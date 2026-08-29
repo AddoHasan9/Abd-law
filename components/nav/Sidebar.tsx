@@ -1,0 +1,200 @@
+'use client'
+
+import { useEffect, useState, useCallback } from 'react'
+import Link from 'next/link'
+import Image from 'next/image'
+import { usePathname, useSearchParams } from 'next/navigation'
+import { Icon } from '@/components/ui/Icon'
+import { NAV, txTypeLeaves, type NavGroup, type NavLeaf } from '@/lib/nav'
+import { can } from '@/lib/constants'
+import type { Profile } from '@/types/database'
+import DeadlineCard, { type DeadlineItem } from './DeadlineCard'
+import UserChip from './UserChip'
+
+const STORE_KEY = 'nav-closed'
+
+interface Props {
+  profile: Profile | null
+  officeName: string
+  txCounts: Record<string, number>
+  badges: Record<string, number>
+  deadline?: DeadlineItem | null
+  deadlines?: DeadlineItem[]
+  onNavigate?: () => void
+}
+
+export default function Sidebar({
+  profile, officeName, txCounts, badges, deadline, deadlines = [], onNavigate,
+}: Props) {
+  const pathname = usePathname()
+  const params = useSearchParams()
+  const typeParam = params.get('type')
+
+  const [closed, setClosed] = useState<Set<string>>(new Set())
+  const [ready, setReady] = useState(false)
+
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem(STORE_KEY)
+      if (raw) setClosed(new Set(JSON.parse(raw) as string[]))
+    } catch { }
+    setReady(true)
+  }, [])
+
+  const toggle = useCallback((key: string) => {
+    setClosed(prev => {
+      const next = new Set(prev)
+      if (next.has(key)) next.delete(key)
+      else next.add(key)
+      try { localStorage.setItem(STORE_KEY, JSON.stringify([...next])) } catch { }
+      return next
+    })
+  }, [])
+
+  const currentRole = profile?.role || 'super_admin'
+
+  const visible = (item: { cap?: string }) => {
+    if (!item.cap) return true
+    if (item.cap === '*') return currentRole === 'super_admin' || currentRole === 'admin'
+    return can(currentRole, item.cap)
+  }
+
+  const isActive = (leaf: NavLeaf) => {
+    const [base, query] = leaf.href.split('?')
+    if (query) {
+      const want = new URLSearchParams(query).get('type')
+      return pathname === base && typeParam === want
+    }
+    if (base === '/commercial') {
+      return pathname === base && !typeParam
+    }
+    if (base === '/settings') {
+      return pathname === '/settings'
+    }
+    return pathname === base || (base !== '/' && pathname.startsWith(base + '/'))
+  }
+
+  const renderLeaf = (leaf: NavLeaf, sub: boolean) => {
+    const active = isActive(leaf)
+    return (
+      <Link
+        key={leaf.key}
+        href={leaf.href}
+        onClick={onNavigate}
+        className={`nav-item${sub ? ' sub' : ' hover:-translate-x-0.5'} transition-all duration-200`}
+        aria-current={active ? 'page' : undefined}
+      >
+        {sub && (
+          <span className="nav-tree-node">
+            <span className="nav-tree-dot" />
+          </span>
+        )}
+        {!sub && leaf.icon && <Icon name={leaf.icon} />}
+        <span className="truncate">{leaf.label}</span>
+        {leaf.count !== undefined && (
+          <span className={`nav-num transition-colors ${active ? 'font-bold text-[var(--accent)]' : ''}`}>
+            {leaf.count}
+          </span>
+        )}
+        {badges[leaf.key] ? (
+          <span className="nav-badge animate-pulse">
+            {badges[leaf.key]}
+          </span>
+        ) : null}
+      </Link>
+    )
+  }
+
+  const renderGroup = (g: NavGroup) => {
+    const extra = g.withTxTypes ? txTypeLeaves(txCounts) : []
+    const items = [...g.items, ...extra].filter(visible)
+    if (!items.length) return null
+
+    const shut = ready && !!g.label && closed.has(g.key)
+    const body = items.map(i => renderLeaf(i, !!g.href))
+
+    if (!g.label) {
+      return <div className="nav-group" key={g.key}>{body}</div>
+    }
+
+    return (
+      <div className="nav-group" key={g.key}>
+        {g.href ? (
+          <div className="nav-head-row group">
+            <Link
+              href={g.href}
+              onClick={onNavigate}
+              className="nav-item nav-item-head transition-all duration-200 hover:-translate-x-0.5"
+              aria-current={
+                pathname === g.href && !typeParam ? 'page' : undefined
+              }
+            >
+              {g.icon && <Icon name={g.icon} />}
+              <span>{g.label}</span>
+            </Link>
+            <button
+              type="button"
+              className="nav-toggle transition-transform duration-200 hover:scale-110"
+              onClick={() => toggle(g.key)}
+              aria-expanded={!shut}
+              aria-label={`طيّ ${g.label}`}
+            >
+              <Icon name="chev" className={`icon chev transition-transform duration-300 ${shut ? 'rotate-90' : 'rotate-0'}`} />
+            </button>
+          </div>
+        ) : (
+          <button
+            type="button"
+            className="nav-group-head transition-colors duration-200 hover:text-[var(--text)] cursor-pointer"
+            onClick={() => toggle(g.key)}
+            aria-expanded={!shut}
+          >
+            <span>{g.label}</span>
+            <Icon name="chev" className={`icon chev transition-transform duration-300 ${shut ? 'rotate-90' : 'rotate-0'}`} />
+          </button>
+        )}
+
+        <div className={`nav-body${shut ? '' : ' open'}`}>
+          <div className={g.href ? 'nav-sub' : undefined}>{body}</div>
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <aside id="sidebar" className="transition-all duration-300">
+      {/* Brand Header with Refined Luxury Styling & Official Large Logo */}
+      <div className="side-head group cursor-default">
+        <div className="w-[52px] h-[52px] rounded-2xl bg-gradient-to-br from-white/10 to-white/[0.03] border border-white/15 p-1.5 flex items-center justify-center shadow-lg shadow-black/20 group-hover:scale-105 group-hover:border-[var(--accent)]/50 transition-all duration-300 flex-none overflow-hidden">
+          <Image
+            src="/logo.png"
+            alt="شعار مكتب المحامي عبدالحسن الخزرجي"
+            width={48}
+            height={48}
+            className="w-full h-full object-contain filter drop-shadow-md"
+            priority
+          />
+        </div>
+        <div className="flex-1 min-w-0 pr-1">
+          <div className="side-name tracking-tight font-black text-[15px] sm:text-[15.5px] text-[var(--text)] group-hover:text-[var(--accent)] transition-colors leading-snug">
+            مكتب المحامي عبدالحسن الخزرجي
+          </div>
+          <div className="side-role text-[11.5px] text-[var(--accent)] font-bold mt-0.5 tracking-wide flex items-center gap-1.5">
+            <span className="w-1.5 h-1.5 rounded-full bg-[var(--accent)] animate-pulse" />
+            <span>للمحاماة والاستشارات القانونية</span>
+          </div>
+        </div>
+      </div>
+
+      <nav className="side-nav" aria-label="أقسام التطبيق">
+        {NAV.map(renderGroup)}
+      </nav>
+
+      <DeadlineCard deadlines={deadlines} item={deadline} />
+
+      <div className="side-foot">
+        <UserChip profile={profile} />
+      </div>
+    </aside>
+  )
+}

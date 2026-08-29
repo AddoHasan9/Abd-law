@@ -1,0 +1,843 @@
+'use client'
+
+import { useState, useMemo, useEffect } from 'react'
+import Link from 'next/link'
+import { formatDate } from '@/lib/constants'
+import { useModalBodyLock } from '@/lib/hooks/useModalBodyLock'
+import { usePermissions } from '@/lib/context/UserRoleContext'
+import type { ProfileWithStats } from '@/lib/data/profiles'
+import type { UserRole } from '@/types/database'
+import {
+  saveUserAction,
+  toggleUserActiveAction,
+  deleteUserAction,
+  resetUserPasswordAction,
+  getUserAuditLogsAction,
+  type UserAuditRecord,
+} from '@/app/(app)/settings/users/actions'
+
+interface Props {
+  initialProfiles: ProfileWithStats[]
+  currentUserRole?: UserRole
+}
+
+const ROLE_BADGES: Record<UserRole, { label: string; badgeClass: string; desc: string }> = {
+  super_admin: {
+    label: 'Super Admin',
+    badgeClass: 'bg-red-500/15 text-red-500 border border-red-500/30',
+    desc: 'تحكم مطلق بإدارة المستخدمين ومنح الأدوار والصلاحيات واستعادة الأرشيف',
+  },
+  admin: {
+    label: 'Admin',
+    badgeClass: 'bg-amber-500/15 text-amber-500 border border-amber-500/30',
+    desc: 'إدارة تشغيلية شاملة للنظام وحذف وتعديل البيانات المعين بها',
+  },
+  manager: {
+    label: 'Manager',
+    badgeClass: 'bg-blue-500/15 text-blue-500 border border-blue-500/30',
+    desc: 'متابعة وإدارة العمليات التجارية والودائع والتقارير',
+  },
+  lawyer: {
+    label: 'Lawyer',
+    badgeClass: 'bg-emerald-500/15 text-emerald-500 border border-emerald-500/30',
+    desc: 'تولّي وتنفيذ المعاملات والمهام الموكلة إليه حصراً',
+  },
+  staff: {
+    label: 'Staff',
+    badgeClass: 'bg-slate-500/15 text-slate-400 border border-slate-500/30',
+    desc: 'صلاحيات استعراض وإدخال بيانات بيئية مخصصة',
+  },
+}
+
+export default function UsersClient({ initialProfiles }: Props) {
+  const { isSuperAdmin, can } = usePermissions()
+  const canManageUsers = can('users', 'create_users') || isSuperAdmin
+  const canManagePermissions = can('users', 'manage_permissions') || isSuperAdmin
+  const [profiles, setProfiles] = useState<ProfileWithStats[]>(initialProfiles)
+  const [auditLogs, setAuditLogs] = useState<UserAuditRecord[]>([])
+
+  // Search & Filters
+  const [searchQuery, setSearchQuery] = useState('')
+  const [roleFilter, setRoleFilter] = useState<string>('all')
+  const [deptFilter, setDeptFilter] = useState<string>('all')
+  const [statusFilter, setStatusFilter] = useState<string>('all')
+
+  // Modals & Menu State
+  const [activeMenuId, setActiveMenuId] = useState<string | null>(null)
+  const [viewingUser, setViewingUser] = useState<ProfileWithStats | null>(null)
+  const [editingUser, setEditingUser] = useState<ProfileWithStats | null>(null)
+  const [resetPassUser, setResetPassUser] = useState<ProfileWithStats | null>(null)
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false)
+  const [loading, setLoading] = useState(false)
+  const [message, setMessage] = useState<{ type: 'ok' | 'err'; text: string } | null>(null)
+
+  // Form Fields
+  const [formId, setFormId] = useState<string>('')
+  const [name, setName] = useState('')
+  const [role, setRole] = useState<UserRole>('lawyer')
+  const [dept, setDept] = useState('')
+  const [title, setTitle] = useState('')
+  const [phone, setPhone] = useState('')
+  const [email, setEmail] = useState('')
+  const [active, setActive] = useState(true)
+  const [newPassword, setNewPassword] = useState('')
+
+  const hasOpenModal = !!(viewingUser || isAddModalOpen || resetPassUser)
+
+  useModalBodyLock(hasOpenModal, () => {
+    setViewingUser(null)
+    setIsAddModalOpen(false)
+    setResetPassUser(null)
+    setActiveMenuId(null)
+  })
+
+  useEffect(() => {
+    async function loadAudit() {
+      const res = await getUserAuditLogsAction()
+      if (res.success && res.data) {
+        setAuditLogs(res.data)
+      }
+    }
+    loadAudit()
+  }, [])
+
+  // Unique departments list
+  const departments = useMemo(() => {
+    const set = new Set<string>()
+    profiles.forEach(p => {
+      if (p.dept) set.add(p.dept)
+    })
+    return Array.from(set)
+  }, [profiles])
+
+  // Filtered users list
+  const filteredProfiles = useMemo(() => {
+    return profiles.filter(p => {
+      const q = searchQuery.trim().toLowerCase()
+      const matchesSearch =
+        !q ||
+        p.name.toLowerCase().includes(q) ||
+        (p.email && p.email.toLowerCase().includes(q)) ||
+        (p.phone && p.phone.includes(q)) ||
+        (p.dept && p.dept.toLowerCase().includes(q))
+
+      const matchesRole = roleFilter === 'all' || p.role === roleFilter
+      const matchesDept = deptFilter === 'all' || p.dept === deptFilter
+      const matchesStatus =
+        statusFilter === 'all' ||
+        (statusFilter === 'active' && p.active) ||
+        (statusFilter === 'inactive' && !p.active)
+
+      return matchesSearch && matchesRole && matchesDept && matchesStatus
+    })
+  }, [profiles, searchQuery, roleFilter, deptFilter, statusFilter])
+
+  const openAddModal = () => {
+    setEditingUser(null)
+    setFormId('')
+    setName('')
+    setRole('lawyer')
+    setDept('')
+    setTitle('')
+    setPhone('')
+    setEmail('')
+    setActive(true)
+    setIsAddModalOpen(true)
+  }
+
+  const openEditModal = (user: ProfileWithStats) => {
+    if (!isSuperAdmin && user.role === 'super_admin') {
+      alert('عذراً، يقتصر تعديل حسابات Super Admin على المدير الأعلى فقط')
+      return
+    }
+    setEditingUser(user)
+    setFormId(user.id)
+    setName(user.name)
+    setRole(user.role)
+    setDept(user.dept || '')
+    setTitle(user.title || '')
+    setPhone(user.phone || '')
+    setEmail(user.email || `${user.name.toLowerCase()}@khazraji-law.com`)
+    setActive(user.active)
+    setIsAddModalOpen(true)
+  }
+
+  const handleSaveUser = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!name.trim()) return
+
+    setLoading(true)
+    setMessage(null)
+
+    const res = await saveUserAction({
+      id: formId || undefined,
+      name,
+      role,
+      dept,
+      title,
+      phone,
+      email,
+      active,
+    })
+    setLoading(false)
+
+    if (res.success && res.data) {
+      if (editingUser) {
+        setProfiles(prev => prev.map(p => (p.id === res.data!.id ? res.data! : p)))
+        setMessage({ type: 'ok', text: 'تم تحديث بيانات ورتبة المستخدم بنجاح' })
+      } else {
+        setProfiles(prev => [...prev, res.data!])
+        setMessage({ type: 'ok', text: 'تم إكمال وتفعيل بروفايل المستخدم بنجاح' })
+      }
+      setIsAddModalOpen(false)
+      const auditRes = await getUserAuditLogsAction()
+      if (auditRes.success && auditRes.data) setAuditLogs(auditRes.data)
+    } else {
+      setMessage({ type: 'err', text: res.error || 'حدث خطأ أثناء الحفظ' })
+    }
+  }
+
+  const handleToggleActive = async (user: ProfileWithStats) => {
+    if (!isSuperAdmin && user.role === 'super_admin') {
+      alert('لا يمكن تعطيل حساب Super Admin')
+      return
+    }
+    const res = await toggleUserActiveAction(user.id)
+    if (res.success) {
+      setProfiles(prev => prev.map(p => (p.id === user.id ? { ...p, active: res.active! } : p)))
+      const auditRes = await getUserAuditLogsAction()
+      if (auditRes.success && auditRes.data) setAuditLogs(auditRes.data)
+    }
+  }
+
+  const handleSoftDeleteUser = async (user: ProfileWithStats) => {
+    if (!isSuperAdmin) {
+      alert('عذراً، يقتصر تعطيل وأرشفة الحسابات على Super Admin فقط')
+      return
+    }
+    if (user.role === 'super_admin') {
+      alert('لا يمكن حذف أو أرشفة حساب Super Admin الرئيسي')
+      return
+    }
+    if (!confirm(`هل أنت تأكد من تعطيل وأرشفة حساب "${user.name}"؟ (سيتم حفظ جميع المعاملات وسجل التدقيق ولن يتم مسح أي بيانات دائمية)`)) {
+      return
+    }
+    const res = await deleteUserAction(user.id)
+    if (res.success) {
+      setProfiles(prev => prev.map(p => (p.id === user.id ? { ...p, active: false } : p)))
+      setMessage({ type: 'ok', text: `تم تعطيل وأرشفة حساب ${user.name} مع حفظ كافة السجلات` })
+      const auditRes = await getUserAuditLogsAction()
+      if (auditRes.success && auditRes.data) setAuditLogs(auditRes.data)
+    }
+  }
+
+  const handleResetPassword = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!resetPassUser) return
+    setLoading(true)
+    const res = await resetUserPasswordAction(resetPassUser.id, resetPassUser.email || `${resetPassUser.name}@khazraji-law.com`)
+    setLoading(false)
+    if (res.success) {
+      setMessage({ type: 'ok', text: res.message || 'تم إرسال تعليمات إعادة ضبط كلمة المرور' })
+      setResetPassUser(null)
+      const auditRes = await getUserAuditLogsAction()
+      if (auditRes.success && auditRes.data) setAuditLogs(auditRes.data)
+    } else {
+      setMessage({ type: 'err', text: res.error || 'فشلت العملية' })
+    }
+  }
+
+  return (
+    <div className="flex flex-col w-full gap-6 relative z-10">
+      
+      {/* 1. Page Header & Actions Bar */}
+      <div className="flex flex-col md:flex-row items-start md:items-center justify-between w-full gap-4 mb-1">
+        <div className="flex flex-col gap-1">
+          <h1 className="text-3xl font-extrabold tracking-tight text-[var(--text)]">إدارة المستخدمين والأذونات</h1>
+          <p className="text-base text-[var(--text-3)]">مكتب المحامي عبدالحسن الخزرجي — التحكم بالأدوار الخماسية وتفعيل البروفايلات</p>
+        </div>
+
+        <div className="flex items-center gap-3">
+          {canManagePermissions && (
+            <Link
+              href="/settings/permissions"
+              className="flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-semibold border border-[var(--glass-border)] bg-[var(--surface-2)] text-[var(--text)] hover:bg-[var(--surface-3)] transition-all shadow-sm"
+            >
+              <span className="material-symbols-outlined text-[18px]">key</span>
+              <span>مصفوفة الصلاحيات</span>
+            </Link>
+          )}
+
+          {canManageUsers && (
+            <button
+              type="button"
+              onClick={openAddModal}
+              className="flex items-center gap-2 px-6 py-2.5 rounded-full text-sm font-bold bg-[var(--accent)] text-white shadow-lg hover:opacity-95 transition-all cursor-pointer"
+            >
+              <span className="material-symbols-outlined text-[18px]">person_add</span>
+              <span>إضافة مستخدم جديد</span>
+            </button>
+          )}
+        </div>
+      </div>
+
+      {/* Alert Banner */}
+      {message && (
+        <div
+          className={`p-4 rounded-2xl text-sm font-bold flex items-center justify-between backdrop-blur-md shadow-md border ${
+            message.type === 'ok'
+              ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20'
+              : 'bg-red-500/10 text-red-600 dark:text-red-400 border-red-500/20'
+          }`}
+        >
+          <span>{message.text}</span>
+          <button type="button" onClick={() => setMessage(null)} className="opacity-70 hover:opacity-100">
+            ✕
+          </button>
+        </div>
+      )}
+
+      {/* 2. Compact Search & Filter Toolbar */}
+      <div className="glass-card rounded-[24px] p-5 flex flex-col lg:flex-row items-center justify-between gap-4 w-full">
+        {/* Search Input */}
+        <div className="relative flex-1 w-full">
+          <span className="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 text-[var(--text-3)] text-[20px] pointer-events-none">
+            search
+          </span>
+          <input
+            type="text"
+            className="w-full pr-12 pl-4 py-2.5 rounded-xl bg-[var(--surface-2)] border border-[var(--glass-border)] text-[var(--text)] placeholder:text-[var(--text-3)] text-sm font-medium focus:outline-none focus:border-[var(--accent)] transition-all"
+            placeholder="بحث باسم المستخدم، البريد الإلكتروني، الهاتف، القسم..."
+            value={searchQuery}
+            onChange={e => setSearchQuery(e.target.value)}
+          />
+        </div>
+
+        {/* Filter Dropdowns */}
+        <div className="flex items-center gap-3 w-full lg:w-auto flex-wrap">
+          {/* Role Filter */}
+          <select
+            className="px-4 py-2.5 rounded-xl bg-[var(--surface-2)] border border-[var(--glass-border)] text-[var(--text)] text-xs font-semibold focus:outline-none transition-all cursor-pointer"
+            value={roleFilter}
+            onChange={e => setRoleFilter(e.target.value)}
+          >
+            <option value="all">كل الأدوار (All Roles)</option>
+            <option value="super_admin">Super Admin</option>
+            <option value="admin">Admin</option>
+            <option value="manager">Manager</option>
+            <option value="lawyer">Lawyer</option>
+            <option value="staff">Staff</option>
+          </select>
+
+          {/* Department Filter */}
+          <select
+            className="px-4 py-2.5 rounded-xl bg-[var(--surface-2)] border border-[var(--glass-border)] text-[var(--text)] text-xs font-semibold focus:outline-none transition-all cursor-pointer"
+            value={deptFilter}
+            onChange={e => setDeptFilter(e.target.value)}
+          >
+            <option value="all">كل الأقسام (All Depts)</option>
+            {departments.map(d => (
+              <option key={d} value={d}>
+                {d}
+              </option>
+            ))}
+          </select>
+
+          {/* Status Filter */}
+          <select
+            className="px-4 py-2.5 rounded-xl bg-[var(--surface-2)] border border-[var(--glass-border)] text-[var(--text)] text-xs font-semibold focus:outline-none transition-all cursor-pointer"
+            value={statusFilter}
+            onChange={e => setStatusFilter(e.target.value)}
+          >
+            <option value="all">كل الحالات (All Statuses)</option>
+            <option value="active">نشط (Active)</option>
+            <option value="inactive">معطّل (Inactive)</option>
+          </select>
+
+          {/* Counter Badge */}
+          <div className="px-3.5 py-2 rounded-xl bg-[var(--accent-soft)] border border-[var(--accent)]/20 text-[var(--accent)] text-xs font-bold whitespace-nowrap">
+            {filteredProfiles.length} مستخدم
+          </div>
+        </div>
+      </div>
+
+      {/* 3. Modern Glassmorphism Users Table */}
+      <div className="glass-card rounded-[28px] shadow-xl w-full border border-[var(--glass-border)]">
+        <div className="overflow-x-auto">
+          <table className="w-full text-right text-sm border-collapse">
+            <thead>
+              <tr className="bg-[var(--surface-2)] text-[var(--text-3)] text-xs font-bold uppercase tracking-wider border-b border-[var(--glass-border)]">
+                <th className="py-4 px-6">الاسم الكامل (Full Name)</th>
+                <th className="py-4 px-6">البريد الإلكتروني (Email)</th>
+                <th className="py-4 px-6">الدور الوظيفي (Role)</th>
+                <th className="py-4 px-6">القسم (Department)</th>
+                <th className="py-4 px-6">الهاتف (Phone)</th>
+                <th className="py-4 px-6 text-center">الحالة (Status)</th>
+                <th className="py-4 px-6">آخر دخول (Last Login)</th>
+                <th className="py-4 px-6">تاريخ الإنشاء</th>
+                <th className="py-4 px-6 text-center">الإجراءات</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-[var(--glass-border)]/50">
+              {filteredProfiles.map((u, idx) => {
+                const roleBadge = ROLE_BADGES[u.role] || ROLE_BADGES.lawyer
+                const userEmail = u.email || `${u.name.toLowerCase()}@khazraji-law.com`
+                const isBottomRow = idx >= Math.max(0, filteredProfiles.length - 2)
+
+                return (
+                  <tr
+                    key={u.id}
+                    className={`hover:bg-[var(--surface-3)] transition-colors ${
+                      u.active ? 'opacity-100' : 'opacity-60 bg-[var(--surface-2)]/40'
+                    }`}
+                  >
+                    {/* Full Name & Avatar */}
+                    <td className="py-4 px-6">
+                      <div className="flex items-center gap-3">
+                        <div
+                          className={`w-10 h-10 rounded-full flex items-center justify-center font-extrabold text-base flex-none ${
+                            u.role === 'super_admin'
+                              ? 'bg-red-500/20 text-red-500 border border-red-500/30'
+                              : u.active
+                              ? 'bg-[var(--accent-soft)] text-[var(--accent)] border border-[var(--accent)]/30'
+                              : 'bg-[var(--surface-3)] text-[var(--text-3)]'
+                          }`}
+                        >
+                          {u.name.slice(0, 1)}
+                        </div>
+                        <div className="flex flex-col min-w-0">
+                          <span className="font-bold text-[var(--text)] truncate">{u.name}</span>
+                          <span className="text-xs text-[var(--text-3)] truncate">{u.title || 'عضو فريق'}</span>
+                        </div>
+                      </div>
+                    </td>
+
+                    {/* Email */}
+                    <td className="py-4 px-6 text-xs text-[var(--text-2)] font-mono ltr text-right">
+                      {userEmail}
+                    </td>
+
+                    {/* Role Badge */}
+                    <td className="py-4 px-6">
+                      <span className={`px-3 py-1 rounded-full text-xs font-extrabold shadow-sm ${roleBadge.badgeClass}`}>
+                        {roleBadge.label}
+                      </span>
+                    </td>
+
+                    {/* Department */}
+                    <td className="py-4 px-6 text-xs font-medium text-[var(--text-2)]">
+                      {u.dept || 'عام'}
+                    </td>
+
+                    {/* Phone */}
+                    <td className="py-4 px-6 text-xs font-semibold text-[var(--text-2)] num">
+                      {u.phone || '—'}
+                    </td>
+
+                    {/* Status */}
+                    <td className="py-4 px-6 text-center">
+                      <span
+                        className={`px-3 py-1 rounded-full text-xs font-bold inline-flex items-center gap-1.5 ${
+                          u.active
+                            ? 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30'
+                            : 'bg-slate-500/15 text-slate-400 border border-slate-500/30'
+                        }`}
+                      >
+                        <span className={`w-1.5 h-1.5 rounded-full ${u.active ? 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.8)]' : 'bg-slate-400'}`} />
+                        <span>{u.active ? 'نشط' : 'معطّل'}</span>
+                      </span>
+                    </td>
+
+                    {/* Last Login */}
+                    <td className="py-4 px-6 text-xs text-[var(--text-3)]">
+                      {u.last_login ? formatDate(u.last_login, true) : 'لم يسجّل بعد'}
+                    </td>
+
+                    {/* Created Date */}
+                    <td className="py-4 px-6 text-xs text-[var(--text-3)]">
+                      {formatDate(u.created_at)}
+                    </td>
+
+                    {/* Actions Menu */}
+                    <td className="py-4 px-6 text-center relative">
+                      <button
+                        type="button"
+                        className="w-8 h-8 rounded-xl bg-[var(--surface-2)] border border-[var(--glass-border)] text-[var(--text)] hover:bg-[var(--surface-3)] transition-all flex items-center justify-center mx-auto"
+                        onClick={() => setActiveMenuId(activeMenuId === u.id ? null : u.id)}
+                      >
+                        <span className="material-symbols-outlined text-[18px]">more_vert</span>
+                      </button>
+
+                      {/* Dropdown Popup Menu */}
+                      {activeMenuId === u.id && (
+                        <div
+                          className={`absolute left-6 ${
+                            isBottomRow ? 'bottom-12' : 'top-12'
+                          } z-50 min-w-[190px] bg-[var(--surface-2)] border border-[var(--glass-border)] rounded-2xl shadow-2xl p-2 text-right flex flex-col gap-1 backdrop-blur-2xl`}
+                        >
+                          
+                          {/* View */}
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setActiveMenuId(null)
+                              setViewingUser(u)
+                            }}
+                            className="flex items-center gap-2.5 w-full px-3 py-2 rounded-xl text-xs font-semibold text-[var(--text)] hover:bg-[var(--surface-3)] transition-colors"
+                          >
+                            <span className="material-symbols-outlined text-[16px] text-blue-400">visibility</span>
+                            <span>عرض البيانات الكاملة</span>
+                          </button>
+
+                          {/* Edit */}
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setActiveMenuId(null)
+                              openEditModal(u)
+                            }}
+                            className="flex items-center gap-2.5 w-full px-3 py-2 rounded-xl text-xs font-semibold text-[var(--text)] hover:bg-[var(--surface-3)] transition-colors"
+                          >
+                            <span className="material-symbols-outlined text-[16px] text-amber-400">edit</span>
+                            <span>تعديل البروفايل والدور</span>
+                          </button>
+
+                          {/* Activate / Deactivate */}
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setActiveMenuId(null)
+                              handleToggleActive(u)
+                            }}
+                            className={`flex items-center gap-2.5 w-full px-3 py-2 rounded-xl text-xs font-semibold hover:bg-[var(--surface-3)] transition-colors ${
+                              u.active ? 'text-amber-500' : 'text-emerald-500'
+                            }`}
+                          >
+                            <span className="material-symbols-outlined text-[16px]">
+                              {u.active ? 'block' : 'check_circle'}
+                            </span>
+                            <span>{u.active ? 'تعطيل الحساب' : 'تفعيل الحساب'}</span>
+                          </button>
+
+                          {/* Reset Password */}
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setActiveMenuId(null)
+                              setResetPassUser(u)
+                            }}
+                            className="flex items-center gap-2.5 w-full px-3 py-2 rounded-xl text-xs font-semibold text-[var(--text-2)] hover:bg-[var(--surface-3)] transition-colors"
+                          >
+                            <span className="material-symbols-outlined text-[16px] text-purple-400">lock_reset</span>
+                            <span>إعادة ضبط كلمة المرور</span>
+                          </button>
+
+                          <hr className="border-[var(--glass-border)] my-1" />
+
+                          {/* Soft Delete (Super Admin only) */}
+                          {isSuperAdmin && u.role !== 'super_admin' && (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setActiveMenuId(null)
+                                handleSoftDeleteUser(u)
+                              }}
+                              className="flex items-center gap-2.5 w-full px-3 py-2 rounded-xl text-xs font-semibold text-red-500 hover:bg-red-500/10 transition-colors"
+                            >
+                              <span className="material-symbols-outlined text-[16px]">delete</span>
+                              <span>أرشفة الحساب ناعماً</span>
+                            </button>
+                          )}
+                        </div>
+                      )}
+                    </td>
+                  </tr>
+                )
+              })}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {/* MODAL 1: View User Details */}
+      {viewingUser && (
+        <div
+          onClick={e => { if (e.target === e.currentTarget) setViewingUser(null) }}
+          className="fixed inset-0 bg-black/70 backdrop-blur-md z-[99999] flex items-center justify-center p-4"
+        >
+          <div className="glass-card rounded-[28px] max-w-lg w-full p-7 border border-[var(--glass-border)] shadow-2xl bg-[var(--surface)] text-[var(--text)] flex flex-col gap-5">
+            <div className="flex items-center justify-between pb-4 border-b border-[var(--glass-border)]">
+              <h3 className="text-lg font-extrabold text-[var(--text)] flex items-center gap-2">
+                <span className="material-symbols-outlined text-blue-400">badge</span>
+                <span>بيانات المستخدم: {viewingUser.name}</span>
+              </h3>
+              <button
+                type="button"
+                onClick={() => setViewingUser(null)}
+                className="w-8 h-8 rounded-full bg-[var(--surface-2)] flex items-center justify-center text-[var(--text-3)] hover:text-[var(--text)] transition-colors"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="p-5 rounded-2xl bg-[var(--surface-2)] border border-[var(--glass-border)] flex flex-col gap-3">
+              <div className="flex items-center justify-between">
+                <span className="text-xs text-[var(--text-3)] font-semibold">اسم البروفايل:</span>
+                <span className="text-sm font-bold text-[var(--text)]">{viewingUser.name}</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-xs text-[var(--text-3)] font-semibold">البريد الإلكتروني:</span>
+                <span className="text-sm font-bold text-[var(--accent)] font-mono">{viewingUser.email || '—'}</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-xs text-[var(--text-3)] font-semibold">الدور الوظيفي:</span>
+                <span className="text-xs font-bold px-3 py-1 rounded-full bg-[var(--accent-soft)] text-[var(--accent)]">
+                  {viewingUser.role}
+                </span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-xs text-[var(--text-3)] font-semibold">القسم والمسمى:</span>
+                <span className="text-sm font-medium text-[var(--text-2)]">{viewingUser.dept || 'عام'} • {viewingUser.title || 'عضو فريق'}</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-xs text-[var(--text-3)] font-semibold">رقم الهاتف:</span>
+                <span className="text-sm font-semibold text-[var(--text)] num">{viewingUser.phone || '—'}</span>
+              </div>
+            </div>
+
+            <div>
+              <h4 className="text-xs font-bold uppercase tracking-wider text-[var(--text-3)] mb-3 flex items-center gap-2">
+                <span className="material-symbols-outlined text-[16px]">history</span>
+                <span>سجل تدقيق النشاط والتعديلات (Audit Log):</span>
+              </h4>
+              <div className="flex flex-col gap-2 max-h-48 overflow-y-auto pr-1">
+                {auditLogs
+                  .filter(a => a.targetUserId === viewingUser.id)
+                  .map(a => (
+                    <div key={a.id} className="p-3 rounded-xl bg-[var(--surface-2)] border border-[var(--glass-border)] text-xs flex flex-col gap-1">
+                      <span className="font-bold text-[var(--accent)]">{a.action}</span>
+                      <span className="text-[var(--text-2)]">{a.details}</span>
+                      <span className="text-[10px] text-[var(--text-3)] mt-1">
+                        بواسطة: {a.performedBy} • {formatDate(a.timestamp, true)}
+                      </span>
+                    </div>
+                  ))}
+                {auditLogs.filter(a => a.targetUserId === viewingUser.id).length === 0 && (
+                  <div className="text-xs text-[var(--text-3)] p-3 rounded-xl bg-[var(--surface-2)] text-center">
+                    لا توجد سجلات تدقيق سابقة لهذا الحساب.
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <div className="flex justify-end pt-2">
+              <button
+                type="button"
+                onClick={() => setViewingUser(null)}
+                className="px-6 py-2.5 rounded-full text-xs font-bold bg-[var(--surface-2)] border border-[var(--glass-border)] text-[var(--text)] hover:bg-[var(--surface-3)] transition-all"
+              >
+                إغلاق
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL 2: Add / Edit User Profile Modal */}
+      {isAddModalOpen && (
+        <div
+          onClick={e => { if (e.target === e.currentTarget) setIsAddModalOpen(false) }}
+          className="fixed inset-0 bg-black/70 backdrop-blur-md z-[99999] flex items-center justify-center p-4"
+        >
+          <div className="glass-card rounded-[28px] max-w-lg w-full p-7 border border-[var(--glass-border)] shadow-2xl bg-[var(--surface)] text-[var(--text)] flex flex-col gap-5">
+            <div className="flex items-center justify-between pb-4 border-b border-[var(--glass-border)]">
+              <h3 className="text-lg font-extrabold text-[var(--text)] flex items-center gap-2">
+                <span className="material-symbols-outlined text-[var(--accent)]">person</span>
+                <span>{editingUser ? 'تعديل بيانات وصلاحيات المستخدم' : 'إضافة مستخدم جديد وتحديد الصلاحيات'}</span>
+              </h3>
+              <button
+                type="button"
+                onClick={() => setIsAddModalOpen(false)}
+                className="w-8 h-8 rounded-full bg-[var(--surface-2)] flex items-center justify-center text-[var(--text-3)] hover:text-[var(--text)] transition-colors"
+              >
+                ✕
+              </button>
+            </div>
+
+            <form onSubmit={handleSaveUser} className="flex flex-col gap-4">
+              
+              {/* User ID (Read-only if editing) */}
+              {editingUser && (
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-xs font-semibold text-[var(--text-3)]">معرف المستخدم (User ID - قراءة فقط)</label>
+                  <input
+                    type="text"
+                    disabled
+                    value={editingUser.id}
+                    className="w-full px-4 py-2.5 rounded-xl bg-[var(--surface-2)] border border-[var(--glass-border)] text-[var(--text-3)] text-xs font-mono opacity-70"
+                  />
+                </div>
+              )}
+
+              {/* Email (Read-only if editing) */}
+              <div className="flex flex-col gap-1.5">
+                <label className="text-xs font-semibold text-[var(--text-2)]">البريد الإلكتروني (Email - حساب الدخول)</label>
+                <input
+                  type="email"
+                  required
+                  disabled={!!editingUser}
+                  placeholder="name@khazraji-law.com"
+                  value={email}
+                  onChange={e => setEmail(e.target.value)}
+                  className="w-full px-4 py-2.5 rounded-xl bg-[var(--surface-2)] border border-[var(--glass-border)] text-[var(--text)] text-sm font-medium focus:outline-none focus:border-[var(--accent)] transition-all"
+                />
+              </div>
+
+              {/* Full Name */}
+              <div className="flex flex-col gap-1.5">
+                <label className="text-xs font-semibold text-[var(--text-2)]">الاسم الكامل *</label>
+                <input
+                  type="text"
+                  required
+                  placeholder="مثال: أحمد الخزرجي"
+                  value={name}
+                  onChange={e => setName(e.target.value)}
+                  className="w-full px-4 py-2.5 rounded-xl bg-[var(--surface-2)] border border-[var(--glass-border)] text-[var(--text)] text-sm font-medium focus:outline-none focus:border-[var(--accent)] transition-all"
+                />
+              </div>
+
+              {/* Role Select */}
+              <div className="flex flex-col gap-1.5">
+                <label className="text-xs font-semibold text-[var(--text-2)]">الدور الوظيفي والرتبة *</label>
+                <select
+                  value={role}
+                  onChange={e => setRole(e.target.value as UserRole)}
+                  disabled={!isSuperAdmin && editingUser?.role === 'super_admin'}
+                  className="w-full px-4 py-2.5 rounded-xl bg-[var(--surface-2)] border border-[var(--glass-border)] text-[var(--text)] text-sm font-semibold focus:outline-none transition-all cursor-pointer"
+                >
+                  {isSuperAdmin && <option value="super_admin">Super Admin (مدير النظام الأعلى)</option>}
+                  <option value="admin">Admin (مدير النظام)</option>
+                  <option value="manager">Manager (مدير)</option>
+                  <option value="lawyer">Lawyer (محامي)</option>
+                  <option value="staff">Staff (موظف)</option>
+                </select>
+              </div>
+
+              {/* Department */}
+              <div className="flex flex-col gap-1.5">
+                <label className="text-xs font-semibold text-[var(--text-2)]">القسم</label>
+                <input
+                  type="text"
+                  placeholder="مثال: قسم تأسيس الشركات والهويات"
+                  value={dept}
+                  onChange={e => setDept(e.target.value)}
+                  className="w-full px-4 py-2.5 rounded-xl bg-[var(--surface-2)] border border-[var(--glass-border)] text-[var(--text)] text-sm font-medium focus:outline-none focus:border-[var(--accent)] transition-all"
+                />
+              </div>
+
+              {/* Phone */}
+              <div className="flex flex-col gap-1.5">
+                <label className="text-xs font-semibold text-[var(--text-2)]">رقم الهاتف</label>
+                <input
+                  type="text"
+                  placeholder="07700000000"
+                  value={phone}
+                  onChange={e => setPhone(e.target.value)}
+                  className="w-full px-4 py-2.5 rounded-xl bg-[var(--surface-2)] border border-[var(--glass-border)] text-[var(--text)] text-sm font-medium focus:outline-none focus:border-[var(--accent)] transition-all num"
+                />
+              </div>
+
+              {/* Active Toggle */}
+              <div className="flex items-center justify-between p-3.5 rounded-xl bg-[var(--surface-2)] border border-[var(--glass-border)] mt-1">
+                <span className="text-xs font-bold text-[var(--text)]">حالة الحساب (Active / Inactive)</span>
+                <input
+                  type="checkbox"
+                  checked={active}
+                  onChange={e => setActive(e.target.checked)}
+                  className="w-5 h-5 cursor-pointer accent-[var(--accent)]"
+                />
+              </div>
+
+              {/* Modal Action Buttons */}
+              <div className="flex items-center justify-end gap-3 pt-3">
+                <button
+                  type="button"
+                  onClick={() => setIsAddModalOpen(false)}
+                  className="px-6 py-2.5 rounded-full text-xs font-bold bg-[var(--surface-2)] border border-[var(--glass-border)] text-[var(--text)] hover:bg-[var(--surface-3)] transition-all"
+                >
+                  إلغاء
+                </button>
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="px-7 py-2.5 rounded-full text-xs font-bold bg-[var(--accent)] text-white shadow-lg hover:opacity-95 transition-all"
+                >
+                  {loading ? 'جاري الحفظ...' : editingUser ? 'تحديث البروفايل' : 'إكمال وتفعيل الحساب'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL 3: Reset Password Modal */}
+      {resetPassUser && (
+        <div
+          onClick={e => { if (e.target === e.currentTarget) setResetPassUser(null) }}
+          className="fixed inset-0 bg-black/70 backdrop-blur-md z-[99999] flex items-center justify-center p-4"
+        >
+          <div className="glass-card rounded-[28px] max-w-md w-full p-7 border border-[var(--glass-border)] shadow-2xl bg-[var(--surface)] text-[var(--text)] flex flex-col gap-5">
+            <div className="flex items-center justify-between pb-4 border-b border-[var(--glass-border)]">
+              <h3 className="text-lg font-extrabold text-[var(--text)] flex items-center gap-2">
+                <span className="material-symbols-outlined text-purple-400">lock_reset</span>
+                <span>إعادة ضبط كلمة المرور</span>
+              </h3>
+              <button
+                type="button"
+                onClick={() => setResetPassUser(null)}
+                className="w-8 h-8 rounded-full bg-[var(--surface-2)] flex items-center justify-center text-[var(--text-3)] hover:text-[var(--text)] transition-colors"
+              >
+                ✕
+              </button>
+            </div>
+
+            <form onSubmit={handleResetPassword} className="flex flex-col gap-4">
+              <p className="text-xs text-[var(--text-2)] leading-relaxed">
+                أنت تقوم بإعادة ضبط كلمة المرور للحساب: <strong className="text-[var(--text)]">{resetPassUser.name}</strong> ({resetPassUser.email})
+              </p>
+
+              <div className="flex flex-col gap-1.5">
+                <label className="text-xs font-semibold text-[var(--text-2)]">كلمة المرور الجديدة</label>
+                <input
+                  type="password"
+                  required
+                  placeholder="••••••••"
+                  value={newPassword}
+                  onChange={e => setNewPassword(e.target.value)}
+                  className="w-full px-4 py-2.5 rounded-xl bg-[var(--surface-2)] border border-[var(--glass-border)] text-[var(--text)] text-sm font-medium focus:outline-none focus:border-[var(--accent)] transition-all"
+                />
+              </div>
+
+              <div className="flex items-center justify-end gap-3 pt-3">
+                <button
+                  type="button"
+                  onClick={() => setResetPassUser(null)}
+                  className="px-6 py-2.5 rounded-full text-xs font-bold bg-[var(--surface-2)] border border-[var(--glass-border)] text-[var(--text)] hover:bg-[var(--surface-3)] transition-all"
+                >
+                  إلغاء
+                </button>
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="px-7 py-2.5 rounded-full text-xs font-bold bg-[var(--accent)] text-white shadow-lg hover:opacity-95 transition-all"
+                >
+                  {loading ? 'جاري الضبط...' : 'تحديث كلمة المرور'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}

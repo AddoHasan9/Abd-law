@@ -1,0 +1,24 @@
+node_modules/
+.next/
+out/
+build/
+.env
+.env*.local
+.DS_Store
+*.tsbuildinfo
+next-env.d.ts
+*.log
+
+# أدوات المساعد والتطوير المحلي — لا داعي لرفعها
+.claude/
+.agents/
+.vercel/
+scratch/
+scratch/**
+
+# بيانات محلية حساسة (نسخة احتياطية/fallback لبيانات Supabase — أسماء، هواتف،
+# إيميلات موظفين وعملاء حقيقيين) — لا يجب أن تدخل التحكم بالإصدار مطلقًا
+.data/
+
+# نسخ احتياطية لقطة كاملة للمشروع (checkpoints) — تكرار غير ضروري بالتحكم بالإصدار
+.checkpoints/

@@ -1,0 +1,2721 @@
+@import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200');
+
+/* ============================================================
+   نظام التصميم — مكتب المحامي عبد الحسن الخزرجي
+   ============================================================ */
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.material-symbols-outlined {
+  font-family: 'Material Symbols Outlined' !important;
+  font-weight: normal;
+  font-style: normal;
+  font-size: 20px;
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
+  display: inline-block;
+  white-space: nowrap;
+  word-wrap: normal;
+  direction: ltr;
+  -webkit-font-feature-settings: 'liga';
+  -webkit-font-smoothing: antialiased;
+  font-feature-settings: 'liga';
+  user-select: none;
+  vertical-align: middle;
+}
+
+@layer base {
+
+  :root {
+    --blue-900: #0A3247;
+    --blue-800: #0E4363;
+    --blue-700: #12557E;
+    --blue-600: #17699A;
+    --blue-500: #1B87C9;
+    --blue-200: #BBDCEF;
+    --blue-100: #E5F1F8;
+
+    --green-700: #14684A;
+    --green-600: #1A7D58;
+    --green-500: #1F9468;
+    --green-400: #2FB37E;
+    --green-100: #E3F5EC;
+
+    --amber-600: #B4740A;
+    --amber-100: #FBF0DC;
+    --red-600: #B93B2E;
+    --red-100: #FBE7E4;
+    --orange-600: #C2660A;
+    --orange-100: #FCEEDD;
+
+    --r-sm: 6px;
+    --r-md: 10px;
+    --r-lg: 14px;
+    --r-xl: 18px;
+    --r-full: 999px;
+    --sp: 4px;
+    --sidebar-w: 275px;
+    --topbar-h: 56px;
+
+    /* مقاييس النوافذ المنبثقة الموحدة (Standard Modal Scale) */
+    --modal-sm: 480px;
+    --modal-md: 640px;
+    --modal-lg: 780px;
+    --modal-xl: 880px;
+
+    --t-fast: .16s cubic-bezier(.16, 1, .3, 1);
+    --t-base: .28s cubic-bezier(.16, 1, .3, 1);
+    --t-spring: .4s cubic-bezier(.175, .885, .32, 1.275);
+
+    --gold-500: #D4AF37;
+    --gold-400: #F3E5AB;
+    --gold-600: #AA771C;
+    --gold-soft: rgba(212, 175, 55, 0.16);
+    --gold-glow: rgba(212, 175, 55, 0.25);
+    --gold-border: rgba(212, 175, 55, 0.35);
+
+    --font-ui: var(--font-tajawal), 'Tajawal', -apple-system, 'Segoe UI', system-ui, sans-serif;
+    --font-display: var(--font-cairo), 'Cairo', var(--font-ui);
+
+    /* ---- Default Tokens (Light Mode Sovereign) ---- */
+    --bg: #F8FAFC;
+    --surface: #FFFFFF;
+    --surface-2: #F1F5F9;
+    --surface-3: #E2E8F0;
+    --side-bg: rgba(255, 255, 255, 0.95);
+    --line: #CBD5E1;
+    --line-soft: #E2E8F0;
+    --line-glass: rgba(203, 213, 225, 0.7);
+    --text: #0F172A;
+    --text-1: #0F172A;
+    --text-2: #334155;
+    --text-3: #64748B;
+    --accent: #0284C7;
+    --accent-soft: #E0F2FE;
+    --ok: #10B981;
+    --ok-soft: #D1FAE5;
+    --warn: #F59E0B;
+    --warn-soft: #FEF3C7;
+    --bad: #EF4444;
+    --bad-soft: #FEE2E2;
+    --orange: #F97316;
+    --orange-soft: #FFEDD5;
+    --glass-bg: rgba(255, 255, 255, 0.92);
+    --glass-border: rgba(226, 232, 240, 0.9);
+    --glass-shadow: 0 10px 30px -5px rgba(15, 23, 42, 0.05), 0 2px 6px -2px rgba(15, 23, 42, 0.02);
+    --glass-backdrop: blur(16px) saturate(180%);
+    --shadow-1: 0 2px 8px rgba(15, 23, 42, 0.05), 0 1px 3px rgba(15, 23, 42, 0.03);
+    --shadow-2: 0 10px 30px -5px rgba(15, 23, 42, 0.08);
+    --shadow-3: 0 20px 50px rgba(15, 23, 42, 0.14);
+  }
+
+  /* ---- الوضع الفاتح (Light Mode Enterprise Glassmorphism) ---- */
+  html[data-theme="light"] {
+    --bg: #F8FAFC;
+    --surface: #FFFFFF;
+    --surface-2: #F1F5F9;
+    --surface-3: #E2E8F0;
+    --side-bg: rgba(255, 255, 255, 0.95);
+    --line: #CBD5E1;
+    --line-soft: #E2E8F0;
+    --line-glass: rgba(203, 213, 225, 0.7);
+    --text: #0F172A;
+    --text-1: #0F172A;
+    --text-2: #334155;
+    --text-3: #64748B;
+    --accent: #0284C7;
+    --accent-soft: #E0F2FE;
+    --ok: #10B981;
+    --ok-soft: #D1FAE5;
+    --warn: #F59E0B;
+    --warn-soft: #FEF3C7;
+    --bad: #EF4444;
+    --bad-soft: #FEE2E2;
+    --orange: #F97316;
+    --orange-soft: #FFEDD5;
+    --glass-bg: rgba(255, 255, 255, 0.92);
+    --glass-border: rgba(226, 232, 240, 0.9);
+    --glass-shadow: 0 10px 30px -5px rgba(15, 23, 42, 0.05), 0 2px 6px -2px rgba(15, 23, 42, 0.02);
+    --glass-backdrop: blur(16px) saturate(180%);
+    --shadow-1: 0 2px 8px rgba(15, 23, 42, 0.05), 0 1px 3px rgba(15, 23, 42, 0.03);
+    --shadow-2: 0 10px 30px -5px rgba(15, 23, 42, 0.08);
+    --shadow-3: 0 20px 50px rgba(15, 23, 42, 0.14);
+  }
+
+  /* ---- الوضع الداكن النيلي الفاخر (Midnight Navy Sovereign Dark) ---- */
+  html[data-theme="dark"] {
+    --bg: #070D18;
+    --surface: #0E1726;
+    --surface-2: #131F37;
+    --surface-3: #1A294A;
+    --side-bg: rgba(10, 18, 33, 0.97);
+    --line: #1E2D4A;
+    --line-soft: #14223B;
+    --line-glass: rgba(30, 45, 74, 0.65);
+    --text: #F8FAFC;
+    --text-1: #FFFFFF;
+    --text-2: #CBD5E1;
+    --text-3: #94A3B8;
+    --accent: #38BDF8;
+    --accent-soft: rgba(56, 189, 248, 0.14);
+    --ok: #34D399;
+    --ok-soft: rgba(52, 211, 153, 0.14);
+    --warn: #FBBF24;
+    --warn-soft: rgba(251, 191, 36, 0.14);
+    --bad: #F87171;
+    --bad-soft: rgba(248, 113, 113, 0.14);
+    --orange: #FB923C;
+    --orange-soft: rgba(251, 146, 60, 0.14);
+    --glass-bg: rgba(14, 23, 38, 0.92);
+    --glass-border: rgba(30, 45, 74, 0.6);
+    --glass-shadow: 0 12px 36px -4px rgba(0, 0, 0, 0.45), 0 2px 8px rgba(0, 0, 0, 0.25);
+    --glass-backdrop: blur(16px) saturate(180%);
+    --shadow-1: 0 2px 8px rgba(0, 0, 0, 0.25);
+    --shadow-2: 0 8px 24px rgba(0, 0, 0, 0.35);
+    --shadow-3: 0 16px 48px rgba(0, 0, 0, 0.5);
+  }
+
+  /* ---- شارات ومربعات الحالة المرجعية (Reference Status Badges & Pills) ---- */
+  .badge-in-progress {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 3.5px 10px;
+    border-radius: var(--r-md);
+    font-size: 11.5px;
+    font-weight: 700;
+    background: rgba(14, 116, 144, 0.18);
+    border: 1px solid rgba(56, 189, 248, 0.35);
+    color: #38BDF8;
+    white-space: nowrap;
+  }
+
+  .badge-late {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 3.5px 10px;
+    border-radius: var(--r-md);
+    font-size: 11.5px;
+    font-weight: 700;
+    background: rgba(185, 28, 28, 0.2);
+    border: 1px solid rgba(248, 113, 113, 0.45);
+    color: #F87171;
+    white-space: nowrap;
+  }
+
+  .badge-waiting {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 3.5px 10px;
+    border-radius: var(--r-md);
+    font-size: 11.5px;
+    font-weight: 700;
+    background: rgba(180, 83, 9, 0.2);
+    border: 1px solid rgba(251, 191, 36, 0.4);
+    color: #FBBF24;
+    white-space: nowrap;
+  }
+
+  .badge-completed {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 3.5px 10px;
+    border-radius: var(--r-md);
+    font-size: 11.5px;
+    font-weight: 700;
+    background: rgba(16, 185, 129, 0.18);
+    border: 1px solid rgba(52, 211, 153, 0.35);
+    color: #34D399;
+    white-space: nowrap;
+  }
+
+  .badge-step {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 3.5px 10px;
+    border-radius: var(--r-md);
+    font-size: 11.5px;
+    font-weight: 700;
+    background: rgba(19, 31, 55, 0.85);
+    border: 1px solid rgba(56, 189, 248, 0.25);
+    color: #CBD5E1;
+    white-space: nowrap;
+  }
+
+  .badge-type {
+    display: inline-flex;
+    align-items: center;
+    padding: 3px 9px;
+    border-radius: var(--r-md);
+    font-size: 11px;
+    font-weight: 700;
+    background: rgba(56, 189, 248, 0.1);
+    border: 1px solid rgba(56, 189, 248, 0.25);
+    color: #38BDF8;
+    white-space: nowrap;
+  }
+
+  .badge-client {
+    display: inline-flex;
+    align-items: center;
+    padding: 3px 9px;
+    border-radius: var(--r-md);
+    font-size: 11px;
+    font-weight: 700;
+    background: var(--surface-2);
+    border: 1px solid var(--line-soft);
+    color: var(--text-3);
+    white-space: nowrap;
+  }
+
+  /* Blueprint Grid Pattern */
+  .bg-blueprint-grid {
+    background-image: radial-gradient(rgba(56, 189, 248, 0.12) 1px, transparent 1px);
+    background-size: 24px 24px;
+  }
+
+  /* ============================================================
+     الأساسيات
+     ============================================================ */
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    color-scheme: light dark;
+  }
+
+  .icon {
+    width: 20px;
+    height: 20px;
+    flex: none;
+    display: inline-block;
+    vertical-align: middle;
+    stroke-width: 1.6;
+    transition: transform var(--t-fast);
+  }
+
+  svg.icon use {
+    pointer-events: none;
+  }
+
+  body {
+    font-family: var(--font-ui);
+    background: var(--bg);
+    color: var(--text);
+    font-size: 15px;
+    line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+    transition: background-color var(--t-base), color var(--t-base);
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-family: var(--font-display);
+    line-height: 1.35;
+    font-weight: 700;
+  }
+
+  button,
+  input,
+  select,
+  textarea {
+    font: inherit;
+    color: inherit;
+  }
+
+  button {
+    background: none;
+    border: none;
+    cursor: pointer;
+  }
+
+  a {
+    color: var(--accent);
+    text-decoration: none;
+    transition: color var(--t-fast), opacity var(--t-fast);
+  }
+
+  /* Ambient Glowing Background Orbs (Ethereal Glassmorphism & Fluid Float) */
+  @keyframes orbFloat1 {
+    0% {
+      transform: translate(0px, 0px) scale(1);
+    }
+
+    50% {
+      transform: translate(30px, 25px) scale(1.08);
+    }
+
+    100% {
+      transform: translate(-20px, 15px) scale(0.96);
+    }
+  }
+
+  @keyframes orbFloat2 {
+    0% {
+      transform: translate(0px, 0px) scale(1);
+    }
+
+    50% {
+      transform: translate(-35px, -20px) scale(1.05);
+    }
+
+    100% {
+      transform: translate(25px, -30px) scale(0.94);
+    }
+  }
+
+  @keyframes orbFloat3 {
+    0% {
+      transform: translate(0px, 0px) scale(1);
+    }
+
+    50% {
+      transform: translate(20px, -25px) scale(1.1);
+    }
+
+    100% {
+      transform: translate(-15px, 20px) scale(0.92);
+    }
+  }
+
+  /* Subtle Executive Ambient Gradient (Quiet & Non-Intrusive) */
+  .subtle-mesh {
+    background-image: radial-gradient(at 0% 0%, rgba(2, 132, 199, 0.04) 0px, transparent 50%),
+                      radial-gradient(at 100% 100%, rgba(212, 175, 55, 0.03) 0px, transparent 50%);
+  }
+
+  html[data-theme="dark"] .subtle-mesh {
+    background-image: radial-gradient(at 0% 0%, rgba(56, 189, 248, 0.03) 0px, transparent 50%),
+                      radial-gradient(at 100% 100%, rgba(212, 175, 55, 0.02) 0px, transparent 50%);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+    border-radius: 6px;
+  }
+
+  ::selection {
+    background: var(--blue-200);
+    color: var(--blue-900);
+  }
+
+  .num {
+    font-family: var(--font-display);
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -.01em;
+  }
+
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: var(--line);
+    border-radius: 99px;
+    border: 2px solid transparent;
+    background-clip: content-box;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--text-3);
+    background-clip: content-box;
+  }
+
+  /* Glass Card System (ui-ux-pro-max standard) */
+  .glass-card {
+    background: var(--glass-bg);
+    backdrop-filter: var(--glass-backdrop);
+    -webkit-backdrop-filter: var(--glass-backdrop);
+    border: 1px solid var(--glass-border);
+    box-shadow: var(--glass-shadow);
+    transition: transform var(--t-base), box-shadow var(--t-base), border-color var(--t-base);
+  }
+
+  /* Mobile Touch Target 44px standard */
+  @media (pointer: coarse) {
+    .btn, button, input[type="button"], input[type="submit"], a.btn {
+      min-height: 44px;
+    }
+  }
+
+  /* ============================================================
+     الأزرار
+     ============================================================ */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 10px 18px;
+    border-radius: var(--r-md);
+    font-weight: 500;
+    font-size: 14px;
+    white-space: nowrap;
+    border: 1px solid transparent;
+    transition: transform var(--t-fast), background var(--t-fast), border-color var(--t-fast), box-shadow var(--t-fast);
+  }
+
+  .btn:active {
+    transform: scale(.975);
+  }
+
+  .btn .icon {
+    width: 18px;
+    height: 18px;
+  }
+
+  .btn-primary,
+  .btn-blue {
+    background: #3B82F6 !important;
+    color: #ffffff !important;
+    font-weight: 700;
+    border-radius: 12px;
+    box-shadow: 0 4px 14px rgba(59, 130, 246, 0.35);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+  }
+
+  .btn-primary:hover,
+  .btn-blue:hover {
+    background: #2563EB !important;
+    box-shadow: 0 6px 20px rgba(59, 130, 246, 0.5);
+    transform: translateY(-1px);
+  }
+
+  .btn-primary:active,
+  .btn-blue:active {
+    background: #1D4ED8 !important;
+    transform: translateY(0.5px) scale(0.98);
+  }
+
+  .btn-go,
+  .btn-success,
+  .btn-green,
+  .btn-excel {
+    background: #10B981 !important;
+    color: #ffffff !important;
+    font-weight: 700;
+    border-radius: 12px;
+    box-shadow: 0 4px 14px rgba(16, 185, 129, 0.35);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+  }
+
+  .btn-go:hover,
+  .btn-success:hover,
+  .btn-green:hover,
+  .btn-excel:hover {
+    background: #059669 !important;
+    box-shadow: 0 6px 20px rgba(16, 185, 129, 0.5);
+    transform: translateY(-1px);
+  }
+
+  .btn-go:active,
+  .btn-success:active,
+  .btn-green:active,
+  .btn-excel:active {
+    background: #047857 !important;
+    transform: translateY(0.5px) scale(0.98);
+  }
+
+  .btn-ghost {
+    background: var(--surface-2);
+    border-color: var(--line);
+    color: var(--text-2);
+  }
+
+  .btn-ghost:hover {
+    background: var(--surface-3);
+    color: var(--text);
+  }
+
+  .btn-quiet {
+    color: var(--text-2);
+    padding: 8px 12px;
+  }
+
+  .btn-quiet:hover {
+    background: var(--surface-3);
+    color: var(--text);
+  }
+
+  .btn-danger {
+    background: var(--bad-soft);
+    color: var(--bad);
+  }
+
+  .btn-danger:hover {
+    background: var(--bad);
+    color: #fff;
+  }
+
+  .btn-block {
+    width: 100%;
+  }
+
+  .btn:disabled {
+    opacity: .5;
+    cursor: not-allowed;
+    transform: none;
+  }
+
+  /* ============================================================
+     الهيكل والشبكة العامة
+     ============================================================ */
+  #app {
+    display: flex;
+    height: 100vh;
+    overflow: hidden;
+  }
+
+  /* ---- الشريط الجانبي ---- */
+  #sidebar {
+    width: var(--sidebar-w);
+    flex: none;
+    display: flex;
+    flex-direction: column;
+    background: var(--side-bg);
+    -webkit-backdrop-filter: saturate(180%) blur(20px);
+    backdrop-filter: saturate(180%) blur(20px);
+    border-left: 1px solid var(--line);
+    z-index: 30;
+    height: 100vh;
+    overflow: hidden;
+  }
+
+  .side-head {
+    padding: 20px 18px 18px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    flex: none;
+    border-bottom: 1px solid var(--line-soft);
+  }
+
+  .side-mark {
+    width: 48px;
+    height: 48px;
+    border-radius: 14px;
+    flex: none;
+    display: grid;
+    place-items: center;
+    color: #fff;
+    background: linear-gradient(150deg, var(--blue-600), var(--blue-800));
+    box-shadow: 0 4px 14px rgba(18, 85, 126, .35);
+  }
+
+  .side-mark .icon {
+    width: 26px;
+    height: 26px;
+  }
+
+  .side-name {
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: 15.5px;
+    line-height: 1.35;
+    color: var(--text);
+  }
+
+  .side-role {
+    font-size: 11.5px;
+    color: var(--text-3);
+    font-weight: 600;
+    margin-top: 2px;
+  }
+
+  .side-nav {
+    flex: 1;
+    overflow-y: auto;
+    min-height: 0;
+    padding: 4px 12px 12px;
+  }
+
+  .nav-group {
+    margin-top: 14px;
+  }
+
+  .nav-group-head {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 10px;
+    margin-bottom: 2px;
+    border-radius: 8px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: .04em;
+    color: var(--text-3);
+    transition: color var(--t-fast), background var(--t-fast);
+  }
+
+  .nav-group-head:hover {
+    color: var(--text-2);
+    background: var(--surface-3);
+  }
+
+  .nav-group-head span {
+    flex: 1;
+    text-align: start;
+  }
+
+  .chev {
+    width: 14px;
+    height: 14px;
+    flex: none;
+    transition: transform var(--t-fast);
+  }
+
+  [aria-expanded="false"] .chev {
+    transform: rotate(90deg);
+  }
+
+  .nav-body {
+    display: grid;
+    grid-template-rows: 0fr;
+    transition: grid-template-rows var(--t-base);
+  }
+
+  .nav-body.open {
+    grid-template-rows: 1fr;
+  }
+
+  .nav-body>div {
+    overflow: hidden;
+    min-height: 0;
+  }
+
+  .nav-head-row {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+  }
+
+  .nav-head-row .nav-item-head {
+    flex: 1;
+  }
+
+  .nav-toggle {
+    width: 30px;
+    height: 34px;
+    border-radius: 8px;
+    flex: none;
+    display: grid;
+    place-items: center;
+    color: var(--text-3);
+    transition: background var(--t-fast), color var(--t-fast);
+  }
+
+  .nav-toggle:hover {
+    background: var(--surface-3);
+    color: var(--text);
+  }
+
+  /* Tree Navigation Submenu (Reference Architecture) */
+  .nav-sub {
+    position: relative;
+    margin-inline-start: 18px;
+    margin-top: 2px;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* The continuous vertical tree trunk line */
+  .nav-sub::before {
+    content: '';
+    position: absolute;
+    inset-inline-start: 11px;
+    top: 4px;
+    bottom: 6px;
+    width: 1.5px;
+    background: var(--line);
+    opacity: 0.6;
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  .nav-item.sub {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 10px;
+    padding-inline-start: 24px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-2);
+    border-radius: 8px;
+    transition: color var(--t-fast), background var(--t-fast);
+  }
+
+  .nav-item.sub:hover {
+    color: var(--text-1);
+    background: var(--surface-2);
+  }
+
+  .nav-item.sub[aria-current="page"] {
+    color: var(--accent);
+    font-weight: 700;
+    background: var(--accent-soft);
+  }
+
+  /* The tree node dot sitting directly on the ::before line */
+  .nav-tree-node {
+    position: absolute;
+    inset-inline-start: 8.75px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 6px;
+    height: 6px;
+    display: grid;
+    place-items: center;
+    z-index: 2;
+    pointer-events: none;
+  }
+
+  .nav-tree-dot {
+    width: 5.5px;
+    height: 5.5px;
+    border-radius: 9999px;
+    background: var(--surface);
+    border: 1.5px solid var(--line);
+    transform-origin: center center;
+    transition: all var(--t-fast);
+  }
+
+  .nav-item.sub:hover .nav-tree-dot {
+    border-color: var(--text-3);
+    background: var(--text-3);
+    transform: scale(1.2);
+  }
+
+  .nav-item.sub[aria-current="page"] .nav-tree-dot {
+    background: var(--accent);
+    border-color: var(--accent);
+    box-shadow: 0 0 8px var(--accent), 0 0 2px var(--accent);
+    transform: scale(1.3);
+  }
+
+  .nav-num {
+    margin-inline-start: auto;
+    font-family: var(--font-display);
+    font-size: 11px;
+    color: var(--text-3);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .nav-item[aria-current="page"] .nav-num {
+    color: var(--accent);
+  }
+
+  .nav-item {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    padding: 9px 11px;
+    border-radius: var(--r-md);
+    color: var(--text-2);
+    font-size: 14px;
+    font-weight: 500;
+    position: relative;
+    transition: background var(--t-fast), color var(--t-fast);
+  }
+
+  .nav-item:hover {
+    background: var(--surface-3);
+    color: var(--text);
+  }
+
+  .nav-item .icon {
+    color: var(--text-3);
+    transition: color var(--t-fast);
+  }
+
+  .nav-item:hover .icon {
+    color: var(--text-2);
+  }
+
+  .nav-item[aria-current="page"] {
+    background: var(--accent-soft);
+    color: var(--accent);
+    font-weight: 700;
+  }
+
+  .nav-item[aria-current="page"] .icon {
+    color: var(--accent);
+  }
+
+  .nav-item[aria-current="page"]::before {
+    content: "";
+    position: absolute;
+    right: -12px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 3px;
+    height: 18px;
+    border-radius: 0 3px 3px 0;
+    background: var(--accent);
+  }
+
+  .nav-badge {
+    margin-inline-start: auto;
+    min-width: 20px;
+    height: 20px;
+    padding: 0 6px;
+    border-radius: var(--r-full);
+    background: var(--bad);
+    color: #fff;
+    font-size: 11px;
+    font-weight: 700;
+    display: grid;
+    place-items: center;
+  }
+
+  /* ---- بطاقة المهلة بالشريط الجانبي ---- */
+  .deadline-card {
+    display: block;
+    text-decoration: none;
+    color: inherit;
+    margin: 8px 12px 10px;
+    padding: 14px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--r-lg);
+    box-shadow: var(--shadow-1);
+    flex: none;
+  }
+
+  .deadline-card.is-warn {
+    border-color: var(--warn);
+    background: var(--warn-soft);
+  }
+
+  .deadline-card.is-late {
+    border-color: var(--bad);
+    background: var(--bad-soft);
+  }
+
+  .dl-top {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11.5px;
+    font-weight: 700;
+    color: var(--text-3);
+    margin-bottom: 8px;
+  }
+
+  .dl-top .icon {
+    width: 14px;
+    height: 14px;
+  }
+
+  .dl-body {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .dl-ring {
+    width: 48px;
+    height: 48px;
+    flex: none;
+    position: relative;
+  }
+
+  .dl-ring svg {
+    transform: rotate(90deg);
+  }
+
+  .dl-ring circle {
+    fill: none;
+    stroke-width: 5;
+    stroke-linecap: round;
+  }
+
+  .dl-ring .track {
+    stroke: var(--line);
+  }
+
+  .dl-ring .prog {
+    stroke: var(--accent);
+    transition: stroke-dashoffset .6s cubic-bezier(.32, .72, 0, 1), stroke .3s;
+  }
+
+  .is-warn .dl-ring .prog {
+    stroke: var(--warn);
+  }
+
+  .is-late .dl-ring .prog {
+    stroke: var(--bad);
+  }
+
+  .dl-num {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: 16px;
+  }
+
+  .is-warn .dl-num {
+    color: var(--warn);
+  }
+
+  .is-late .dl-num {
+    color: var(--bad);
+  }
+
+  .dl-meta {
+    min-width: 0;
+  }
+
+  .dl-title {
+    font-size: 13px;
+    font-weight: 700;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .dl-sub {
+    font-size: 11.5px;
+    color: var(--text-3);
+  }
+
+  .side-foot {
+    padding: 0 12px 14px;
+    flex: none;
+  }
+
+  .user-chip {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 10px;
+    border-radius: var(--r-md);
+    transition: background var(--t-fast);
+  }
+
+  .user-chip:hover {
+    background: var(--surface-3);
+  }
+
+  .avatar {
+    width: 34px;
+    height: 34px;
+    border-radius: var(--r-full);
+    flex: none;
+    display: grid;
+    place-items: center;
+    font-weight: 700;
+    font-size: 13px;
+    background: var(--accent-soft);
+    color: var(--accent);
+    font-family: var(--font-display);
+  }
+
+  .user-meta {
+    min-width: 0;
+    text-align: start;
+    flex: 1;
+  }
+
+  .user-name {
+    font-size: 13.5px;
+    font-weight: 700;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .user-role {
+    font-size: 11.5px;
+    color: var(--text-3);
+  }
+
+  /* ---- المنطقة الرئيسية ---- */
+  #main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+  }
+
+  #topbar {
+    height: var(--topbar-h);
+    flex: none;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 0 24px;
+    background: var(--side-bg);
+    -webkit-backdrop-filter: saturate(180%) blur(20px);
+    backdrop-filter: saturate(180%) blur(20px);
+    border-bottom: 1px solid var(--line);
+    z-index: 20;
+  }
+
+  #page-title {
+    font-size: 18px;
+    font-weight: 700;
+    white-space: nowrap;
+  }
+
+  #page-sub {
+    font-size: 12.5px;
+    color: var(--text-3);
+    margin-top: -3px;
+  }
+
+  .top-spacer {
+    flex: 1;
+  }
+
+  .search-trigger {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    min-width: 230px;
+    padding: 8px 13px;
+    background: var(--surface-2);
+    border: 1px solid var(--line);
+    border-radius: var(--r-full);
+    color: var(--text-3);
+    font-size: 13.5px;
+    transition: border-color var(--t-fast), background var(--t-fast);
+  }
+
+  .search-trigger:hover {
+    border-color: var(--blue-200);
+    background: var(--surface);
+  }
+
+  .search-trigger .icon {
+    width: 17px;
+    height: 17px;
+  }
+
+  .kbd {
+    margin-inline-start: auto;
+    font-size: 11px;
+    padding: 2px 6px;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    background: var(--surface);
+    color: var(--text-3);
+    font-family: var(--font-display);
+  }
+
+  .icon-btn {
+    width: 38px;
+    height: 38px;
+    border-radius: var(--r-md);
+    display: grid;
+    place-items: center;
+    color: var(--text-2);
+    position: relative;
+    transition: background var(--t-fast), color var(--t-fast);
+  }
+
+  .icon-btn:hover {
+    background: var(--surface-3);
+    color: var(--text);
+  }
+
+  #view-root {
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px 20px 36px;
+    background: var(--bg);
+    color: var(--text);
+  }
+
+  .view {
+    max-width: 1540px;
+    margin: 0 auto;
+    background: transparent;
+    color: var(--text);
+    animation: viewIn var(--t-base) both;
+  }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--line-soft);
+    border-radius: var(--r-lg);
+    color: var(--text);
+    box-shadow: var(--shadow-1);
+    transition: background var(--t-fast), border-color var(--t-fast), box-shadow var(--t-fast);
+  }
+
+  @keyframes viewIn {
+    from {
+      opacity: 0;
+      transform: translateY(6px);
+    }
+
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  @keyframes rise {
+    from {
+      opacity: 0;
+      transform: translateY(12px) scale(.985);
+    }
+
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  @keyframes fade {
+    from {
+      opacity: 0;
+    }
+
+    to {
+      opacity: 1;
+    }
+  }
+
+  @keyframes kpiIn {
+    from {
+      opacity: 0;
+      transform: translateY(12px);
+    }
+
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  @keyframes draw {
+    to {
+      stroke-dashoffset: 0;
+    }
+  }
+
+  /* ============================================================
+     حقول الإدخال والنوافذ المنبثقة (Modals & Form Controls)
+     تضمن تباين الألوان الاحترافي وتوافق الوضع الفاتح والداكن
+     ============================================================ */
+  .field {
+    margin-bottom: 10px;
+  }
+
+  .field label {
+    display: block;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-2);
+    margin-bottom: 4px;
+  }
+
+  .input {
+    width: 100%;
+    height: 38px;
+    padding: 7px 12px;
+    background: var(--surface-2);
+    color: var(--text);
+    border: 1px solid var(--line);
+    border-radius: var(--r-md);
+    font-size: 13px;
+    transition: border-color var(--t-fast), box-shadow var(--t-fast), background var(--t-fast);
+  }
+
+  textarea.input {
+    height: auto;
+    padding: 8px 12px;
+  }
+
+  .input:focus {
+    outline: none;
+    border-color: var(--accent);
+    background: var(--surface);
+    box-shadow: 0 0 0 3px var(--accent-soft);
+  }
+
+  .input::placeholder {
+    color: var(--text-3);
+    opacity: 0.85;
+  }
+
+  /* ============================================================
+     صفحة تسجيل الدخول الفاخرة (Luxury Glassmorphism Login)
+     ============================================================ */
+  #login {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    position: relative;
+    z-index: 10;
+  }
+
+  .login-card {
+    width: 100%;
+    max-width: 440px;
+    background: var(--glass-bg);
+    backdrop-filter: var(--glass-backdrop);
+    -webkit-backdrop-filter: var(--glass-backdrop);
+    border: 1px solid var(--glass-border);
+    border-radius: 28px;
+    padding: 36px 32px;
+    box-shadow: var(--shadow-3), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+    animation: scaleIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .login-mark {
+    width: 56px;
+    height: 56px;
+    border-radius: 18px;
+    background: linear-gradient(135deg, var(--accent), #2563EB);
+    color: #fff;
+    display: grid;
+    place-items: center;
+    margin: 0 auto 18px;
+    box-shadow: 0 8px 20px -4px rgba(59, 130, 246, 0.4);
+  }
+
+  .login-mark .icon {
+    width: 28px;
+    height: 28px;
+  }
+
+  .login-card h1 {
+    font-size: 20px;
+    font-weight: 800;
+    text-align: center;
+    color: var(--text);
+    margin-bottom: 6px;
+  }
+
+  .login-card .sub {
+    font-size: 13px;
+    color: var(--text-3);
+    text-align: center;
+    margin-bottom: 22px;
+  }
+
+  .login-err {
+    background: var(--bad-soft);
+    color: var(--bad);
+    border: 1px solid rgba(239, 68, 68, 0.25);
+    padding: 10px 14px;
+    border-radius: var(--r-md);
+    font-size: 12.5px;
+    font-weight: 600;
+    margin-bottom: 16px;
+    text-align: center;
+    animation: fadeInUp 0.2s ease;
+  }
+
+  .login-hint {
+    font-size: 11.5px;
+    color: var(--text-3);
+    text-align: center;
+    margin-top: 20px;
+    line-height: 1.6;
+  }
+
+  select,
+  option {
+    background-color: var(--surface);
+    color: var(--text);
+  }
+
+  html[data-theme="dark"] select,
+  html[data-theme="dark"] option {
+    background-color: #171A21 !important;
+    color: #F8FAFC !important;
+  }
+
+  select.input {
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2364748B'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: left 12px center;
+    background-size: 14px;
+    padding-left: 32px;
+  }
+
+  /* ---- شريط الأدوات والفلاتر الأفقي الحاوي (Compact Horizontal Toolbar) ---- */
+  .tools {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 14px;
+    width: 100%;
+  }
+
+  .tools .sel {
+    width: auto !important;
+    min-width: 110px;
+    max-width: 150px;
+    height: 36px;
+    padding: 6px 10px;
+    background: var(--surface);
+    color: var(--text);
+    border: 1px solid var(--line);
+    border-radius: var(--r-md);
+    font-size: 12.5px;
+    cursor: pointer;
+    transition: border-color var(--t-fast), background var(--t-fast), box-shadow var(--t-fast);
+  }
+
+  .tools .sel:hover {
+    border-color: var(--accent);
+  }
+
+  .tools .sel:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-soft);
+  }
+
+  .tools .input.grow {
+    flex: 1;
+    min-width: 200px;
+    height: 36px;
+    width: auto !important;
+    padding: 6px 14px;
+    background: var(--surface);
+    color: var(--text);
+    border: 1px solid var(--line);
+    border-radius: var(--r-full);
+    font-size: 13px;
+  }
+
+  .tools .input.grow:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-soft);
+  }
+
+  .chip-clear {
+    font-size: 12px;
+    color: var(--text-3);
+    cursor: pointer;
+  }
+
+  .chip-clear:hover {
+    color: var(--bad);
+  }
+
+  /* ---- النوافذ المنبثقة الاحترافية عبر React Portal ---- */
+  body.modal-open {
+    overflow: hidden !important;
+  }
+
+  #modal-root {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    z-index: 999999 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 16px !important;
+    overflow: hidden !important;
+  }
+
+  .modal-veil {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    background: rgba(10, 24, 33, 0.65) !important;
+    -webkit-backdrop-filter: blur(8px) !important;
+    backdrop-filter: blur(8px) !important;
+    z-index: 1 !important;
+    animation: fade var(--t-base) both;
+  }
+
+  html[data-theme="dark"] .modal-veil {
+    background: rgba(0, 0, 0, 0.78) !important;
+  }
+
+  .modal {
+    position: relative !important;
+    z-index: 2 !important;
+    width: 100% !important;
+    max-width: min(var(--modal-max-w, 800px), 92vw) !important;
+    max-height: 88vh !important;
+    display: flex !important;
+    flex-direction: column !important;
+    background: var(--surface) !important;
+    color: var(--text) !important;
+    border: 1px solid var(--line) !important;
+    border-radius: var(--r-lg) !important;
+    box-shadow: var(--shadow-3) !important;
+    animation: rise var(--t-base) both;
+    overflow: hidden !important;
+    margin: auto !important;
+  }
+
+  .modal-head {
+    flex: none !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 12px !important;
+    padding: 14px 18px !important;
+    border-bottom: 1px solid var(--line-soft) !important;
+    background: var(--surface-2) !important;
+  }
+
+  .modal-head h3 {
+    flex: 1 !important;
+    font-size: 16px !important;
+    font-weight: 700 !important;
+    color: var(--text) !important;
+    margin: 0 !important;
+  }
+
+  .modal-body {
+    flex: 1 1 auto !important;
+    overflow-y: auto !important;
+    padding: 18px !important;
+    background: var(--surface) !important;
+    color: var(--text) !important;
+  }
+
+  .modal-foot {
+    flex: none !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    gap: 10px !important;
+    padding: 12px 18px !important;
+    border-top: 1px solid var(--line-soft) !important;
+    background: var(--surface-2) !important;
+  }
+
+  /* ============================================================
+     نظام البطاقات والمربعات الفاخر والمحدد (Card & Glass System)
+     ============================================================ */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--line-soft);
+    border-radius: var(--r-lg);
+    color: var(--text);
+    box-shadow: var(--shadow-1);
+    position: relative;
+    transition: background var(--t-fast), border-color var(--t-fast), box-shadow var(--t-fast);
+  }
+
+  .glass-card,
+  .co-card,
+  .dep-card,
+  .stat-card,
+  .kpi-card {
+    background: var(--surface);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--r-xl, 18px);
+    box-shadow: var(--glass-shadow);
+    padding: 16px 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    gap: 12px;
+    position: relative;
+    overflow: hidden;
+    width: 100%;
+    color: var(--text);
+    transition: transform var(--t-base), box-shadow var(--t-base), border-color var(--t-base), background var(--t-base);
+  }
+
+  .card:hover,
+  .glass-card:hover,
+  .co-card:hover,
+  .dep-card:hover,
+  .stat-card:hover,
+  .kpi-card:hover {
+    box-shadow: var(--shadow-2);
+    border-color: var(--accent);
+    transform: translateY(-2px);
+  }
+
+  .card-pad {
+    padding: 14px 16px;
+  }
+
+  .card-head {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--line-soft);
+  }
+
+  .card-head h3 {
+    font-size: 15px;
+    font-weight: 700;
+    flex: 1;
+    margin: 0;
+    color: var(--text);
+  }
+
+  /* ---- أنيميشن تمدد وتقلص الإشعارات والتنبيهات داخل البطاقات (Auto Expand & Contract) ---- */
+  @keyframes cardNotifyIn {
+    0% {
+      opacity: 0;
+      transform: translateY(-8px) scale(0.97);
+      max-height: 0;
+      margin-top: 0;
+      padding-top: 0;
+      padding-bottom: 0;
+    }
+    60% {
+      opacity: 0.85;
+      transform: translateY(2px) scale(1.008);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+      max-height: 400px;
+    }
+  }
+
+  @keyframes cardNotifyOut {
+    0% {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+      max-height: 400px;
+    }
+    100% {
+      opacity: 0;
+      transform: translateY(-8px) scale(0.97);
+      max-height: 0;
+      margin-top: 0;
+      padding-top: 0;
+      padding-bottom: 0;
+    }
+  }
+
+  .pen,
+  .card-notify,
+  .alert-banner,
+  .doc-expand-box {
+    animation: cardNotifyIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    transform-origin: top center;
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  /* ---- Bento Grid System ---- */
+  .bento-grid {
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    gap: 16px;
+  }
+
+  .bento-12 {
+    grid-column: span 12;
+  }
+
+  .bento-8 {
+    grid-column: span 8;
+  }
+
+  .bento-6 {
+    grid-column: span 6;
+  }
+
+  .bento-4 {
+    grid-column: span 4;
+  }
+
+  .bento-3 {
+    grid-column: span 3;
+  }
+
+  @media (max-width: 1024px) {
+
+    .bento-8,
+    .bento-6,
+    .bento-4,
+    .bento-3 {
+      grid-column: span 12;
+    }
+  }
+
+  /* ---- رأس بطاقات الشركات والودائع ---- */
+  .co-top,
+  .dep-top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 10px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--line-soft);
+    width: 100%;
+    flex: none;
+  }
+
+  .co-ico {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, var(--accent-soft), var(--surface-3));
+    border: 1px solid var(--line-soft);
+    display: grid;
+    place-items: center;
+    color: var(--accent);
+    flex: none;
+  }
+
+  .co-ico .icon {
+    width: 18px;
+    height: 18px;
+  }
+
+  .co-header-info {
+    min-width: 0;
+    flex: 1;
+  }
+
+  .co-name {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 14px;
+    line-height: 1.35;
+    color: var(--text);
+    margin-bottom: 2px;
+    word-break: break-word;
+  }
+
+  .co-client {
+    font-size: 11.5px;
+    color: var(--text-3);
+  }
+
+  .co-kind-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 1px 7px;
+    border-radius: 5px;
+    background: var(--surface-3);
+    color: var(--text-2);
+    font-size: 10.5px;
+    font-weight: 600;
+  }
+
+  .task-no {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 10.5px;
+    padding: 2px 8px;
+    border-radius: var(--r-full);
+    background: var(--accent-soft);
+    color: var(--accent);
+    border: 1px solid rgba(27, 135, 201, 0.2);
+    white-space: nowrap;
+    flex: none;
+  }
+
+  /* ---- شبكة الحقائق والتفاصيل ---- */
+  .co-facts-box {
+    background: var(--surface-2);
+    border: 1px solid var(--line-soft);
+    border-radius: var(--r-md);
+    padding: 8px 12px;
+  }
+
+  .co-facts {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 6px 12px;
+  }
+
+  .co-fact-item {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .co-facts .dt {
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--text-3);
+    margin-bottom: 1px;
+    line-height: 1.2;
+  }
+
+  .co-facts .dv {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text);
+    line-height: 1.3;
+    word-break: break-word;
+  }
+
+  .co-facts .capital-val {
+    color: var(--ok);
+  }
+
+  /* ---- نواقص المستندات ---- */
+  .lack-bar {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    padding: 12px 14px;
+    border-radius: var(--r-md);
+    background: var(--bad-soft);
+    border: 1px solid rgba(217, 88, 74, 0.4);
+  }
+
+  .lack-bar .icon {
+    width: 18px;
+    height: 18px;
+    color: var(--bad);
+    flex: none;
+    margin-top: 2px;
+  }
+
+  .lack-t {
+    font-size: 12px;
+    font-weight: 800;
+    color: var(--bad);
+    margin-bottom: 2px;
+  }
+
+  .lack-d {
+    font-size: 12px;
+    color: var(--text);
+    line-height: 1.55;
+    font-weight: 500;
+  }
+
+  /* ---- أسفل البطاقة — سير العمل ---- */
+  .wf-mini {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 12px 14px;
+    border-radius: var(--r-md);
+    background: var(--surface-2);
+    border: 1px solid var(--line-soft);
+    margin-top: auto;
+  }
+
+  .wf-ring {
+    position: relative;
+    width: 42px;
+    height: 42px;
+    flex: none;
+  }
+
+  .wf-ring svg {
+    transform: rotate(-90deg);
+    display: block;
+  }
+
+  .wf-ring circle {
+    fill: none;
+    stroke-width: 4;
+    stroke-linecap: round;
+  }
+
+  .wf-ring circle.track {
+    stroke: var(--line);
+  }
+
+  .wf-ring circle.prog {
+    stroke: var(--ok);
+    transition: stroke-dashoffset .6s cubic-bezier(.32, .72, 0, 1);
+  }
+
+  .wf-ring circle.prog.in-progress {
+    stroke: var(--accent);
+  }
+
+  .wf-pct {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    font-size: 11px;
+    font-weight: 800;
+    font-family: var(--font-display);
+  }
+
+  .wf-status-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 3px;
+  }
+
+  .wf-count {
+    font-size: 12px;
+    color: var(--text-2);
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  /* ---- محطات الودائع ---- */
+  .dep-stages {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin: 4px 0;
+  }
+
+  .dep-stage {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 12px;
+    border-radius: var(--r-md);
+    position: relative;
+    background: var(--surface-2);
+  }
+
+  .dep-dot {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    flex: none;
+    display: grid;
+    place-items: center;
+    background: var(--surface-3);
+    border: 2px solid var(--line);
+    color: #fff;
+  }
+
+  .dep-dot .icon {
+    width: 13px;
+    height: 13px;
+  }
+
+  .dep-stage.state-progress .dep-dot {
+    border-color: var(--accent);
+    background: var(--accent);
+  }
+
+  .dep-stage.state-done .dep-dot {
+    border-color: var(--ok);
+    background: var(--ok);
+  }
+
+  .dep-info {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+  }
+
+  .dep-label {
+    font-size: 13.5px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .dep-crit {
+    font-size: 10.5px;
+    font-weight: 700;
+    color: var(--warn);
+    background: var(--warn-soft);
+    padding: 2px 8px;
+    border-radius: var(--r-full);
+  }
+
+  .dep-date {
+    font-size: 11.5px;
+    color: var(--text-3);
+    flex: none;
+  }
+
+  .pen {
+    display: flex;
+    gap: 11px;
+    align-items: flex-start;
+    padding: 12px 14px;
+    border-radius: var(--r-md);
+    background: var(--surface-2);
+    border: 1px solid var(--line);
+    margin-top: auto;
+  }
+
+  .pen .icon {
+    width: 19px;
+    height: 19px;
+    flex: none;
+    margin-top: 1px;
+    color: var(--text-3);
+  }
+
+  .pen-main {
+    font-size: 13.5px;
+    font-weight: 700;
+  }
+
+  .pen-sub {
+    font-size: 12px;
+    color: var(--text-3);
+    line-height: 1.55;
+    margin-top: 2px;
+  }
+
+  .pen.warn {
+    background: var(--warn-soft);
+    border-color: var(--warn);
+  }
+
+  .pen.warn .icon {
+    color: var(--warn);
+  }
+
+  .pen.late {
+    background: var(--bad-soft);
+    border-color: var(--bad);
+  }
+
+  .pen.late .icon {
+    color: var(--bad);
+  }
+
+  .pen.late .pen-main {
+    color: var(--bad);
+  }
+
+  .pen.clear {
+    background: var(--ok-soft);
+    border-color: var(--ok);
+  }
+
+  .pen.clear .icon {
+    color: var(--ok);
+  }
+
+  .pen.clear .pen-main {
+    color: var(--ok);
+  }
+
+  /* ============================================================
+     الوسوم والشبكة
+     ============================================================ */
+  .grid {
+    display: grid;
+    gap: 16px;
+  }
+
+  .grid.g-2 {
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  }
+
+  .grid.g-3 {
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  }
+
+  .tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 10px;
+    border-radius: var(--r-full);
+    font-size: 12px;
+    font-weight: 700;
+    white-space: nowrap;
+    flex: none;
+  }
+
+  .tag-ok {
+    background: var(--ok-soft);
+    color: var(--ok);
+  }
+
+  .tag-work {
+    background: var(--accent-soft);
+    color: var(--accent);
+  }
+
+  .tag-warn {
+    background: var(--warn-soft);
+    color: var(--warn);
+  }
+
+  .tag-bad {
+    background: var(--bad-soft);
+    color: var(--bad);
+  }
+
+  .tag-mute {
+    background: var(--surface-3);
+    color: var(--text-3);
+  }
+
+  .tag-blue {
+    background: var(--surface-3);
+    color: var(--text-2);
+    border: 1px solid var(--line-soft);
+  }
+
+  .tag-neutral {
+    background: var(--surface-3);
+    color: var(--text-2);
+    border: 1px solid var(--line-soft);
+  }
+
+  .tag-orange {
+    background: var(--orange-soft);
+    color: var(--orange);
+  }
+
+  .tag-gray {
+    background: var(--surface-3);
+    color: var(--text-3);
+  }
+
+  /* ============================================================
+     مؤشرات KPI والصفحة الرئيسية
+     ============================================================ */
+  .kpi-row {
+    display: grid;
+    gap: 14px;
+    margin-bottom: 18px;
+    grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  }
+
+  .kpi {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--r-lg);
+    padding: 20px;
+    box-shadow: var(--shadow-1);
+    transition: box-shadow var(--t-base), transform var(--t-base);
+  }
+
+  .kpi:hover {
+    box-shadow: var(--shadow-2);
+    transform: translateY(-2px);
+  }
+
+  .kpi-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 9px;
+    color: var(--text-3);
+    font-size: 12.5px;
+    font-weight: 600;
+    margin-bottom: 12px;
+  }
+
+  .kpi-label {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .kpi-ico {
+    width: 34px;
+    height: 34px;
+    border-radius: 10px;
+    display: grid;
+    place-items: center;
+    flex: none;
+    background: var(--surface-3);
+    color: var(--text-2);
+  }
+
+  .kpi-ico .icon {
+    width: 18px;
+    height: 18px;
+  }
+
+  .kpi.tone-blue .kpi-ico {
+    background: var(--accent-soft);
+    color: var(--accent);
+  }
+
+  .kpi.tone-green .kpi-ico {
+    background: var(--ok-soft);
+    color: var(--ok);
+  }
+
+  .kpi.tone-bad .kpi-ico {
+    background: var(--bad-soft);
+    color: var(--bad);
+  }
+
+  .kpi-val {
+    font-family: var(--font-display);
+    font-size: 30px;
+    font-weight: 800;
+    line-height: 1;
+  }
+
+  .kpi-foot {
+    font-size: 11.5px;
+    color: var(--text-3);
+    margin-top: 8px;
+  }
+
+  /* الجداول — تصميم موحّد وفاخر */
+  table.tbl {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+    background: var(--surface);
+  }
+
+  .tbl thead th {
+    text-align: start;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text-3);
+    padding: 12px 16px;
+    background: var(--surface-2);
+    border-bottom: 1px solid var(--line);
+    white-space: nowrap;
+  }
+
+  .tbl tbody td {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--line-soft);
+  }
+
+  .tbl tbody tr {
+    background: var(--surface);
+    transition: background 150ms ease;
+  }
+
+  .tbl tbody tr:hover {
+    background: var(--surface-3) !important;
+  }
+
+  .tbl tbody tr.selected,
+  .tbl tbody tr[aria-selected="true"] {
+    background: rgba(59, 130, 246, 0.12);
+    border-right: 3px solid var(--accent);
+  }
+
+  @media (max-width: 1080px) {
+    #sidebar {
+      position: fixed;
+      inset-block: 0;
+      inset-inline-end: 0;
+      transform: translateX(100%);
+      transition: transform var(--t-base);
+      box-shadow: var(--shadow-3);
+    }
+
+    body.side-open #sidebar {
+      transform: none;
+    }
+  }
+
+  /* ============================================================
+     تنسيق حقول الإدخال والسيطرة المتجاوبة الشاملة (Form Controls & Modals)
+     تعتمد حصرياً على متغيرات الثيم (CSS Variables) للوضع الفاتح والداكن
+     ============================================================ */
+  .field {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+    margin-bottom: 12px;
+    width: 100%;
+  }
+
+  .field label,
+  label {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-2);
+    display: block;
+    margin: 0 0 2px 0;
+    text-align: right;
+    width: 100%;
+  }
+
+  :where(.input,
+    input[type="text"],
+    input[type="number"],
+    input[type="date"],
+    input[type="email"],
+    input[type="password"],
+    select.input,
+    select,
+    textarea.input,
+    textarea) {
+    width: 100%;
+    height: 42px;
+    padding: 9px 14px;
+    border-radius: var(--r-md, 10px);
+    background: var(--surface-2);
+    border: 1px solid var(--line);
+    color: var(--text);
+    font-size: 13.5px;
+    font-family: inherit;
+    transition: border-color var(--t-fast), box-shadow var(--t-fast), background var(--t-fast);
+    box-sizing: border-box;
+  }
+
+  :where(select.input, select) {
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2394a3b8'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: left 12px center;
+    background-size: 16px;
+    padding-left: 36px !important;
+    padding-right: 14px !important;
+    cursor: pointer;
+  }
+
+  :where(.input:focus,
+    input:focus,
+    select:focus,
+    textarea:focus) {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-soft);
+    background: var(--surface);
+  }
+
+  textarea.input,
+  textarea {
+    height: auto;
+    min-height: 80px;
+  }
+
+  /* ============================================================
+     الحالة الفارغة الموحّدة — تُستعمل في كل قسم قبل وجود بيانات
+     وفي كل صفحة قيد الإنشاء (Placeholder)
+     ============================================================ */
+  .empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    gap: 10px;
+    padding: 48px 24px;
+  }
+
+  .empty .icon {
+    width: 40px;
+    height: 40px;
+    color: var(--text-3);
+    opacity: .7;
+  }
+
+  .empty h3 {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text-2);
+    margin: 2px 0 0;
+  }
+
+  .empty p {
+    font-size: 13px;
+    color: var(--text-3);
+    max-width: 380px;
+    margin: 0;
+    line-height: 1.6;
+  }
+
+  /* ============================================================
+     رأس الصفحة الموحّد
+     ============================================================ */
+  .page-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 4px;
+  }
+
+  .page-title {
+    font-family: var(--font-display);
+    font-size: 20px;
+    font-weight: 800;
+    margin: 0;
+    color: var(--text);
+  }
+
+  .count-note {
+    font-size: 12.5px;
+    color: var(--text-3);
+  }
+
+  /* ============================================================
+     تفاصيل صفوف جدول المعاملات
+     ============================================================ */
+  .table-wrap {
+    overflow-x: auto;
+  }
+
+  .tx-type {
+    font-weight: 700;
+    font-size: 14px;
+  }
+
+  .tx-desc {
+    font-size: 12px;
+    color: var(--text-3);
+    margin-top: 2px;
+  }
+
+  .due-late {
+    color: var(--bad);
+    font-weight: 700;
+  }
+
+  .due-soon {
+    color: var(--warn);
+    font-weight: 700;
+  }
+
+  /* ============================================================
+     تمييزات بطاقة الشركة
+     ============================================================ */
+  .co-body-spacer {
+    flex: 1 1 auto;
+    min-height: 12px;
+  }
+
+  .co-card.has-lack {
+    border-color: var(--warn);
+    box-shadow: 0 0 0 1px var(--warn-soft) inset, var(--shadow-1);
+  }
+
+  /* ============================================================
+     تحسين التوافقية للشاشات المتنوعة والهواتف (Mobile & Tablet Responsive System)
+     ============================================================ */
+  #menu-btn {
+    display: none;
+  }
+
+  #side-veil {
+    display: none;
+  }
+
+  @media (max-width: 1024px) {
+    #menu-btn {
+      display: grid;
+      place-items: center;
+      flex: none;
+    }
+
+    #sidebar {
+      position: fixed;
+      top: 0;
+      bottom: 0;
+      inset-inline-start: -320px;
+      width: 280px;
+      max-width: 85vw;
+      z-index: 99999;
+      box-shadow: none;
+      transition: inset-inline-start 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s ease;
+    }
+
+    body.side-open #sidebar {
+      inset-inline-start: 0;
+      box-shadow: 0 0 50px rgba(0, 0, 0, 0.8), 0 0 20px rgba(56, 189, 248, 0.25);
+    }
+
+    body.side-open #side-veil {
+      display: block;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.68);
+      -webkit-backdrop-filter: blur(8px);
+      backdrop-filter: blur(8px);
+      z-index: 99998;
+      animation: fade 0.2s ease-out;
+    }
+
+    #topbar {
+      padding: 0 14px;
+      gap: 8px;
+    }
+
+    .search-trigger {
+      display: none;
+    }
+
+    #view-root {
+      padding: 12px 12px 28px;
+    }
+
+    .tools {
+      flex-direction: column;
+      align-items: stretch;
+      gap: 8px;
+    }
+
+    .tools .sel,
+    .tools .input.grow,
+    .tools .btn {
+      width: 100% !important;
+      max-width: 100% !important;
+    }
+
+    .tools .btn-go {
+      margin-inline-start: 0 !important;
+    }
+
+    .modal {
+      width: 96vw !important;
+      max-width: 96vw !important;
+      max-height: 92vh !important;
+      margin: 10px auto !important;
+    }
+
+    .tbl th,
+    .tbl td {
+      padding: 10px 12px !important;
+      font-size: 12px !important;
+    }
+  }
+
+  @media (max-width: 640px) {
+    #page-title {
+      font-size: 15px;
+    }
+
+    #page-sub {
+      display: none;
+    }
+
+    .bento-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .bento-12,
+    .bento-8,
+    .bento-6,
+    .bento-4 {
+      grid-column: span 1 !important;
+    }
+  }
+
+  @media (max-width: 1366px) {
+    #view-root {
+      padding: 14px 16px 28px;
+    }
+
+    .tools {
+      gap: 6px;
+      margin-bottom: 12px;
+    }
+
+    .modal {
+      max-width: min(var(--modal-max-w, 760px), 94vw) !important;
+    }
+  }
+
+  @media (min-width: 2560px) {
+    .view {
+      max-width: 1780px;
+    }
+  }
+
+  /* ============================================================
+     Skeleton Shimmer & Micro-Animations (Bézier Physics)
+     ============================================================ */
+  @keyframes skeletonShimmer {
+    0% {
+      opacity: 0.45;
+      background-position: -200px 0;
+    }
+
+    50% {
+      opacity: 0.85;
+    }
+
+    100% {
+      opacity: 0.45;
+      background-position: 200px 0;
+    }
+  }
+
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(14px);
+    }
+
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes scaleIn {
+    from {
+      opacity: 0;
+      transform: scale(0.95);
+    }
+
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+
+  @keyframes glowPulse {
+
+    0%,
+    100% {
+      box-shadow: 0 0 15px -3px rgba(59, 130, 246, 0.3);
+    }
+
+    50% {
+      box-shadow: 0 0 25px 2px rgba(59, 130, 246, 0.6);
+    }
+  }
+
+  @keyframes shimmerSweep {
+    0% {
+      transform: translateX(-100%);
+    }
+
+    100% {
+      transform: translateX(200%);
+    }
+  }
+
+  .skeleton-shimmer {
+    animation: skeletonShimmer 1.4s ease-in-out infinite;
+  }
+
+  /* ---- فئات التصميم الزجاجي المتطور (Glassmorphism 2.0) ---- */
+  .glass-card {
+    background: var(--glass-bg);
+    backdrop-filter: var(--glass-backdrop);
+    -webkit-backdrop-filter: var(--glass-backdrop);
+    border: 1px solid var(--glass-border);
+    box-shadow: var(--glass-shadow), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    transition: transform var(--t-base), box-shadow var(--t-base), border-color var(--t-base);
+  }
+
+  .glass-card:hover,
+  .glass-card-hover:hover {
+    transform: translateY(-2.5px);
+    box-shadow: 0 16px 36px -6px rgba(0, 0, 0, 0.16), 0 4px 12px rgba(0, 0, 0, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+    border-color: var(--line);
+  }
+
+  .glass-panel {
+    background: var(--glass-bg);
+    backdrop-filter: var(--glass-backdrop);
+    -webkit-backdrop-filter: var(--glass-backdrop);
+    border: 1px solid var(--glass-border);
+  }
+
+  /* ---- فئات الحركات والانسيابية (Smooth Motion Classes) ---- */
+  .animate-fade-in-up {
+    animation: fadeInUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+
+  .animate-scale-in {
+    animation: scaleIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+
+  .animate-glow-pulse {
+    animation: glowPulse 2.5s ease-in-out infinite;
+  }
+
+  .stagger-1 {
+    animation-delay: 50ms;
+  }
+
+  .stagger-2 {
+    animation-delay: 100ms;
+  }
+
+  .stagger-3 {
+    animation-delay: 150ms;
+  }
+
+  .stagger-4 {
+    animation-delay: 200ms;
+  }
+
+  /* ---- الأزرار والتفاعلات اللمسية (Haptic & Tactile Feedback) ---- */
+  .btn-animated {
+    transition: transform 160ms cubic-bezier(0.16, 1, 0.3, 1), opacity 160ms ease, box-shadow 160ms ease;
+  }
+
+  .btn-animated:hover {
+    transform: translateY(-1.5px);
+  }
+
+  .btn-animated:active {
+    transform: translateY(0.5px) scale(0.98);
+  }
+
+  .interactive-tap {
+    transition: transform var(--t-fast);
+  }
+
+  .interactive-tap:active {
+    transform: scale(0.975);
+  }
+
+  /* ---- دعم تفضيل تقليل الحركة (Reduced Motion Support) ---- */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
