@@ -144,9 +144,13 @@ export default function AddIDModal({
     setLoading(true)
     setError(null)
 
-    // Compute effective status: if user entered issue date or id number, it can be 'done' unless set to 'lacks'
-    const computedStatus: CompanyIDStatus = status === 'lacks'
+    // Use explicitly selected status, or infer done if ID number / dates provided
+    const computedStatus: CompanyIDStatus = status === 'done'
+      ? 'done'
+      : status === 'lacks'
       ? 'lacks'
+      : status === 'paused'
+      ? 'paused'
       : (idNumber.trim() || issueDate ? 'done' : 'in_progress')
 
     const res = isEditMode && record
@@ -438,6 +442,52 @@ export default function AddIDModal({
                 onChange={e => setTxStartDate(e.target.value)}
                 required
               />
+            </div>
+
+            {/* Status Selection */}
+            <div className="field">
+              <label style={{ fontWeight: 800, color: 'var(--text)' }}>حالة المعاملة الحالية *</label>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '8px' }}>
+                <button
+                  type="button"
+                  onClick={() => setStatus('in_progress')}
+                  className={`btn ${status === 'in_progress' ? 'btn-warn' : 'btn-ghost'}`}
+                  style={{ fontSize: '12px', padding: '8px 10px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}
+                >
+                  <span className="w-2 h-2 rounded-full bg-amber-400 animate-ping" />
+                  <span>قيد الإصدار / الإجراء</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setStatus('done')}
+                  className={`btn ${status === 'done' ? 'btn-go' : 'btn-ghost'}`}
+                  style={{ fontSize: '12px', padding: '8px 10px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}
+                >
+                  <span>✓</span>
+                  <span>مكتملة ومُصدرة</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setStatus('lacks')}
+                  className={`btn ${status === 'lacks' ? 'btn-bad' : 'btn-ghost'}`}
+                  style={{ fontSize: '12px', padding: '8px 10px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}
+                >
+                  <span>⚠️</span>
+                  <span>بها نواقص</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setStatus('paused')}
+                  className={`btn ${status === 'paused' ? 'btn-gray' : 'btn-ghost'}`}
+                  style={{ fontSize: '12px', padding: '8px 10px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}
+                >
+                  <span>⏸️</span>
+                  <span>متوقفة مؤقتاً</span>
+                </button>
+              </div>
             </div>
 
             {/* Informational Guidance Alert */}

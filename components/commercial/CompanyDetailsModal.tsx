@@ -1201,8 +1201,10 @@ export default function CompanyDetailsModal({ company, isOpen, onClose, onDelete
                     { type: 'planning_id', title: 'هوية وزارة التخطيط', icon: 'build', color: '#F59E0B', desc: 'تصنيف وتأهيل الشركات للمقاولات والمناقصات' },
                   ].map(cat => {
                     const rec = companyIDs.find(x => x.id_type === cat.type)
-                    const isDone = rec && (rec.status === 'done' || Boolean(rec.id_number || rec.issue_date))
-                    const isInProgress = rec && !isDone
+                    const isDone = Boolean(rec && rec.status === 'done' && (rec.id_number || rec.issue_date))
+                    const isLacks = Boolean(rec && rec.status === 'lacks')
+                    const isPaused = Boolean(rec && rec.status === 'paused')
+                    const isInProgress = Boolean(rec && !isDone && !isLacks && !isPaused)
 
                     return (
                       <div
@@ -1212,11 +1214,19 @@ export default function CompanyDetailsModal({ company, isOpen, onClose, onDelete
                           borderRadius: 'var(--r-md)',
                           background: isDone
                             ? 'rgba(16, 185, 129, 0.05)'
+                            : isLacks
+                            ? 'rgba(239, 68, 68, 0.05)'
+                            : isPaused
+                            ? 'rgba(100, 116, 139, 0.05)'
                             : isInProgress
                             ? 'rgba(245, 158, 11, 0.05)'
                             : 'var(--surface-2)',
                           border: isDone
                             ? '1.5px solid rgba(16, 185, 129, 0.35)'
+                            : isLacks
+                            ? '1.5px solid rgba(239, 68, 68, 0.35)'
+                            : isPaused
+                            ? '1.5px solid rgba(100, 116, 139, 0.35)'
                             : isInProgress
                             ? '1.5px solid rgba(245, 158, 11, 0.35)'
                             : '1px solid var(--line-soft)',
@@ -1233,9 +1243,13 @@ export default function CompanyDetailsModal({ company, isOpen, onClose, onDelete
 
                           {isDone ? (
                             <span className="tag tag-ok" style={{ fontSize: '11px', fontWeight: 800 }}>✓ مكتملة ومُصدرة</span>
+                          ) : isLacks ? (
+                            <span className="tag tag-bad" style={{ fontSize: '11px', fontWeight: 800 }}>⚠️ بها نواقص</span>
+                          ) : isPaused ? (
+                            <span className="tag tag-gray" style={{ fontSize: '11px', fontWeight: 800 }}>⏸️ متوقفة مؤقتاً</span>
                           ) : isInProgress ? (
                             <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-extrabold bg-amber-500/15 text-amber-400 border border-amber-500/30 shadow-[0_0_12px_rgba(245,158,11,0.15)]">
-                              <span className="w-3 h-3 border-2 border-amber-400/30 border-t-amber-400 rounded-full animate-spin flex-none" />
+                              <span className="w-3.5 h-3.5 border-2 border-amber-400/40 border-t-amber-400 rounded-full animate-spin flex-none" />
                               <span>قيد الإصدار</span>
                             </span>
                           ) : (
@@ -1258,8 +1272,12 @@ export default function CompanyDetailsModal({ company, isOpen, onClose, onDelete
                               <div>بدء المعاملة: <span className="num">{rec.tx_start_date}</span></div>
                             ) : null}
                             <div>
-                              {rec.issue_date || rec.expiry_date ? (
+                              {isDone ? (
                                 <span>الإصدار: <strong className="num">{rec.issue_date || '—'}</strong> | الانتهاء: <strong className="num">{rec.expiry_date || '—'}</strong></span>
+                              ) : isLacks ? (
+                                <span style={{ color: 'var(--bad)', fontWeight: 700 }}>توجد نواقص أو متطلبات متبقية {rec.notes ? `(${rec.notes})` : ''}</span>
+                              ) : isPaused ? (
+                                <span style={{ color: 'var(--text-3)', fontWeight: 700 }}>المعاملة معلقة / متوقفة مؤقتاً</span>
                               ) : (
                                 <span style={{ color: 'var(--warn)', fontWeight: 700 }}>المعاملة قيد الإجراء الحكومي</span>
                               )}

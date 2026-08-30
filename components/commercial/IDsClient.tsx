@@ -418,7 +418,15 @@ export default function IDsClient({ companies = [], initialCompanyId }: Props) {
 
                       {/* Status Badge */}
                       <td style={{ padding: '14px', textAlign: 'center' }}>
-                        {!isDone ? (
+                        {r.status === 'lacks' ? (
+                          <span className="badge-late">
+                            ⚠️ بها نواقص
+                          </span>
+                        ) : r.status === 'paused' ? (
+                          <span className="badge-waiting">
+                            ⏸️ متوقفة مؤقتاً
+                          </span>
+                        ) : !isDone || r.status === 'in_progress' ? (
                           <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-extrabold bg-amber-500/15 text-amber-400 border border-amber-500/30 shadow-[0_0_12px_rgba(245,158,11,0.15)]">
                             <span className="w-3.5 h-3.5 border-2 border-amber-400/30 border-t-amber-400 rounded-full animate-spin flex-none" />
                             <span>قيد الإصدار</span>

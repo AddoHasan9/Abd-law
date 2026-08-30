@@ -126,7 +126,7 @@ export interface CompanyShareholder {
 }
 
 export type CompanyIDType = 'importer_id' | 'tax_id' | 'planning_id' | 'chamber_id'
-export type CompanyIDStatus = 'in_progress' | 'done' | 'lacks' | 'expired'
+export type CompanyIDStatus = 'in_progress' | 'done' | 'lacks' | 'paused' | 'expired'
 
 export interface CompanyIDRecord {
   id: string
