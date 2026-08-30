@@ -415,7 +415,7 @@ export default function CompaniesClient({ initialCompanies }: Props) {
             return (
               <div
                 key={co.id}
-                className="glass-card group relative !p-3.5 !gap-2.5 rounded-[18px] bg-[var(--surface)] border border-[var(--line-soft)] hover:border-[var(--accent)]/60 hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1 flex flex-col justify-between overflow-hidden cursor-pointer h-full"
+                className="glass-card co-card formation-card group relative !p-3.5 !gap-2.5 rounded-[18px] bg-[var(--surface)] border border-[var(--line-soft)] hover:border-[var(--accent)]/60 hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1 flex flex-col justify-between overflow-hidden cursor-pointer h-full"
                 onClick={() => handleCardClick(co)}
               >
                 {/* Glowing Top Indicator Bar */}
@@ -443,9 +443,9 @@ export default function CompaniesClient({ initialCompanies }: Props) {
                     </div>
                     <div className="flex flex-col min-w-0 flex-1">
                       <h3
-                        className="font-extrabold text-[var(--text)] transition-colors leading-snug group-hover:text-[var(--accent)]"
+                        className="font-display font-extrabold text-[var(--text)] transition-colors leading-snug group-hover:text-[var(--accent)]"
                         style={{
-                          fontSize: co.name.length > 25 ? '12px' : '13px',
+                          fontSize: co.name.length > 25 ? '12.5px' : '13.5px',
                           lineHeight: '1.35',
                           display: '-webkit-box',
                           WebkitLineClamp: 2,
@@ -458,7 +458,7 @@ export default function CompaniesClient({ initialCompanies }: Props) {
                         {co.name}
                       </h3>
                       <div className="flex items-center gap-1.5 mt-0.5">
-                        <span className="text-[9.5px] font-bold text-[var(--text-2)] bg-[var(--surface-2)] px-1.5 py-0.5 rounded-full border border-[var(--line-soft)]">
+                        <span className="text-[10px] font-bold text-[var(--text-2)] bg-[var(--surface-2)] px-2 py-0.5 rounded-full border border-[var(--line-soft)]">
                           {co.kind ?? 'شركة'}
                         </span>
                       </div>
@@ -472,7 +472,7 @@ export default function CompaniesClient({ initialCompanies }: Props) {
                       entityType="company"
                       size="sm"
                     />
-                    <span className="text-[10px] font-bold text-[var(--accent)] bg-[var(--accent-soft)] border border-[var(--accent)]/25 px-2 py-0.5 rounded-full font-mono shadow-xs">
+                    <span className="text-[10.5px] font-bold text-[var(--accent)] bg-[var(--accent-soft)] border border-[var(--accent)]/25 px-2 py-0.5 rounded-full num shadow-xs">
                       #{co.task_no ?? '—'}
                     </span>
                   </div>
@@ -481,25 +481,25 @@ export default function CompaniesClient({ initialCompanies }: Props) {
                 {/* Facts Grid (شبكة البيانات المختصرة 2x2 مع أيقونات ناعمة) */}
                 <div className="grid grid-cols-2 gap-x-3 gap-y-2 p-2.5 rounded-xl bg-[var(--surface-2)]/70 border border-[var(--line-soft)] text-xs">
                   <div className="flex flex-col min-w-0">
-                    <span className="text-[9.5px] font-bold text-[var(--text-3)]">رقم الشهادة</span>
-                    <span className="text-[11.5px] font-bold text-[var(--text)] truncate font-mono mt-0.5" dir="ltr" style={{ textAlign: 'right' }}>
+                    <span className="text-[10px] font-bold text-[var(--text-3)]">رقم الشهادة</span>
+                    <span className="text-[11.5px] font-bold text-[var(--text)] truncate num mt-0.5" dir="ltr" style={{ textAlign: 'right' }}>
                       {co.cert_no ?? 'غير صادرة'}
                     </span>
                   </div>
                   <div className="flex flex-col min-w-0">
-                    <span className="text-[9.5px] font-bold text-[var(--text-3)]">تاريخ الشهادة</span>
-                    <span className="text-[11.5px] font-bold text-[var(--text)] truncate font-mono mt-0.5">
+                    <span className="text-[10px] font-bold text-[var(--text-3)]">تاريخ الشهادة</span>
+                    <span className="text-[11.5px] font-bold text-[var(--text)] truncate num mt-0.5">
                       {co.cert_date ? formatDate(co.cert_date) : 'قيد التأسيس'}
                     </span>
                   </div>
                   <div className="flex flex-col min-w-0">
-                    <span className="text-[9.5px] font-bold text-[var(--text-3)]">رأس المال</span>
+                    <span className="text-[10px] font-bold text-[var(--text-3)]">رأس المال</span>
                     <span className="text-[12px] font-extrabold text-emerald-600 dark:text-emerald-400 truncate num mt-0.5">
                       {formatMoney(co.capital)}
                     </span>
                   </div>
                   <div className="flex flex-col min-w-0">
-                    <span className="text-[9.5px] font-bold text-[var(--text-3)]">المدير المفوض</span>
+                    <span className="text-[10px] font-bold text-[var(--text-3)]">المدير المفوض</span>
                     <span className="text-[11.5px] font-bold text-[var(--text)] truncate mt-0.5" title={activeManager}>
                       {activeManager}
                     </span>
@@ -510,20 +510,20 @@ export default function CompaniesClient({ initialCompanies }: Props) {
                 <div className="grid grid-cols-2 gap-2 p-2 rounded-xl bg-[var(--surface-2)]/50 border border-[var(--line-soft)] text-xs items-center">
                   {/* Deposit status */}
                   <div className="flex flex-col gap-0.5 min-w-0">
-                    <span className="text-[9px] font-bold text-[var(--text-3)]">حالة الوديعة</span>
+                    <span className="text-[10px] font-bold text-[var(--text-3)]">حالة الوديعة</span>
                     <div className="truncate">
                       {isEstablished ? (
-                        <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-500/15 px-2 py-0.5 rounded-full border border-emerald-500/20">
+                        <span className="inline-flex items-center gap-1 text-[10.5px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-500/15 px-2 py-0.5 rounded-full border border-emerald-500/20">
                           <span>✓ أُطلقت</span>
                         </span>
                       ) : pen ? (
-                        <span className={`inline-flex items-center text-[10px] font-bold px-2 py-0.5 rounded-full truncate ${
+                        <span className={`inline-flex items-center text-[10.5px] font-bold px-2 py-0.5 rounded-full num truncate ${
                           pen.level === 'late' ? 'text-rose-600 bg-rose-500/15' : pen.level === 'soon' ? 'text-amber-600 bg-amber-500/15' : 'text-[var(--accent)] bg-[var(--accent-soft)]'
                         }`}>
                           متابعة ({pen.daysLeft}ي)
                         </span>
                       ) : (
-                        <span className="inline-flex items-center text-[10px] font-semibold text-[var(--text-3)] bg-[var(--surface-3)] px-2 py-0.5 rounded-full">
+                        <span className="inline-flex items-center text-[10.5px] font-semibold text-[var(--text-3)] bg-[var(--surface-3)] px-2 py-0.5 rounded-full">
                           لم تبدأ
                         </span>
                       )}
@@ -532,7 +532,7 @@ export default function CompaniesClient({ initialCompanies }: Props) {
 
                   {/* FS status or Quick Assign Button */}
                   <div className="flex flex-col gap-0.5 min-w-0 border-r border-[var(--line-soft)] pr-2">
-                    <span className="text-[9px] font-bold text-[var(--text-3)]">الحسابات الختامية</span>
+                    <span className="text-[10px] font-bold text-[var(--text-3)]">الحسابات الختامية</span>
                     <div className="truncate">
                       {(() => {
                         const currentYear = new Date().getFullYear()
@@ -552,7 +552,7 @@ export default function CompaniesClient({ initialCompanies }: Props) {
                               type="button"
                               disabled={assigningId === co.id}
                               onClick={e => handleAssignFS(e, co.id, co.name)}
-                              className="inline-flex items-center gap-1 text-[10px] font-bold text-[var(--accent)] hover:text-white bg-[var(--accent-soft)] hover:bg-[var(--accent)] border border-[var(--accent)]/30 px-2 py-0.5 rounded-full transition-all truncate"
+                              className="inline-flex items-center gap-1 text-[10.5px] font-bold text-[var(--accent)] hover:text-white bg-[var(--accent-soft)] hover:bg-[var(--accent)] border border-[var(--accent)]/30 px-2 py-0.5 rounded-full transition-all truncate"
                               title="تكليف المكتب بالحسابات الختامية"
                             >
                               <span className="material-symbols-outlined text-[12px]">add_circle</span>
@@ -563,7 +563,7 @@ export default function CompaniesClient({ initialCompanies }: Props) {
 
                         const fsCalc = calculateFSState({ year: currentYear, company_id: co.id })
                         return (
-                          <span className={`inline-flex items-center text-[10px] font-bold px-2 py-0.5 rounded-full truncate ${
+                          <span className={`inline-flex items-center text-[10.5px] font-bold px-2 py-0.5 rounded-full truncate ${
                             fsCalc.status === 'penalty_running' || fsCalc.status === 'penalty_max'
                               ? 'text-rose-600 bg-rose-500/15'
                               : fsCalc.status === 'due_soon'
@@ -607,14 +607,14 @@ export default function CompaniesClient({ initialCompanies }: Props) {
                           strokeDashoffset={100.5 * (1 - pg.pct / 100)}
                         />
                       </svg>
-                      <span className={`absolute inset-0 flex items-center justify-center text-[8.5px] font-extrabold num ${pg.current ? 'text-amber-500' : 'text-[var(--accent)]'}`}>
+                      <span className={`absolute inset-0 flex items-center justify-center text-[8.5px] font-black num ${pg.current ? 'text-amber-500' : 'text-[var(--accent)]'}`}>
                         {pg.pct}%
                       </span>
                     </div>
 
                     <div className="flex items-center gap-1.5 min-w-0">
-                      <span className={`tag ${calculatedSt.tagClass} !py-0.5 !px-2 !text-[10px]`}>{calculatedSt.label}</span>
-                      <span className="text-[10px] text-[var(--text-3)] font-bold num truncate" title={pg.current ? `المحطة الحالية: ${pg.current.label}` : undefined}>
+                      <span className={`tag ${calculatedSt.tagClass} !py-0.5 !px-2 !text-[10px] !font-bold`}>{calculatedSt.label}</span>
+                      <span className="text-[10.5px] text-[var(--text-3)] font-bold num truncate" title={pg.current ? `المحطة الحالية: ${pg.current.label}` : undefined}>
                         {pg.done}/{pg.total} خطوات
                       </span>
                     </div>
@@ -623,7 +623,7 @@ export default function CompaniesClient({ initialCompanies }: Props) {
                   <Link
                     href={`/commercial/companies/${co.id}`}
                     onClick={e => e.stopPropagation()}
-                    className="text-[11px] font-bold text-[var(--accent)] hover:text-blue-600 hover:translate-x-[-3px] transition-all flex items-center gap-0.5 flex-none group-hover:underline"
+                    className="text-[11.5px] font-bold text-[var(--accent)] hover:text-blue-600 hover:translate-x-[-3px] transition-all flex items-center gap-0.5 flex-none group-hover:underline"
                     title="عرض ملف الشركة الشامل 360°"
                   >
                     <span>ملف 360°</span>
