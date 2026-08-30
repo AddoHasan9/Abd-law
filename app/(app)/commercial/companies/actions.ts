@@ -900,6 +900,7 @@ export async function deleteCompanyAction(companyId: string) {
         supabase.from('transactions').delete().eq('company_id', companyId),
         supabase.from('documents').delete().eq('company_id', companyId),
         supabase.from('timeline_events').delete().eq('company_id', companyId),
+        supabase.from('company_timeline').delete().eq('company_id', companyId),
         supabase.from('trademarks').delete().eq('company_id', companyId),
         supabase.from('cases').delete().eq('company_id', companyId),
         supabase.from('notifications').delete().eq('related_company_id', companyId),
@@ -910,6 +911,13 @@ export async function deleteCompanyAction(companyId: string) {
     } catch (dbErr) {
       console.warn('Supabase deleteCompany notice:', dbErr)
     }
+
+    // In-memory cache cleanup
+    const inMemIdx = inMemoryCompanies.findIndex(c => c.id === companyId)
+    if (inMemIdx !== -1) inMemoryCompanies.splice(inMemIdx, 1)
+
+    const inDepIdx = inMemoryDeposits.findIndex(d => d.company_id === companyId)
+    if (inDepIdx !== -1) inMemoryDeposits.splice(inDepIdx, 1)
 
     // 3. Clean up from all local Disk JSON files
     try {

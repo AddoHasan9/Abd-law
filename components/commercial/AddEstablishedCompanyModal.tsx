@@ -9,7 +9,7 @@ import { createEstablishedCompanyAction } from '@/app/(app)/commercial/companies
 interface Props {
   isOpen: boolean
   onClose: () => void
-  onSuccess?: () => void
+  onSuccess?: (company?: any) => void
 }
 
 interface ShareholderInput {
@@ -182,7 +182,7 @@ export default function AddEstablishedCompanyModal({ isOpen, onClose, onSuccess 
     setLoading(false)
 
     if (res.success) {
-      if (onSuccess) onSuccess()
+      if (onSuccess) onSuccess(res.company)
       onClose()
     } else {
       setError(res.error || 'حدث خطأ أثناء حفظ بيانات الشركة')

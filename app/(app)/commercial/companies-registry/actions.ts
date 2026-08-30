@@ -238,6 +238,13 @@ export async function createEstablishedCompanyAction(payload: AddEstablishedComp
     diskCompanies.unshift(fullCompanyObject)
     writeJsonFile('companies.json', diskCompanies)
 
+    try {
+      const deletedIds = readJsonFile<string[]>('deleted_company_ids.json', [])
+      if (deletedIds.includes(companyId)) {
+        writeJsonFile('deleted_company_ids.json', deletedIds.filter(id => id !== companyId))
+      }
+    } catch {}
+
     // 8. Log Timeline Event
     try {
       await logTimelineEvent({

@@ -336,7 +336,10 @@ export default function CompaniesRegistryClient({ companies = [] }: Props) {
         <AddEstablishedCompanyModal
           isOpen={isAddModalOpen}
           onClose={() => setIsAddModalOpen(false)}
-          onSuccess={() => {
+          onSuccess={(newCompany) => {
+            if (newCompany && newCompany.id) {
+              setCompaniesList(prev => [newCompany, ...prev.filter(c => c.id !== newCompany.id)])
+            }
             router.refresh()
           }}
         />
