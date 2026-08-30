@@ -24,16 +24,14 @@ const DEFAULT_WORKFLOW_TEMPLATES: Record<string, WorkflowTemplate> = {
   formation: {
     txType: 'formation',
     txLabel: 'تأسيس الشركات (قسم التأسيس)',
-    description: 'المسار الرسمي المعتمد لتأسيس وتسجيل الشركات لدى دائرة مسجل الشركات (8 محطات أساسية)',
+    description: 'المسار الرسمي المعتمد لتأسيس وتسجيل الشركات لدى دائرة مسجل الشركات',
     steps: [
-      { id: 'online_submission', label: 'الإرسال على النظام', owner: 'الموظف المختص', icon: 'send' },
-      { id: 'chamber_approval', label: 'موافقة غرفة التجارة', owner: 'غرفة التجارة', icon: 'domain' },
-      { id: 'union_approval', label: 'موافقة اتحاد الغرف', owner: 'اتحاد الغرف', icon: 'hub' },
-      { id: 'bank_letter', label: 'إصدار كتاب مصرف', owner: 'المصرف التجاري', icon: 'account_balance' },
-      { id: 'company_file', label: 'عمل إضبارة الشركة', owner: 'مسجل الشركات', icon: 'folder' },
-      { id: 'specialist_officer', label: 'تدقيق الموظف المختص', owner: 'الموظف المختص', icon: 'badge' },
-      { id: 'sign_decision', label: 'رفع القرار للتوقيع', owner: 'مسجل الشركات', icon: 'draw' },
-      { id: 'issue_cert', label: 'إصدار شهادة التأسيس', owner: 'مسجل الشركات', icon: 'verified' },
+      { id: 'pay_fee', label: 'دفع الرسوم الإلكترونية', owner: 'الموظف المختص', icon: 'payments' },
+      { id: 'bank_letter', label: 'إشعار الإيداع المصرفي', owner: 'المصرف التجاري', icon: 'account_balance' },
+      { id: 'officer_review', label: 'تدقيق الموظف المختص', owner: 'الموظف المختص', icon: 'badge' },
+      { id: 'dept_head', label: 'موافقة مدير القسم', owner: 'مدير القسم', icon: 'verified_user' },
+      { id: 'gm_sign', label: 'توقيع المدير العام', owner: 'المدير العام', icon: 'draw' },
+      { id: 'issue_cert', label: 'إصدار شهادة التأسيس والباركود', owner: 'مسجل الشركات', icon: 'qr_code' },
     ],
   },
   share_sale: {
@@ -156,6 +154,9 @@ export async function getWorkflowTemplatesAction(): Promise<{ success: boolean; 
   try {
     const templates = readJsonFile<Record<string, WorkflowTemplate>>('workflow_templates.json', DEFAULT_WORKFLOW_TEMPLATES)
     const merged: Record<string, WorkflowTemplate> = { ...DEFAULT_WORKFLOW_TEMPLATES, ...templates }
+    if (merged.formation && merged.formation.steps.some(s => s.id === 'online_submission' || s.id === 'chamber_approval')) {
+      merged.formation = DEFAULT_WORKFLOW_TEMPLATES.formation
+    }
     return { success: true, data: merged }
   } catch (e) {
     console.error('Failed to get workflow templates:', e)

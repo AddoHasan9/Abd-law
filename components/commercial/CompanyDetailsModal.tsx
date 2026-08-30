@@ -159,7 +159,9 @@ export default function CompanyDetailsModal({ company, isOpen, onClose, onDelete
       setLastCompletedYear(company.last_completed_fs_year?.toString() || '')
       setFsFirstMethod(company.fs_first_method || 'standard')
       const isCompanyEstablished = company.status === 'established' || Boolean(company.deposit_released) || Boolean(company.cert_date)
-      if (isCompanyEstablished) {
+      const hasLegacySteps = Array.isArray(company.workflow_steps) && company.workflow_steps.some(s => s.step_key === 'online_submission' || s.step_key === 'chamber_approval')
+
+      if (isCompanyEstablished || hasLegacySteps || !company.workflow_steps?.length) {
         setSteps(WORKFLOW.map((wf, idx) => ({
           id: `wf_${company.id}_${idx + 1}`,
           company_id: company.id,
@@ -167,9 +169,9 @@ export default function CompanyDetailsModal({ company, isOpen, onClose, onDelete
           step_order: idx + 1,
           label: wf.label,
           owner_kind: wf.owner,
-          state: 'done' as const,
+          state: (isCompanyEstablished ? 'done' : idx === 0 ? 'doing' : 'wait') as 'done' | 'doing' | 'wait',
           done_by: null,
-          done_at: company.created_at || null,
+          done_at: isCompanyEstablished ? company.created_at || null : null,
         })))
       } else {
         setSteps(company.workflow_steps || [])
@@ -181,7 +183,7 @@ export default function CompanyDetailsModal({ company, isOpen, onClose, onDelete
         const allStepsDone = Array.isArray(company.workflow_steps) && company.workflow_steps.length > 0 && company.workflow_steps.every(s => s.state === 'done')
 
         if (!isCompanyEstablished && !allStepsDone) {
-          // للشركات قيد التأسيس: الانتقال المباشر لتبويب سير العمل (8 محطات)
+          // للشركات قيد التأسيس: الانتقال المباشر لتبويب سير العمل
           setActiveTab('workflow')
         } else {
           // للشركات المكتملة أو المؤسسة: فتح تبويب البيانات الأساسية والتفاصيل
@@ -245,7 +247,7 @@ export default function CompanyDetailsModal({ company, isOpen, onClose, onDelete
     else if (currentState === 'done') nextState = 'wait'
 
     const targetStep = steps.find(s => s.id === stepId)
-    const isCertStep = targetStep?.step_key === 'cert' || targetStep?.step_order === 8 || targetStep?.label?.includes('شهادة')
+    const isCertStep = targetStep?.step_key === 'issue_cert' || targetStep?.step_key === 'cert' || targetStep?.step_order === steps.length || targetStep?.label?.includes('شهادة')
 
     // Optimistic UI update
     setSteps(prev =>
@@ -337,7 +339,7 @@ export default function CompanyDetailsModal({ company, isOpen, onClose, onDelete
         <div style={{ display: 'flex', borderBottom: '1px solid var(--line-soft)', padding: '0 20px', gap: '8px', overflowX: 'auto', background: 'var(--surface)' }}>
           {[
             { id: 'info', label: 'البيانات الأساسية', icon: 'build' },
-            { id: 'workflow', label: 'سير العمل (8 محطات)', icon: 'steps' },
+            { id: 'workflow', label: `سير العمل (${steps?.length || 6} محطات)`, icon: 'steps' },
             { id: 'cert', label: 'الشهادة والوديعة', icon: 'vault' },
             { id: 'tax', label: 'التحاسب الضريبي', icon: 'scale' },
             { id: 'financial', label: 'الحسابات الختامية', icon: 'doc' },
@@ -598,7 +600,7 @@ export default function CompanyDetailsModal({ company, isOpen, onClose, onDelete
               {(() => {
                 const doneCount = (steps ?? []).filter(s => s.state === 'done').length
                 const doingStep = (steps ?? []).find(s => s.state === 'doing')
-                const totalSteps = steps?.length || 8
+                const totalSteps = steps?.length || 6
                 const pct = Math.round((doneCount / totalSteps) * 100)
 
                 return (
@@ -634,7 +636,7 @@ export default function CompanyDetailsModal({ company, isOpen, onClose, onDelete
 
               {/* Steps Timeline List */}
               <div className="flex flex-col gap-2 relative">
-                {(steps ?? []).map((step: { id: string; step_order: number; label: string; state: 'done' | 'wait' | 'doing'; owner_kind?: string | null }) => {
+                {(steps ?? []).map((step: { id: string; step_order: number; label: string; state: 'done' | 'wait' | 'doing'; owner_kind?: string | null; step_key?: string }) => {
                   const isDone = step.state === 'done'
                   const isDoing = step.state === 'doing'
 
@@ -745,7 +747,7 @@ export default function CompanyDetailsModal({ company, isOpen, onClose, onDelete
                           </button>
                         ) : isDone ? (
                           <div className="flex items-center gap-1.5">
-                            {(step.step_order === 8 || step.label?.includes('شهادة')) && (
+                            {(step.step_order === steps.length || step.step_key === 'issue_cert' || step.label?.includes('شهادة')) && (
                               <button
                                 type="button"
                                 onClick={() => setActiveTab('cert')}

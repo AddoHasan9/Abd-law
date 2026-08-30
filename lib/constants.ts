@@ -111,14 +111,12 @@ export const stageStateOf = (id: string) => pick(STAGE_STATES, id)
 export interface WfDef { id: string; label: string; owner: string }
 
 export const WORKFLOW: WfDef[] = [
-  { id: 'online_submission', label: 'الإرسال على النظام',     owner: 'الموظف المختص' },
-  { id: 'chamber_approval',  label: 'موافقة غرفة التجارة',    owner: 'غرفة التجارة' },
-  { id: 'union_approval',    label: 'موافقة اتحاد الغرف',     owner: 'اتحاد الغرف' },
-  { id: 'bank_letter',       label: 'إصدار كتاب مصرف',        owner: 'المصرف التجاري' },
-  { id: 'company_file',      label: 'عمل إضبارة الشركة',      owner: 'مسجل الشركات' },
-  { id: 'specialist_officer',label: 'الموظف المختص',          owner: 'الموظف المختص' },
-  { id: 'sign_decision',     label: 'رفع القرار للتوقيع',     owner: 'مسجل الشركات' },
-  { id: 'issue_cert',        label: 'إصدار شهادة التأسيس',    owner: 'مسجل الشركات' },
+  { id: 'pay_fee',        label: 'دفع الرسوم الإلكترونية',        owner: 'الموظف المختص' },
+  { id: 'bank_letter',    label: 'إشعار الإيداع المصرفي',         owner: 'المصرف التجاري' },
+  { id: 'officer_review', label: 'تدقيق الموظف المختص',           owner: 'الموظف المختص' },
+  { id: 'dept_head',      label: 'موافقة مدير القسم',            owner: 'مدير القسم' },
+  { id: 'gm_sign',        label: 'توقيع المدير العام',            owner: 'المدير العام' },
+  { id: 'issue_cert',     label: 'إصدار شهادة التأسيس والباركود', owner: 'مسجل الشركات' },
 ]
 
 /* ============================================================

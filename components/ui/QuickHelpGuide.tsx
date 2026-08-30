@@ -220,8 +220,8 @@ export default function QuickHelpGuide() {
       items: [
         {
           id: 'overview',
-          title: 'مسار تأسيس الشركات (8 محطات)',
-          subtitle: 'المسار القانوني الرسمي من الحجز إلى الشهادة',
+          title: 'مسار تأسيس الشركات المعتمد',
+          subtitle: 'المسار القانوني الرسمي من التقديم إلى صدور الشهادة والباركود',
           icon: 'domain',
           content: (
             <div className="space-y-2 text-xs text-[var(--text-2)]">

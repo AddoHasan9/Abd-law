@@ -31,14 +31,18 @@ interface Props {
 }
 
 const STEP_METAS: Record<string, { icon: string; emoji: string }> = {
+  pay_fee: { icon: 'payments', emoji: '💳' },
+  bank_letter: { icon: 'account_balance', emoji: '📑' },
+  officer_review: { icon: 'badge', emoji: '🏛️' },
+  dept_head: { icon: 'verified_user', emoji: '⚖️' },
+  gm_sign: { icon: 'draw', emoji: '✍️' },
+  issue_cert: { icon: 'qr_code', emoji: '📜' },
   online_submission: { icon: 'rocket_launch', emoji: '🚀' },
   chamber_approval: { icon: 'balance', emoji: '⚖️' },
   union_approval: { icon: 'description', emoji: '📋' },
-  bank_letter: { icon: 'assignment_turned_in', emoji: '📑' },
   company_file: { icon: 'folder_shared', emoji: '📁' },
   specialist_officer: { icon: 'badge', emoji: '🏛️' },
   sign_decision: { icon: 'draw', emoji: '✍️' },
-  issue_cert: { icon: 'verified', emoji: '📜' },
 }
 
 export default function WorkflowStepperDiagram({
