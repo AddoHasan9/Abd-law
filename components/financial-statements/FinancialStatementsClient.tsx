@@ -48,6 +48,13 @@ export default function FinancialStatementsClient({ companies = [] }: Props) {
 
   const [activeTab, setActiveTab] = useState<'grouped' | 'required' | 'contact'>('grouped')
   const [contactFilter, setContactFilter] = useState<string>('all')
+  const [searchTerm, setSearchTerm] = useState('')
+  const [toastMsg, setToastMsg] = useState<string | null>(null)
+
+  const triggerToast = (msg: string) => {
+    setToastMsg(msg)
+    setTimeout(() => setToastMsg(null), 4000)
+  }
 
   const [isAddModalOpen, setIsAddModalOpen] = useState(false)
   const [modalCompanyId, setModalCompanyId] = useState<string | undefined>()
@@ -196,6 +203,41 @@ export default function FinancialStatementsClient({ companies = [] }: Props) {
     loadData()
   }
 
+  // بحث نصّي على قائمة الشركات المجمّعة (الاسم أو أي سنة ماليّة)
+  const q = searchTerm.trim().toLowerCase()
+  const visibleGrouped = q
+    ? groupedCompanies.filter(item =>
+        item.companyName.toLowerCase().includes(q) ||
+        item.statements.some(s => String(s.year).includes(q)) ||
+        String(item.latestYear).includes(q),
+      )
+    : groupedCompanies
+
+  const handleExportExcel = () => {
+    if (!groupedCompanies.length) { triggerToast('لا توجد سجلات لتصديرها'); return }
+    const headers = ['الشركة', 'عدد سنوات الميزانيات', 'آخر سنة ماليّة', 'الحالة العامة', 'إجمالي الغرامة (د.ع)']
+    const csvRows = [
+      headers.join(','),
+      ...visibleGrouped.map(item => [
+        `"${(item.companyName || '—').replace(/"/g, '""')}"`,
+        item.yearsCount,
+        `"${item.latestYear}"`,
+        `"${item.overallStatusLabel.replace(/[✓⚠]/g, '').trim()}"`,
+        item.totalPenalty || 0,
+      ].join(',')),
+    ]
+    const blob = new Blob(['﻿' + csvRows.join('\n')], { type: 'text/csv;charset=utf-8;' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `financial_statements_${new Date().toISOString().slice(0, 10)}.csv`
+    document.body.appendChild(a)
+    a.click()
+    a.remove()
+    URL.revokeObjectURL(url)
+    triggerToast(`تم تصدير ${visibleGrouped.length} سجلاً إلى ملف Excel`)
+  }
+
   return (
     <div className="flex flex-col gap-6 w-full animate-fade-in-up">
       {/* Header Title & Action Button */}
@@ -209,21 +251,51 @@ export default function FinancialStatementsClient({ companies = [] }: Props) {
           </p>
         </div>
 
-        {canCreateFS && (
+        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
           <button
             type="button"
-            onClick={() => {
-              setEditingStatement(null)
-              setModalCompanyId(undefined)
-              setIsAddModalOpen(true)
-            }}
-            className="btn btn-primary"
+            onClick={handleExportExcel}
+            className="btn btn-excel"
             style={{ padding: '8px 16px', fontSize: '13px' }}
+            title="تصدير سجل الحسابات الختامية إلى ملف Excel"
           >
-            <Icon name="plus" />
-            <span>إضافة حسابات ختامية</span>
+            <span className="material-symbols-outlined" style={{ fontSize: 18 }}>download</span>
+            <span>تصدير Excel</span>
           </button>
-        )}
+          {canCreateFS && (
+            <button
+              type="button"
+              onClick={() => {
+                setEditingStatement(null)
+                setModalCompanyId(undefined)
+                setIsAddModalOpen(true)
+              }}
+              className="btn btn-primary"
+              style={{ padding: '8px 16px', fontSize: '13px' }}
+            >
+              <Icon name="plus" />
+              <span>إضافة حسابات ختامية</span>
+            </button>
+          )}
+        </div>
+      </div>
+
+      {/* شريط البحث */}
+      <div style={{ position: 'relative', maxWidth: '420px' }}>
+        <input
+          type="text"
+          value={searchTerm}
+          onChange={e => setSearchTerm(e.target.value)}
+          placeholder="ابحث باسم الشركة أو السنة الماليّة..."
+          className="input"
+          style={{ paddingRight: '38px' }}
+        />
+        <span
+          className="material-symbols-outlined"
+          style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', fontSize: 19, color: 'var(--text-3)', pointerEvents: 'none' }}
+        >
+          search
+        </span>
       </div>
 
       {/* Summary KPI Cards */}
@@ -293,15 +365,15 @@ export default function FinancialStatementsClient({ companies = [] }: Props) {
               قائمة الشركات الحالية (تظهر كل شركة مرة واحدة فقط — اضغط على الاسم للفتح والتعديل)
             </span>
             <span style={{ fontSize: '11.5px', color: 'var(--text-3)' }}>
-              إجمالي الشركات: {groupedCompanies.length}
+              إجمالي الشركات: {visibleGrouped.length}{searchTerm.trim() ? ` من ${groupedCompanies.length}` : ''}
             </span>
           </div>
 
           {loading ? (
             <div style={{ padding: '30px', textAlign: 'center', color: 'var(--text-3)' }}>جاري تحميل الحسابات الختامية...</div>
-          ) : groupedCompanies.length === 0 ? (
+          ) : visibleGrouped.length === 0 ? (
             <div style={{ padding: '40px', textAlign: 'center', color: 'var(--text-3)' }}>
-              لا توجد سجلات ميزانيات مضافة حالياً.
+              {searchTerm.trim() ? 'لا توجد شركة تطابق بحثك.' : 'لا توجد سجلات ميزانيات مضافة حالياً.'}
             </div>
           ) : (
             <div style={{ overflowX: 'auto' }}>
@@ -317,7 +389,7 @@ export default function FinancialStatementsClient({ companies = [] }: Props) {
                   </tr>
                 </thead>
                 <tbody>
-                  {groupedCompanies.map(item => (
+                  {visibleGrouped.map(item => (
                     <tr key={item.companyId || item.companyName} style={{ borderBottom: '1px solid var(--line-soft)' }}>
                       <td style={{ padding: '12px 14px' }}>
                         <button
@@ -570,6 +642,28 @@ export default function FinancialStatementsClient({ companies = [] }: Props) {
           canSubmit={canSubmitFS}
           canDelete={canDeleteFS}
         />
+      )}
+
+      {/* Toast Notification */}
+      {toastMsg && (
+        <div
+          role="status"
+          style={{
+            position: 'fixed',
+            bottom: '24px',
+            left: '24px',
+            zIndex: 99999,
+            backgroundColor: '#10b981',
+            color: '#ffffff',
+            padding: '10px 18px',
+            borderRadius: '10px',
+            fontWeight: 600,
+            fontSize: '13px',
+            boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.15)',
+          }}
+        >
+          {toastMsg}
+        </div>
       )}
     </div>
   )

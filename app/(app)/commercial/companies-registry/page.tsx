@@ -18,6 +18,8 @@ export default async function CompaniesRegistryPage() {
     return (
       c.status === 'established' ||
       c.status === 'done' ||
+      c.status === 'active' ||
+      c.status === 'registered' ||
       c.deposit_released === true ||
       c.deposit_status === 'released' ||
       c.external === true
