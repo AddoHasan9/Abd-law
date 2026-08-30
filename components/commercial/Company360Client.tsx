@@ -934,9 +934,11 @@ export default function Company360Client({
           {!isFsEnabled ? (
             <div style={{ padding: '20px', textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px' }}>
               <div style={{ color: 'var(--text-3)', fontSize: '13.5px' }}>
-                لم يتم تكليف المكتب بمتابعة الحسابات الختامية والميزانيات لهذه الشركة بعد.
+                {!isDepositReleased && company.status !== 'established' && !company.cert_date
+                  ? 'هذه الشركة قيد التأسيس حالياً. يتم تكليف الحسابات الختامية فقط بعد اكتمال إجراءات التأسيس بالكامل وصدور الشهادة الرسمية.'
+                  : 'لم يتم تكليف المكتب بمتابعة الحسابات الختامية والميزانيات لهذه الشركة بعد.'}
               </div>
-              {canEdit && (
+              {canEdit && (isDepositReleased || company.status === 'established' || Boolean(company.cert_date)) && (
                 <button
                   type="button"
                   disabled={loading}

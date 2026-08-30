@@ -140,6 +140,8 @@ export default function CompanyDetailsModal({ company, isOpen, onClose, onDelete
     }
   }, [isOpen, company, loadCompanyIDs, loadCompanyTax])
 
+  const isCompanyEstablished = company ? (company.status === 'established' || Boolean(company.deposit_released) || Boolean(company.cert_date)) : false
+
   useEffect(() => {
     if (company) {
       setName(company.name || '')
@@ -158,7 +160,6 @@ export default function CompanyDetailsModal({ company, isOpen, onClose, onDelete
       setEstablishmentDate(company.establishment_date || company.cert_date || '')
       setLastCompletedYear(company.last_completed_fs_year?.toString() || '')
       setFsFirstMethod(company.fs_first_method || 'standard')
-      const isCompanyEstablished = company.status === 'established' || Boolean(company.deposit_released) || Boolean(company.cert_date)
       const hasLegacySteps = Array.isArray(company.workflow_steps) && company.workflow_steps.some(s => s.step_key === 'online_submission' || s.step_key === 'chamber_approval')
 
       if (isCompanyEstablished || hasLegacySteps || !company.workflow_steps?.length) {
@@ -1112,31 +1113,39 @@ export default function CompanyDetailsModal({ company, isOpen, onClose, onDelete
                 <p style={{ fontSize: '12px', color: 'var(--text-3)', maxWidth: '420px', margin: 0, lineHeight: 1.6 }}>
                   {company.financial_statements_enabled || company.last_completed_fs_year
                     ? 'تم تكليف المكتب بمتابعة الحسابات الختامية والميزانيات السنوية لهذه الشركة. يمكنك إدارة السنوات والغرامات والتذكيرات من مساحة العمل المستقلة.'
+                    : !isCompanyEstablished
+                    ? 'هذه الشركة قيد التأسيس حالياً. يتم تكليف الحسابات الختامية فقط بعد اكتمال التأسيس بالكامل وصدور الشهادة الرسمية.'
                     : 'إذا قام صاحب الشركة بتكليف المكتب بمتابعة الحسابات الختامية والميزانيات السنوية، اضغط زر التكليف أدناه لفتح وحدة الحسابات الختامية الخاصة بها.'}
                 </p>
 
                 {!(company.financial_statements_enabled || company.last_completed_fs_year) ? (
-                  <button
-                    type="button"
-                    disabled={loading}
-                    onClick={async () => {
-                      if (confirm('هل تم تكليف المكتب بمتابعة الحسابات الختامية لهذه الشركة؟')) {
-                        setLoading(true)
-                        const res = await updateCompanyFSSettingsAction(company.id, { financial_statements_enabled: true })
-                        setLoading(false)
-                        if (res.success) {
-                          setMessage({ type: 'ok', text: 'تم تكليف المكتب بالحسابات الختامية بنجاح' })
-                          router.refresh()
-                        } else {
-                          setMessage({ type: 'err', text: res.error || 'تعذّر تكليف المكتب بالحسابات الختامية' })
+                  !isCompanyEstablished ? (
+                    <div style={{ padding: '8px 18px', background: 'var(--surface-3)', borderRadius: 'var(--r-sm)', fontSize: '12px', color: 'var(--text-3)', fontWeight: 600 }}>
+                      ⏳ متاح بعد اكتمال التأسيس
+                    </div>
+                  ) : (
+                    <button
+                      type="button"
+                      disabled={loading}
+                      onClick={async () => {
+                        if (confirm('هل تم تكليف المكتب بمتابعة الحسابات الختامية لهذه الشركة؟')) {
+                          setLoading(true)
+                          const res = await updateCompanyFSSettingsAction(company.id, { financial_statements_enabled: true })
+                          setLoading(false)
+                          if (res.success) {
+                            setMessage({ type: 'ok', text: 'تم تكليف المكتب بالحسابات الختامية بنجاح' })
+                            router.refresh()
+                          } else {
+                            setMessage({ type: 'err', text: res.error || 'تعذّر تكليف المكتب بالحسابات الختامية' })
+                          }
                         }
-                      }
-                    }}
-                    className="btn btn-go"
-                    style={{ padding: '10px 22px', fontSize: '13.5px', fontWeight: 700 }}
-                  >
-                    ✓ تكليف المكتب بالحسابات الختامية
-                  </button>
+                      }}
+                      className="btn btn-go"
+                      style={{ padding: '10px 22px', fontSize: '13.5px', fontWeight: 700 }}
+                    >
+                      ✓ تكليف المكتب بالحسابات الختامية
+                    </button>
+                  )
                 ) : (
                   <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', justifyContent: 'center' }}>
                     <a

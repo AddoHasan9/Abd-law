@@ -538,6 +538,14 @@ export default function CompaniesClient({ initialCompanies }: Props) {
                         const currentYear = new Date().getFullYear()
                         const isFsEnabled = co.financial_statements_enabled || Boolean(co.last_completed_fs_year)
 
+                        if (!isEstablished) {
+                          return (
+                            <span className="inline-flex items-center text-[10px] font-semibold text-[var(--text-3)] bg-[var(--surface-3)] px-2 py-0.5 rounded-full" title="لا يُكلّف بالحسابات الختامية إلا بعد اكتمال التأسيس">
+                              بعد التأسيس
+                            </span>
+                          )
+                        }
+
                         if (!isFsEnabled) {
                           return (
                             <button
