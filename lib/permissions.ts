@@ -5,9 +5,19 @@
  * يقرأ مصفوفة الصلاحيات المخصصة في role_permissions.json
  */
 import type { UserRole } from '@/types/database'
-import type { RolePermissions } from '@/app/(app)/settings/users/actions'
 
-const DEFAULT_ROLE_PERMISSIONS: Record<UserRole, RolePermissions> = {
+export interface RolePermissions {
+  companies: { view: boolean; create: boolean; edit: boolean; delete: boolean }
+  transactions: { view: boolean; create: boolean; edit: boolean; delete: boolean; close: boolean }
+  government_ids: { view: boolean; create: boolean; renew: boolean; delete: boolean }
+  financial_statements: { view: boolean; create: boolean; submit: boolean; delete: boolean }
+  deposits: { view: boolean; create: boolean; release: boolean }
+  reports: { view: boolean; export: boolean }
+  notifications: { view: boolean; dismiss: boolean }
+  users: { create_users: boolean; edit_users: boolean; delete_users: boolean; manage_permissions: boolean }
+}
+
+export const DEFAULT_ROLE_PERMISSIONS: Record<UserRole, RolePermissions> = {
   super_admin: {
     companies: { view: true, create: true, edit: true, delete: true },
     transactions: { view: true, create: true, edit: true, delete: true, close: true },

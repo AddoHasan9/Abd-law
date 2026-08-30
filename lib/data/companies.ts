@@ -18,6 +18,14 @@ export async function listCompanies(): Promise<CompanyWithWorkflow[]> {
 
     const supabase = await createClient()
 
+    // Check deposits state to accurately promote companies upon deposit release
+    const diskDeposits = readJsonFile<Array<{ company_id: string; status?: string; deposit_stages?: Array<{ state?: string; stage_key?: string }> }>>('deposits.json', [])
+    const releasedCompanyIds = new Set(
+      diskDeposits
+        .filter(d => d.status === 'released' || (Array.isArray(d.deposit_stages) && d.deposit_stages.length >= 4 && d.deposit_stages.every(s => s.state === 'done')))
+        .map(d => d.company_id)
+    )
+
     // Fetch primary company records
     const { data: companiesData } = await supabase
       .from('companies')
@@ -30,13 +38,17 @@ export async function listCompanies(): Promise<CompanyWithWorkflow[]> {
     // First load from disk store
     diskCompanies.forEach(c => {
       if (deletedIds.has(c.id)) return
-      const isEstablished = c.status === 'established' || Boolean(c.deposit_released) || Boolean(c.cert_date)
+      const isDepositReleased = releasedCompanyIds.has(c.id) || Boolean(c.deposit_released) || c.status === 'established' || c.status === 'registered' || c.status === 'active'
+      const status = isDepositReleased ? 'established' : (c.status || 'forming')
+      const isEstablished = status === 'established'
       const workflowSteps = sanitizeFormationWorkflowSteps(c.workflow_steps, c.id, isEstablished, c.created_at)
       const managers = diskManagers.filter(m => m.company_id === c.id)
       const activeManager = managers.find(m => m.active)?.name || managers[0]?.name || c.manager
       const shareholders = diskShareholders.filter(s => s.company_id === c.id)
       map.set(c.id, {
         ...c,
+        status,
+        deposit_released: isDepositReleased,
         workflow_steps: workflowSteps,
         manager: activeManager,
         managers: managers.length > 0 ? managers : c.managers,
@@ -75,11 +87,14 @@ export async function listCompanies(): Promise<CompanyWithWorkflow[]> {
       companiesData.forEach(c => {
         if (deletedIds.has(c.id)) return
 
-        const isEstablished = c.status === 'established' || Boolean(c.deposit_released) || Boolean(c.cert_date)
+        const diskCo = diskCompanies.find(dc => dc.id === c.id)
+        const isDepositReleased = releasedCompanyIds.has(c.id) || Boolean(c.deposit_released) || Boolean(diskCo?.deposit_released) || c.status === 'established' || diskCo?.status === 'established' || c.status === 'registered' || c.status === 'active'
+        const status = isDepositReleased ? 'established' : (c.status || diskCo?.status || 'forming')
+        const isEstablished = status === 'established'
+
         const rawSteps = (stepsMap.get(c.id) || []).sort(
           (a, b) => (a.step_order || 0) - (b.step_order || 0)
         )
-        const diskCo = diskCompanies.find(dc => dc.id === c.id)
         const effectiveSteps = rawSteps.length > 0 ? rawSteps : (diskCo?.workflow_steps || [])
         const workflowSteps = sanitizeFormationWorkflowSteps(effectiveSteps, c.id, isEstablished, c.created_at)
 
@@ -93,6 +108,8 @@ export async function listCompanies(): Promise<CompanyWithWorkflow[]> {
 
         map.set(c.id, {
           ...c,
+          status,
+          deposit_released: isDepositReleased,
           manager: activeManager,
           managers,
           shareholders,

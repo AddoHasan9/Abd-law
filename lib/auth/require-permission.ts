@@ -66,7 +66,7 @@ export async function getCurrentUserProfile(): Promise<CurrentUserProfile | null
         return { id: user.id, name: data.name || user.email || 'مستخدم', role: data.role as UserRole }
       }
 
-      // fallback: نسخة القرص المحلية
+      // fallback: نسخة القرص المحلية للمستخدمين النشطين
       const diskProfiles = readJsonFile<Array<{ id: string; name?: string; role: UserRole; active?: boolean }>>('profiles.json', [])
       const diskProfile = diskProfiles.find(p => p.id === user.id)
       if (diskProfile?.role && diskProfile.active !== false) {
@@ -77,16 +77,19 @@ export async function getCurrentUserProfile(): Promise<CurrentUserProfile | null
       return { id: user.id, name: fallback.name, role: fallback.role }
     }
 
-    // إذا لم تكن هناك جلسة كوكيز نشطة (في بيئة التطوير أو العرض التجريبي)
-    const diskProfiles = readJsonFile<Array<{ id: string; name?: string; role: UserRole; active?: boolean }>>('profiles.json', [])
-    const activeAdmin = diskProfiles.find(p => (p.role === 'super_admin' || p.role === 'admin') && p.active !== false)
-    if (activeAdmin) {
-      return { id: activeAdmin.id, name: activeAdmin.name || 'منتظر الخزرجي', role: activeAdmin.role }
+    // بيئة التطوير والاختبار: استخدام الأدمن النشط المسجل محلياً
+    if (process.env.NODE_ENV !== 'production') {
+      const diskProfiles = readJsonFile<Array<{ id: string; name?: string; role: UserRole; active?: boolean }>>('profiles.json', [])
+      const activeAdmin = diskProfiles.find(p => p.role === 'super_admin' && p.active !== false)
+      if (activeAdmin) {
+        return { id: activeAdmin.id, name: activeAdmin.name || 'منتظر الخزرجي', role: activeAdmin.role }
+      }
     }
 
-    return { id: 'db13125d-3aa1-46ab-9159-8fad18746623', name: 'منتظر الخزرجي', role: 'super_admin' }
-  } catch {
-    return { id: 'db13125d-3aa1-46ab-9159-8fad18746623', name: 'منتظر الخزرجي', role: 'super_admin' }
+    return null
+  } catch (err) {
+    console.warn('getCurrentUserProfile error (failing closed):', err)
+    return null
   }
 }
 
@@ -112,14 +115,38 @@ export async function requirePermission(
   category: keyof RolePermissions,
   action: string
 ): Promise<PermissionDenied | null> {
-  const profile = await getCurrentUserProfile()
-  if (!profile) {
-    logPermissionDenial(null, category, action, 'محاولة تنفيذ إجراء بلا جلسة مسجّلة')
-    return { success: false, error: 'يجب تسجيل الدخول لتنفيذ هذا الإجراء' }
+  try {
+    const profile = await getCurrentUserProfile()
+
+    if (!profile) {
+      logPermissionDenial(null, category, action, 'غير مسجّل دخول أو تعذّر التحقق من الجلسة')
+      return {
+        success: false,
+        error: 'غير مصرح لك بتنفيذ هذه العملية. يرجى تسجيل الدخول بحساب مخول.',
+      }
+    }
+
+    const allowed = hasPermission(profile.role, category, action)
+
+    if (!allowed) {
+      logPermissionDenial(
+        profile,
+        category,
+        action,
+        `الدور [${profile.role}] لا يملك صلاحية [${action}] في قسم [${category}]`
+      )
+      return {
+        success: false,
+        error: `غير مصرح لك بتنفيذ هذا الإجراء (${action} في ${category}) وفق صلاحيات دورك الحالي.`,
+      }
+    }
+
+    return null
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : 'خطأ غير متوقع في التحقق من الصلاحية'
+    return {
+      success: false,
+      error: `فشل التحقق من الصلاحيات: ${message}`,
+    }
   }
-  if (!hasPermission(profile.role, category, action)) {
-    logPermissionDenial(profile, category, action, `دور [${profile.role}] بلا صلاحية ${category}.${action}`)
-    return { success: false, error: 'ليس لديك صلاحية كافية لتنفيذ هذا الإجراء — راجع إدارة النظام' }
-  }
-  return null
 }

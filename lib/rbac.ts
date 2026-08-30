@@ -7,9 +7,9 @@
 import type { Profile, UserRole } from '@/types/database'
 
 export function canEditCompanyData(profile?: Profile | { role?: UserRole } | null): boolean {
-  if (!profile) return true // Default fallback for administrative views if role omitted
+  if (!profile || !profile.role) return false // Fail closed!
   const role = profile.role
-  return role === 'admin' || role === 'manager'
+  return role === 'super_admin' || role === 'admin' || role === 'manager'
 }
 
 export function canManageGovernmentIDs(profile?: Profile | { role?: UserRole } | null): boolean {

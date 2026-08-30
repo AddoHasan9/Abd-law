@@ -20,7 +20,7 @@ function resolveRole(meta?: Record<string, unknown>): UserRole {
   if (typeof raw === 'string' && VALID_ROLES.includes(raw as UserRole)) {
     return raw as UserRole
   }
-  return 'super_admin'
+  return 'staff'
 }
 
 /** يبني Profile من بيانات auth.users عند غياب صف profiles */

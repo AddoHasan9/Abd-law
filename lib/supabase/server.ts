@@ -9,7 +9,17 @@ import { createClient as createSupabaseClient } from '@supabase/supabase-js'
 import { cookies } from 'next/headers'
 
 export async function createClient() {
-  const cookieStore = await cookies()
+  let cookieStore: Awaited<ReturnType<typeof cookies>> | null = null
+  try {
+    cookieStore = await cookies()
+  } catch {
+    // Outside of request scope (e.g. unit testing, build, or background task)
+    return createSupabaseClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://sheiontehslvsoczndqv.supabase.co',
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'dummy_key',
+      { auth: { persistSession: false } }
+    )
+  }
 
   return createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -17,12 +27,12 @@ export async function createClient() {
     {
       cookies: {
         getAll() {
-          return cookieStore.getAll()
+          return cookieStore ? cookieStore.getAll() : []
         },
         setAll(cookiesToSet: { name: string; value: string; options?: Record<string, unknown> }[]) {
           try {
             cookiesToSet.forEach(({ name, value, options }) =>
-              cookieStore.set(name, value, options)
+              cookieStore?.set(name, value, options)
             )
           } catch {
             // يُستدعى من Server Component — التجاهل آمن،

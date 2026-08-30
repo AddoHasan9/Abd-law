@@ -42,7 +42,7 @@ export async function listProfiles(): Promise<ProfileWithStats[]> {
           map.set(p.id, {
             ...p,
             title: p.dept || 'عضو فريق',
-            email: p.email || `${p.name.toLowerCase()}@khazraji-law.com`,
+            email: p.email || `${p.id}@khazraji-law.com`,
             last_login: null,
           })
         }

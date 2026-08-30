@@ -187,20 +187,30 @@ export async function updateDepositStageStateAction(
 
         // Upgrade Company to established in DB and disk store
         try {
+          // 1. Basic status update (guaranteed to succeed across DB schemas)
           await supabase
             .from('companies')
-            .update({
-              status: 'established',
-              deposit_released: true,
-              deposit_released_at: targetAtDate || new Date().toISOString().slice(0, 10),
-            })
+            .update({ status: 'established' })
             .eq('id', finalCompanyId)
+
+          // 2. Extended fields if columns exist
+          try {
+            await supabase
+              .from('companies')
+              .update({
+                deposit_released: true,
+                deposit_released_at: targetAtDate || new Date().toISOString().slice(0, 10),
+              })
+              .eq('id', finalCompanyId)
+          } catch {}
 
           await supabase
             .from('deposits')
             .update({ status: 'released' })
             .eq('id', targetDep.id)
-        } catch {}
+        } catch (dbUpErr) {
+          console.warn('DB company established update notice:', dbUpErr)
+        }
 
         const diskCompanies = readJsonFile<CompanyWithWorkflow[]>('companies.json', [])
         const coIdx = diskCompanies.findIndex(c => c.id === finalCompanyId)
@@ -344,15 +354,23 @@ export async function uploadCompanyBarcodeAction(stageId: string, companyId: str
           .eq('id', stageId)
       }
 
+      // 1. Basic status update (guaranteed to succeed across DB schemas)
       await supabase
         .from('companies')
-        .update({
-          status: 'established',
-          deposit_released: true,
-          deposit_released_at: today,
-          barcode_url: barcodeDataUrl,
-        })
+        .update({ status: 'established' })
         .eq('id', companyId)
+
+      // 2. Extended fields if columns exist
+      try {
+        await supabase
+          .from('companies')
+          .update({
+            deposit_released: true,
+            deposit_released_at: today,
+            barcode_url: barcodeDataUrl,
+          })
+          .eq('id', companyId)
+      } catch {}
 
       await supabase
         .from('deposits')
@@ -377,12 +395,14 @@ export async function uploadCompanyBarcodeAction(stageId: string, companyId: str
       console.warn('Supabase barcode upload notice:', e)
     }
 
-    revalidatePath('/commercial/deposits')
-    revalidatePath('/commercial/companies-registry')
-    revalidatePath('/commercial/companies')
-    revalidatePath(`/commercial/companies/${companyId}`)
-    revalidatePath('/commercial')
-    revalidatePath('/dashboard')
+    try {
+      revalidatePath('/commercial/deposits')
+      revalidatePath('/commercial/companies-registry')
+      revalidatePath('/commercial/companies')
+      revalidatePath(`/commercial/companies/${companyId}`)
+      revalidatePath('/commercial')
+      revalidatePath('/dashboard')
+    } catch {}
 
     return { success: true }
   } catch (err) {

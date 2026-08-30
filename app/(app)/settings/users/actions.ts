@@ -11,17 +11,12 @@ import {
 import { readJsonFile, writeJsonFile } from '@/lib/data/fs-store'
 import type { UserRole } from '@/types/database'
 import { requirePermission, getCurrentUserProfile } from '@/lib/auth/require-permission'
+import {
+  type RolePermissions,
+  DEFAULT_ROLE_PERMISSIONS,
+} from '@/lib/permissions'
 
-export interface RolePermissions {
-  companies: { view: boolean; create: boolean; edit: boolean; delete: boolean }
-  transactions: { view: boolean; create: boolean; edit: boolean; delete: boolean; close: boolean }
-  government_ids: { view: boolean; create: boolean; renew: boolean; delete: boolean }
-  financial_statements: { view: boolean; create: boolean; submit: boolean; delete: boolean }
-  deposits: { view: boolean; create: boolean; release: boolean }
-  reports: { view: boolean; export: boolean }
-  notifications: { view: boolean; dismiss: boolean }
-  users: { create_users: boolean; edit_users: boolean; delete_users: boolean; manage_permissions: boolean }
-}
+export type { RolePermissions }
 
 export interface UserAuditRecord {
   id: string
@@ -35,58 +30,6 @@ export interface UserAuditRecord {
   timestamp: string
 }
 
-const DEFAULT_ROLE_PERMISSIONS: Record<UserRole, RolePermissions> = {
-  super_admin: {
-    companies: { view: true, create: true, edit: true, delete: true },
-    transactions: { view: true, create: true, edit: true, delete: true, close: true },
-    government_ids: { view: true, create: true, renew: true, delete: true },
-    financial_statements: { view: true, create: true, submit: true, delete: true },
-    deposits: { view: true, create: true, release: true },
-    reports: { view: true, export: true },
-    notifications: { view: true, dismiss: true },
-    users: { create_users: true, edit_users: true, delete_users: true, manage_permissions: true },
-  },
-  admin: {
-    companies: { view: true, create: true, edit: true, delete: true },
-    transactions: { view: true, create: true, edit: true, delete: true, close: true },
-    government_ids: { view: true, create: true, renew: true, delete: true },
-    financial_statements: { view: true, create: true, submit: true, delete: true },
-    deposits: { view: true, create: true, release: true },
-    reports: { view: true, export: true },
-    notifications: { view: true, dismiss: true },
-    users: { create_users: false, edit_users: false, delete_users: false, manage_permissions: false },
-  },
-  manager: {
-    companies: { view: true, create: true, edit: true, delete: false },
-    transactions: { view: true, create: true, edit: true, delete: false, close: true },
-    government_ids: { view: true, create: true, renew: true, delete: false },
-    financial_statements: { view: true, create: true, submit: true, delete: false },
-    deposits: { view: true, create: true, release: true },
-    reports: { view: true, export: true },
-    notifications: { view: true, dismiss: true },
-    users: { create_users: false, edit_users: false, delete_users: false, manage_permissions: false },
-  },
-  lawyer: {
-    companies: { view: true, create: true, edit: true, delete: false },
-    transactions: { view: true, create: true, edit: true, delete: false, close: true },
-    government_ids: { view: true, create: true, renew: true, delete: false },
-    financial_statements: { view: true, create: true, submit: false, delete: false },
-    deposits: { view: true, create: false, release: false },
-    reports: { view: true, export: false },
-    notifications: { view: true, dismiss: true },
-    users: { create_users: false, edit_users: false, delete_users: false, manage_permissions: false },
-  },
-  staff: {
-    companies: { view: true, create: false, edit: false, delete: false },
-    transactions: { view: true, create: false, edit: false, delete: false, close: false },
-    government_ids: { view: true, create: false, renew: false, delete: false },
-    financial_statements: { view: true, create: false, submit: false, delete: false },
-    deposits: { view: true, create: false, release: false },
-    reports: { view: true, export: false },
-    notifications: { view: true, dismiss: true },
-    users: { create_users: false, edit_users: false, delete_users: false, manage_permissions: false },
-  },
-}
 
 export async function getUsersAction() {
   try {

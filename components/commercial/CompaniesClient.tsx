@@ -76,13 +76,13 @@ export default function CompaniesClient({ initialCompanies }: Props) {
   const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1)
   const startOfYear = new Date(now.getFullYear(), 0, 1)
 
-  // شركات قسم التأسيس فقط (استبعاد الشركات المضافة كشركات متأسسة من قسم الشركات)
-  const formationList = companiesList.filter(c => c.status !== 'established')
+  // شركات قسم التأسيس فقط (استبعاد الشركات المؤسسة أو مكتملة إطلاق الوديعة)
+  const formationList = companiesList.filter(c => c.status !== 'established' && !c.deposit_released && c.deposit_status !== 'released')
 
   // Categorize companies
-  const establishedCompanies = formationList.filter(c => c.deposit_released)
-  const formingCompanies = formationList.filter(c => !c.deposit_released && !c.cert_date)
-  const depositPhaseCompanies = formationList.filter(c => Boolean(c.cert_date) && !c.deposit_released)
+  const establishedCompanies = companiesList.filter(c => c.status === 'established' || c.deposit_released)
+  const formingCompanies = formationList.filter(c => !c.cert_date)
+  const depositPhaseCompanies = formationList.filter(c => Boolean(c.cert_date))
 
   // Timeframe stats for established companies
   const thisWeekEstablished = establishedCompanies.filter(c => {
