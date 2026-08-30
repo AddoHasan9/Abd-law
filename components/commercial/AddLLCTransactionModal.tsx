@@ -115,6 +115,11 @@ export default function AddLLCTransactionModal({
       return
     }
 
+    if (!lawyerId) {
+      setError('المحامي المكلّف / المسؤول مطلوب (إلزامي)')
+      return
+    }
+
     setLoading(true)
     setError(null)
 
@@ -133,7 +138,7 @@ export default function AddLLCTransactionModal({
       fee: feeNum,
       phone: phone.trim() || undefined,
       priority,
-      lawyer_id: lawyerId || undefined,
+      lawyer_id: lawyerId,
       capital_before: capBeforeNum,
       capital_after: capAfterNum,
       seller_name: sellerName.trim() || undefined,
@@ -517,24 +522,30 @@ export default function AddLLCTransactionModal({
                 </select>
               </div>
 
-              {lawyers.length > 0 && (
-                <div className="field" style={{ marginBottom: 0 }}>
-                  <label htmlFor="llc-lawyer" style={{ fontSize: '11.5px' }}>المحامي المكلف</label>
-                  <select
-                    id="llc-lawyer"
-                    className="input"
-                    value={lawyerId}
-                    onChange={e => setLawyerId(e.target.value)}
-                  >
-                    <option value="">غير معين</option>
-                    {lawyers.map(l => (
-                      <option key={l.id} value={l.id}>
-                        {l.name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              )}
+              <div className="field" style={{ marginBottom: 0 }}>
+                <label htmlFor="llc-lawyer" style={{ fontSize: '11.5px', fontWeight: 700, color: 'var(--accent)' }}>
+                  المحامي المكلّف / المسؤول *
+                </label>
+                <select
+                  id="llc-lawyer"
+                  className="input"
+                  value={lawyerId}
+                  onChange={e => setLawyerId(e.target.value)}
+                  required
+                >
+                  <option value="">اختر المحامي المسؤول...</option>
+                  {(lawyers.length > 0 ? lawyers : [
+                    { id: 'prof_1', name: 'منتظر' },
+                    { id: 'prof_2', name: 'عباس' },
+                    { id: 'prof_3', name: 'مروة' },
+                    { id: 'prof_4', name: 'علي' },
+                  ]).map(l => (
+                    <option key={l.id} value={l.id}>
+                      {l.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
             </div>
 
           </div>

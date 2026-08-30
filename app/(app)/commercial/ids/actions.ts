@@ -127,6 +127,7 @@ export async function createCompanyIDAction(payload: {
   id_type: 'importer_id' | 'tax_id' | 'planning_id' | 'chamber_id'
   id_number?: string
   manager_name?: string
+  lawyer_id?: string
   issue_date?: string
   expiry_date?: string
   tx_start_date?: string
@@ -141,6 +142,10 @@ export async function createCompanyIDAction(payload: {
     const supabase = createAdminClient()
     const compName = payload.company_name?.trim() || ''
     let targetCompanyId = payload.company_id?.trim() || ''
+
+    if (!payload.lawyer_id?.trim()) {
+      return { success: false, error: 'المحامي المكلّف / المسؤول مطلوب (إلزامي)' }
+    }
 
     if (!targetCompanyId && !compName) {
       return { success: false, error: 'يرجى اختيار شركة أو كتابة اسم الشركة' }

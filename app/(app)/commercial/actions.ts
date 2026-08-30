@@ -74,6 +74,10 @@ export async function createTransactionAction(formData: FormData) {
     const lawyer_id = formData.get('lawyer_id')?.toString().trim() || null
     const lawyer_name = formData.get('lawyer_name')?.toString().trim() || null
 
+    if (!lawyer_id) {
+      return { success: false, error: 'المحامي المكلّف / المسؤول مطلوب (إلزامي)' }
+    }
+
     const txObj = {
       id: generateUUID(),
       type,

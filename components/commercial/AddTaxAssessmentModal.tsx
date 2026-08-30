@@ -125,6 +125,11 @@ export default function AddTaxAssessmentModal({
       return
     }
 
+    if (!lawyerId) {
+      setError('المحامي المكلّف / المسؤول مطلوب (إلزامي)')
+      return
+    }
+
     setLoading(true)
     setError(null)
 
@@ -272,14 +277,23 @@ export default function AddTaxAssessmentModal({
           {/* 3. Lawyer & Tax Branch Grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
             <div className="flex flex-col gap-2">
-              <label className="text-xs sm:text-sm font-bold text-[var(--text)]">المحامي المكلف بمتابعة التحاسب</label>
+              <label className="text-xs sm:text-sm font-bold text-[var(--accent)] flex items-center gap-1.5">
+                <span>المحامي المكلّف بمتابعة التحاسب</span>
+                <span className="text-amber-500">*</span>
+              </label>
               <select
                 value={lawyerId}
                 onChange={e => setLawyerId(e.target.value)}
                 className="input h-12 text-sm px-4 rounded-2xl bg-[var(--surface-2)] border border-[var(--line-soft)] focus:border-[var(--accent)]"
+                required
               >
-                <option value="">-- غير معين --</option>
-                {lawyers.map(l => (
+                <option value="">اختر المحامي المسؤول...</option>
+                {(lawyers.length > 0 ? lawyers : [
+                  { id: 'prof_1', name: 'منتظر' },
+                  { id: 'prof_2', name: 'عباس' },
+                  { id: 'prof_3', name: 'مروة' },
+                  { id: 'prof_4', name: 'علي' },
+                ]).map(l => (
                   <option key={l.id} value={l.id}>{l.name}</option>
                 ))}
               </select>

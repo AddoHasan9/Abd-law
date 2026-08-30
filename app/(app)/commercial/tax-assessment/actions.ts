@@ -90,6 +90,9 @@ export async function createTaxAssessmentAction(payload: CreateTaxAssessmentPayl
     if (!payload.year) {
       return { success: false, error: 'سنة التحاسب الضريبي مطلوبة' }
     }
+    if (!payload.lawyer_id?.trim() && !payload.assigned_lawyer_name?.trim()) {
+      return { success: false, error: 'المحامي المكلّف / المسؤول مطلوب (إلزامي)' }
+    }
 
     const diskCompanies = readJsonFile<Company[]>('companies.json', [])
     const targetCompany = diskCompanies.find(c => c.id === payload.company_id)

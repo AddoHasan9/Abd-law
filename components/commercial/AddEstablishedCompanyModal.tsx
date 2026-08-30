@@ -65,6 +65,7 @@ export default function AddEstablishedCompanyModal({ isOpen, onClose, onSuccess 
   // Authorized Manager (Saved strictly in company_managers)
   const [manager, setManager] = useState('')
   const [managerPhone, setManagerPhone] = useState('')
+  const [lawyerId, setLawyerId] = useState('')
 
   // Shareholders
   const [shareholders, setShareholders] = useState<ShareholderInput[]>([
@@ -230,6 +231,11 @@ export default function AddEstablishedCompanyModal({ isOpen, onClose, onSuccess 
       return
     }
 
+    if (!lawyerId.trim()) {
+      setError('المحامي المكلّف / المسؤول مطلوب (إلزامي)')
+      return
+    }
+
     setLoading(true)
     setError(null)
 
@@ -258,6 +264,7 @@ export default function AddEstablishedCompanyModal({ isOpen, onClose, onSuccess 
       name: name.trim(),
       kind: shareholders.length > 1 ? 'محدودة' : kind,
       capital: capitalNum,
+      lawyer_id: lawyerId,
       manager: manager.trim(),
       manager_phone: managerPhone.trim() || undefined,
       cert_no: certNo.trim() || undefined,
@@ -460,6 +467,25 @@ export default function AddEstablishedCompanyModal({ isOpen, onClose, onSuccess 
                       placeholder="بغداد - المنصور - شارع 14 رمضان"
                     />
                   </div>
+                </div>
+
+                <div className="field">
+                  <label htmlFor="est-co-lawyer" style={{ fontWeight: 700, color: 'var(--accent)' }}>
+                    المحامي المكلّف / المسؤول *
+                  </label>
+                  <select
+                    id="est-co-lawyer"
+                    className="input"
+                    value={lawyerId}
+                    onChange={e => setLawyerId(e.target.value)}
+                    required
+                  >
+                    <option value="">اختر المحامي المسؤول...</option>
+                    <option value="prof_1">منتظر</option>
+                    <option value="prof_2">عباس</option>
+                    <option value="prof_3">مروة</option>
+                    <option value="prof_4">علي</option>
+                  </select>
                 </div>
               </div>
             </div>

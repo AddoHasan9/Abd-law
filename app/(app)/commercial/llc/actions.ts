@@ -47,6 +47,10 @@ export async function createLLCTransactionAction(payload: CreateLLCTransactionPa
       return { success: false, error: 'نوع المعاملة مطلوب (إلزامي)' }
     }
 
+    if (!payload.lawyer_id?.trim()) {
+      return { success: false, error: 'المحامي المكلّف / المسؤول مطلوب (إلزامي)' }
+    }
+
     const compName = payload.company_name?.trim() || ''
     let targetCompanyId = payload.company_id?.trim() || ''
 

@@ -23,6 +23,7 @@ export interface AddEstablishedCompanyPayload {
   name: string
   kind?: string
   capital?: number
+  lawyer_id?: string
   manager: string
   manager_phone?: string
   cert_no?: string
@@ -56,6 +57,10 @@ export async function createEstablishedCompanyAction(payload: AddEstablishedComp
 
     if (!payload.name?.trim()) {
       return { success: false, error: 'اسم الشركة مطلوب ولا يمكن تركه فارغاً' }
+    }
+
+    if (!payload.lawyer_id?.trim()) {
+      return { success: false, error: 'المحامي المكلّف / المسؤول مطلوب (إلزامي)' }
     }
 
     const companyId = generateUUID()

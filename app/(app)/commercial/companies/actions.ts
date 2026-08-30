@@ -34,6 +34,7 @@ export async function createCompanyFormationAction(payload: {
   name: string
   kind: string
   capital: number
+  lawyer_id?: string
   manager?: string
   activity?: string
   phone?: string
@@ -65,6 +66,10 @@ export async function createCompanyFormationAction(payload: {
 
     if (!payload.name?.trim()) {
       return { success: false, error: 'اسم الشركة مطلوب' }
+    }
+
+    if (!payload.lawyer_id?.trim()) {
+      return { success: false, error: 'المحامي المكلّف / المسؤول مطلوب (إلزامي)' }
     }
 
     const name = payload.name.trim()
@@ -223,6 +228,7 @@ export async function createCompanyFormationAction(payload: {
       type: 'tasis',
       company_id: company.id,
       companies: { id: company.id, name: company.name },
+      lawyer_id: payload.lawyer_id || null,
       status: status === 'done' ? 'done' : 'progress',
       priority: 'medium',
       fee: payload.fee || 0,
@@ -239,6 +245,7 @@ export async function createCompanyFormationAction(payload: {
       await supabase.from('transactions').insert({
         type: 'tasis',
         company_id: company.id,
+        lawyer_id: payload.lawyer_id || null,
         status: txObj.status,
         priority: txObj.priority,
         fee: txObj.fee,

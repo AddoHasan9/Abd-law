@@ -179,6 +179,13 @@ export default function NewCompanyModal({ isOpen, onClose }: Props) {
     const formData = new FormData(e.currentTarget)
 
     const name = formData.get('name')?.toString() || ''
+    const lawyer_id = formData.get('lawyer_id')?.toString() || ''
+    if (!lawyer_id) {
+      setError('المحامي المكلّف / المسؤول مطلوب (إلزامي)')
+      setLoading(false)
+      return
+    }
+
     const kind = shareholders.length > 1 ? 'محدودة' : 'فردية'
     const capitalRaw = capital || formData.get('capital')?.toString() || '0'
     const capitalNum = parseFloat(capitalRaw.replace(/[^0-9.]/g, '')) || 0
@@ -213,6 +220,7 @@ export default function NewCompanyModal({ isOpen, onClose }: Props) {
       name,
       kind,
       capital: capitalNum,
+      lawyer_id,
       manager,
       activity,
       phone,
@@ -619,6 +627,19 @@ export default function NewCompanyModal({ isOpen, onClose }: Props) {
               <FormationServiceChecklist selected={selectedServices} onToggle={toggleService} />
 
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '12px' }}>
+                <div className="field">
+                  <label htmlFor="modal-tx-lawyer" style={{ fontWeight: 700, color: 'var(--accent)' }}>
+                    المحامي المكلّف / المسؤول *
+                  </label>
+                  <select id="modal-tx-lawyer" name="lawyer_id" className="input" required defaultValue="">
+                    <option value="" disabled>اختر المحامي المسؤول...</option>
+                    <option value="prof_1">منتظر</option>
+                    <option value="prof_2">عباس</option>
+                    <option value="prof_3">مروة</option>
+                    <option value="prof_4">علي</option>
+                  </select>
+                </div>
+
                 <div className="field">
                   <label htmlFor="modal-tx-start">تاريخ بدء المعاملة</label>
                   <input

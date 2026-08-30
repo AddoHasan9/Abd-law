@@ -86,6 +86,13 @@ export default function AddTransactionModal({ isOpen, onClose, companies, lawyer
       return
     }
 
+    const lawyer_id = formData.get('lawyer_id')?.toString().trim()
+    if (!lawyer_id) {
+      setError('المحامي المكلّف / المسؤول مطلوب (إلزامي)')
+      setLoading(false)
+      return
+    }
+
     // Pass company_id or company_name
     if (selectedCompany?.id) {
       formData.set('company_id', selectedCompany.id)
@@ -257,9 +264,11 @@ export default function AddTransactionModal({ isOpen, onClose, companies, lawyer
               </div>
 
               <div className="field">
-                <label htmlFor="tx-lawyer">المحامي المكلف (اختياري)</label>
-                <select id="tx-lawyer" name="lawyer_id" className="input" defaultValue="">
-                  <option value="">غير معيّن (Unassigned)</option>
+                <label htmlFor="tx-lawyer" style={{ fontWeight: 700, color: 'var(--accent)' }}>
+                  المحامي المكلّف / المسؤول *
+                </label>
+                <select id="tx-lawyer" name="lawyer_id" className="input" required defaultValue="">
+                  <option value="" disabled>اختر المحامي المسؤول...</option>
                   {lawyers.map(l => (
                     <option key={l.id} value={l.id}>
                       {l.name}

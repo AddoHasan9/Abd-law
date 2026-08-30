@@ -67,6 +67,7 @@ export default function AddIDModal({
   const [txStartDate, setTxStartDate] = useState(new Date().toISOString().slice(0, 10))
   const [grade, setGrade] = useState('الأولى')
   const [status, setStatus] = useState<CompanyIDStatus>('in_progress')
+  const [lawyerId, setLawyerId] = useState('')
   const [notes, setNotes] = useState('')
 
   const autocompleteRef = useRef<HTMLDivElement>(null)
@@ -141,6 +142,11 @@ export default function AddIDModal({
       return
     }
 
+    if (!lawyerId) {
+      setError('المحامي المكلّف / المسؤول مطلوب (إلزامي)')
+      return
+    }
+
     setLoading(true)
     setError(null)
 
@@ -170,6 +176,7 @@ export default function AddIDModal({
           id_type: idType,
           id_number: idNumber.trim() || undefined,
           manager_name: managerName.trim() || selectedCompany?.manager || undefined,
+          lawyer_id: lawyerId,
           issue_date: issueDate || undefined,
           expiry_date: expiryDate || undefined,
           tx_start_date: txStartDate || undefined,
@@ -431,17 +438,38 @@ export default function AddIDModal({
               />
             </div>
 
-            {/* Transaction Start Date */}
-            <div className="field">
-              <label htmlFor="id-start-date">تاريخ بدء المعاملة *</label>
-              <input
-                id="id-start-date"
-                type="date"
-                className="input"
-                value={txStartDate}
-                onChange={e => setTxStartDate(e.target.value)}
-                required
-              />
+            {/* Lawyer & Transaction Start Date */}
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+              <div className="field">
+                <label htmlFor="id-lawyer" style={{ fontWeight: 700, color: 'var(--accent)' }}>
+                  المحامي المكلّف / المسؤول *
+                </label>
+                <select
+                  id="id-lawyer"
+                  className="input"
+                  value={lawyerId}
+                  onChange={e => setLawyerId(e.target.value)}
+                  required
+                >
+                  <option value="">اختر المحامي المسؤول...</option>
+                  <option value="prof_1">منتظر</option>
+                  <option value="prof_2">عباس</option>
+                  <option value="prof_3">مروة</option>
+                  <option value="prof_4">علي</option>
+                </select>
+              </div>
+
+              <div className="field">
+                <label htmlFor="id-start-date">تاريخ بدء المعاملة *</label>
+                <input
+                  id="id-start-date"
+                  type="date"
+                  className="input"
+                  value={txStartDate}
+                  onChange={e => setTxStartDate(e.target.value)}
+                  required
+                />
+              </div>
             </div>
 
             {/* Status Selection */}
