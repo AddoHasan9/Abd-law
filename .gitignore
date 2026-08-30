@@ -22,3 +22,6 @@ scratch/**
 
 # نسخ احتياطية لقطة كاملة للمشروع (checkpoints) — تكرار غير ضروري بالتحكم بالإصدار
 .checkpoints/
+
+.vercel
+.env*

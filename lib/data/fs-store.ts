@@ -1,35 +1,58 @@
 import fs from 'fs'
+import os from 'os'
 import path from 'path'
 
-const DATA_DIR = path.join(process.cwd(), '.data')
+/**
+ * مخزن JSON على القرص — طبقة احتياطية/كاش فقط. المصدر الأساسي للبيانات هو
+ * Supabase. على بيئات serverless (Vercel) يكون مجلد المشروع للقراءة فقط،
+ * لذا نسقط تلقائيًا إلى مجلد مؤقت قابل للكتابة بدل رمي أخطاء ENOENT متكررة.
+ */
 
-function ensureDataDir() {
-  if (!fs.existsSync(DATA_DIR)) {
-    fs.mkdirSync(DATA_DIR, { recursive: true })
+function resolveDataDir(): string {
+  const candidates = [
+    path.join(process.cwd(), '.data'),
+    path.join(os.tmpdir(), 'lawyer-office-data'),
+  ]
+  for (const dir of candidates) {
+    try {
+      fs.mkdirSync(dir, { recursive: true })
+      fs.accessSync(dir, fs.constants.W_OK)
+      return dir
+    } catch {
+      // جرّب التالي
+    }
   }
+  // آخر حل: مجلد مؤقت بدون ضمان — العمليات ستفشل بهدوء وتُرجع القيمة الافتراضية
+  return path.join(os.tmpdir(), 'lawyer-office-data')
+}
+
+let cachedDir: string | null = null
+function dataDir(): string {
+  if (!cachedDir) cachedDir = resolveDataDir()
+  return cachedDir
 }
 
 export function readJsonFile<T>(filename: string, defaultValue: T): T {
   try {
-    ensureDataDir()
-    const filePath = path.join(DATA_DIR, filename)
+    const filePath = path.join(dataDir(), filename)
     if (!fs.existsSync(filePath)) {
       return defaultValue
     }
     const raw = fs.readFileSync(filePath, 'utf8')
     return JSON.parse(raw) as T
   } catch (err) {
-    console.error(`Error reading ${filename} from disk:`, err)
+    // القرص طبقة احتياطية فقط — لا نُصعّد الخطأ، فقط تنبيه خفيف
+    console.warn(`fs-store: تعذّر قراءة ${filename}، سيتم استخدام القيمة الافتراضية`)
     return defaultValue
   }
 }
 
 export function writeJsonFile<T>(filename: string, data: T): void {
   try {
-    ensureDataDir()
-    const filePath = path.join(DATA_DIR, filename)
+    const filePath = path.join(dataDir(), filename)
     fs.writeFileSync(filePath, JSON.stringify(data, null, 2), 'utf8')
-  } catch (err) {
-    console.error(`Error writing ${filename} to disk:`, err)
+  } catch {
+    // على serverless الكتابة على القرص غير مضمونة — Supabase هو مصدر الحقيقة
+    console.warn(`fs-store: تعذّر حفظ ${filename} على القرص (بيئة للقراءة فقط) — تم التجاهل`)
   }
 }
