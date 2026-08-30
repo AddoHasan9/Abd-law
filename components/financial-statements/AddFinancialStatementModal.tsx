@@ -138,7 +138,10 @@ export default function AddFinancialStatementModal({
 
   if (!mounted || !isOpen) return null
 
-  const availableCompanies = loadedCompanies.length > 0 ? loadedCompanies : companies
+  // إتاحة الشركات المؤسسة فقط، واستبعاد الشركات قيد التأسيس من قائمة اختيار الحسابات الختامية
+  const availableCompanies = (loadedCompanies.length > 0 ? loadedCompanies : companies).filter(
+    c => c.status === 'established' || Boolean(c.deposit_released) || Boolean(c.cert_date) || Boolean(c.cert_no)
+  )
 
   // Filter companies based on search input
   const filteredCompanies = availableCompanies.filter(c =>

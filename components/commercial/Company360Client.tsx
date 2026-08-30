@@ -187,6 +187,12 @@ export default function Company360Client({
 
   const handleAssignOfficeFS = async () => {
     if (!canEdit) return
+    const isCompanyEstablished = isDepositReleased || company.status === 'established' || Boolean(company.cert_date)
+    if (!isCompanyEstablished) {
+      setMsg({ type: 'err', text: 'ممنوع تكليف الحسابات الختامية للشركات قيد التأسيس.' })
+      return
+    }
+
     setLoading(true)
     setMsg(null)
     const currentYear = new Date().getFullYear()
@@ -487,7 +493,9 @@ export default function Company360Client({
 
         <div>
           <div style={{ fontSize: '11px', color: 'var(--text-3)', fontWeight: 700, marginBottom: '6px' }}>الحسابات الختامية</div>
-          {financialStatements.length === 0 ? (
+          {!isDepositReleased && company.status !== 'established' && !company.cert_date ? (
+            <span style={{ fontSize: '11.5px', color: 'var(--text-3)' }}>غير متاح (قيد التأسيس)</span>
+          ) : financialStatements.length === 0 ? (
             <span style={{ fontSize: '12px', color: 'var(--text-3)' }}>لا توجد سنوات مسجلة بعد</span>
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
@@ -939,22 +947,28 @@ export default function Company360Client({
 
           {!isFsEnabled ? (
             <div style={{ padding: '20px', textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px' }}>
-              <div style={{ color: 'var(--text-3)', fontSize: '13.5px' }}>
-                {!isDepositReleased && company.status !== 'established' && !company.cert_date
-                  ? 'هذه الشركة قيد التأسيس حالياً. يتم تكليف الحسابات الختامية فقط بعد اكتمال إجراءات التأسيس بالكامل وصدور الشهادة الرسمية.'
-                  : 'لم يتم تكليف المكتب بمتابعة الحسابات الختامية والميزانيات لهذه الشركة بعد.'}
-              </div>
-              {canEdit && (isDepositReleased || company.status === 'established' || Boolean(company.cert_date)) && (
-                <button
-                  type="button"
-                  disabled={loading}
-                  className="btn btn-go"
-                  style={{ padding: '8px 20px', fontSize: '13px', fontWeight: 700 }}
-                  onClick={handleAssignOfficeFS}
-                >
-                  <Icon name="doc" />
-                  <span>تكليف المكتب بالحسابات الختامية</span>
-                </button>
+              {!isDepositReleased && company.status !== 'established' && !company.cert_date ? (
+                <div style={{ padding: '12px 24px', background: 'rgba(239, 68, 68, 0.08)', border: '1px solid rgba(239, 68, 68, 0.25)', borderRadius: 'var(--r-md)', color: 'var(--bad)', fontSize: '13px', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <span>🚫 الحسابات الختامية ممنوعة ومغلقة للشركات قيد التأسيس (متاحة حصرياً بعد اكتمال التأسيس بالكامل وصدور الشهادة الرسمية)</span>
+                </div>
+              ) : (
+                <>
+                  <div style={{ color: 'var(--text-3)', fontSize: '13.5px' }}>
+                    لم يتم تكليف المكتب بمتابعة الحسابات الختامية والميزانيات لهذه الشركة بعد.
+                  </div>
+                  {canEdit && (
+                    <button
+                      type="button"
+                      disabled={loading}
+                      className="btn btn-go"
+                      style={{ padding: '8px 20px', fontSize: '13px', fontWeight: 700 }}
+                      onClick={handleAssignOfficeFS}
+                    >
+                      <Icon name="doc" />
+                      <span>تكليف المكتب بالحسابات الختامية</span>
+                    </button>
+                  )}
+                </>
               )}
             </div>
           ) : (

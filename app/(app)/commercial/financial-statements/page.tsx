@@ -10,6 +10,8 @@ export const metadata = {
 }
 
 export default async function FinancialStatementsPage() {
-  const companies = await listCompanies()
+  const allCompanies = await listCompanies()
+  // تصفية الشركات لعرض الشركات المؤسسة فقط، واستبعاد الشركات قيد التأسيس من الحسابات الختامية تماماً
+  const companies = allCompanies.filter(c => c.status === 'established' || Boolean(c.deposit_released) || Boolean(c.cert_date) || Boolean(c.cert_no))
   return <FinancialStatementsClient companies={companies} />
 }

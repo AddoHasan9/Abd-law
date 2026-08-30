@@ -123,11 +123,15 @@ export async function createFinancialStatementsBatchAction(payload: {
       try {
         const { data: co } = await supabase
           .from('companies')
-          .select('id, name')
+          .select('id, name, status, cert_date, cert_no, deposit_released')
           .eq('id', companyId)
           .single()
         if (co) {
           companyName = co.name
+          const isEstablished = co.status === 'established' || Boolean(co.deposit_released) || Boolean(co.cert_date) || Boolean(co.cert_no)
+          if (!isEstablished) {
+            return { success: false, error: 'ممنوع تسجيل أو تكليف الحسابات الختامية للشركات قيد التأسيس.' }
+          }
         }
       } catch {
         // Custom ID or non-UUID
@@ -377,6 +381,23 @@ export async function updateCompanyFSSettingsAction(companyId: string, payload: 
 
   try {
     const supabase = createAdminClient()
+
+    // إذا كان المطلوب تكليف الحسابات الختامية، يتم التحقق من أن الشركة مكتملة التأسيس أولاً
+    if (payload.financial_statements_enabled) {
+      const { data: co } = await supabase
+        .from('companies')
+        .select('status, cert_date, cert_no, deposit_released')
+        .eq('id', companyId)
+        .single()
+
+      if (co) {
+        const isEstablished = co.status === 'established' || Boolean(co.deposit_released) || Boolean(co.cert_date) || Boolean(co.cert_no)
+        if (!isEstablished) {
+          return { success: false, error: 'ممنوع تكليف الحسابات الختامية للشركات قيد التأسيس.' }
+        }
+      }
+    }
+
     const updateData: Record<string, unknown> = {}
     if (payload.establishment_date !== undefined) updateData.establishment_date = payload.establishment_date || null
     if (payload.last_completed_fs_year !== undefined) updateData.last_completed_fs_year = payload.last_completed_fs_year || null

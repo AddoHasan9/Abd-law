@@ -76,6 +76,12 @@ export function calculateRequiredFSForCompanies(
   })
 
   companies.forEach(company => {
+    // الشركات قيد التأسيس ممنوع مطالبتها أو تكليفها بالحسابات الختامية
+    const isEstablished = company.status === 'established' || Boolean(company.deposit_released) || Boolean(company.cert_date) || Boolean(company.cert_no)
+    if (!isEstablished) {
+      return
+    }
+
     // الشركة الجديدة لا تطالَب بحسابات ختامية إلا بعد مرور سنة كاملة من تاريخ تأسيسها
     if (isCompanyNewAndExempt(company, today)) {
       return

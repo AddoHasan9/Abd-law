@@ -484,7 +484,7 @@ export default function CompanyDetailsModal({ company, isOpen, onClose, onDelete
             { id: 'workflow', label: 'سير العمل (6 محطات)', icon: 'steps' },
             { id: 'cert', label: 'الشهادة والوديعة', icon: 'vault' },
             { id: 'tax', label: 'التحاسب الضريبي', icon: 'scale' },
-            { id: 'financial', label: 'الحسابات الختامية', icon: 'doc' },
+            ...(isCompanyEstablished ? [{ id: 'financial', label: 'الحسابات الختامية', icon: 'doc' }] : []),
             { id: 'ids', label: 'الهويات والرقيمات', icon: 'badge' },
             { id: 'notes', label: 'النواقص والملاحظات', icon: 'doc' },
           ].map(tab => (
@@ -1452,14 +1452,14 @@ export default function CompanyDetailsModal({ company, isOpen, onClose, onDelete
                   {company.financial_statements_enabled || company.last_completed_fs_year
                     ? 'تم تكليف المكتب بمتابعة الحسابات الختامية والميزانيات السنوية لهذه الشركة. يمكنك إدارة السنوات والغرامات والتذكيرات من مساحة العمل المستقلة.'
                     : !isCompanyEstablished
-                    ? 'هذه الشركة قيد التأسيس حالياً. يتم تكليف الحسابات الختامية فقط بعد اكتمال التأسيس بالكامل وصدور الشهادة الرسمية.'
+                    ? 'هذه الشركة قيد التأسيس حالياً — التكليف بالحسابات الختامية ممنوع وغير متاح إلا بعد اكتمال التأسيس بالكامل وصدور الشهادة الرسمية.'
                     : 'إذا قام صاحب الشركة بتكليف المكتب بمتابعة الحسابات الختامية والميزانيات السنوية، اضغط زر التكليف أدناه لفتح وحدة الحسابات الختامية الخاصة بها.'}
                 </p>
 
                 {!(company.financial_statements_enabled || company.last_completed_fs_year) ? (
                   !isCompanyEstablished ? (
-                    <div style={{ padding: '8px 18px', background: 'var(--surface-3)', borderRadius: 'var(--r-sm)', fontSize: '12px', color: 'var(--text-3)', fontWeight: 600 }}>
-                      ⏳ متاح بعد اكتمال التأسيس
+                    <div style={{ padding: '10px 20px', background: 'rgba(239, 68, 68, 0.08)', border: '1px solid rgba(239, 68, 68, 0.25)', borderRadius: 'var(--r-md)', fontSize: '12.5px', color: 'var(--bad)', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <span>🚫 الحسابات الختامية ممنوعة للشركات قيد التأسيس</span>
                     </div>
                   ) : (
                     <button
