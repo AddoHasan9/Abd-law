@@ -88,21 +88,111 @@ export default function AddEstablishedCompanyModal({ isOpen, onClose, onSuccess 
 
   if (!mounted || !isOpen) return null
 
+  // معالجة تغيير رأس المال وتحديث نسب وأسهم الشركاء
+  const handleCapitalChange = (rawVal: string) => {
+    const formatted = formatNumberWithCommas(rawVal)
+    setCapital(formatted)
+    const capNum = parseFloat(formatted.replace(/[^0-9.]/g, '')) || 0
+
+    if (shareholders.length === 1) {
+      setShareholders(prev => [
+        {
+          ...prev[0],
+          share_amount: formatted,
+          share_percentage: capNum > 0 ? '100' : prev[0].share_percentage,
+        }
+      ])
+    } else if (capNum > 0) {
+      setShareholders(prev =>
+        prev.map(sh => {
+          const pct = parseFloat(sh.share_percentage) || 0
+          if (pct > 0) {
+            const calculatedAmount = Math.round((pct / 100) * capNum)
+            return { ...sh, share_amount: formatNumberWithCommas(calculatedAmount) }
+          }
+          return sh
+        })
+      )
+    }
+  }
+
   const addShareholder = () => {
+    const capNum = parseFloat(capital.replace(/[^0-9.]/g, '')) || 0
+    const totalAllocatedPct = shareholders.reduce((sum, s) => sum + (parseFloat(s.share_percentage) || 0), 0)
+    const remainingPct = Math.max(0, Math.round((100 - totalAllocatedPct) * 100) / 100)
+    const remainingAmount = capNum > 0 && remainingPct > 0 ? Math.round((remainingPct / 100) * capNum) : 0
+
     setShareholders(prev => [
       ...prev,
-      { id: Date.now().toString(), name: '', share_percentage: '', share_amount: '', phone: '' },
+      {
+        id: Date.now().toString(),
+        name: '',
+        share_percentage: remainingPct > 0 ? remainingPct.toString() : '',
+        share_amount: remainingAmount > 0 ? formatNumberWithCommas(remainingAmount) : '',
+        phone: '',
+      },
     ])
   }
 
   const removeShareholder = (id: string) => {
     if (shareholders.length <= 1) return
-    setShareholders(prev => prev.filter(s => s.id !== id))
+    setShareholders(prev => {
+      const filtered = prev.filter(s => s.id !== id)
+      if (filtered.length === 1 && capital) {
+        return [{ ...filtered[0], share_amount: capital, share_percentage: '100' }]
+      }
+      return filtered
+    })
   }
 
   const updateShareholder = (id: string, field: keyof ShareholderInput, val: string) => {
-    const formattedVal = field === 'share_amount' ? formatNumberWithCommas(val) : val
-    setShareholders(prev => prev.map(s => (s.id === id ? { ...s, [field]: formattedVal } : s)))
+    const capNum = parseFloat(capital.replace(/[^0-9.]/g, '')) || 0
+
+    setShareholders(prev =>
+      prev.map(s => {
+        if (s.id !== id) return s
+
+        if (field === 'share_amount') {
+          const formattedAmount = formatNumberWithCommas(val)
+          const amountNum = parseFloat(formattedAmount.replace(/[^0-9.]/g, '')) || 0
+          let calculatedPct = s.share_percentage
+
+          if (capNum > 0 && amountNum > 0) {
+            const rawPct = (amountNum / capNum) * 100
+            calculatedPct = (Math.round(rawPct * 100) / 100).toString()
+          } else if (amountNum === 0) {
+            calculatedPct = '0'
+          }
+
+          return {
+            ...s,
+            share_amount: formattedAmount,
+            share_percentage: calculatedPct,
+          }
+        }
+
+        if (field === 'share_percentage') {
+          const cleanPct = val.replace(/[^0-9.]/g, '')
+          const pctNum = parseFloat(cleanPct) || 0
+          let calculatedAmount = s.share_amount
+
+          if (capNum > 0 && pctNum > 0) {
+            const rawAmount = Math.round((pctNum / 100) * capNum)
+            calculatedAmount = formatNumberWithCommas(rawAmount)
+          } else if (pctNum === 0) {
+            calculatedAmount = '0'
+          }
+
+          return {
+            ...s,
+            share_percentage: cleanPct,
+            share_amount: calculatedAmount,
+          }
+        }
+
+        return { ...s, [field]: val }
+      })
+    )
   }
 
   const toggleFsYear = (yr: number) => {
@@ -334,13 +424,13 @@ export default function AddEstablishedCompanyModal({ isOpen, onClose, onSuccess 
                   </div>
 
                   <div className="field">
-                    <label htmlFor="est-co-capital">رأس المال (د.ع)</label>
+                    <label htmlFor="est-co-capital">رأس المال (د.ع) *</label>
                     <input
                       id="est-co-capital"
                       type="text"
                       className="input num"
                       value={capital}
-                      onChange={e => setCapital(formatNumberWithCommas(e.target.value))}
+                      onChange={e => handleCapitalChange(e.target.value)}
                       placeholder="100,000,000"
                     />
                   </div>
@@ -409,18 +499,21 @@ export default function AddEstablishedCompanyModal({ isOpen, onClose, onSuccess 
               </div>
             </div>
 
-            {/* 3. بيانات المساهمين ونسب الأسهم */}
+            {/* 3. بيانات المساهمين ونسب الأسهم مع الحساب التلقائي */}
             <div style={{ background: 'var(--surface-2)', padding: '16px', borderRadius: 'var(--r-md)', border: '1px solid var(--line-soft)' }}>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
-                <h4 style={{ fontSize: '13.5px', fontWeight: 800, color: 'var(--accent)', display: 'flex', alignItems: 'center', gap: '8px', margin: 0 }}>
-                  <Icon name="users" />
-                  <span>المساهمون ونسبة الأسهم ({shareholders.length})</span>
-                </h4>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px', flexWrap: 'wrap', gap: '8px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <h4 style={{ fontSize: '13.5px', fontWeight: 800, color: 'var(--accent)', display: 'flex', alignItems: 'center', gap: '8px', margin: 0 }}>
+                    <Icon name="users" />
+                    <span>المساهمون والشركاء ({shareholders.length})</span>
+                  </h4>
+                  <span style={{ fontSize: '11px', color: 'var(--text-3)' }}>(حساب تلقائي لنسبة وعدد الأسهم)</span>
+                </div>
                 <button
                   type="button"
                   onClick={addShareholder}
                   className="btn btn-ghost"
-                  style={{ fontSize: '12px', padding: '4px 10px', color: 'var(--accent)' }}
+                  style={{ fontSize: '11.5px', padding: '4px 10px', color: 'var(--accent)', border: '1px dashed var(--accent)', display: 'flex', alignItems: 'center', gap: '4px' }}
                 >
                   <Icon name="plus" />
                   <span>إضافة مساهم آخر</span>
@@ -433,38 +526,28 @@ export default function AddEstablishedCompanyModal({ isOpen, onClose, onSuccess 
                     key={sh.id}
                     style={{
                       display: 'grid',
-                      gridTemplateColumns: '2fr 1fr 1fr auto',
-                      gap: '10px',
+                      gridTemplateColumns: 'minmax(130px, 1.4fr) minmax(100px, 1.1fr) minmax(120px, 1.2fr) minmax(85px, 0.8fr) auto',
+                      gap: '8px',
                       alignItems: 'end',
                       background: 'var(--surface)',
-                      padding: '12px',
+                      padding: '10px 12px',
                       borderRadius: 'var(--r-sm)',
                       border: '1px solid var(--line-soft)',
                     }}
                   >
                     <div className="field" style={{ marginBottom: 0 }}>
-                      <label style={{ fontSize: '11px', color: 'var(--text-3)' }}>
-                        اسم المساهم ({idx + 1}) *
+                      <label style={{ fontSize: '11px', color: 'var(--text-3)', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                        <span className="w-4 h-4 rounded-full bg-[var(--accent-soft)] text-[var(--accent)] text-[9.5px] font-bold inline-flex items-center justify-center">{idx + 1}</span>
+                        <span>اسم المساهم *</span>
                       </label>
                       <input
                         type="text"
                         className="input"
+                        style={{ padding: '6px 10px', fontSize: '12.5px' }}
                         value={sh.name}
                         onChange={e => updateShareholder(sh.id, 'name', e.target.value)}
-                        placeholder="الاسم الثلاثي للشريك المساهم"
-                      />
-                    </div>
-
-                    <div className="field" style={{ marginBottom: 0 }}>
-                      <label style={{ fontSize: '11px', color: 'var(--text-3)' }}>
-                        نسبة الأسهم (%)
-                      </label>
-                      <input
-                        type="text"
-                        className="input num"
-                        value={sh.share_percentage}
-                        onChange={e => updateShareholder(sh.id, 'share_percentage', e.target.value)}
-                        placeholder="50"
+                        placeholder="الاسم الثلاثي"
+                        required
                       />
                     </div>
 
@@ -475,25 +558,134 @@ export default function AddEstablishedCompanyModal({ isOpen, onClose, onSuccess 
                       <input
                         type="text"
                         className="input num"
+                        style={{ padding: '6px 10px', fontSize: '12.5px' }}
                         value={sh.phone}
                         onChange={e => updateShareholder(sh.id, 'phone', e.target.value)}
                         placeholder="0770XXXXXXX"
                       />
                     </div>
 
-                    {shareholders.length > 1 && (
+                    <div className="field" style={{ marginBottom: 0 }}>
+                      <label style={{ fontSize: '11px', color: 'var(--text-2)', fontWeight: 600 }}>
+                        عدد الأسهم (د.ع)
+                      </label>
+                      <input
+                        type="text"
+                        className="input num font-bold"
+                        style={{ padding: '6px 10px', fontSize: '12.5px' }}
+                        value={sh.share_amount}
+                        onChange={e => updateShareholder(sh.id, 'share_amount', e.target.value)}
+                        placeholder="50,000,000"
+                      />
+                    </div>
+
+                    <div className="field" style={{ marginBottom: 0 }}>
+                      <label style={{ fontSize: '11px', color: 'var(--accent)', fontWeight: 700 }}>
+                        النسبة (%)
+                      </label>
+                      <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+                        <input
+                          type="text"
+                          className="input num font-extrabold text-[var(--accent)]"
+                          style={{ padding: '6px 20px 6px 8px', fontSize: '12.5px' }}
+                          value={sh.share_percentage}
+                          onChange={e => updateShareholder(sh.id, 'share_percentage', e.target.value)}
+                          placeholder="50"
+                        />
+                        <span style={{ position: 'absolute', left: '6px', fontSize: '11px', fontWeight: 800, color: 'var(--accent)' }}>%</span>
+                      </div>
+                    </div>
+
+                    {shareholders.length > 1 ? (
                       <button
                         type="button"
                         onClick={() => removeShareholder(sh.id)}
                         className="btn btn-ghost"
-                        style={{ color: 'var(--bad)', padding: '6px' }}
+                        style={{ color: 'var(--bad)', padding: '6px', marginBottom: '2px' }}
                         title="حذف المساهم"
                       >
                         ✕
                       </button>
+                    ) : (
+                      <div style={{ width: '24px' }} />
                     )}
                   </div>
                 ))}
+
+                {/* بطاقة ملخص توزيع الأسهم ورأس المال التلقائي */}
+                {(() => {
+                  const capNum = parseFloat(capital.replace(/[^0-9.]/g, '')) || 0
+                  const totalAllocatedShares = shareholders.reduce((sum, s) => sum + (parseFloat(s.share_amount.replace(/[^0-9.]/g, '')) || 0), 0)
+                  const totalAllocatedPct = Math.round(shareholders.reduce((sum, s) => sum + (parseFloat(s.share_percentage) || 0), 0) * 100) / 100
+                  const remainingShares = Math.max(0, capNum - totalAllocatedShares)
+                  const remainingPct = Math.max(0, Math.round((100 - totalAllocatedPct) * 100) / 100)
+                  const isMatched = capNum > 0 && Math.abs(totalAllocatedPct - 100) < 0.05
+                  const isOver = totalAllocatedPct > 100
+
+                  return (
+                    <div
+                      style={{
+                        background: isMatched
+                          ? 'rgba(16, 185, 129, 0.06)'
+                          : isOver
+                          ? 'rgba(239, 68, 68, 0.06)'
+                          : 'var(--surface-3)',
+                        border: `1px solid ${
+                          isMatched
+                            ? 'rgba(16, 185, 129, 0.25)'
+                            : isOver
+                            ? 'rgba(239, 68, 68, 0.25)'
+                            : 'var(--line-soft)'
+                        }`,
+                        padding: '10px 14px',
+                        borderRadius: 'var(--r-md)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        flexWrap: 'wrap',
+                        gap: '10px',
+                        marginTop: '4px',
+                      }}
+                    >
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
+                        <div style={{ fontSize: '11.5px' }}>
+                          <span style={{ color: 'var(--text-3)' }}>إجمالي رأس المال: </span>
+                          <strong className="num" style={{ color: 'var(--text)' }}>{capital || '0'} د.ع</strong>
+                        </div>
+                        <div style={{ fontSize: '11.5px' }}>
+                          <span style={{ color: 'var(--text-3)' }}>الموزع: </span>
+                          <strong className="num" style={{ color: isOver ? 'var(--bad)' : 'var(--accent)' }}>
+                            {formatNumberWithCommas(totalAllocatedShares)} د.ع ({totalAllocatedPct}%)
+                          </strong>
+                        </div>
+                        {remainingShares > 0 && (
+                          <div style={{ fontSize: '11.5px' }}>
+                            <span style={{ color: 'var(--text-3)' }}>المتبقي: </span>
+                            <strong className="num" style={{ color: 'var(--warn, #f59e0b)' }}>
+                              {formatNumberWithCommas(remainingShares)} د.ع ({remainingPct}%)
+                            </strong>
+                          </div>
+                        )}
+                      </div>
+
+                      <div>
+                        {isMatched ? (
+                          <span className="tag tag-ok" style={{ fontSize: '10.5px', fontWeight: 700 }}>
+                            ✓ توزيع الحصص مكتمل 100%
+                          </span>
+                        ) : isOver ? (
+                          <span className="tag tag-bad" style={{ fontSize: '10.5px', fontWeight: 700 }}>
+                            ⚠️ يتجاوز 100% ({totalAllocatedPct}%)
+                          </span>
+                        ) : (
+                          <span className="tag" style={{ fontSize: '10.5px', background: 'rgba(245, 158, 11, 0.15)', color: '#d97706', border: '1px solid rgba(245, 158, 11, 0.3)' }}>
+                            ⏳ متبقي: {remainingPct}%
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  )
+                })()}
               </div>
             </div>
 

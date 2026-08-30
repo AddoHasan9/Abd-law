@@ -119,6 +119,83 @@ export const WORKFLOW: WfDef[] = [
   { id: 'issue_cert',     label: 'إصدار شهادة التأسيس والباركود', owner: 'مسجل الشركات' },
 ]
 
+/**
+ * توحيد وتنظيف مسار خطوات التأسيس لتطابق المحطات الـ 6 الرسمية دائماً
+ */
+export function sanitizeFormationWorkflowSteps(
+  rawSteps: Array<{ id?: string; step_key?: string; step_order?: number; label?: string; state?: 'done' | 'doing' | 'wait'; owner_kind?: string | null; done_by?: string | null; done_at?: string | null }> | undefined | null,
+  companyId: string,
+  isEstablished: boolean,
+  createdAt?: string | null
+): Array<{
+  id: string
+  company_id: string
+  step_key: string
+  step_order: number
+  label: string
+  owner_kind: string | null
+  state: 'done' | 'doing' | 'wait'
+  done_by: string | null
+  done_at: string | null
+}> {
+  if (isEstablished) {
+    return WORKFLOW.map((wf, idx) => ({
+      id: `wf_${companyId}_${idx + 1}`,
+      company_id: companyId,
+      step_key: wf.id,
+      step_order: idx + 1,
+      label: wf.label,
+      owner_kind: wf.owner,
+      state: 'done' as const,
+      done_by: null,
+      done_at: createdAt || new Date().toISOString(),
+    }))
+  }
+
+  // Check if rawSteps is already exactly the 6 official steps matching WORKFLOW keys
+  const isClean = Array.isArray(rawSteps) && 
+    rawSteps.length === 6 && 
+    rawSteps.every((s, i) => s.step_key === WORKFLOW[i].id)
+
+  if (isClean && rawSteps) {
+    return rawSteps.map((s, idx) => ({
+      id: s.id || `wf_${companyId}_${idx + 1}`,
+      step_key: s.step_key || WORKFLOW[idx].id,
+      step_order: idx + 1,
+      label: WORKFLOW[idx].label,
+      owner_kind: WORKFLOW[idx].owner,
+      company_id: companyId,
+      state: s.state || (idx === 0 ? 'doing' : 'wait'),
+      done_by: s.done_by || null,
+      done_at: s.done_at || null,
+    }))
+  }
+
+  // If rawSteps had legacy or extra steps, compute the progress and project into the 6 official steps
+  const doneCount = Array.isArray(rawSteps) ? rawSteps.filter(s => s.state === 'done').length : 0
+  const normalizedDone = Math.min(doneCount, 6)
+
+  return WORKFLOW.map((wf, idx) => {
+    let state: 'done' | 'doing' | 'wait' = 'wait'
+    if (idx < normalizedDone) {
+      state = 'done'
+    } else if (idx === normalizedDone) {
+      state = 'doing'
+    }
+    return {
+      id: `wf_${companyId}_${idx + 1}`,
+      company_id: companyId,
+      step_key: wf.id,
+      step_order: idx + 1,
+      label: wf.label,
+      owner_kind: wf.owner,
+      state,
+      done_by: null,
+      done_at: null,
+    }
+  })
+}
+
 /* ============================================================
    4) محطات الوديعة — الإرسال على النظام هي الحاسمة
    ============================================================ */

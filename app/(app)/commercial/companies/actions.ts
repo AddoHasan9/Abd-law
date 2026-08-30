@@ -5,7 +5,7 @@
 
 import { revalidatePath } from 'next/cache'
 import { createAdminClient } from '@/lib/supabase/server'
-import { WORKFLOW } from '@/lib/constants'
+import { WORKFLOW, sanitizeFormationWorkflowSteps } from '@/lib/constants'
 import type { WfState, CompanyWithWorkflow, CompanyManager, CompanyShareholder, CompanyIDRecord, FinancialStatement, DepositStage, Trademark, TaxAssessment } from '@/types/database'
 import { createNotificationAction } from '@/app/(app)/notifications/actions'
 import { readJsonFile, writeJsonFile } from '@/lib/data/fs-store'
@@ -307,6 +307,13 @@ export async function updateCompanyDetailsAction(
     reservation_letter_governorate?: string
     phone?: string
     lacks?: string
+    shareholders?: Array<{
+      id?: string
+      name: string
+      phone?: string
+      share_amount?: number
+      share_percentage?: number
+    }>
     accounting_notes?: {
       accountant_fee?: number | null
       registration_fee?: number | null
@@ -405,6 +412,43 @@ export async function updateCompanyDetailsAction(
         })
       } else {
         console.warn('company_managers update notice:', deactivateErr?.message || managerErr?.message)
+      }
+    }
+
+    // تحديث الشركاء والمساهمين في جدول company_shareholders وملف القرص المحلي
+    if (payload.shareholders !== undefined && Array.isArray(payload.shareholders)) {
+      const shObjs: CompanyShareholder[] = payload.shareholders
+        .filter(sh => sh.name && sh.name.trim())
+        .map(sh => ({
+          id: sh.id || generateUUID(),
+          company_id: companyId,
+          name: sh.name.trim(),
+          share_amount: sh.share_amount || null,
+          share_percentage: sh.share_percentage || null,
+          notes: sh.phone ? `هاتف: ${sh.phone}` : null,
+          created_at: new Date().toISOString(),
+        }))
+
+      try {
+        await supabase.from('company_shareholders').delete().eq('company_id', companyId)
+        if (shObjs.length > 0) {
+          await supabase.from('company_shareholders').insert(shObjs)
+        }
+      } catch (shErr) {
+        console.warn('company_shareholders update notice:', shErr)
+      }
+
+      const diskShs = readJsonFile<CompanyShareholder[]>('company_shareholders.json', [])
+      const filteredDiskShs = diskShs.filter(s => s.company_id !== companyId)
+      filteredDiskShs.push(...shObjs)
+      writeJsonFile('company_shareholders.json', filteredDiskShs)
+
+      // تحديث قائمة المساهمين داخل كائن الشركة في ملف companies.json
+      const diskCompanies = readJsonFile<CompanyWithWorkflow[]>('companies.json', [])
+      const coIdx = diskCompanies.findIndex(c => c.id === companyId)
+      if (coIdx !== -1) {
+        diskCompanies[coIdx].shareholders = shObjs
+        writeJsonFile('companies.json', diskCompanies)
       }
     }
 
@@ -716,9 +760,10 @@ export async function getCompany360DataAction(companyId: string) {
           .eq('company_id', companyId)
           .order('step_order', { ascending: true })
 
+        const isEst = coData.status === 'established' || Boolean(coData.deposit_released) || Boolean(coData.cert_date)
         company = {
           ...coData,
-          workflow_steps: stepsData || [],
+          workflow_steps: sanitizeFormationWorkflowSteps(stepsData, companyId, isEst, coData.created_at),
         } as CompanyWithWorkflow
       }
     } catch (e) {
@@ -741,6 +786,9 @@ export async function getCompany360DataAction(companyId: string) {
     if (!company) {
       return { success: false, error: 'لم يتم العثور على الشركة' }
     }
+
+    const isCompanyEst = company.status === 'established' || Boolean(company.deposit_released) || Boolean(company.cert_date)
+    company.workflow_steps = sanitizeFormationWorkflowSteps(company.workflow_steps, company.id, isCompanyEst, company.created_at)
 
     // 3. Fetch related records individually with try-catch blocks to prevent join exceptions
     let idsData: CompanyIDRecord[] = []

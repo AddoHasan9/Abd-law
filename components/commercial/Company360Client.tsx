@@ -625,8 +625,9 @@ export default function Company360Client({
                   <tr style={{ background: 'var(--surface-2)', borderBottom: '1px solid var(--line)' }}>
                     <th style={{ padding: '8px 12px', textAlign: 'right' }}>اسم المساهم</th>
                     <th style={{ padding: '8px 12px', textAlign: 'center' }}>صفة الشراكة</th>
-                    <th style={{ padding: '8px 12px', textAlign: 'center' }}>النسبة / الحصة</th>
-                    <th style={{ padding: '8px 12px', textAlign: 'center' }}>الجنسية / الملاحظات</th>
+                    <th style={{ padding: '8px 12px', textAlign: 'center' }}>عدد الأسهم (د.ع)</th>
+                    <th style={{ padding: '8px 12px', textAlign: 'center' }}>النسبة المئوية (%)</th>
+                    <th style={{ padding: '8px 12px', textAlign: 'center' }}>الجنسية / الهاتف / الملاحظات</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -637,7 +638,12 @@ export default function Company360Client({
                         {idx === 0 && <span className="tag tag-ok" style={{ fontSize: '10px', marginRight: '8px' }}>المساهم الرئيسي ★</span>}
                       </td>
                       <td style={{ padding: '10px 12px', textAlign: 'center' }}>{idx === 0 ? 'مؤسس أول' : 'شريك مساهم'}</td>
-                      <td style={{ padding: '10px 12px', textAlign: 'center', fontWeight: 700 }} className="num">{sh.share_percentage ? `${sh.share_percentage}%` : '—'}</td>
+                      <td style={{ padding: '10px 12px', textAlign: 'center', fontWeight: 700 }} className="num">
+                        {sh.share_amount ? `${formatNumberWithCommas(sh.share_amount)} د.ع` : '—'}
+                      </td>
+                      <td style={{ padding: '10px 12px', textAlign: 'center', fontWeight: 800, color: 'var(--accent)' }} className="num">
+                        {sh.share_percentage !== undefined && sh.share_percentage !== null ? `${sh.share_percentage}%` : '—'}
+                      </td>
                       <td style={{ padding: '10px 12px', textAlign: 'center', color: 'var(--text-3)' }}>{sh.nationality || sh.notes || '—'}</td>
                     </tr>
                   ))}

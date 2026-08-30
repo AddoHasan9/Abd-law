@@ -7,7 +7,7 @@
 import { createClient } from '@/lib/supabase/server'
 import type { CompanyWithWorkflow, Company, CompanyManager, CompanyShareholder, WorkflowStep } from '@/types/database'
 import { readJsonFile } from '@/lib/data/fs-store'
-import { WORKFLOW } from '@/lib/constants'
+import { WORKFLOW, sanitizeFormationWorkflowSteps } from '@/lib/constants'
 
 /** كل الشركات مع مخططاتها، مرتّبة بالأحدث */
 export async function listCompanies(): Promise<CompanyWithWorkflow[]> {
@@ -31,20 +31,7 @@ export async function listCompanies(): Promise<CompanyWithWorkflow[]> {
     diskCompanies.forEach(c => {
       if (deletedIds.has(c.id)) return
       const isEstablished = c.status === 'established' || Boolean(c.deposit_released) || Boolean(c.cert_date)
-      let workflowSteps = c.workflow_steps || []
-      if (isEstablished) {
-        workflowSteps = WORKFLOW.map((wf, idx) => ({
-          id: `wf_${c.id}_${idx + 1}`,
-          company_id: c.id,
-          step_key: wf.id,
-          step_order: idx + 1,
-          label: wf.label,
-          owner_kind: wf.owner,
-          state: 'done' as const,
-          done_by: null,
-          done_at: c.created_at || new Date().toISOString(),
-        }))
-      }
+      const workflowSteps = sanitizeFormationWorkflowSteps(c.workflow_steps, c.id, isEstablished, c.created_at)
       const managers = diskManagers.filter(m => m.company_id === c.id)
       const activeManager = managers.find(m => m.active)?.name || managers[0]?.name || c.manager
       const shareholders = diskShareholders.filter(s => s.company_id === c.id)
@@ -89,42 +76,12 @@ export async function listCompanies(): Promise<CompanyWithWorkflow[]> {
         if (deletedIds.has(c.id)) return
 
         const isEstablished = c.status === 'established' || Boolean(c.deposit_released) || Boolean(c.cert_date)
-        let workflowSteps = (stepsMap.get(c.id) || []).sort(
+        const rawSteps = (stepsMap.get(c.id) || []).sort(
           (a, b) => (a.step_order || 0) - (b.step_order || 0)
         )
-        const hasLegacy = workflowSteps.some(s => s.step_key === 'online_submission' || s.step_key === 'chamber_approval')
-
-        if (isEstablished || hasLegacy) {
-          workflowSteps = WORKFLOW.map((wf, idx) => ({
-            id: `wf_${c.id}_${idx + 1}`,
-            company_id: c.id,
-            step_key: wf.id,
-            step_order: idx + 1,
-            label: wf.label,
-            owner_kind: wf.owner,
-            state: (isEstablished ? 'done' : idx === 0 ? 'doing' : 'wait') as 'done' | 'doing' | 'wait',
-            done_by: null,
-            done_at: isEstablished ? (c.created_at || new Date().toISOString()) : null,
-          }))
-        } else if (!workflowSteps.length) {
-          const diskCo = diskCompanies.find(dc => dc.id === c.id)
-          const diskHasLegacy = diskCo?.workflow_steps?.some(s => s.step_key === 'online_submission' || s.step_key === 'chamber_approval')
-          if (diskCo?.workflow_steps?.length && !diskHasLegacy) {
-            workflowSteps = diskCo.workflow_steps
-          } else {
-            workflowSteps = WORKFLOW.map((wf, idx) => ({
-              id: `wf_${c.id}_${idx + 1}`,
-              company_id: c.id,
-              step_key: wf.id,
-              step_order: idx + 1,
-              label: wf.label,
-              owner_kind: wf.owner,
-              state: (idx === 0 ? 'doing' : 'wait') as 'done' | 'doing' | 'wait',
-              done_by: null,
-              done_at: null,
-            }))
-          }
-        }
+        const diskCo = diskCompanies.find(dc => dc.id === c.id)
+        const effectiveSteps = rawSteps.length > 0 ? rawSteps : (diskCo?.workflow_steps || [])
+        const workflowSteps = sanitizeFormationWorkflowSteps(effectiveSteps, c.id, isEstablished, c.created_at)
 
         const managers = (managersMap.get(c.id) || []).length > 0
           ? managersMap.get(c.id)!
@@ -177,23 +134,8 @@ export async function getCompany(id: string): Promise<CompanyWithWorkflow | null
     const rawSteps = (rawCompany.workflow_steps && rawCompany.workflow_steps.length > 0)
       ? rawCompany.workflow_steps
       : (foundDisk?.workflow_steps || [])
-    const hasLegacy = Array.isArray(rawSteps) && rawSteps.some((s: { step_key: string }) => s.step_key === 'online_submission' || s.step_key === 'chamber_approval')
 
-    const workflowSteps = (isEst || hasLegacy || !rawSteps.length)
-      ? WORKFLOW.map((wf, idx) => ({
-          id: `wf_${id}_${idx + 1}`,
-          company_id: id,
-          step_key: wf.id,
-          step_order: idx + 1,
-          label: wf.label,
-          owner_kind: wf.owner,
-          state: (isEst ? 'done' : idx === 0 ? 'doing' : 'wait') as 'done' | 'doing' | 'wait',
-          done_by: null,
-          done_at: isEst ? (rawCompany.created_at || new Date().toISOString()) : null,
-        }))
-      : rawSteps.sort(
-          (a: { step_order: number }, b: { step_order: number }) => a.step_order - b.step_order
-        )
+    const workflowSteps = sanitizeFormationWorkflowSteps(rawSteps, id, isEst, rawCompany.created_at)
 
     return {
       ...rawCompany,

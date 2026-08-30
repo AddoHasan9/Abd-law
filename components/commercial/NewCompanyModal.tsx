@@ -32,9 +32,15 @@ export default function NewCompanyModal({ isOpen, onClose }: Props) {
 
   useModalBodyLock(isOpen)
 
-  // قائمة المساهمين / الشركاء الديناميكية
-  const [shareholders, setShareholders] = useState<Array<{ id: string; name: string; phone: string }>>([
-    { id: '1', name: '', phone: '' }
+  // قائمة المساهمين / الشركاء الديناميكية مع عدد الأسهم والنسبة المئوية
+  const [shareholders, setShareholders] = useState<Array<{
+    id: string
+    name: string
+    phone: string
+    share_amount: string
+    share_percentage: string
+  }>>([
+    { id: '1', name: '', phone: '', share_amount: '', share_percentage: '100' }
   ])
 
   // مصفوفة الخدمات المفعلة
@@ -44,21 +50,116 @@ export default function NewCompanyModal({ isOpen, onClose }: Props) {
 
   if (!mounted || !isOpen) return null
 
+  // معالجة تغيير رأس المال وتحديث نسب وأسهم الشركاء
+  const handleCapitalChange = (rawVal: string) => {
+    const formatted = formatNumberWithCommas(rawVal)
+    setCapital(formatted)
+    const capNum = parseFloat(formatted.replace(/[^0-9.]/g, '')) || 0
+
+    if (shareholders.length === 1) {
+      setShareholders(prev => [
+        {
+          ...prev[0],
+          share_amount: formatted,
+          share_percentage: capNum > 0 ? '100' : prev[0].share_percentage,
+        }
+      ])
+    } else if (capNum > 0) {
+      setShareholders(prev =>
+        prev.map(sh => {
+          const pct = parseFloat(sh.share_percentage) || 0
+          if (pct > 0) {
+            const calculatedAmount = Math.round((pct / 100) * capNum)
+            return { ...sh, share_amount: formatNumberWithCommas(calculatedAmount) }
+          }
+          return sh
+        })
+      )
+    }
+  }
+
+  // إضافة شريك جديد مع حساب الحصة المتبقية تلقائياً
   const addShareholder = () => {
+    const capNum = parseFloat(capital.replace(/[^0-9.]/g, '')) || 0
+    const totalAllocatedPct = shareholders.reduce((sum, s) => sum + (parseFloat(s.share_percentage) || 0), 0)
+    const remainingPct = Math.max(0, Math.round((100 - totalAllocatedPct) * 100) / 100)
+    const remainingAmount = capNum > 0 && remainingPct > 0 ? Math.round((remainingPct / 100) * capNum) : 0
+
     setShareholders(prev => [
       ...prev,
-      { id: Date.now().toString(), name: '', phone: '' }
+      {
+        id: Date.now().toString(),
+        name: '',
+        phone: '',
+        share_amount: remainingAmount > 0 ? formatNumberWithCommas(remainingAmount) : '',
+        share_percentage: remainingPct > 0 ? remainingPct.toString() : '',
+      }
     ])
   }
 
   const removeShareholder = (id: string) => {
     if (shareholders.length <= 1) return
-    setShareholders(prev => prev.filter(s => s.id !== id))
+    setShareholders(prev => {
+      const filtered = prev.filter(s => s.id !== id)
+      if (filtered.length === 1 && capital) {
+        return [{ ...filtered[0], share_amount: capital, share_percentage: '100' }]
+      }
+      return filtered
+    })
   }
 
-  const updateShareholder = (id: string, field: 'name' | 'phone', value: string) => {
+  // تحديث بيانات الشريك مع الحساب التبادلي التلقائي بين عدد الأسهم والنسبة المئوية
+  const updateShareholder = (
+    id: string,
+    field: 'name' | 'phone' | 'share_amount' | 'share_percentage',
+    value: string
+  ) => {
+    const capNum = parseFloat(capital.replace(/[^0-9.]/g, '')) || 0
+
     setShareholders(prev =>
-      prev.map(s => (s.id === id ? { ...s, [field]: value } : s))
+      prev.map(sh => {
+        if (sh.id !== id) return sh
+
+        if (field === 'share_amount') {
+          const formattedAmount = formatNumberWithCommas(value)
+          const amountNum = parseFloat(formattedAmount.replace(/[^0-9.]/g, '')) || 0
+          let calculatedPct = sh.share_percentage
+
+          if (capNum > 0 && amountNum > 0) {
+            const rawPct = (amountNum / capNum) * 100
+            calculatedPct = (Math.round(rawPct * 100) / 100).toString()
+          } else if (amountNum === 0) {
+            calculatedPct = '0'
+          }
+
+          return {
+            ...sh,
+            share_amount: formattedAmount,
+            share_percentage: calculatedPct,
+          }
+        }
+
+        if (field === 'share_percentage') {
+          const cleanPct = value.replace(/[^0-9.]/g, '')
+          const pctNum = parseFloat(cleanPct) || 0
+          let calculatedAmount = sh.share_amount
+
+          if (capNum > 0 && pctNum > 0) {
+            const rawAmount = Math.round((pctNum / 100) * capNum)
+            calculatedAmount = formatNumberWithCommas(rawAmount)
+          } else if (pctNum === 0) {
+            calculatedAmount = '0'
+          }
+
+          return {
+            ...sh,
+            share_percentage: cleanPct,
+            share_amount: calculatedAmount,
+          }
+        }
+
+        return { ...sh, [field]: value }
+      })
     )
   }
 
@@ -79,8 +180,8 @@ export default function NewCompanyModal({ isOpen, onClose }: Props) {
 
     const name = formData.get('name')?.toString() || ''
     const kind = shareholders.length > 1 ? 'محدودة' : 'فردية'
-    const capitalRaw = formData.get('capital')?.toString() || '0'
-    const capital = parseFloat(capitalRaw.replace(/[^0-9.]/g, '')) || 0
+    const capitalRaw = capital || formData.get('capital')?.toString() || '0'
+    const capitalNum = parseFloat(capitalRaw.replace(/[^0-9.]/g, '')) || 0
     const manager = formData.get('manager')?.toString() || ''
     const activity = ''
     const phone = formData.get('phone')?.toString() || ''
@@ -90,7 +191,7 @@ export default function NewCompanyModal({ isOpen, onClose }: Props) {
     const lacks = formData.get('lacks')?.toString() || ''
     const status = formData.get('status')?.toString() || 'progress'
     const feeRaw = formData.get('fee')?.toString() || '0'
-    const fee = parseFloat(feeRaw.replace(/[^0-9.]/g, '')) || 0
+    const feeVal = parseFloat(feeRaw.replace(/[^0-9.]/g, '')) || 0
     const currency = formData.get('currency')?.toString() || 'IQD'
     const tx_date = formData.get('tx_date')?.toString() || new Date().toISOString().slice(0, 10)
     const due_date = formData.get('due_date')?.toString() || ''
@@ -98,7 +199,12 @@ export default function NewCompanyModal({ isOpen, onClose }: Props) {
 
     const cleanShareholders = shareholders
       .filter(s => s.name.trim())
-      .map(s => ({ name: s.name.trim(), phone: s.phone.trim() }))
+      .map(s => ({
+        name: s.name.trim(),
+        phone: s.phone.trim(),
+        share_amount: parseFloat(s.share_amount.replace(/[^0-9.]/g, '')) || 0,
+        share_percentage: parseFloat(s.share_percentage) || 0,
+      }))
 
     const lockedServices = FORMATION_SERVICES.filter(s => s.locked).map(s => s.id)
     const services = Array.from(new Set([...selectedServices, ...lockedServices]))
@@ -106,7 +212,7 @@ export default function NewCompanyModal({ isOpen, onClose }: Props) {
     const res = await createCompanyFormationAction({
       name,
       kind,
-      capital,
+      capital: capitalNum,
       manager,
       activity,
       phone,
@@ -115,7 +221,7 @@ export default function NewCompanyModal({ isOpen, onClose }: Props) {
       reservation_letter_governorate,
       lacks,
       status,
-      fee,
+      fee: feeVal,
       currency,
       services,
       tx_date,
@@ -183,7 +289,7 @@ export default function NewCompanyModal({ isOpen, onClose }: Props) {
 
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '14px' }}>
                 <div className="field">
-                  <label htmlFor="modal-co-capital">رأس المال (د.ع)</label>
+                  <label htmlFor="modal-co-capital">رأس المال (د.ع) *</label>
                   <input
                     id="modal-co-capital"
                     name="capital"
@@ -191,7 +297,7 @@ export default function NewCompanyModal({ isOpen, onClose }: Props) {
                     className="input num"
                     placeholder="50,000,000"
                     value={capital}
-                    onChange={e => setCapital(formatNumberWithCommas(e.target.value))}
+                    onChange={e => handleCapitalChange(e.target.value)}
                   />
                 </div>
 
@@ -281,42 +387,46 @@ export default function NewCompanyModal({ isOpen, onClose }: Props) {
             </div>
           </div>
 
-          {/* 2. بيانات الشركاء / المساهمين */}
+          {/* 2. بيانات الشركاء / المساهمين مع الحساب التلقائي للأسهم والنسب */}
           <div style={{ borderBottom: '1px solid var(--line-soft)', paddingBottom: '16px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '14px' }}>
-              <h4 style={{ fontSize: '14.5px', fontWeight: 700, color: 'var(--accent)', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <Icon name="users" />
-                <span>العميل / الشركاء المساهمون</span>
-              </h4>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '14px', flexWrap: 'wrap', gap: '8px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <h4 style={{ fontSize: '14.5px', fontWeight: 700, color: 'var(--accent)', margin: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <Icon name="users" />
+                  <span>العميل / الشركاء المساهمون ({shareholders.length})</span>
+                </h4>
+                <span style={{ fontSize: '11px', color: 'var(--text-3)' }}>(حساب تلقائي لنسبة وعدد الأسهم)</span>
+              </div>
               <button
                 type="button"
                 onClick={addShareholder}
                 className="btn btn-ghost"
-                style={{ fontSize: '12px', padding: '4px 10px' }}
+                style={{ fontSize: '12px', padding: '5px 12px', display: 'flex', alignItems: 'center', gap: '6px', border: '1px dashed var(--accent)', color: 'var(--accent)' }}
               >
                 <Icon name="plus" />
                 <span>أضف شريكاً إضافياً</span>
               </button>
             </div>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
               {shareholders.map((sh, idx) => (
                 <div
                   key={sh.id}
                   style={{
                     display: 'grid',
-                    gridTemplateColumns: '1fr 1fr auto',
+                    gridTemplateColumns: 'minmax(140px, 1.4fr) minmax(110px, 1.1fr) minmax(130px, 1.2fr) minmax(90px, 0.8fr) auto',
                     gap: '10px',
                     alignItems: 'end',
                     background: 'var(--surface-2)',
-                    padding: '12px',
+                    padding: '12px 14px',
                     borderRadius: 'var(--r-md)',
                     border: '1px solid var(--line-soft)',
                   }}
                 >
                   <div className="field" style={{ marginBottom: 0 }}>
-                    <label style={{ fontSize: '11.5px', color: 'var(--text-3)' }}>
-                      اسم الشريك ({idx + 1})
+                    <label style={{ fontSize: '11.5px', color: 'var(--text-3)', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                      <span className="w-4 h-4 rounded-full bg-[var(--accent-soft)] text-[var(--accent)] text-[10px] font-bold inline-flex items-center justify-center">{idx + 1}</span>
+                      <span>اسم الشريك / المساهم *</span>
                     </label>
                     <input
                       type="text"
@@ -324,6 +434,7 @@ export default function NewCompanyModal({ isOpen, onClose }: Props) {
                       value={sh.name}
                       onChange={e => updateShareholder(sh.id, 'name', e.target.value)}
                       placeholder="الاسم الثلاثي للشريك"
+                      required
                     />
                   </div>
 
@@ -340,19 +451,125 @@ export default function NewCompanyModal({ isOpen, onClose }: Props) {
                     />
                   </div>
 
-                  {shareholders.length > 1 && (
+                  <div className="field" style={{ marginBottom: 0 }}>
+                    <label style={{ fontSize: '11.5px', color: 'var(--text-2)', fontWeight: 600 }}>
+                      عدد الأسهم (د.ع)
+                    </label>
+                    <input
+                      type="text"
+                      className="input num font-bold"
+                      value={sh.share_amount}
+                      onChange={e => updateShareholder(sh.id, 'share_amount', e.target.value)}
+                      placeholder="مثال: 25,000,000"
+                    />
+                  </div>
+
+                  <div className="field" style={{ marginBottom: 0 }}>
+                    <label style={{ fontSize: '11.5px', color: 'var(--accent)', fontWeight: 700 }}>
+                      النسبة المئوية (%)
+                    </label>
+                    <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+                      <input
+                        type="text"
+                        className="input num font-extrabold text-[var(--accent)]"
+                        style={{ paddingLeft: '24px' }}
+                        value={sh.share_percentage}
+                        onChange={e => updateShareholder(sh.id, 'share_percentage', e.target.value)}
+                        placeholder="50"
+                      />
+                      <span style={{ position: 'absolute', left: '8px', fontSize: '12px', fontWeight: 800, color: 'var(--accent)' }}>%</span>
+                    </div>
+                  </div>
+
+                  {shareholders.length > 1 ? (
                     <button
                       type="button"
                       onClick={() => removeShareholder(sh.id)}
                       className="btn btn-ghost"
-                      style={{ color: 'var(--bad)', padding: '8px' }}
+                      style={{ color: 'var(--bad)', padding: '8px', marginBottom: '2px' }}
                       title="حذف الشريك"
                     >
                       ✕
                     </button>
+                  ) : (
+                    <div style={{ width: '28px' }} />
                   )}
                 </div>
               ))}
+
+              {/* بطاقة ملخص توزيع الأسهم ورأس المال التلقائي */}
+              {(() => {
+                const capNum = parseFloat(capital.replace(/[^0-9.]/g, '')) || 0
+                const totalAllocatedShares = shareholders.reduce((sum, s) => sum + (parseFloat(s.share_amount.replace(/[^0-9.]/g, '')) || 0), 0)
+                const totalAllocatedPct = Math.round(shareholders.reduce((sum, s) => sum + (parseFloat(s.share_percentage) || 0), 0) * 100) / 100
+                const remainingShares = Math.max(0, capNum - totalAllocatedShares)
+                const remainingPct = Math.max(0, Math.round((100 - totalAllocatedPct) * 100) / 100)
+                const isMatched = capNum > 0 && Math.abs(totalAllocatedPct - 100) < 0.05
+                const isOver = totalAllocatedPct > 100
+
+                return (
+                  <div
+                    style={{
+                      background: isMatched
+                        ? 'rgba(16, 185, 129, 0.06)'
+                        : isOver
+                        ? 'rgba(239, 68, 68, 0.06)'
+                        : 'var(--surface-3)',
+                      border: `1px solid ${
+                        isMatched
+                          ? 'rgba(16, 185, 129, 0.25)'
+                          : isOver
+                          ? 'rgba(239, 68, 68, 0.25)'
+                          : 'var(--line-soft)'
+                      }`,
+                      padding: '12px 16px',
+                      borderRadius: 'var(--r-md)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      flexWrap: 'wrap',
+                      gap: '12px',
+                    }}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '16px', flexWrap: 'wrap' }}>
+                      <div style={{ fontSize: '12px' }}>
+                        <span style={{ color: 'var(--text-3)' }}>إجمالي رأس المال: </span>
+                        <strong className="num" style={{ color: 'var(--text)' }}>{capital || '0'} د.ع</strong>
+                      </div>
+                      <div style={{ fontSize: '12px' }}>
+                        <span style={{ color: 'var(--text-3)' }}>المجموع الموزع: </span>
+                        <strong className="num" style={{ color: isOver ? 'var(--bad)' : 'var(--accent)' }}>
+                          {formatNumberWithCommas(totalAllocatedShares)} د.ع ({totalAllocatedPct}%)
+                        </strong>
+                      </div>
+                      {remainingShares > 0 && (
+                        <div style={{ fontSize: '12px' }}>
+                          <span style={{ color: 'var(--text-3)' }}>المتبقي غير الموزع: </span>
+                          <strong className="num" style={{ color: 'var(--warn, #f59e0b)' }}>
+                            {formatNumberWithCommas(remainingShares)} د.ع ({remainingPct}%)
+                          </strong>
+                        </div>
+                      )}
+                    </div>
+
+                    <div>
+                      {isMatched ? (
+                        <span className="tag tag-ok" style={{ fontSize: '11px', fontWeight: 700 }}>
+                          ✓ توزيع الحصص مكتمل 100%
+                        </span>
+                      ) : isOver ? (
+                        <span className="tag tag-bad" style={{ fontSize: '11px', fontWeight: 700 }}>
+                          ⚠️ مجموع الحصص يتجاوز 100% ({totalAllocatedPct}%)
+                        </span>
+                      ) : (
+                        <span className="tag" style={{ fontSize: '11px', background: 'rgba(245, 158, 11, 0.15)', color: '#d97706', border: '1px solid rgba(245, 158, 11, 0.3)' }}>
+                          ⏳ متبقي غير موزع: {remainingPct}%
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                )
+              })()}
             </div>
           </div>
 
