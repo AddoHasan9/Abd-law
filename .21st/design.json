@@ -110,7 +110,14 @@
     "must": [],
     "avoid": []
   },
-  "decisions": [],
+  "decisions": [
+    {
+      "date": "2026-08-30",
+      "scope": "app/(auth)/login",
+      "choice": "Premium split-screen ('Gold Wing'): brand panel (medallion + scales watermark + double gold hairline frame) beside a focused form panel; gold-on-navy, Cairo display headings. Stacks to a compact crest + form on <900px. Auth pages locked to a fixed dark palette via scoped tokens on #login; theme-color #080D17.",
+      "files": ["app/(auth)/login/page.tsx", "app/(auth)/login/LoginForm.tsx", "app/(auth)/layout.tsx", "styles/globals.css"]
+    }
+  ],
   "evidence": [
     {
       "fact": "components.installed",
