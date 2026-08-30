@@ -50,7 +50,7 @@ export async function getTaxAssessmentsAction(companyId?: string): Promise<{ suc
       if (companyId) q = q.eq('company_id', companyId)
       const { data, error } = await q
       if (!error && data) {
-        dbItems = (data || []).map((d: any) => ({
+        dbItems = (data as Array<TaxAssessment & { companies?: { name?: string } | null }>).map(d => ({
           ...d,
           company_name: d.companies?.name || diskCompanies.find(c => c.id === d.company_id)?.name || null,
         }))

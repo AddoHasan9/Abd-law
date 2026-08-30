@@ -6,7 +6,7 @@
 import { revalidatePath } from 'next/cache'
 import { createAdminClient } from '@/lib/supabase/server'
 import { WORKFLOW } from '@/lib/constants'
-import type { WfState, CompanyWithWorkflow, CompanyManager, CompanyShareholder, CompanyIDRecord, FinancialStatement, DepositStage, Trademark } from '@/types/database'
+import type { WfState, CompanyWithWorkflow, CompanyManager, CompanyShareholder, CompanyIDRecord, FinancialStatement, DepositStage, Trademark, TaxAssessment } from '@/types/database'
 import { createNotificationAction } from '@/app/(app)/notifications/actions'
 import { readJsonFile, writeJsonFile } from '@/lib/data/fs-store'
 import { logTimelineEvent, getCompanyTimeline, type TimelineEvent } from '@/lib/data/timeline'
@@ -816,19 +816,19 @@ export async function getCompany360DataAction(companyId: string) {
     }
 
     // 8. Fetch Tax Assessments for Company
-    let taxAssessmentsData: any[] = []
+    let taxAssessmentsData: TaxAssessment[] = []
     try {
       const { data: taxDb } = await supabase
         .from('tax_assessments')
         .select('*')
         .eq('company_id', companyId)
         .order('year', { ascending: false })
-      if (taxDb) taxAssessmentsData = taxDb
+      if (taxDb) taxAssessmentsData = taxDb as TaxAssessment[]
     } catch {}
 
-    const diskTax = readJsonFile<any[]>('tax_assessments.json', [])
+    const diskTax = readJsonFile<TaxAssessment[]>('tax_assessments.json', [])
     const diskCompanyTax = diskTax.filter(t => t.company_id === companyId)
-    const taxMap = new Map<string, any>()
+    const taxMap = new Map<string, TaxAssessment>()
     taxAssessmentsData.forEach(t => taxMap.set(t.id, t))
     diskCompanyTax.forEach(t => taxMap.set(t.id, { ...(taxMap.get(t.id) || {}), ...t }))
     const finalTaxAssessments = Array.from(taxMap.values()).sort((a, b) => b.year - a.year)

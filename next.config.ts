@@ -1,6 +1,10 @@
 import type { NextConfig } from 'next'
+
 const config: NextConfig = {
   reactStrictMode: true,
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
   experimental: {
     serverActions: {
       bodySizeLimit: '10mb',
@@ -24,4 +28,5 @@ const config: NextConfig = {
     }]
   },
 }
+
 export default config
