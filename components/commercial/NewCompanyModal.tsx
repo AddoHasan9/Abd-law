@@ -3,7 +3,7 @@ import { useRouter } from 'next/navigation'
 import { createPortal } from 'react-dom'
 import { Icon } from '@/components/ui/Icon'
 import { createCompanyFormationAction } from '@/app/(app)/commercial/companies/actions'
-import { FORMATION_SERVICES, IRAQ_GOVERNORATES } from '@/lib/constants'
+import { FORMATION_SERVICES, IRAQ_GOVERNORATES, formatNumberWithCommas } from '@/lib/constants'
 import FormationServiceChecklist from './FormationServiceChecklist'
 import { useModalBodyLock } from '@/lib/hooks/useModalBodyLock'
 
@@ -21,6 +21,10 @@ export default function NewCompanyModal({ isOpen, onClose }: Props) {
   // كتاب الحجز والمحافظة
   const [hasReservationLetter, setHasReservationLetter] = useState(false)
   const [reservationGovernorate, setReservationGovernorate] = useState('بغداد')
+
+  // رأس المال والأتعاب
+  const [capital, setCapital] = useState('')
+  const [fee, setFee] = useState('')
 
   useEffect(() => {
     setMounted(true)
@@ -186,6 +190,8 @@ export default function NewCompanyModal({ isOpen, onClose }: Props) {
                     type="text"
                     className="input num"
                     placeholder="50,000,000"
+                    value={capital}
+                    onChange={e => setCapital(formatNumberWithCommas(e.target.value))}
                   />
                 </div>
 
@@ -378,6 +384,8 @@ export default function NewCompanyModal({ isOpen, onClose }: Props) {
                     type="text"
                     className="input num"
                     placeholder="1,500,000"
+                    value={fee}
+                    onChange={e => setFee(formatNumberWithCommas(e.target.value))}
                   />
                 </div>
 

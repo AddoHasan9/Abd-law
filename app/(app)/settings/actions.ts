@@ -21,6 +21,21 @@ export interface WorkflowTemplate {
 }
 
 const DEFAULT_WORKFLOW_TEMPLATES: Record<string, WorkflowTemplate> = {
+  formation: {
+    txType: 'formation',
+    txLabel: 'تأسيس الشركات (قسم التأسيس)',
+    description: 'المسار الرسمي المعتمد لتأسيس وتسجيل الشركات لدى دائرة مسجل الشركات (8 محطات أساسية)',
+    steps: [
+      { id: 'online_submission', label: 'الإرسال على النظام', owner: 'الموظف المختص', icon: 'send' },
+      { id: 'chamber_approval', label: 'موافقة غرفة التجارة', owner: 'غرفة التجارة', icon: 'domain' },
+      { id: 'union_approval', label: 'موافقة اتحاد الغرف', owner: 'اتحاد الغرف', icon: 'hub' },
+      { id: 'bank_letter', label: 'إصدار كتاب مصرف', owner: 'المصرف التجاري', icon: 'account_balance' },
+      { id: 'company_file', label: 'عمل إضبارة الشركة', owner: 'مسجل الشركات', icon: 'folder' },
+      { id: 'specialist_officer', label: 'تدقيق الموظف المختص', owner: 'الموظف المختص', icon: 'badge' },
+      { id: 'sign_decision', label: 'رفع القرار للتوقيع', owner: 'مسجل الشركات', icon: 'draw' },
+      { id: 'issue_cert', label: 'إصدار شهادة التأسيس', owner: 'مسجل الشركات', icon: 'verified' },
+    ],
+  },
   share_sale: {
     txType: 'share_sale',
     txLabel: 'بيع ونقل الأسهم',
@@ -140,7 +155,8 @@ export async function updateGeneralSettingsAction(payload: Partial<Settings>): P
 export async function getWorkflowTemplatesAction(): Promise<{ success: boolean; data: Record<string, WorkflowTemplate> }> {
   try {
     const templates = readJsonFile<Record<string, WorkflowTemplate>>('workflow_templates.json', DEFAULT_WORKFLOW_TEMPLATES)
-    return { success: true, data: templates }
+    const merged: Record<string, WorkflowTemplate> = { ...DEFAULT_WORKFLOW_TEMPLATES, ...templates }
+    return { success: true, data: merged }
   } catch (e) {
     console.error('Failed to get workflow templates:', e)
     return { success: true, data: DEFAULT_WORKFLOW_TEMPLATES }

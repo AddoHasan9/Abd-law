@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { createPortal } from 'react-dom'
 import { useModalBodyLock } from '@/lib/hooks/useModalBodyLock'
+import { formatNumberWithCommas } from '@/lib/constants'
 import { createTaxAssessmentAction, updateTaxAssessmentAction } from '@/app/(app)/commercial/tax-assessment/actions'
 import type { Company, TaxAssessment } from '@/types/database'
 
@@ -65,13 +66,13 @@ export default function AddTaxAssessmentModal({
       setTaxBranch(editingAssessment.tax_branch || 'قسم الشركات')
       setTaxFileNumber(editingAssessment.tax_file_number || '')
       setContractsInfo(editingAssessment.contracts_info || '')
-      setContractsAmount(editingAssessment.contracts_amount?.toString() || '')
+      setContractsAmount(editingAssessment.contracts_amount ? formatNumberWithCommas(editingAssessment.contracts_amount) : '')
       setImportsInfo(editingAssessment.imports_info || '')
-      setImportsAmount(editingAssessment.imports_amount?.toString() || '')
+      setImportsAmount(editingAssessment.imports_amount ? formatNumberWithCommas(editingAssessment.imports_amount) : '')
       setLawyerId(editingAssessment.lawyer_id || '')
       setTxStartDate(editingAssessment.tx_start_date || new Date().toISOString().slice(0, 10))
       setStatus(editingAssessment.status || 'in_progress')
-      setTaxAmountAssessed(editingAssessment.tax_amount_assessed?.toString() || '')
+      setTaxAmountAssessed(editingAssessment.tax_amount_assessed ? formatNumberWithCommas(editingAssessment.tax_amount_assessed) : '')
       setReceiptNumber(editingAssessment.receipt_number || '')
       setClearanceLetterNo(editingAssessment.clearance_letter_no || '')
       setClearanceDate(editingAssessment.clearance_date || '')
@@ -339,7 +340,7 @@ export default function AddTaxAssessmentModal({
                   type="text"
                   placeholder="مثال: 50,000,000"
                   value={contractsAmount}
-                  onChange={e => setContractsAmount(e.target.value)}
+                  onChange={e => setContractsAmount(formatNumberWithCommas(e.target.value))}
                   className="input num text-xs sm:text-sm h-11 px-3.5 rounded-xl bg-[var(--surface)] border border-[var(--line-soft)]"
                 />
               </div>
@@ -375,7 +376,7 @@ export default function AddTaxAssessmentModal({
                   type="text"
                   placeholder="مثال: 120,000,000"
                   value={importsAmount}
-                  onChange={e => setImportsAmount(e.target.value)}
+                  onChange={e => setImportsAmount(formatNumberWithCommas(e.target.value))}
                   className="input num text-xs sm:text-sm h-11 px-3.5 rounded-xl bg-[var(--surface)] border border-[var(--line-soft)]"
                 />
               </div>
@@ -404,7 +405,7 @@ export default function AddTaxAssessmentModal({
                 type="text"
                 placeholder="مثال: 1,500,000"
                 value={taxAmountAssessed}
-                onChange={e => setTaxAmountAssessed(e.target.value)}
+                onChange={e => setTaxAmountAssessed(formatNumberWithCommas(e.target.value))}
                 className="input num h-12 text-sm px-4 rounded-2xl bg-[var(--surface-2)] border border-[var(--line-soft)] focus:border-[var(--accent)]"
               />
             </div>

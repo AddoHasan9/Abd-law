@@ -3,7 +3,7 @@
 import { useState, useMemo, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { formatMoney, formatDate } from '@/lib/constants'
+import { formatMoney, formatDate, formatNumberWithCommas } from '@/lib/constants'
 import { Icon } from '@/components/ui/Icon'
 import { WorkflowStatus } from '@/components/ui/WorkflowStatus'
 import { calculateCompanyStatus } from '@/lib/status-engine'
@@ -97,7 +97,7 @@ export default function Company360Client({
   // Company Overview Form State
   const [name, setName] = useState(company.name || '')
   const [kind, setKind] = useState(company.kind || 'محدودة')
-  const [capital, setCapital] = useState(company.capital?.toString() || '')
+  const [capital, setCapital] = useState(company.capital ? formatNumberWithCommas(company.capital) : '')
   const [phone, setPhone] = useState(company.phone || '')
   const [activity, setActivity] = useState(company.activity || '')
   const [address, setAddress] = useState(company.address || '')
@@ -107,10 +107,10 @@ export default function Company360Client({
 
   // Accounting Breakdown Form State
   const accNotes = (typeof company.accounting_notes === 'object' ? company.accounting_notes : {}) as AccountingBreakdown
-  const [accountantFee, setAccountantFee] = useState(accNotes.accountant_fee?.toString() || '')
-  const [registrationFee, setRegistrationFee] = useState(accNotes.registration_fee?.toString() || '')
-  const [govFee, setGovFee] = useState(accNotes.gov_fee?.toString() || '')
-  const [otherExpenses, setOtherExpenses] = useState(accNotes.other_expenses?.toString() || '')
+  const [accountantFee, setAccountantFee] = useState(accNotes.accountant_fee ? formatNumberWithCommas(accNotes.accountant_fee) : '')
+  const [registrationFee, setRegistrationFee] = useState(accNotes.registration_fee ? formatNumberWithCommas(accNotes.registration_fee) : '')
+  const [govFee, setGovFee] = useState(accNotes.gov_fee ? formatNumberWithCommas(accNotes.gov_fee) : '')
+  const [otherExpenses, setOtherExpenses] = useState(accNotes.other_expenses ? formatNumberWithCommas(accNotes.other_expenses) : '')
 
   // Modals state
   const [isFSModalOpen, setIsFSModalOpen] = useState(false)
@@ -542,7 +542,7 @@ export default function Company360Client({
 
             <div className="field">
               <label htmlFor="co360-capital">رأس المال الإجمالي (د.ع)</label>
-              <input id="co360-capital" type="text" className="input num" value={capital} disabled={!canEdit} onChange={e => setCapital(e.target.value)} />
+              <input id="co360-capital" type="text" className="input num" value={capital} disabled={!canEdit} onChange={e => setCapital(formatNumberWithCommas(e.target.value))} placeholder="50,000,000" />
             </div>
 
             <div className="field">
@@ -574,19 +574,19 @@ export default function Company360Client({
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '12px' }}>
               <div className="field">
                 <label style={{ fontSize: '11.5px' }}>أتعاب المحاسب (د.ع)</label>
-                <input type="text" className="input num" value={accountantFee} disabled={!canEdit} onChange={e => setAccountantFee(e.target.value)} placeholder="0" />
+                <input type="text" className="input num" value={accountantFee} disabled={!canEdit} onChange={e => setAccountantFee(formatNumberWithCommas(e.target.value))} placeholder="0" />
               </div>
               <div className="field">
                 <label style={{ fontSize: '11.5px' }}>رسوم التسجيل (د.ع)</label>
-                <input type="text" className="input num" value={registrationFee} disabled={!canEdit} onChange={e => setRegistrationFee(e.target.value)} placeholder="0" />
+                <input type="text" className="input num" value={registrationFee} disabled={!canEdit} onChange={e => setRegistrationFee(formatNumberWithCommas(e.target.value))} placeholder="0" />
               </div>
               <div className="field">
                 <label style={{ fontSize: '11.5px' }}>الرسوم الحكومية (د.ع)</label>
-                <input type="text" className="input num" value={govFee} disabled={!canEdit} onChange={e => setGovFee(e.target.value)} placeholder="0" />
+                <input type="text" className="input num" value={govFee} disabled={!canEdit} onChange={e => setGovFee(formatNumberWithCommas(e.target.value))} placeholder="0" />
               </div>
               <div className="field">
                 <label style={{ fontSize: '11.5px' }}>مصاريف أخرى (د.ع)</label>
-                <input type="text" className="input num" value={otherExpenses} disabled={!canEdit} onChange={e => setOtherExpenses(e.target.value)} placeholder="0" />
+                <input type="text" className="input num" value={otherExpenses} disabled={!canEdit} onChange={e => setOtherExpenses(formatNumberWithCommas(e.target.value))} placeholder="0" />
               </div>
             </div>
           </div>

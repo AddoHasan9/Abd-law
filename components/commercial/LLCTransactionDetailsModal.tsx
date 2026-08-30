@@ -5,6 +5,7 @@ import { createPortal } from 'react-dom'
 import Link from 'next/link'
 import { Icon } from '@/components/ui/Icon'
 import { useModalBodyLock } from '@/lib/hooks/useModalBodyLock'
+import { formatNumberWithCommas } from '@/lib/constants'
 import { updateLLCTransactionAction } from '@/app/(app)/commercial/llc/actions'
 import { deleteTransactionAction } from '@/app/(app)/commercial/actions'
 import { LLC_TX_TYPES } from './AddLLCTransactionModal'
@@ -66,12 +67,12 @@ export default function LLCTransactionDetailsModal({
     setTxStartDate(transaction.tx_date || '')
     setLacks(transaction.lacks || '')
     setNotes(transaction.description || '')
-    setFee(transaction.fee ? transaction.fee.toString() : '')
+    setFee(transaction.fee ? formatNumberWithCommas(transaction.fee) : '')
     setPhone(transaction.phone || '')
     setPriority(transaction.priority || 'medium')
     setLawyerId(transaction.lawyer_id || '')
-    setCapitalBefore(transaction.capital_before !== undefined && transaction.capital_before !== null ? transaction.capital_before.toString() : '')
-    setCapitalAfter(transaction.capital_after !== undefined && transaction.capital_after !== null ? transaction.capital_after.toString() : '')
+    setCapitalBefore(transaction.capital_before !== undefined && transaction.capital_before !== null ? formatNumberWithCommas(transaction.capital_before) : '')
+    setCapitalAfter(transaction.capital_after !== undefined && transaction.capital_after !== null ? formatNumberWithCommas(transaction.capital_after) : '')
     setSellerName(transaction.seller_name || '')
     setBuyerName(transaction.buyer_name || '')
     setError(null)
@@ -273,7 +274,7 @@ export default function LLCTransactionDetailsModal({
                     type="text"
                     className="input num"
                     value={capitalBefore}
-                    onChange={e => setCapitalBefore(e.target.value)}
+                    onChange={e => setCapitalBefore(formatNumberWithCommas(e.target.value))}
                     placeholder="مثال: 1,000,000"
                   />
                 </div>
@@ -287,7 +288,7 @@ export default function LLCTransactionDetailsModal({
                     type="text"
                     className="input num"
                     value={capitalAfter}
-                    onChange={e => setCapitalAfter(e.target.value)}
+                    onChange={e => setCapitalAfter(formatNumberWithCommas(e.target.value))}
                     placeholder="مثال: 5,000,000"
                   />
                 </div>
@@ -401,7 +402,7 @@ export default function LLCTransactionDetailsModal({
                   type="text"
                   className="input num"
                   value={fee}
-                  onChange={e => setFee(e.target.value)}
+                  onChange={e => setFee(formatNumberWithCommas(e.target.value))}
                   placeholder="250,000"
                 />
               </div>

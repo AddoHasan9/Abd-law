@@ -347,6 +347,40 @@ export function formatMoney(n: number | null | undefined, currency = 'IQD'): str
   return currency === 'IQD' ? `${v} د.ع` : `${v} $`
 }
 
+/** تحويل الرقم إلى نص بأرقام مفصولة بفواصل دون إضافة رمز العملة */
+export function formatNumber(n: number | null | undefined): string {
+  if (n === null || n === undefined || isNaN(Number(n))) return '0'
+  return Number(n).toLocaleString('en-US')
+}
+
+/**
+ * دالة لتنسيق النصوص والأرقام المدخلة في حقول رأس المال والمبالغ بفواصل الآلاف أثناء الكتابة (مثال: 50,000,000)
+ */
+export function formatNumberWithCommas(value: string | number | null | undefined): string {
+  if (value === null || value === undefined || value === '') return ''
+  const str = String(value).replace(/[^0-9.]/g, '')
+  if (!str) return ''
+
+  const parts = str.split('.')
+  // تنسيق الجزء الصحيح بفواصل الآلاف
+  const intPart = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',')
+
+  if (parts.length > 1) {
+    return `${intPart}.${parts.slice(1).join('')}`
+  }
+  return intPart
+}
+
+/**
+ * دالة استخراج الرقم الصافي كـ number بدون فواصل من النصوص المدخلة
+ */
+export function parseNumberFromCommas(value: string | number | null | undefined): number {
+  if (value === null || value === undefined || value === '') return 0
+  const clean = String(value).replace(/[^0-9.]/g, '')
+  const num = parseFloat(clean)
+  return isNaN(num) ? 0 : num
+}
+
 /* ============================================================
    9) تقدّم سير العمل
    ============================================================ */

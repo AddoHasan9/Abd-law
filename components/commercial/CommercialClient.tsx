@@ -3,7 +3,7 @@
 import { useState, useMemo, useEffect, useRef } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { TX_TYPES, PRIORITIES, txType, priorityOf, formatDate } from '@/lib/constants'
+import { TX_TYPES, PRIORITIES, txType, priorityOf, formatDate, formatNumberWithCommas } from '@/lib/constants'
 import { WorkflowStatus } from '@/components/ui/WorkflowStatus'
 import { WORKFLOW_STATUS_LIST } from '@/lib/workflow-status'
 import { Icon } from '@/components/ui/Icon'
@@ -1188,7 +1188,11 @@ export default function CommercialClient({ rows = [], companies = [] }: Props) {
                     name="fee"
                     type="text"
                     className="input num"
-                    defaultValue={editTx.fee ? editTx.fee.toString() : ''}
+                    defaultValue={editTx.fee ? formatNumberWithCommas(editTx.fee) : ''}
+                    onInput={e => {
+                      const t = e.currentTarget
+                      t.value = formatNumberWithCommas(t.value)
+                    }}
                     placeholder="250,000"
                   />
                 </div>

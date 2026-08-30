@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { createPortal } from 'react-dom'
 import { Icon } from '@/components/ui/Icon'
-import { TX_TYPES } from '@/lib/constants'
+import { TX_TYPES, formatNumberWithCommas } from '@/lib/constants'
 import { createTransactionAction } from '@/app/(app)/commercial/actions'
 import type { Company } from '@/types/database'
 import { useModalBodyLock } from '@/lib/hooks/useModalBodyLock'
@@ -26,6 +26,7 @@ export default function AddTransactionModal({ isOpen, onClose, companies, lawyer
   const [mounted, setMounted] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [amount, setAmount] = useState('')
 
   // Dual Company Selection State
   const [selectedCompany, setSelectedCompany] = useState<Company | null>(null)
@@ -41,6 +42,7 @@ export default function AddTransactionModal({ isOpen, onClose, companies, lawyer
     if (!isOpen) return
     setSelectedCompany(null)
     setCompanySearch('')
+    setAmount('')
     setIsDropdownOpen(false)
     setError(null)
   }, [isOpen])
@@ -275,6 +277,8 @@ export default function AddTransactionModal({ isOpen, onClose, companies, lawyer
                   name="amount"
                   type="text"
                   className="input num"
+                  value={amount}
+                  onChange={e => setAmount(formatNumberWithCommas(e.target.value))}
                   placeholder="250,000"
                 />
               </div>

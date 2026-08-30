@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { createPortal } from 'react-dom'
 import { Icon } from '@/components/ui/Icon'
+import { formatNumberWithCommas } from '@/lib/constants'
 import { useModalBodyLock } from '@/lib/hooks/useModalBodyLock'
 import { createEstablishedCompanyAction } from '@/app/(app)/commercial/companies-registry/actions'
 
@@ -100,7 +101,8 @@ export default function AddEstablishedCompanyModal({ isOpen, onClose, onSuccess 
   }
 
   const updateShareholder = (id: string, field: keyof ShareholderInput, val: string) => {
-    setShareholders(prev => prev.map(s => (s.id === id ? { ...s, [field]: val } : s)))
+    const formattedVal = field === 'share_amount' ? formatNumberWithCommas(val) : val
+    setShareholders(prev => prev.map(s => (s.id === id ? { ...s, [field]: formattedVal } : s)))
   }
 
   const toggleFsYear = (yr: number) => {
@@ -338,7 +340,7 @@ export default function AddEstablishedCompanyModal({ isOpen, onClose, onSuccess 
                       type="text"
                       className="input num"
                       value={capital}
-                      onChange={e => setCapital(e.target.value)}
+                      onChange={e => setCapital(formatNumberWithCommas(e.target.value))}
                       placeholder="100,000,000"
                     />
                   </div>

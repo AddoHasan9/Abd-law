@@ -10,7 +10,7 @@ import { getTaxAssessmentsAction } from '@/app/(app)/commercial/tax-assessment/a
 import AddIDModal from '@/components/commercial/AddIDModal'
 import type { CompanyWithWorkflow, TaxAssessment } from '@/types/database'
 import { useModalBodyLock } from '@/lib/hooks/useModalBodyLock'
-import { IRAQ_GOVERNORATES, WORKFLOW } from '@/lib/constants'
+import { IRAQ_GOVERNORATES, WORKFLOW, formatNumberWithCommas } from '@/lib/constants'
 import { usePermissions } from '@/lib/context/UserRoleContext'
 
 interface Props {
@@ -46,7 +46,7 @@ export default function CompanyDetailsModal({ company, isOpen, onClose, onDelete
 
   const [name, setName] = useState(company?.name || '')
   const [kind, setKind] = useState(company?.kind || 'محدودة')
-  const [capital, setCapital] = useState(company?.capital?.toString() || '')
+  const [capital, setCapital] = useState(company?.capital ? formatNumberWithCommas(company.capital) : '')
   const [manager, setManager] = useState(company?.manager || '')
   const [phone, setPhone] = useState(company?.phone || '')
   const [activity, setActivity] = useState(company?.activity || '')
@@ -144,7 +144,7 @@ export default function CompanyDetailsModal({ company, isOpen, onClose, onDelete
     if (company) {
       setName(company.name || '')
       setKind(company.kind || 'محدودة')
-      setCapital(company.capital?.toString() || '')
+      setCapital(company.capital ? formatNumberWithCommas(company.capital) : '')
       setManager(company.manager || '')
       setPhone(company.phone || '')
       setActivity(company.activity || '')
@@ -492,7 +492,7 @@ export default function CompanyDetailsModal({ company, isOpen, onClose, onDelete
 
                 <div className="field">
                   <label htmlFor="modal-capital">رأس المال (د.ع)</label>
-                  <input id="modal-capital" type="text" className="input num" value={capital} onChange={e => setCapital(e.target.value)} />
+                  <input id="modal-capital" type="text" className="input num" value={capital} onChange={e => setCapital(formatNumberWithCommas(e.target.value))} placeholder="50,000,000" />
                 </div>
               </div>
 

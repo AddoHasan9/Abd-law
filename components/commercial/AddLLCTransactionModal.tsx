@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { createPortal } from 'react-dom'
 import { Icon } from '@/components/ui/Icon'
+import { formatNumberWithCommas } from '@/lib/constants'
 import { useModalBodyLock } from '@/lib/hooks/useModalBodyLock'
 import { createLLCTransactionAction } from '@/app/(app)/commercial/llc/actions'
 import type { Company } from '@/types/database'
@@ -310,7 +311,7 @@ export default function AddLLCTransactionModal({
                         setCompanySearch(c.name)
                         if (c.manager) setManagerName(c.manager)
                         if (c.phone) setPhone(c.phone)
-                        if (c.capital) setCapitalBefore(c.capital.toString())
+                        if (c.capital) setCapitalBefore(formatNumberWithCommas(c.capital))
                         setIsDropdownOpen(false)
                       }}
                       style={{
@@ -355,7 +356,7 @@ export default function AddLLCTransactionModal({
                     type="text"
                     className="input num"
                     value={capitalBefore}
-                    onChange={e => setCapitalBefore(e.target.value)}
+                    onChange={e => setCapitalBefore(formatNumberWithCommas(e.target.value))}
                     placeholder="مثال: 1,000,000"
                   />
                 </div>
@@ -369,7 +370,7 @@ export default function AddLLCTransactionModal({
                     type="text"
                     className="input num"
                     value={capitalAfter}
-                    onChange={e => setCapitalAfter(e.target.value)}
+                    onChange={e => setCapitalAfter(formatNumberWithCommas(e.target.value))}
                     placeholder="مثال: 5,000,000"
                   />
                 </div>
@@ -484,7 +485,7 @@ export default function AddLLCTransactionModal({
                   type="text"
                   className="input num"
                   value={fee}
-                  onChange={e => setFee(e.target.value)}
+                  onChange={e => setFee(formatNumberWithCommas(e.target.value))}
                   placeholder="250,000"
                 />
               </div>

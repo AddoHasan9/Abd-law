@@ -11,6 +11,7 @@ import {
   type WorkflowTemplateStep,
 } from '@/app/(app)/settings/actions'
 import type { Settings } from '@/types/database'
+import { formatNumberWithCommas, parseNumberFromCommas } from '@/lib/constants'
 import { usePermissions } from '@/lib/context/UserRoleContext'
 
 export default function SettingsClient() {
@@ -36,9 +37,12 @@ export default function SettingsClient() {
 
   // Workflow Builder State
   const [templates, setTemplates] = useState<Record<string, WorkflowTemplate>>({})
-  const [selectedTxKey, setSelectedTxKey] = useState<string>('share_sale')
+  const [selectedTxKey, setSelectedTxKey] = useState<string>('formation')
   const [newStepLabel, setNewStepLabel] = useState('')
   const [newStepOwner, setNewStepOwner] = useState('الموظف المختص')
+  const [editingStepId, setEditingStepId] = useState<string | null>(null)
+  const [editingStepLabel, setEditingStepLabel] = useState('')
+  const [editingStepOwner, setEditingStepOwner] = useState('')
 
   useEffect(() => {
     async function loadData() {
@@ -132,6 +136,33 @@ export default function SettingsClient() {
         steps,
       },
     })
+  }
+
+  const handleStartEditStep = (step: WorkflowTemplateStep) => {
+    setEditingStepId(step.id)
+    setEditingStepLabel(step.label)
+    setEditingStepOwner(step.owner)
+  }
+
+  const handleSaveEditStep = () => {
+    if (!editingStepId || !editingStepLabel.trim() || !activeTemplate) return
+    const updatedSteps = activeTemplate.steps.map(s =>
+      s.id === editingStepId
+        ? { ...s, label: editingStepLabel.trim(), owner: editingStepOwner.trim() || 'الموظف المختص' }
+        : s
+    )
+    setTemplates({
+      ...templates,
+      [selectedTxKey]: {
+        ...activeTemplate,
+        steps: updatedSteps,
+      },
+    })
+    setEditingStepId(null)
+  }
+
+  const handleCancelEditStep = () => {
+    setEditingStepId(null)
   }
 
   const handleSaveWorkflows = async () => {
@@ -278,7 +309,19 @@ export default function SettingsClient() {
                     }`}
                   >
                     <span className="material-symbols-outlined text-[16px]">
-                      {key === 'share_sale' ? 'swap_horiz' : key === 'capital_increase' ? 'trending_up' : key === 'manager_change' ? 'badge' : 'task_alt'}
+                      {key === 'formation'
+                        ? 'domain_add'
+                        : key === 'share_sale'
+                        ? 'swap_horiz'
+                        : key === 'capital_increase'
+                        ? 'trending_up'
+                        : key === 'manager_change'
+                        ? 'badge'
+                        : key === 'address_change'
+                        ? 'location_city'
+                        : key === 'paper_attestation'
+                        ? 'verified'
+                        : 'task_alt'}
                     </span>
                     <span>{item.txLabel}</span>
                     <span className="w-5 h-5 rounded-full bg-black/30 flex items-center justify-center text-[10px] num text-slate-300">
@@ -317,50 +360,103 @@ export default function SettingsClient() {
                       key={step.id}
                       className="p-4 rounded-2xl bg-[var(--surface-2)] border border-[var(--line-soft)] hover:border-[#38BDF8]/40 transition-all flex items-center justify-between gap-4 group"
                     >
-                      {/* Step Number & Details */}
-                      <div className="flex items-center gap-3.5">
-                        <div className="w-10 h-10 rounded-xl bg-emerald-500 text-white flex items-center justify-center font-black text-sm shadow-md shadow-emerald-500/20 flex-none">
-                          <span className="num">{idx + 1}</span>
-                        </div>
-                        <div>
-                          <div className="text-sm font-extrabold text-[var(--text)]">{step.label}</div>
-                          <div className="text-[11px] text-[var(--text-3)] font-semibold mt-0.5 flex items-center gap-1.5">
-                            <span className="material-symbols-outlined text-[13px]">person</span>
-                            <span>المسؤول: {step.owner}</span>
+                      {editingStepId === step.id ? (
+                        <div className="flex-1 flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5">
+                          <div className="w-8 h-8 rounded-xl bg-blue-500 text-white flex items-center justify-center font-black text-xs flex-none">
+                            <span className="num">{idx + 1}</span>
+                          </div>
+                          <input
+                            type="text"
+                            className="input flex-1 h-10 text-xs px-3"
+                            value={editingStepLabel}
+                            onChange={e => setEditingStepLabel(e.target.value)}
+                            placeholder="اسم المحطة"
+                            autoFocus
+                          />
+                          <input
+                            type="text"
+                            className="input w-full sm:w-48 h-10 text-xs px-3"
+                            value={editingStepOwner}
+                            onChange={e => setEditingStepOwner(e.target.value)}
+                            placeholder="الجهة المسؤولة"
+                          />
+                          <div className="flex items-center gap-1.5 flex-none">
+                            <button
+                              type="button"
+                              onClick={handleSaveEditStep}
+                              className="px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center gap-1 cursor-pointer shadow-sm"
+                              title="حفظ التعديل"
+                            >
+                              <span className="material-symbols-outlined text-[15px]">check</span>
+                              <span>حفظ</span>
+                            </button>
+                            <button
+                              type="button"
+                              onClick={handleCancelEditStep}
+                              className="px-3.5 py-2 rounded-xl bg-[var(--surface-3)] text-[var(--text-3)] hover:text-white font-bold text-xs flex items-center gap-1 cursor-pointer"
+                              title="إلغاء التعديل"
+                            >
+                              <span className="material-symbols-outlined text-[15px]">close</span>
+                              <span>إلغاء</span>
+                            </button>
                           </div>
                         </div>
-                      </div>
+                      ) : (
+                        <>
+                          {/* Step Number & Details */}
+                          <div className="flex items-center gap-3.5">
+                            <div className="w-10 h-10 rounded-xl bg-emerald-500 text-white flex items-center justify-center font-black text-sm shadow-md shadow-emerald-500/20 flex-none">
+                              <span className="num">{idx + 1}</span>
+                            </div>
+                            <div>
+                              <div className="text-sm font-extrabold text-[var(--text)]">{step.label}</div>
+                              <div className="text-[11px] text-[var(--text-3)] font-semibold mt-0.5 flex items-center gap-1.5">
+                                <span className="material-symbols-outlined text-[13px]">person</span>
+                                <span>المسؤول: {step.owner}</span>
+                              </div>
+                            </div>
+                          </div>
 
-                      {/* Action Controls (Move Up, Move Down, Delete) */}
-                      {canEdit && (
-                        <div className="flex items-center gap-1.5">
-                          <button
-                            type="button"
-                            onClick={() => handleMoveStep(idx, 'up')}
-                            disabled={idx === 0}
-                            className="w-8 h-8 rounded-lg bg-[var(--surface-3)] text-[var(--text-2)] hover:text-white hover:bg-blue-600 disabled:opacity-30 flex items-center justify-center transition-colors cursor-pointer"
-                            title="تحريك لأعلى"
-                          >
-                            <span className="material-symbols-outlined text-[16px]">arrow_upward</span>
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => handleMoveStep(idx, 'down')}
-                            disabled={idx === activeTemplate.steps.length - 1}
-                            className="w-8 h-8 rounded-lg bg-[var(--surface-3)] text-[var(--text-2)] hover:text-white hover:bg-blue-600 disabled:opacity-30 flex items-center justify-center transition-colors cursor-pointer"
-                            title="تحريك لأسفل"
-                          >
-                            <span className="material-symbols-outlined text-[16px]">arrow_downward</span>
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => handleDeleteStep(step.id)}
-                            className="w-8 h-8 rounded-lg bg-red-500/10 text-red-400 hover:bg-red-500 hover:text-white flex items-center justify-center transition-colors cursor-pointer mr-2"
-                            title="حذف هذه الخطوة"
-                          >
-                            <span className="material-symbols-outlined text-[16px]">delete</span>
-                          </button>
-                        </div>
+                          {/* Action Controls (Edit, Move Up, Move Down, Delete) */}
+                          {canEdit && (
+                            <div className="flex items-center gap-1.5">
+                              <button
+                                type="button"
+                                onClick={() => handleStartEditStep(step)}
+                                className="w-8 h-8 rounded-lg bg-[var(--surface-3)] text-[var(--text-2)] hover:text-white hover:bg-blue-600 flex items-center justify-center transition-colors cursor-pointer"
+                                title="تعديل اسم أو مسؤول المحطة"
+                              >
+                                <span className="material-symbols-outlined text-[16px]">edit</span>
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => handleMoveStep(idx, 'up')}
+                                disabled={idx === 0}
+                                className="w-8 h-8 rounded-lg bg-[var(--surface-3)] text-[var(--text-2)] hover:text-white hover:bg-blue-600 disabled:opacity-30 flex items-center justify-center transition-colors cursor-pointer"
+                                title="تحريك لأعلى"
+                              >
+                                <span className="material-symbols-outlined text-[16px]">arrow_upward</span>
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => handleMoveStep(idx, 'down')}
+                                disabled={idx === activeTemplate.steps.length - 1}
+                                className="w-8 h-8 rounded-lg bg-[var(--surface-3)] text-[var(--text-2)] hover:text-white hover:bg-blue-600 disabled:opacity-30 flex items-center justify-center transition-colors cursor-pointer"
+                                title="تحريك لأسفل"
+                              >
+                                <span className="material-symbols-outlined text-[16px]">arrow_downward</span>
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => handleDeleteStep(step.id)}
+                                className="w-8 h-8 rounded-lg bg-red-500/10 text-red-400 hover:bg-red-500 hover:text-white flex items-center justify-center transition-colors cursor-pointer mr-2"
+                                title="حذف هذه الخطوة"
+                              >
+                                <span className="material-symbols-outlined text-[16px]">delete</span>
+                              </button>
+                            </div>
+                          )}
+                        </>
                       )}
                     </div>
                   ))}
@@ -459,10 +555,10 @@ export default function SettingsClient() {
             <div className="field">
               <label className="text-xs font-bold text-[var(--text)]">مبلغ الغرامة اليومية (د.ع)</label>
               <input
-                type="number"
+                type="text"
                 className="input num"
-                value={settings.penalty_daily}
-                onChange={e => setSettings({ ...settings, penalty_daily: parseInt(e.target.value) || 50000 })}
+                value={formatNumberWithCommas(settings.penalty_daily)}
+                onChange={e => setSettings({ ...settings, penalty_daily: parseNumberFromCommas(e.target.value) })}
                 required
                 disabled={!canEdit}
               />
@@ -471,10 +567,10 @@ export default function SettingsClient() {
             <div className="field">
               <label className="text-xs font-bold text-[var(--text)]">سقف الغرامة الأقصى (د.ع)</label>
               <input
-                type="number"
+                type="text"
                 className="input num"
-                value={settings.penalty_max}
-                onChange={e => setSettings({ ...settings, penalty_max: parseInt(e.target.value) || 5000000 })}
+                value={formatNumberWithCommas(settings.penalty_max)}
+                onChange={e => setSettings({ ...settings, penalty_max: parseNumberFromCommas(e.target.value) })}
                 required
                 disabled={!canEdit}
               />
