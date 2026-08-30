@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { formatDate } from '@/lib/constants'
+import { formatDate, formatFullDate } from '@/lib/constants'
 import type { DashboardStats } from '@/lib/data/dashboard'
 import type { ProfileWithStats } from '@/lib/data/profiles'
 import RemindersWidget from './RemindersWidget'
@@ -53,30 +53,30 @@ export default function DashboardClient({ stats, profiles = [] }: Props) {
       <ExpiryAlertBanner alerts={stats.expiryAlerts || []} />
 
       {/* 1. Executive Page Header (Calm, Dignified, No Redundant Buttons) */}
-      <div className="flex flex-col md:flex-row items-start md:items-center justify-between w-full gap-4 pb-4 border-b border-[var(--line-soft)]">
-        <div className="flex flex-col gap-1">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-[var(--surface-2)] border border-[var(--glass-border)] text-[var(--accent)] flex items-center justify-center shadow-xs">
-              <span className="material-symbols-outlined text-[22px]">account_balance</span>
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between w-full gap-3 lg:gap-4 pb-4 border-b border-[var(--line-soft)]">
+        <div className="flex items-start gap-3 min-w-0">
+          <div className="w-10 h-10 shrink-0 rounded-2xl bg-[var(--surface-2)] border border-[var(--glass-border)] text-[var(--accent)] flex items-center justify-center shadow-xs">
+            <span className="material-symbols-outlined text-[22px]">account_balance</span>
+          </div>
+          <div className="min-w-0">
+            <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+              <h1 className="text-xl md:text-2xl lg:text-3xl font-extrabold tracking-tight text-[var(--text)] leading-tight">
+                لوحة التحكم التنفيذية
+              </h1>
+              <span className="px-2.5 py-0.5 rounded-full text-[10.5px] font-bold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 whitespace-nowrap">
+                متصل ومحدّث
+              </span>
             </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight text-[var(--text)]">لوحة التحكم التنفيذية</h1>
-                <span className="px-2.5 py-0.5 rounded-full text-[10.5px] font-bold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
-                  متصل ومحدّث
-                </span>
-              </div>
-              <p className="text-xs md:text-sm text-[var(--text-3)]">
-                مكتب المحامي عبدالحسن الخزرجي — ملخص شامل للعمليات والشركات والمهل القانونية
-              </p>
-            </div>
+            <p className="mt-1.5 text-xs md:text-sm text-[var(--text-3)] leading-relaxed">
+              مكتب المحامي عبدالحسن الخزرجي — ملخص شامل للعمليات والشركات والمهل القانونية
+            </p>
           </div>
         </div>
 
-        {/* Live Date & Operational Summary Pill */}
-        <div className="flex items-center gap-2 bg-[var(--surface-2)] px-3.5 py-2 rounded-xl border border-[var(--glass-border)] text-xs text-[var(--text-2)] font-semibold shadow-xs">
+        {/* Live Date Pill */}
+        <div className="flex items-center gap-2 self-start lg:self-auto shrink-0 bg-[var(--surface-2)] px-3.5 py-2 rounded-xl border border-[var(--glass-border)] text-[12.5px] text-[var(--text-2)] font-semibold shadow-xs">
           <span className="material-symbols-outlined text-[16px] text-[var(--accent)]">calendar_today</span>
-          <span>{new Date().toLocaleDateString('ar-IQ', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</span>
+          <span dir="rtl">{formatFullDate()}</span>
         </div>
       </div>
 

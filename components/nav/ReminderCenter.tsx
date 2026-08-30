@@ -101,11 +101,11 @@ export default function ReminderCenter() {
       {isOpen && (
         <div
           style={{
-            position: 'absolute',
-            top: 'calc(100% + 10px)',
-            left: 0,
-            width: 'min(380px, 90vw)',
-            maxHeight: '480px',
+            position: 'fixed',
+            top: 'calc(var(--topbar-h, 56px) + 8px)',
+            insetInlineEnd: '8px',
+            width: 'min(380px, calc(100vw - 16px))',
+            maxHeight: 'calc(100dvh - var(--topbar-h, 56px) - 24px)',
             background: 'var(--surface)',
             color: 'var(--text)',
             border: '1px solid var(--line)',

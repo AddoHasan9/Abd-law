@@ -308,6 +308,10 @@ const AR_MONTHS = [
   'تموز','آب','أيلول','تشرين الأول','تشرين الثاني','كانون الأول',
 ]
 
+const AR_WEEKDAYS = [
+  'الأحد','الاثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت',
+]
+
 export function formatDate(d: string | Date | null | undefined, long = false): string {
   if (!d) return '—'
   const x = new Date(d)
@@ -316,6 +320,22 @@ export function formatDate(d: string | Date | null | undefined, long = false): s
   return long
     ? `${x.getDate()} ${AR_MONTHS[x.getMonth()]} ${x.getFullYear()}`
     : `${x.getFullYear()}/${p(x.getMonth() + 1)}/${p(x.getDate())}`
+}
+
+/** التاريخ الكامل بالعربية وبأرقام لاتينية: «الأحد، 30 آب 2026» */
+export function formatFullDate(d: string | Date | null | undefined = new Date()): string {
+  const x = d ? new Date(d) : new Date()
+  if (isNaN(x.getTime())) return '—'
+  return `${AR_WEEKDAYS[x.getDay()]}، ${x.getDate()} ${AR_MONTHS[x.getMonth()]} ${x.getFullYear()}`
+}
+
+/** الوقت بصيغة 24 ساعة وبأرقام لاتينية: «14:05» */
+export function formatTime(d: string | Date | null | undefined): string {
+  if (!d) return '—'
+  const x = new Date(d)
+  if (isNaN(x.getTime())) return '—'
+  const p = (n: number) => String(n).padStart(2, '0')
+  return `${p(x.getHours())}:${p(x.getMinutes())}`
 }
 
 export function formatMoney(n: number | null | undefined, currency = 'IQD'): string {

@@ -224,7 +224,7 @@ export default function CommercialClient({ rows = [], companies = [] }: Props) {
         const pic = getPersonInCharge(comp)
         const pr = priorityOf(t.priority).label
         const st = t.status || 'new'
-        const dt = t.created_at ? new Date(t.created_at).toLocaleDateString('ar-IQ') : '—'
+        const dt = formatDate(t.created_at)
         return [
           `"${name.replace(/"/g, '""')}"`,
           `"${sType.replace(/"/g, '""')}"`,

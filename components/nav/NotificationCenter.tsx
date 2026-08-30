@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react'
 import { Icon } from '@/components/ui/Icon'
+import { formatDate, formatTime } from '@/lib/constants'
 import {
   getNotificationsAction,
   markNotificationReadAction,
@@ -116,11 +117,11 @@ export default function NotificationCenter({ initialCount = 0 }: Props) {
       {isOpen && (
         <div
           style={{
-            position: 'absolute',
-            top: 'calc(100% + 10px)',
-            left: 0,
-            width: 'min(390px, 90vw)',
-            maxHeight: '500px',
+            position: 'fixed',
+            top: 'calc(var(--topbar-h, 56px) + 8px)',
+            insetInlineEnd: '8px',
+            width: 'min(390px, calc(100vw - 16px))',
+            maxHeight: 'calc(100dvh - var(--topbar-h, 56px) - 24px)',
             background: 'var(--glass-bg)',
             backdropFilter: 'var(--glass-backdrop)',
             WebkitBackdropFilter: 'var(--glass-backdrop)',
@@ -292,9 +293,9 @@ export default function NotificationCenter({ initialCount = 0 }: Props) {
                         </div>
                       )}
                       <div style={{ fontSize: '10.5px', color: 'var(--text-3)', display: 'flex', gap: '8px' }}>
-                        <span>{new Date(item.created_at).toLocaleDateString('ar-IQ')}</span>
+                        <span>{formatDate(item.created_at)}</span>
                         <span>•</span>
-                        <span>{new Date(item.created_at).toLocaleTimeString('ar-IQ', { hour: '2-digit', minute: '2-digit' })}</span>
+                        <span>{formatTime(item.created_at)}</span>
                       </div>
                     </div>
                   </div>
