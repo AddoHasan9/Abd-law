@@ -24,58 +24,76 @@ export async function listCompanies(): Promise<CompanyWithWorkflow[]> {
       .select('*')
       .order('created_at', { ascending: false })
 
-    if (!companiesData || companiesData.length === 0) {
-      const map = new Map<string, CompanyWithWorkflow>()
-      diskCompanies.forEach(c => {
-        const managers = diskManagers.filter(m => m.company_id === c.id)
-        const activeManager = managers.find(m => m.active)?.name || managers[0]?.name || c.manager
-        const shareholders = diskShareholders.filter(s => s.company_id === c.id)
-        map.set(c.id, {
-          ...c,
-          manager: activeManager,
-          managers: managers.length > 0 ? managers : c.managers,
-          shareholders: shareholders.length > 0 ? shareholders : c.shareholders,
-        })
+    const deletedIds = new Set(readJsonFile<string[]>('deleted_company_ids.json', []))
+    const map = new Map<string, CompanyWithWorkflow>()
+
+    // First load from disk store
+    diskCompanies.forEach(c => {
+      if (deletedIds.has(c.id)) return
+      const isEstablished = c.status === 'established' || Boolean(c.deposit_released) || Boolean(c.cert_date)
+      let workflowSteps = c.workflow_steps || []
+      if (isEstablished) {
+        workflowSteps = WORKFLOW.map((wf, idx) => ({
+          id: `wf_${c.id}_${idx + 1}`,
+          company_id: c.id,
+          step_key: wf.id,
+          step_order: idx + 1,
+          label: wf.label,
+          owner_kind: wf.owner,
+          state: 'done' as const,
+          done_by: null,
+          done_at: c.created_at || new Date().toISOString(),
+        }))
+      }
+      const managers = diskManagers.filter(m => m.company_id === c.id)
+      const activeManager = managers.find(m => m.active)?.name || managers[0]?.name || c.manager
+      const shareholders = diskShareholders.filter(s => s.company_id === c.id)
+      map.set(c.id, {
+        ...c,
+        workflow_steps: workflowSteps,
+        manager: activeManager,
+        managers: managers.length > 0 ? managers : c.managers,
+        shareholders: shareholders.length > 0 ? shareholders : c.shareholders,
       })
-      return Array.from(map.values())
-    }
-
-    const companyIds = companiesData.map(c => c.id)
-
-    // Fetch related tables individually to prevent deep nesting serialization errors
-    const [stepsRes, managersRes, shareholdersRes] = await Promise.all([
-      supabase.from('workflow_steps').select('*').in('company_id', companyIds),
-      supabase.from('company_managers').select('*').in('company_id', companyIds),
-      supabase.from('company_shareholders').select('*').in('company_id', companyIds),
-    ])
-
-    const stepsMap = new Map<string, WorkflowStep[]>()
-    ;(stepsRes.data || []).forEach(step => {
-      if (!stepsMap.has(step.company_id)) stepsMap.set(step.company_id, [])
-      stepsMap.get(step.company_id)!.push(step)
     })
 
-    const managersMap = new Map<string, CompanyManager[]>()
-    ;(managersRes.data || []).forEach(m => {
-      if (!managersMap.has(m.company_id)) managersMap.set(m.company_id, [])
-      managersMap.get(m.company_id)!.push(m)
-    })
+    if (companiesData && companiesData.length > 0) {
+      const companyIds = companiesData.map(c => c.id)
 
-    const shareholdersMap = new Map<string, CompanyShareholder[]>()
-    ;(shareholdersRes.data || []).forEach(s => {
-      if (!shareholdersMap.has(s.company_id)) shareholdersMap.set(s.company_id, [])
-      shareholdersMap.get(s.company_id)!.push(s)
-    })
+      // Fetch related tables individually to prevent deep nesting serialization errors
+      const [stepsRes, managersRes, shareholdersRes] = await Promise.all([
+        supabase.from('workflow_steps').select('*').in('company_id', companyIds),
+        supabase.from('company_managers').select('*').in('company_id', companyIds),
+        supabase.from('company_shareholders').select('*').in('company_id', companyIds),
+      ])
 
-    const dbCompanies = companiesData.map(c => {
-      let workflowSteps = (stepsMap.get(c.id) || []).sort(
-        (a, b) => (a.step_order || 0) - (b.step_order || 0)
-      )
-      if (!workflowSteps.length) {
-        const diskCo = diskCompanies.find(dc => dc.id === c.id)
-        if (diskCo?.workflow_steps?.length) {
-          workflowSteps = diskCo.workflow_steps
-        } else {
+      const stepsMap = new Map<string, WorkflowStep[]>()
+      ;(stepsRes.data || []).forEach(step => {
+        if (!stepsMap.has(step.company_id)) stepsMap.set(step.company_id, [])
+        stepsMap.get(step.company_id)!.push(step)
+      })
+
+      const managersMap = new Map<string, CompanyManager[]>()
+      ;(managersRes.data || []).forEach(m => {
+        if (!managersMap.has(m.company_id)) managersMap.set(m.company_id, [])
+        managersMap.get(m.company_id)!.push(m)
+      })
+
+      const shareholdersMap = new Map<string, CompanyShareholder[]>()
+      ;(shareholdersRes.data || []).forEach(s => {
+        if (!shareholdersMap.has(s.company_id)) shareholdersMap.set(s.company_id, [])
+        shareholdersMap.get(s.company_id)!.push(s)
+      })
+
+      companiesData.forEach(c => {
+        if (deletedIds.has(c.id)) return
+
+        const isEstablished = c.status === 'established' || Boolean(c.deposit_released) || Boolean(c.cert_date)
+        let workflowSteps = (stepsMap.get(c.id) || []).sort(
+          (a, b) => (a.step_order || 0) - (b.step_order || 0)
+        )
+
+        if (isEstablished) {
           workflowSteps = WORKFLOW.map((wf, idx) => ({
             id: `wf_${c.id}_${idx + 1}`,
             company_id: c.id,
@@ -83,52 +101,46 @@ export async function listCompanies(): Promise<CompanyWithWorkflow[]> {
             step_order: idx + 1,
             label: wf.label,
             owner_kind: wf.owner,
-            state: (idx === 0 ? 'doing' : 'wait') as 'done' | 'doing' | 'wait',
+            state: 'done' as const,
             done_by: null,
-            done_at: null,
+            done_at: c.created_at || new Date().toISOString(),
           }))
+        } else if (!workflowSteps.length) {
+          const diskCo = diskCompanies.find(dc => dc.id === c.id)
+          if (diskCo?.workflow_steps?.length) {
+            workflowSteps = diskCo.workflow_steps
+          } else {
+            workflowSteps = WORKFLOW.map((wf, idx) => ({
+              id: `wf_${c.id}_${idx + 1}`,
+              company_id: c.id,
+              step_key: wf.id,
+              step_order: idx + 1,
+              label: wf.label,
+              owner_kind: wf.owner,
+              state: (idx === 0 ? 'doing' : 'wait') as 'done' | 'doing' | 'wait',
+              done_by: null,
+              done_at: null,
+            }))
+          }
         }
-      }
 
-      const managers = (managersMap.get(c.id) || []).length > 0
-        ? managersMap.get(c.id)!
-        : diskManagers.filter(m => m.company_id === c.id)
-      const activeManager = managers.find(m => m.active)?.name || managers[0]?.name || c.manager || null
-      const shareholders = (shareholdersMap.get(c.id) || []).length > 0
-        ? shareholdersMap.get(c.id)!
-        : diskShareholders.filter(s => s.company_id === c.id)
+        const managers = (managersMap.get(c.id) || []).length > 0
+          ? managersMap.get(c.id)!
+          : diskManagers.filter(m => m.company_id === c.id)
+        const activeManager = managers.find(m => m.active)?.name || managers[0]?.name || c.manager || null
+        const shareholders = (shareholdersMap.get(c.id) || []).length > 0
+          ? shareholdersMap.get(c.id)!
+          : diskShareholders.filter(s => s.company_id === c.id)
 
-      return {
-        ...c,
-        manager: activeManager,
-        managers,
-        shareholders,
-        workflow_steps: workflowSteps,
-      }
-    }) as CompanyWithWorkflow[]
-
-    // Merge disk companies with DB records and filter out permanently deleted companies
-    const deletedIds = new Set(readJsonFile<string[]>('deleted_company_ids.json', []))
-    const map = new Map<string, CompanyWithWorkflow>()
-
-    diskCompanies.forEach(c => {
-      if (deletedIds.has(c.id)) return
-      const managers = diskManagers.filter(m => m.company_id === c.id)
-      const activeManager = managers.find(m => m.active)?.name || managers[0]?.name || c.manager
-      const shareholders = diskShareholders.filter(s => s.company_id === c.id)
-      map.set(c.id, {
-        ...c,
-        manager: activeManager,
-        managers: managers.length > 0 ? managers : c.managers,
-        shareholders: shareholders.length > 0 ? shareholders : c.shareholders,
+        map.set(c.id, {
+          ...c,
+          manager: activeManager,
+          managers,
+          shareholders,
+          workflow_steps: workflowSteps,
+        } as CompanyWithWorkflow)
       })
-    })
-
-    dbCompanies.forEach(c => {
-      if (!deletedIds.has(c.id)) {
-        map.set(c.id, c)
-      }
-    })
+    }
 
     return Array.from(map.values())
       .filter(c => !deletedIds.has(c.id))
@@ -156,10 +168,25 @@ export async function getCompany(id: string): Promise<CompanyWithWorkflow | null
       .eq('id', id)
       .single()
 
-    if (error || !data) return foundDisk || null
+    const rawCompany = data || foundDisk
+    if (!rawCompany) return null
 
-    const workflowSteps = (data.workflow_steps && data.workflow_steps.length > 0)
-      ? data.workflow_steps.sort(
+    const isEst = rawCompany.status === 'established' || Boolean(rawCompany.deposit_released) || Boolean(rawCompany.cert_date)
+
+    const workflowSteps = isEst
+      ? WORKFLOW.map((wf, idx) => ({
+          id: `wf_${id}_${idx + 1}`,
+          company_id: id,
+          step_key: wf.id,
+          step_order: idx + 1,
+          label: wf.label,
+          owner_kind: wf.owner,
+          state: 'done' as const,
+          done_by: null,
+          done_at: rawCompany.created_at || new Date().toISOString(),
+        }))
+      : (rawCompany.workflow_steps && rawCompany.workflow_steps.length > 0)
+      ? rawCompany.workflow_steps.sort(
           (a: { step_order: number }, b: { step_order: number }) => a.step_order - b.step_order
         )
       : foundDisk?.workflow_steps?.length
@@ -177,7 +204,7 @@ export async function getCompany(id: string): Promise<CompanyWithWorkflow | null
         }))
 
     return {
-      ...data,
+      ...rawCompany,
       workflow_steps: workflowSteps,
     } as CompanyWithWorkflow
   } catch {

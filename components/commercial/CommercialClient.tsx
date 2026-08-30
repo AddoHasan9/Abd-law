@@ -41,8 +41,11 @@ const SERVICE_TYPE_STYLES: Record<string, { label: string; bg: string; color: st
   'tax-id-new': { label: 'إصدار هوية ضريبية', bg: 'rgba(16, 185, 129, 0.08)', color: '#059669', border: '1px solid rgba(16, 185, 129, 0.25)' },
   'tax-id-renew': { label: 'تجديد هوية ضريبية', bg: 'rgba(16, 185, 129, 0.08)', color: '#059669', border: '1px solid rgba(16, 185, 129, 0.25)' },
   'chamber-new': { label: 'إصدار هوية غرفة', bg: 'rgba(249, 115, 22, 0.08)', color: '#ea580c', border: '1px solid rgba(249, 115, 22, 0.25)' },
-  'chamber-renew': { label: 'تجديد هوية غرفة', bg: 'rgba(249, 115, 22, 0.08)', color: '#ea580c', border: '1px solid rgba(249, 115, 22, 0.25)' },
   'plan-id': { label: 'إصدار هوية تخطيط', bg: 'rgba(245, 158, 11, 0.08)', color: '#d97706', border: '1px solid rgba(245, 158, 11, 0.25)' },
+  'plan-id-renew': { label: 'تجديد هوية تخطيط', bg: 'rgba(245, 158, 11, 0.08)', color: '#d97706', border: '1px solid rgba(245, 158, 11, 0.25)' },
+  'importer-id-new': { label: 'إصدار هوية مستورد', bg: 'rgba(6, 182, 212, 0.08)', color: '#0891b2', border: '1px solid rgba(6, 182, 212, 0.25)' },
+  'importer-id-renew': { label: 'تجديد هوية مستورد', bg: 'rgba(6, 182, 212, 0.08)', color: '#0891b2', border: '1px solid rgba(6, 182, 212, 0.25)' },
+  'importer_id': { label: 'هوية مستورد', bg: 'rgba(6, 182, 212, 0.08)', color: '#0891b2', border: '1px solid rgba(6, 182, 212, 0.25)' },
 }
 
 function getPersonInCharge(co?: CompanyWithWorkflow | Company | null): { name: string; roleLabel: string } {

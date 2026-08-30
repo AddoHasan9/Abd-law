@@ -10,7 +10,7 @@ import { getTaxAssessmentsAction } from '@/app/(app)/commercial/tax-assessment/a
 import AddIDModal from '@/components/commercial/AddIDModal'
 import type { CompanyWithWorkflow, TaxAssessment } from '@/types/database'
 import { useModalBodyLock } from '@/lib/hooks/useModalBodyLock'
-import { IRAQ_GOVERNORATES } from '@/lib/constants'
+import { IRAQ_GOVERNORATES, WORKFLOW } from '@/lib/constants'
 import { usePermissions } from '@/lib/context/UserRoleContext'
 
 interface Props {
@@ -158,13 +158,26 @@ export default function CompanyDetailsModal({ company, isOpen, onClose, onDelete
       setEstablishmentDate(company.establishment_date || company.cert_date || '')
       setLastCompletedYear(company.last_completed_fs_year?.toString() || '')
       setFsFirstMethod(company.fs_first_method || 'standard')
-      setLacks(company.lacks || '')
-      setSteps(company.workflow_steps || [])
+      const isCompanyEstablished = company.status === 'established' || Boolean(company.deposit_released) || Boolean(company.cert_date)
+      if (isCompanyEstablished) {
+        setSteps(WORKFLOW.map((wf, idx) => ({
+          id: `wf_${company.id}_${idx + 1}`,
+          company_id: company.id,
+          step_key: wf.id,
+          step_order: idx + 1,
+          label: wf.label,
+          owner_kind: wf.owner,
+          state: 'done' as const,
+          done_by: null,
+          done_at: company.created_at || null,
+        })))
+      } else {
+        setSteps(company.workflow_steps || [])
+      }
 
       if (initialTab) {
         setActiveTab(initialTab)
       } else {
-        const isCompanyEstablished = company.status === 'established' || Boolean(company.deposit_released)
         const allStepsDone = Array.isArray(company.workflow_steps) && company.workflow_steps.length > 0 && company.workflow_steps.every(s => s.state === 'done')
 
         if (!isCompanyEstablished && !allStepsDone) {

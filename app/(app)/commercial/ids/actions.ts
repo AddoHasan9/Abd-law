@@ -4,7 +4,7 @@ import { revalidatePath } from 'next/cache'
 import { createAdminClient } from '@/lib/supabase/server'
 import { logTimelineEvent } from '@/lib/data/timeline'
 import { readJsonFile, writeJsonFile } from '@/lib/data/fs-store'
-import type { CompanyWithWorkflow, CompanyIDRecord, CompanyIDStatus } from '@/types/database'
+import type { CompanyWithWorkflow, CompanyIDRecord, CompanyIDStatus, TransactionFull, Company } from '@/types/database'
 import { requirePermission } from '@/lib/auth/require-permission'
 
 export type { CompanyIDRecord, CompanyIDStatus }
@@ -14,6 +14,14 @@ const ID_TYPE_LABELS: Record<string, string> = {
   tax_id: 'هوية ضريبية',
   planning_id: 'هوية التخطيط',
   chamber_id: 'هوية الغرفة التجارية',
+}
+
+function mapIDTypeToTxType(idType: string, isRenew: boolean): string {
+  if (idType === 'chamber_id') return isRenew ? 'chamber-renew' : 'chamber-new'
+  if (idType === 'tax_id') return isRenew ? 'tax-id-renew' : 'tax-id-new'
+  if (idType === 'planning_id') return isRenew ? 'plan-id-renew' : 'plan-id'
+  if (idType === 'importer_id') return isRenew ? 'importer-id-renew' : 'importer-id-new'
+  return 'tax-id-new'
 }
 
 function generateUUID() {
@@ -149,31 +157,26 @@ export async function createCompanyIDAction(payload: {
       if (foundInDisk) {
         targetCompanyId = foundInDisk.id
       } else {
+        // Auto-create company in DB and disk so it connects properly
         try {
-          const { data: matchedCo } = await supabase
+          const { data: dbCo } = await supabase
             .from('companies')
             .select('id, name')
             .ilike('name', compName)
             .limit(1)
-            .maybeSingle()
+            .single()
 
-          if (matchedCo) {
-            targetCompanyId = matchedCo.id
+          if (dbCo) {
+            targetCompanyId = dbCo.id
           } else {
-            // Create a new company record with proper UUID
-            const newCompanyUUID = generateUUID()
-            targetCompanyId = newCompanyUUID
-
+            targetCompanyId = generateUUID()
             const newCoRecord = {
-              id: newCompanyUUID,
+              id: targetCompanyId,
               name: compName,
               kind: 'محدودة',
-              capital: 0,
-              external: true,
               status: 'established',
               created_at: new Date().toISOString(),
             }
-
             try {
               await supabase.from('companies').insert(newCoRecord)
             } catch (insErr) {
@@ -269,6 +272,53 @@ export async function createCompanyIDAction(payload: {
     diskIDs.unshift(diskRecord)
     writeJsonFile('company_ids.json', diskIDs)
 
+    // Sync to Commercial Transactions Feed
+    const isRenew = Boolean(payload.notes?.includes('تجديد'))
+    const txTypeStr = mapIDTypeToTxType(payload.id_type, isRenew)
+    const txStatus = finalStatus === 'done' ? 'completed' : 'in_progress'
+
+    const txRecord: TransactionFull = {
+      id: recordId,
+      company_id: targetCompanyId,
+      client_id: null,
+      lawyer_id: null,
+      type: txTypeStr,
+      status: txStatus,
+      priority: 'medium',
+      tx_date: createdAt.slice(0, 10),
+      due_date: expiryDate || null,
+      description: payload.notes?.trim() || `إصدار ${ID_TYPE_LABELS[payload.id_type] || payload.id_type}`,
+      services: [payload.id_type],
+      lacks: null,
+      fee: null,
+      phone: null,
+      created_at: createdAt,
+      clients: null,
+      profiles: null,
+      companies: {
+        id: targetCompanyId,
+        name: finalCompanyName || 'شركة',
+      } as Company,
+    }
+
+    try {
+      await supabase.from('transactions').insert({
+        id: recordId,
+        company_id: targetCompanyId,
+        type: txTypeStr,
+        status: txStatus,
+        priority: 'medium',
+        tx_date: createdAt.slice(0, 10),
+        due_date: expiryDate || null,
+        description: payload.notes?.trim() || `إصدار ${ID_TYPE_LABELS[payload.id_type] || payload.id_type}`,
+        created_at: createdAt,
+      })
+    } catch {}
+
+    const diskTxs = readJsonFile<TransactionFull[]>('transactions.json', [])
+    diskTxs.unshift(txRecord)
+    writeJsonFile('transactions.json', diskTxs)
+
     // Log timeline event
     try {
       const isComplete = finalStatus === 'done'
@@ -349,6 +399,23 @@ export async function updateCompanyIDAction(
       writeJsonFile('company_ids.json', diskIDs)
     }
 
+    // Update corresponding commercial transaction
+    const isDone = payload.status === 'done' || Boolean(payload.id_number || payload.issue_date)
+    const diskTxs = readJsonFile<TransactionFull[]>('transactions.json', [])
+    const txIdx = diskTxs.findIndex(t => t.id === id)
+    if (txIdx !== -1) {
+      diskTxs[txIdx].status = isDone ? 'completed' : (payload.status === 'lacks' ? 'incomplete' : 'in_progress')
+      if (payload.expiry_date) diskTxs[txIdx].due_date = payload.expiry_date
+      writeJsonFile('transactions.json', diskTxs)
+    }
+
+    try {
+      await supabase.from('transactions').update({
+        status: isDone ? 'completed' : (payload.status === 'lacks' ? 'incomplete' : 'in_progress'),
+        due_date: payload.expiry_date || null,
+      }).eq('id', id)
+    } catch {}
+
     try {
       revalidatePath('/commercial/ids')
       revalidatePath('/commercial/companies')
@@ -389,6 +456,7 @@ export async function deleteCompanyIDAction(id: string) {
     const supabase = createAdminClient()
     try {
       await supabase.from('company_ids').delete().eq('id', id)
+      await supabase.from('transactions').delete().eq('id', id)
     } catch (dbErr) {
       console.warn('Supabase delete company_ids error:', dbErr)
     }
@@ -396,6 +464,10 @@ export async function deleteCompanyIDAction(id: string) {
     const diskIDs = readJsonFile<CompanyIDRecord[]>('company_ids.json', [])
     const filtered = diskIDs.filter(x => x.id !== id)
     writeJsonFile('company_ids.json', filtered)
+
+    const diskTxs = readJsonFile<TransactionFull[]>('transactions.json', [])
+    const filteredTxs = diskTxs.filter(x => x.id !== id)
+    writeJsonFile('transactions.json', filteredTxs)
 
     try {
       revalidatePath('/commercial/ids')
@@ -409,6 +481,10 @@ export async function deleteCompanyIDAction(id: string) {
     const diskIDs = readJsonFile<CompanyIDRecord[]>('company_ids.json', [])
     const filtered = diskIDs.filter(x => x.id !== id)
     writeJsonFile('company_ids.json', filtered)
+
+    const diskTxs = readJsonFile<TransactionFull[]>('transactions.json', [])
+    const filteredTxs = diskTxs.filter(x => x.id !== id)
+    writeJsonFile('transactions.json', filteredTxs)
     return { success: true }
   }
 }
