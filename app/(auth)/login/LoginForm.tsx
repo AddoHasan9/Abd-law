@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { createClient } from '@/lib/supabase/client'
 
 export default function LoginForm() {
@@ -49,13 +50,36 @@ export default function LoginForm() {
   }
 
   return (
-    <div className="flex flex-col justify-center h-full w-full max-w-[420px] mx-auto py-2">
+    <div className="flex flex-col justify-center h-full w-full max-w-[420px] mx-auto py-1 sm:py-2">
+      {/* Mobile Top Brand Header (Compact & Clean on Mobile Screens) */}
+      <div className="lg:hidden flex items-center gap-3 mb-5 pb-3.5 border-b border-white/10 text-right">
+        <div className="w-12 h-12 rounded-xl bg-white/[0.06] border border-amber-500/30 p-1.5 flex items-center justify-center shadow-md shadow-amber-500/10 shrink-0">
+          <Image
+            src="/logo.png"
+            alt="شعار المكتب"
+            width={48}
+            height={48}
+            className="object-contain w-full h-full"
+            priority
+          />
+        </div>
+        <div className="min-w-0 flex-1">
+          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/15 border border-amber-500/30 text-amber-300">
+            <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-ping" />
+            منظومة العمل القانوني
+          </span>
+          <h2 className="text-sm font-extrabold text-white mt-0.5 truncate">
+            مكتب المحامي عبدالحسن الخزرجي
+          </h2>
+        </div>
+      </div>
+
       {/* Form Header */}
-      <div className="mb-7 text-right">
-        <h1 className="text-2xl md:text-3xl font-extrabold text-white tracking-tight">
+      <div className="mb-5 sm:mb-7 text-right">
+        <h1 className="text-xl sm:text-2xl md:text-3xl font-extrabold text-white tracking-tight">
           تسجيل الدخول
         </h1>
-        <p className="text-xs md:text-sm text-slate-400 mt-1.5 leading-relaxed">
+        <p className="text-xs sm:text-sm text-slate-400 mt-1 leading-relaxed">
           أهلاً بك مجدداً، أدخل بياناتك للوصول إلى لوحة العمل.
         </p>
       </div>
