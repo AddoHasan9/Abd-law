@@ -1270,52 +1270,76 @@
   }
 
   /* ============================================================
-     صفحة تسجيل الدخول الفاخرة (Luxury Glassmorphism Login)
+     صفحات الدخول — تصميم داكن هادئ موحّد مع شريط المتصفح
      ============================================================ */
+
+  /* يمنع ظهور شريط أبيض أعلى/أسفل الصفحة عند السحب على iOS —
+     نعيد تعريف --bg على <html> حتى ترث خلفية <body> اللون الداكن */
+  html:has(#login) {
+    --bg: #0B1220;
+    background: #0B1220;
+  }
+  body:has(#login) {
+    background: #0B1220;
+  }
+
   #login {
-    min-height: 100vh;
+    /* أقفل صفحات الدخول على لوحة داكنة ثابتة بغضّ النظر عن ثيم التطبيق */
+    --bg: #0B1220;
+    --surface: #111A2E;
+    --surface-2: #0E1728;
+    --surface-3: #172136;
+    --text: #F1F5F9;
+    --text-1: #FFFFFF;
+    --text-2: #CBD5E1;
+    --text-3: #94A3B8;
+    --line: rgba(255, 255, 255, 0.10);
+    --line-soft: rgba(255, 255, 255, 0.06);
+    --accent: #D4AF37;
+    --glass-bg: #111A2E;
+    --glass-border: rgba(255, 255, 255, 0.08);
+
+    min-height: 100dvh;
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 24px;
+    background: #0B1220;
+    padding: max(2.5rem, env(safe-area-inset-top)) 1.25rem
+             max(2.5rem, env(safe-area-inset-bottom));
     position: relative;
     z-index: 10;
   }
 
   .login-card {
     width: 100%;
-    max-width: 440px;
-    background: var(--glass-bg);
-    backdrop-filter: var(--glass-backdrop);
-    -webkit-backdrop-filter: var(--glass-backdrop);
+    max-width: 380px;
+    background: var(--surface);
     border: 1px solid var(--glass-border);
-    border-radius: 28px;
-    padding: 36px 32px;
-    box-shadow: var(--shadow-3), inset 0 1px 0 rgba(255, 255, 255, 0.12);
-    animation: scaleIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    border-radius: 18px;
+    padding: 28px 24px;
+    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.5);
     position: relative;
-    overflow: hidden;
   }
 
   .login-mark {
-    width: 56px;
-    height: 56px;
-    border-radius: 18px;
-    background: linear-gradient(135deg, var(--accent), #2563EB);
-    color: #fff;
+    width: 52px;
+    height: 52px;
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.10);
+    color: var(--accent);
     display: grid;
     place-items: center;
-    margin: 0 auto 18px;
-    box-shadow: 0 8px 20px -4px rgba(59, 130, 246, 0.4);
+    margin: 0 auto 16px;
   }
 
   .login-mark .icon {
-    width: 28px;
-    height: 28px;
+    width: 26px;
+    height: 26px;
   }
 
   .login-card h1 {
-    font-size: 20px;
+    font-size: 18px;
     font-weight: 800;
     text-align: center;
     color: var(--text);
@@ -1327,19 +1351,19 @@
     color: var(--text-3);
     text-align: center;
     margin-bottom: 22px;
+    line-height: 1.6;
   }
 
   .login-err {
-    background: var(--bad-soft);
-    color: var(--bad);
-    border: 1px solid rgba(239, 68, 68, 0.25);
+    background: rgba(244, 63, 94, 0.10);
+    color: #FDA4AF;
+    border: 1px solid rgba(244, 63, 94, 0.22);
     padding: 10px 14px;
     border-radius: var(--r-md);
     font-size: 12.5px;
     font-weight: 600;
     margin-bottom: 16px;
     text-align: center;
-    animation: fadeInUp 0.2s ease;
   }
 
   .login-hint {

@@ -21,8 +21,8 @@ export default function LoginForm() {
     e.preventDefault()
     setError(null)
 
-    if (!email.trim())    { setError('يرجى إدخال البريد الإلكتروني'); return }
-    if (!password)        { setError('يرجى إدخال كلمة المرور'); return }
+    if (!email.trim()) { setError('يرجى إدخال البريد الإلكتروني'); return }
+    if (!password)     { setError('يرجى إدخال كلمة المرور'); return }
 
     setLoading(true)
     const supabase = createClient()
@@ -43,132 +43,124 @@ export default function LoginForm() {
       return
     }
 
-    // Success — reload so server session is immediately fresh
+    // نجاح — إعادة تحميل حتى تكون جلسة الخادم محدّثة فورًا
     window.location.href = '/dashboard'
   }
 
   return (
-    <div className="relative z-10 w-full max-w-[420px] rounded-[28px] bg-slate-900/80 backdrop-blur-2xl border border-white/10 p-7 sm:p-8 shadow-2xl shadow-black/60 transition-all duration-300 animate-scale-in">
-      
-      {/* Top Brand Logo */}
-      <div className="flex flex-col items-center justify-center text-center mb-6">
-        <div className="relative w-28 h-28 mb-3 p-2 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center shadow-inner group transition-transform duration-300 hover:scale-105">
+    <div className="relative z-10 w-full max-w-[380px]">
+      {/* الشعار والعنوان */}
+      <div className="mb-7 flex flex-col items-center text-center">
+        <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.04]">
           <Image
             src="/logo.png"
             alt="شعار مكتب المحامي عبد الحسن الخزرجي"
-            width={100}
-            height={100}
+            width={44}
+            height={44}
             priority
-            className="w-full h-full object-contain filter drop-shadow"
+            className="h-11 w-11 object-contain"
           />
         </div>
-
-        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-400 text-[11px] font-bold mb-2">
-          <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-ping" />
-          <span>منظومة العمل القانوني الموحدة</span>
-        </div>
-
-        <h1 className="text-xl font-extrabold text-white tracking-tight">
+        <h1
+          className="text-[17px] font-bold tracking-tight text-white"
+          style={{ fontFamily: 'var(--font-display)' }}
+        >
           مكتب المحامي عبدالحسن الخزرجي
         </h1>
-        <p className="text-xs text-slate-400 mt-1 font-medium">
+        <p className="mt-1.5 text-[13px] leading-relaxed text-slate-400">
           سجّل الدخول للوصول إلى المعاملات وقضايا الشركات
         </p>
       </div>
 
-      {/* Error Message */}
-      {error && (
-        <div className="flex items-center gap-2 p-3 rounded-xl bg-rose-500/15 border border-rose-500/30 text-rose-300 text-xs font-bold mb-5 animate-shake">
-          <span className="material-symbols-outlined text-[18px] text-rose-400 flex-none">error</span>
-          <span>{error}</span>
-        </div>
-      )}
-
-      {/* Login Form */}
-      <form onSubmit={handleLogin} className="flex flex-col gap-4 text-start w-full">
-        {/* Email Field */}
-        <div className="flex flex-col gap-1.5 w-full">
-          <label htmlFor="lg-email" className="font-bold text-xs text-slate-300 text-right block">
-            البريد الإلكتروني
-          </label>
-          <div className="relative flex items-center w-full">
-            <input
-              id="lg-email"
-              type="email"
-              autoComplete="username"
-              placeholder="name@example.com"
-              dir="ltr"
-              value={email}
-              onChange={e => setEmail(e.target.value)}
-              className="w-full h-11 pr-11 pl-4 text-left font-medium text-white bg-slate-800/80 border border-slate-700/80 rounded-xl placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-amber-500/40 focus:border-amber-500 transition-all text-sm"
-            />
-            <span className="material-symbols-outlined absolute right-3.5 text-[20px] text-slate-400 pointer-events-none select-none">
-              alternate_email
-            </span>
+      {/* البطاقة */}
+      <div className="rounded-2xl border border-white/[0.08] bg-[#111A2E] p-6 shadow-[0_16px_48px_rgba(0,0,0,0.5)]">
+        {error && (
+          <div className="mb-4 flex items-center gap-2 rounded-lg border border-rose-500/20 bg-rose-500/10 px-3 py-2.5 text-[12.5px] font-semibold text-rose-300">
+            <span className="material-symbols-outlined flex-none text-[18px]">error</span>
+            <span>{error}</span>
           </div>
-        </div>
+        )}
 
-        {/* Password Field */}
-        <div className="flex flex-col gap-1.5 w-full">
-          <label htmlFor="lg-pass" className="font-bold text-xs text-slate-300 text-right block">
-            كلمة المرور
-          </label>
-          <div className="relative flex items-center w-full">
-            <input
-              id="lg-pass"
-              type={showPassword ? 'text' : 'password'}
-              autoComplete="current-password"
-              placeholder="••••••••"
-              dir="ltr"
-              value={password}
-              onChange={e => setPassword(e.target.value)}
-              className="w-full h-11 pr-11 pl-11 text-left font-medium text-white bg-slate-800/80 border border-slate-700/80 rounded-xl placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-amber-500/40 focus:border-amber-500 transition-all text-sm"
-            />
-            <span className="material-symbols-outlined absolute right-3.5 text-[20px] text-slate-400 pointer-events-none select-none">
-              lock
-            </span>
-            <button
-              type="button"
-              onClick={() => setShowPassword(!showPassword)}
-              className="absolute left-2.5 p-1.5 text-slate-400 hover:text-white hover:bg-slate-700/50 rounded-lg transition-colors flex items-center justify-center"
-              tabIndex={-1}
-              aria-label={showPassword ? 'إخفاء كلمة المرور' : 'إظهار كلمة المرور'}
-            >
-              <span className="material-symbols-outlined text-[18px]">
-                {showPassword ? 'visibility_off' : 'visibility'}
+        <form onSubmit={handleLogin} className="flex flex-col gap-4">
+          {/* البريد */}
+          <div className="flex flex-col gap-1.5">
+            <label htmlFor="lg-email" className="text-right text-[12.5px] font-semibold text-slate-300">
+              البريد الإلكتروني
+            </label>
+            <div className="relative">
+              <input
+                id="lg-email"
+                type="email"
+                autoComplete="username"
+                inputMode="email"
+                dir="ltr"
+                placeholder="name@example.com"
+                value={email}
+                onChange={e => setEmail(e.target.value)}
+                className="h-11 w-full rounded-lg border border-white/10 bg-white/[0.03] pl-4 pr-10 text-left text-sm text-white transition-colors placeholder:text-slate-500 focus:border-[#D4AF37]/60 focus:bg-white/[0.05] focus:outline-none"
+              />
+              <span className="material-symbols-outlined pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-[19px] text-slate-500">
+                alternate_email
               </span>
-            </button>
+            </div>
           </div>
-        </div>
 
-        {/* Submit Button */}
-        <button
-          type="submit"
-          disabled={loading}
-          className="w-full h-11 mt-2 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-extrabold text-sm shadow-lg shadow-amber-500/20 hover:shadow-amber-500/30 hover:-translate-y-0.5 active:scale-95 transition-all duration-200 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-70 disabled:cursor-not-allowed"
-        >
-          {loading ? (
-            <span className="flex items-center justify-center gap-2">
-              <span className="w-4 h-4 border-2 border-slate-950/30 border-t-slate-950 rounded-full animate-spin" />
-              <span>جارٍ التحقق والدخول…</span>
-            </span>
-          ) : (
-            <>
+          {/* كلمة المرور */}
+          <div className="flex flex-col gap-1.5">
+            <label htmlFor="lg-pass" className="text-right text-[12.5px] font-semibold text-slate-300">
+              كلمة المرور
+            </label>
+            <div className="relative">
+              <input
+                id="lg-pass"
+                type={showPassword ? 'text' : 'password'}
+                autoComplete="current-password"
+                dir="ltr"
+                placeholder="••••••••"
+                value={password}
+                onChange={e => setPassword(e.target.value)}
+                className="h-11 w-full rounded-lg border border-white/10 bg-white/[0.03] pl-10 pr-10 text-left text-sm text-white transition-colors placeholder:text-slate-500 focus:border-[#D4AF37]/60 focus:bg-white/[0.05] focus:outline-none"
+              />
+              <span className="material-symbols-outlined pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-[19px] text-slate-500">
+                lock
+              </span>
+              <button
+                type="button"
+                onClick={() => setShowPassword(v => !v)}
+                tabIndex={-1}
+                aria-label={showPassword ? 'إخفاء كلمة المرور' : 'إظهار كلمة المرور'}
+                className="absolute left-1.5 top-1/2 -translate-y-1/2 rounded-md p-1.5 text-slate-500 transition-colors hover:text-slate-300"
+              >
+                <span className="material-symbols-outlined text-[18px]">
+                  {showPassword ? 'visibility_off' : 'visibility'}
+                </span>
+              </button>
+            </div>
+          </div>
+
+          {/* زر الدخول */}
+          <button
+            type="submit"
+            disabled={loading}
+            className="mt-2 flex h-11 w-full items-center justify-center gap-2 rounded-lg bg-[#D4AF37] text-sm font-bold text-[#1A1204] transition-opacity hover:opacity-90 disabled:opacity-60"
+          >
+            {loading ? (
+              <>
+                <span className="h-4 w-4 animate-spin rounded-full border-2 border-[#1A1204]/30 border-t-[#1A1204]" />
+                <span>جارٍ الدخول…</span>
+              </>
+            ) : (
               <span>تسجيل الدخول</span>
-              <span className="material-symbols-outlined text-[18px]">login</span>
-            </>
-          )}
-        </button>
-      </form>
-
-      {/* Footer Info */}
-      <div className="mt-6 pt-4 border-t border-white/5 flex items-center justify-between text-[11px] text-slate-400">
-        <span className="flex items-center gap-1.5">
-          <span className="w-2 h-2 rounded-full bg-emerald-500 inline-block" />
-          <span>النظام متصل وآمن</span>
-        </span>
-        <span>بإشراف إدارة المكتب</span>
+            )}
+          </button>
+        </form>
       </div>
+
+      {/* تذييل */}
+      <p className="mt-5 flex items-center justify-center gap-1.5 text-[11.5px] text-slate-500">
+        <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+        النظام متصل وآمن — بإشراف إدارة المكتب
+      </p>
     </div>
   )
 }
