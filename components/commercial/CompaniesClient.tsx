@@ -644,7 +644,7 @@ export default function CompaniesClient({ initialCompanies }: Props) {
           setIsDetailsOpen(false)
           setSelectedCompany(null)
         }}
-        onDelete={(deletedId) => {
+        onDelete={(deletedId: string) => {
           setCompaniesList(prev => prev.filter(c => c.id !== deletedId))
         }}
       />

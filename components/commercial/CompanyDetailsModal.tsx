@@ -21,6 +21,21 @@ interface Props {
   initialTab?: 'info' | 'workflow' | 'ids' | 'tax' | 'cert' | 'notes' | 'financial'
 }
 
+function formatStepArabicDate(dateStr?: string | null): string {
+  if (!dateStr) return ''
+  try {
+    const d = new Date(dateStr)
+    if (isNaN(d.getTime())) return dateStr
+    const months = [
+      'كانون الثاني', 'شباط', 'آذار', 'نيسان', 'أيار', 'حزيران',
+      'تموز', 'آب', 'أيلول', 'تشرين الأول', 'تشرين الثاني', 'كانون الأول'
+    ]
+    return `${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear()}`
+  } catch {
+    return dateStr
+  }
+}
+
 export default function CompanyDetailsModal({ company, isOpen, onClose, onDelete, initialTab }: Props) {
   const router = useRouter()
   const { can, isSuperAdmin, isAdmin } = usePermissions()
@@ -61,7 +76,7 @@ export default function CompanyDetailsModal({ company, isOpen, onClose, onDelete
   const [lastCompletedYear, setLastCompletedYear] = useState(company?.last_completed_fs_year?.toString() || '')
   const [fsFirstMethod, setFsFirstMethod] = useState<'standard' | 'merge_next_year'>(company?.fs_first_method || 'standard')
   const [lacks, setLacks] = useState(company?.lacks || '')
-  const [steps, setSteps] = useState(company?.workflow_steps || [])
+  const [steps, setSteps] = useState<Array<{ id: string; company_id?: string; step_key: string; step_order: number; label: string; owner_kind?: string | null; state: 'done' | 'doing' | 'wait'; done_by?: string | null; done_at?: string | null }>>(company?.workflow_steps || [])
   const [barcodePreviewOpen, setBarcodePreviewOpen] = useState(false)
 
   // قائمة الشركاء والمساهمين مع التحديث التلقائي للأسهم والنسب
@@ -289,7 +304,7 @@ export default function CompanyDetailsModal({ company, isOpen, onClose, onDelete
 
       // تهيئة قائمة المساهمين
       if (company.shareholders && company.shareholders.length > 0) {
-        setShareholders(company.shareholders.map((sh, idx) => ({
+        setShareholders(company.shareholders.map((sh: { id?: string; name?: string; notes?: string | null; share_amount?: number | null; share_percentage?: number | null }, idx: number) => ({
           id: sh.id || `sh_${idx + 1}`,
           name: sh.name || '',
           phone: sh.notes?.replace('هاتف: ', '') || '',
@@ -382,29 +397,62 @@ export default function CompanyDetailsModal({ company, isOpen, onClose, onDelete
     }
   }
 
-  const handleStepToggle = async (stepId: string, currentState: 'wait' | 'doing' | 'done') => {
-    let nextState: 'wait' | 'doing' | 'done' = 'doing'
-    if (currentState === 'wait') nextState = 'doing'
-    else if (currentState === 'doing') nextState = 'done'
-    else if (currentState === 'done') nextState = 'wait'
-
-    const targetStep = steps.find(s => s.id === stepId)
-    const isCertStep = targetStep?.step_key === 'issue_cert' || targetStep?.step_key === 'cert' || targetStep?.step_order === steps.length || targetStep?.label?.includes('شهادة')
-
-    // Optimistic UI update
+  const handleStepComplete = async (stepId: string, stepOrder: number) => {
+    // Optimistic UI update: Mark current as done, and immediately activate the next step below!
     setSteps(prev =>
-      prev.map(s => (s.id === stepId ? { ...s, state: nextState } : s))
+      prev.map(s => {
+        if (s.id === stepId || s.step_order === stepOrder) {
+          return { ...s, state: 'done' as const, done_at: new Date().toISOString() }
+        }
+        if (s.step_order === stepOrder + 1 && s.state === 'wait') {
+          return { ...s, state: 'doing' as const }
+        }
+        return s
+      })
     )
 
-    await advanceCompanyStepAction(stepId, currentState)
+    await advanceCompanyStepAction(stepId, 'doing')
 
-    // If step 8 (إصدار الشهادة) is completed, automatically switch to Tab 3 (الشهادة والوديعة)!
-    if (nextState === 'done' && isCertStep) {
-      setActiveTab('cert')
-      setMessage({ type: 'ok', text: '✓ تم إكمال إصدار الشهادة! يُرجى إدخال رقم وتاريخ الشهادة ثم الضغط على «إطلاق مسار الوديعة» للانتقال لقسم الودائع.' })
+    // Scroll smoothly to the newly activated step below!
+    setTimeout(() => {
+      const nextElem = document.getElementById(`wf-step-${stepOrder + 1}`)
+      if (nextElem) {
+        nextElem.scrollIntoView({ behavior: 'smooth', block: 'center' })
+      }
+    }, 120)
+
+    if (stepOrder >= (steps?.length || 8)) {
+      setMessage({ type: 'ok', text: '✓ تم إكمال جميع خطوات تأسيس الشركة بنجاح! يمكنك الآن التحويل لإطلاق الوديعة.' })
     }
 
     router.refresh()
+  }
+
+  const handleStepRevert = async (stepId: string, stepOrder: number) => {
+    // Revert this step to 'doing', and reset all subsequent steps to 'wait'
+    setSteps(prev =>
+      prev.map(s => {
+        if (s.id === stepId || s.step_order === stepOrder) {
+          return { ...s, state: 'doing' as const, done_at: null }
+        }
+        if ((s.step_order || 0) > stepOrder) {
+          return { ...s, state: 'wait' as const, done_at: null }
+        }
+        return s
+      })
+    )
+
+    await advanceCompanyStepAction(stepId, 'done')
+    router.refresh()
+  }
+
+  const handleStepToggle = async (stepId: string, currentState: 'wait' | 'doing' | 'done', stepOrder?: number) => {
+    const sOrder = stepOrder || steps.find(s => s.id === stepId)?.step_order || 1
+    if (currentState === 'doing') {
+      await handleStepComplete(stepId, sOrder)
+    } else if (currentState === 'done') {
+      await handleStepRevert(stepId, sOrder)
+    }
   }
 
   const handleReleaseDeposit = async () => {
@@ -932,194 +980,173 @@ export default function CompanyDetailsModal({ company, isOpen, onClose, onDelete
             </div>
           )}
 
-          {/* Tab 2: Workflow Steps */}
+          {/* Tab 2: Workflow Steps (تتبّع سير العمل - 8 خطوات رسمية) */}
           {activeTab === 'workflow' && (
-            <div className="flex flex-col gap-4">
-              {/* Summary Progress Card */}
-              {(() => {
-                const doneCount = (steps ?? []).filter(s => s.state === 'done').length
-                const doingStep = (steps ?? []).find(s => s.state === 'doing')
-                const totalSteps = steps?.length || 6
-                const pct = Math.round((doneCount / totalSteps) * 100)
-
-                return (
-                  <div className="p-3.5 rounded-2xl bg-[var(--surface-2)] border border-[var(--line-soft)] flex flex-col gap-2.5 shadow-xs">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2.5">
-                        <div className="w-8 h-8 rounded-xl bg-[var(--accent-soft)] text-[var(--accent)] border border-[var(--accent)]/20 flex items-center justify-center font-bold">
-                          <span className="material-symbols-outlined text-[18px]">account_tree</span>
-                        </div>
-                        <div className="flex flex-col">
-                          <span className="text-xs font-bold text-[var(--text)]">مخطط سير عمل تأسيس الشركة</span>
-                          <span className="text-[11px] text-[var(--text-3)]">
-                            {doingStep ? `الخطوة الحالية: ${doingStep.label}` : pct === 100 ? 'اكتملت جميع خطوات التأسيس بنجاح!' : 'جاهز للمتابعة والتنفيذ'}
-                          </span>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-1.5 bg-[var(--surface-3)] px-2.5 py-1 rounded-full border border-[var(--line-soft)]">
-                        <span className="text-xs font-extrabold text-[var(--accent)] num">{pct}%</span>
-                        <span className="text-[10px] text-[var(--text-3)] font-semibold">({doneCount}/{totalSteps})</span>
-                      </div>
-                    </div>
-
-                    {/* Progress Bar */}
-                    <div className="w-full h-2 bg-[var(--surface-3)] rounded-full overflow-hidden relative">
-                      <div
-                        className="h-full rounded-full bg-gradient-to-r from-[var(--accent)] via-blue-500 to-emerald-500 transition-all duration-700 shadow-sm shadow-blue-500/20"
-                        style={{ width: `${pct}%` }}
-                      />
-                    </div>
+            <div className="flex flex-col gap-5">
+              {/* Header Title Section matching User Design */}
+              <div className="flex items-center justify-between p-3.5 rounded-2xl bg-[var(--surface-2)] border border-[var(--line-soft)] shadow-xs">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-9 h-9 rounded-xl bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/25 flex items-center justify-center font-bold">
+                    <span className="material-symbols-outlined text-[20px]">share</span>
                   </div>
-                )
-              })()}
+                  <div className="flex flex-col">
+                    <span className="text-sm font-extrabold text-[var(--text)]">خطوات سير العمل</span>
+                    <span className="text-[11px] text-[var(--text-3)]">
+                      {company?.name || 'متابعة مسار التأسيس خطوة بخطوة'}
+                    </span>
+                  </div>
+                </div>
 
-              {/* Steps Timeline List */}
-              <div className="flex flex-col gap-2 relative">
-                {(steps ?? []).map((step: { id: string; step_order: number; label: string; state: 'done' | 'wait' | 'doing'; owner_kind?: string | null; step_key?: string }) => {
+                {(() => {
+                  const doneCount = (steps ?? []).filter(s => s.state === 'done').length
+                  const totalSteps = steps?.length || 8
+                  const pct = Math.round((doneCount / totalSteps) * 100)
+                  return (
+                    <div className="flex items-center gap-2 bg-[var(--surface-3)] px-3 py-1.5 rounded-full border border-[var(--line-soft)]">
+                      <span className="text-xs font-black text-emerald-600 dark:text-emerald-400 num">{pct}%</span>
+                      <span className="text-[11px] text-[var(--text-3)] font-bold num">({doneCount}/{totalSteps} مكتملة)</span>
+                    </div>
+                  )
+                })()}
+              </div>
+
+              {/* Connected Vertical Timeline Track */}
+              <div className="relative flex flex-col gap-0 pr-2 pl-1 py-1">
+                {(steps ?? []).map((step: { id: string; step_order: number; label: string; state: 'done' | 'wait' | 'doing'; owner_kind?: string | null; step_key?: string; done_at?: string | null }, idx: number) => {
                   const isDone = step.state === 'done'
                   const isDoing = step.state === 'doing'
+                  const isWait = step.state === 'wait'
+                  const isLast = idx === (steps.length - 1)
 
                   return (
                     <div
                       key={step.id}
-                      className={`relative flex items-center justify-between gap-3 p-3 rounded-2xl border transition-all duration-300 ${
+                      id={`wf-step-${step.step_order}`}
+                      className={`relative flex items-start gap-4 p-3.5 rounded-2xl transition-all duration-300 ${
                         isDoing
-                          ? 'bg-gradient-to-r from-amber-500/10 via-amber-500/5 to-[var(--surface-2)] border-amber-500/40 shadow-lg shadow-amber-500/10 ring-1 ring-amber-500/20'
+                          ? 'bg-gradient-to-r from-amber-500/15 via-amber-500/5 to-transparent border border-amber-500/40 shadow-md ring-1 ring-amber-500/20'
                           : isDone
-                          ? 'bg-emerald-500/8 dark:bg-emerald-500/10 border-emerald-500/20 hover:border-emerald-500/30'
-                          : 'bg-[var(--surface-2)]/60 border-[var(--line-soft)] opacity-85 hover:opacity-100'
+                          ? 'hover:bg-emerald-500/5'
+                          : 'opacity-65'
                       }`}
                     >
-                      {/* Step Icon & Content */}
-                      <div className="flex items-center gap-3 min-w-0 flex-1">
-                        {/* Spinning Wheel for Doing / Emerald for Done / Gray for Wait */}
-                        <div className="relative w-8 h-8 flex-none flex items-center justify-center">
-                          {isDoing ? (
-                            <>
-                              {/* Glowing Amber Pulse Background */}
-                              <div className="absolute inset-0 rounded-full bg-amber-500/25 blur-[3px] animate-pulse" />
-                              {/* Continuous Smooth Spinning Wheel SVG */}
-                              <svg className="w-8 h-8 animate-spin" viewBox="0 0 36 36">
-                                <circle
-                                  cx="18"
-                                  cy="18"
-                                  r="14"
-                                  fill="none"
-                                  className="stroke-amber-500/20"
-                                  strokeWidth="3.5"
-                                />
-                                <circle
-                                  cx="18"
-                                  cy="18"
-                                  r="14"
-                                  fill="none"
-                                  className="stroke-amber-500"
-                                  strokeWidth="3.5"
-                                  strokeDasharray="55 35"
-                                  strokeLinecap="round"
-                                />
-                              </svg>
-                              {/* Number in Center of Wheel */}
-                              <span className="absolute inset-0 flex items-center justify-center font-extrabold text-[11px] text-amber-500 num">
-                                {step.step_order}
-                              </span>
-                            </>
-                          ) : isDone ? (
-                            <div className="w-8 h-8 rounded-full bg-emerald-500 text-white flex items-center justify-center shadow-md shadow-emerald-500/25 transition-transform hover:scale-105">
-                              <span className="material-symbols-outlined text-[18px]">check</span>
+                      {/* Left Vertical Line Connector + Circle Node */}
+                      <div className="relative flex flex-col items-center flex-none">
+                        {/* Circle Node Icon */}
+                        <div className="relative z-10">
+                          {isDone ? (
+                            <div className="w-9 h-9 rounded-full bg-[#10B981] text-white flex items-center justify-center shadow-md shadow-emerald-500/30 transition-transform hover:scale-105">
+                              <span className="material-symbols-outlined text-[20px] font-black">check</span>
+                            </div>
+                          ) : isDoing ? (
+                            <div className="relative w-9 h-9 flex items-center justify-center">
+                              <div className="absolute inset-0 rounded-full bg-amber-500/30 blur-[4px] animate-pulse" />
+                              <div className="w-9 h-9 rounded-full bg-amber-500 text-slate-950 flex items-center justify-center font-black text-sm shadow-md shadow-amber-500/40 animate-bounce">
+                                <span className="material-symbols-outlined text-[19px]">play_arrow</span>
+                              </div>
                             </div>
                           ) : (
-                            <div className="w-8 h-8 rounded-full bg-[var(--surface-3)] border border-[var(--line-soft)] text-[var(--text-3)] flex items-center justify-center font-bold text-xs num">
+                            <div className="w-9 h-9 rounded-full bg-[var(--surface-3)] border-2 border-[var(--line-soft)] text-[var(--text-3)] flex items-center justify-center font-bold text-xs num">
                               {step.step_order}
                             </div>
                           )}
                         </div>
 
-                        {/* Title & Owner Info */}
-                        <div className="flex flex-col min-w-0 flex-1">
-                          <div className="flex items-center gap-2">
-                            <span
-                              className={`font-bold text-sm truncate ${
-                                isDoing
-                                  ? 'text-amber-600 dark:text-amber-400'
-                                  : isDone
-                                  ? 'text-[var(--text)]'
-                                  : 'text-[var(--text-2)]'
-                              }`}
-                            >
-                              {step.label}
-                            </span>
-
-                            {/* Status Indicator Tag */}
-                            {isDoing && (
-                              <span className="inline-flex items-center gap-1 text-[10.5px] font-bold text-amber-600 dark:text-amber-400 bg-amber-500/15 border border-amber-500/25 px-2 py-0.5 rounded-full">
-                                <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-ping" />
-                                <span>جاري التنفيذ</span>
-                              </span>
-                            )}
-                            {isDone && (
-                              <span className="inline-flex items-center gap-0.5 text-[10.5px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-1.5 py-0.5 rounded-md">
-                                ✓ مكتملة
-                              </span>
-                            )}
-                          </div>
-
-                          <div className="flex items-center gap-2 mt-0.5">
-                            <span className="text-[11px] text-[var(--text-3)] flex items-center gap-1">
-                              <span className="material-symbols-outlined text-[13px]">person</span>
-                              <span>المسؤول: {step.owner_kind ?? 'الموظف المختص'}</span>
-                            </span>
-                          </div>
-                        </div>
+                        {/* Connecting Line to next step below */}
+                        {!isLast && (
+                          <div
+                            className={`w-0.5 my-1 transition-colors duration-500`}
+                            style={{
+                              height: '42px',
+                              backgroundColor: isDone ? '#10B981' : 'var(--line-soft)',
+                            }}
+                          />
+                        )}
                       </div>
 
-                      {/* Action Button */}
-                      <div className="flex-none">
-                        {isDoing ? (
-                          <button
-                            type="button"
-                            onClick={() => handleStepToggle(step.id, step.state)}
-                            className="px-3.5 py-1.5 rounded-xl font-bold text-xs bg-emerald-500 hover:bg-emerald-600 active:scale-95 text-white shadow-md shadow-emerald-500/25 hover:shadow-emerald-500/40 transition-all flex items-center gap-1.5"
+                      {/* Step Details (Label + Date / Action Status) */}
+                      <div className="flex items-center justify-between gap-3 min-w-0 flex-1 pt-1">
+                        <div className="flex flex-col min-w-0 flex-1">
+                          <h4
+                            className={`font-extrabold text-sm leading-snug transition-colors ${
+                              isDoing
+                                ? 'text-amber-600 dark:text-amber-400 text-[14.5px]'
+                                : isDone
+                                ? 'text-[var(--text)]'
+                                : 'text-[var(--text-2)]'
+                            }`}
                           >
-                            <span className="material-symbols-outlined text-[15px]">done_all</span>
-                            <span>إكمال الخطوة ✓</span>
-                          </button>
-                        ) : isDone ? (
-                          <div className="flex items-center gap-1.5">
-                            {(step.step_order === steps.length || step.step_key === 'issue_cert' || step.label?.includes('شهادة')) && (
-                              <button
-                                type="button"
-                                onClick={() => setActiveTab('cert')}
-                                className="px-2.5 py-1 rounded-lg text-xs font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-500/15 hover:bg-emerald-500 hover:text-white border border-emerald-500/30 transition-all flex items-center gap-1"
-                                title="الانتقال لتبويب الشهادة والوديعة"
-                              >
-                                <span>الشهادة والوديعة</span>
-                                <span className="material-symbols-outlined text-[13px]">arrow_left</span>
-                              </button>
-                            )}
+                            {step.label}
+                          </h4>
+
+                          {/* Completion Date or Status Subtext */}
+                          {isDone ? (
+                            <div className="flex items-center gap-1.5 mt-0.5 text-xs font-bold text-[#10B981]">
+                              <span>{formatStepArabicDate(step.done_at) || 'مكتملة ✓'}</span>
+                              <span className="material-symbols-outlined text-[14px]">check</span>
+                            </div>
+                          ) : isDoing ? (
+                            <div className="flex items-center gap-1.5 mt-0.5 text-xs font-extrabold text-amber-600 dark:text-amber-400">
+                              <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-ping" />
+                              <span>الخطوة الحالية — بانتظار الإنجاز</span>
+                            </div>
+                          ) : (
+                            <div className="flex items-center gap-1 mt-0.5 text-xs font-medium text-[var(--text-3)]">
+                              <span className="material-symbols-outlined text-[13px]">lock</span>
+                              <span>في الانتظار (تُفتح تلقائياً بعد إكمال السابقة)</span>
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Right Action Buttons */}
+                        <div className="flex items-center gap-2 flex-none">
+                          {isDoing ? (
                             <button
                               type="button"
-                              onClick={() => handleStepToggle(step.id, step.state)}
-                              className="px-2.5 py-1 rounded-lg text-xs font-semibold text-[var(--text-3)] hover:text-rose-500 hover:bg-rose-500/10 border border-transparent hover:border-rose-500/20 transition-all"
-                              title="إعادة هذه الخطوة إلى قيد التنفيذ"
+                              onClick={() => handleStepComplete(step.id, step.step_order)}
+                              className="px-4 py-2 rounded-xl font-black text-xs bg-[#10B981] hover:bg-emerald-600 active:scale-95 text-white shadow-md shadow-emerald-500/30 hover:shadow-emerald-500/50 transition-all flex items-center gap-1.5"
+                            >
+                              <span>إكمال الخطوة</span>
+                              <span className="material-symbols-outlined text-[16px]">done</span>
+                            </button>
+                          ) : isDone ? (
+                            <button
+                              type="button"
+                              onClick={() => handleStepRevert(step.id, step.step_order)}
+                              className="px-2.5 py-1 rounded-lg text-xs font-bold text-[var(--text-3)] hover:text-rose-500 hover:bg-rose-500/10 border border-transparent hover:border-rose-500/20 transition-all"
+                              title="إعادة هذه الخطوة للتنفيذ وتجميد الخطوات اللاحقة"
                             >
                               تراجع ←
                             </button>
-                          </div>
-                        ) : (
-                          <button
-                            type="button"
-                            onClick={() => handleStepToggle(step.id, step.state)}
-                            className="px-3 py-1.5 rounded-xl text-xs font-bold text-[var(--accent)] hover:text-white bg-[var(--accent-soft)] hover:bg-[var(--accent)] border border-[var(--accent)]/30 hover:border-transparent active:scale-95 transition-all flex items-center gap-1"
-                          >
-                            <span className="material-symbols-outlined text-[13px]">play_arrow</span>
-                            <span>بدء الخطوة</span>
-                          </button>
-                        )}
+                          ) : (
+                            <span className="text-[11px] font-bold text-[var(--text-3)] opacity-60 bg-[var(--surface-3)] px-2.5 py-1 rounded-lg flex items-center gap-1">
+                              <span className="material-symbols-outlined text-[13px]">lock</span>
+                              <span>مغلقة</span>
+                            </span>
+                          )}
+                        </div>
                       </div>
                     </div>
                   )
                 })}
+              </div>
+
+              {/* Bottom Transfer to Release Deposit Button */}
+              <div className="pt-3 border-t border-[var(--line-soft)]">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setActiveTab('cert')
+                    setMessage({
+                      type: 'ok',
+                      text: 'يرجى مراجعة وتأكيد بيانات الشهادة والوديعة أدناه لإطلاق مسار الوديعة.',
+                    })
+                  }}
+                  className="w-full py-3.5 px-6 rounded-2xl font-black text-sm bg-[#10B981] hover:bg-emerald-600 active:scale-98 text-white shadow-lg shadow-emerald-500/30 flex items-center justify-center gap-2 transition-all cursor-pointer"
+                >
+                  <span className="material-symbols-outlined text-[20px]">sync</span>
+                  <span>التحويل لإطلاق الوديعة</span>
+                </button>
               </div>
             </div>
           )}

@@ -485,37 +485,87 @@ export async function advanceCompanyStepAction(stepId: string, currentState: WfS
     let nextState: WfState = 'doing'
     if (currentState === 'wait') nextState = 'doing'
     else if (currentState === 'doing') nextState = 'done'
-    else if (currentState === 'done') nextState = 'wait'
+    else if (currentState === 'done') nextState = 'doing'
 
+    // 1. Update disk JSON store
+    const diskCompanies = readJsonFile<CompanyWithWorkflow[]>('companies.json', [])
+    let currentStepOrder = 1
+    let companyId: string | null = null
+
+    for (const c of diskCompanies) {
+      const stepIdx = c.workflow_steps?.findIndex(s => s.id === stepId) ?? -1
+      if (stepIdx !== -1 && c.workflow_steps) {
+        const step = c.workflow_steps[stepIdx]
+        companyId = c.id
+        currentStepOrder = step.step_order || stepIdx + 1
+
+        if (nextState === 'done') {
+          step.state = 'done'
+          step.done_at = new Date().toISOString()
+
+          // Auto-advance NEXT step to 'doing'
+          const nextStep = c.workflow_steps.find(s => (s.step_order || 0) === currentStepOrder + 1)
+          if (nextStep && nextStep.state === 'wait') {
+            nextStep.state = 'doing'
+          }
+        } else if (nextState === 'doing') {
+          // If reverting to doing, ensure all subsequent steps are reset to 'wait'
+          step.state = 'doing'
+          step.done_at = null
+          c.workflow_steps.forEach(s => {
+            if ((s.step_order || 0) > currentStepOrder) {
+              s.state = 'wait'
+              s.done_at = null
+            }
+          })
+        }
+        break
+      }
+    }
+    writeJsonFile('companies.json', diskCompanies)
+
+    // 2. Update Supabase
     try {
-      await supabase
-        .from('workflow_steps')
-        .update({
-          state: nextState,
-          done_at: nextState === 'done' ? new Date().toISOString() : null,
-        })
-        .eq('id', stepId)
+      if (nextState === 'done') {
+        await supabase
+          .from('workflow_steps')
+          .update({
+            state: 'done',
+            done_at: new Date().toISOString(),
+          })
+          .eq('id', stepId)
+
+        if (companyId) {
+          // Advance next step in DB
+          await supabase
+            .from('workflow_steps')
+            .update({ state: 'doing' })
+            .eq('company_id', companyId)
+            .eq('step_order', currentStepOrder + 1)
+            .eq('state', 'wait')
+        }
+      } else {
+        await supabase
+          .from('workflow_steps')
+          .update({
+            state: 'doing',
+            done_at: null,
+          })
+          .eq('id', stepId)
+
+        if (companyId) {
+          await supabase
+            .from('workflow_steps')
+            .update({ state: 'wait', done_at: null })
+            .eq('company_id', companyId)
+            .gt('step_order', currentStepOrder)
+        }
+      }
     } catch (dbErr) {
       console.warn('advanceCompanyStepAction Supabase notice:', dbErr)
     }
 
-    // Update disk JSON store
-    const diskCompanies = readJsonFile<CompanyWithWorkflow[]>('companies.json', [])
-    let found = false
-    for (const c of diskCompanies) {
-      const step = c.workflow_steps?.find(s => s.id === stepId)
-      if (step) {
-        step.state = nextState
-        step.done_at = nextState === 'done' ? new Date().toISOString() : null
-        found = true
-        break
-      }
-    }
-    if (found) {
-      writeJsonFile('companies.json', diskCompanies)
-    }
-
-    const stateLabel = nextState === 'done' ? 'مكتملة ✓' : nextState === 'doing' ? 'قيد التنفيذ ⏳' : 'في الانتظار'
+    const stateLabel = nextState === 'done' ? 'مكتملة ✓ والانتقال للخطوة التالية' : 'قيد التنفيذ ⏳'
     await createNotificationAction({
       title: `تحديث محطة سير العمل`,
       description: `تغيرت حالة الخطوة إلى ${stateLabel}`,

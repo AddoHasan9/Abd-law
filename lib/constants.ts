@@ -111,16 +111,18 @@ export const stageStateOf = (id: string) => pick(STAGE_STATES, id)
 export interface WfDef { id: string; label: string; owner: string }
 
 export const WORKFLOW: WfDef[] = [
-  { id: 'pay_fee',        label: 'دفع الرسوم الإلكترونية',        owner: 'الموظف المختص' },
-  { id: 'bank_letter',    label: 'إشعار الإيداع المصرفي',         owner: 'المصرف التجاري' },
-  { id: 'officer_review', label: 'تدقيق الموظف المختص',           owner: 'الموظف المختص' },
-  { id: 'dept_head',      label: 'موافقة مدير القسم',            owner: 'مدير القسم' },
-  { id: 'gm_sign',        label: 'توقيع المدير العام',            owner: 'المدير العام' },
-  { id: 'issue_cert',     label: 'إصدار شهادة التأسيس والباركود', owner: 'مسجل الشركات' },
+  { id: 'online_submission',  label: 'الإرسال على النظام',     owner: 'الموظف المختص' },
+  { id: 'chamber_approval',   label: 'موافقة غرفة التجارة',    owner: 'غرفة التجارة' },
+  { id: 'union_approval',     label: 'موافقة اتحاد الغرف',     owner: 'اتحاد الغرف' },
+  { id: 'bank_letter',        label: 'إصدار كتاب مصرف',       owner: 'المصرف التجاري' },
+  { id: 'company_file',       label: 'عمل إضبارة الشركة',     owner: 'الموظف المختص' },
+  { id: 'specialist_officer',  label: 'الموظف المختص',        owner: 'الموظف المختص' },
+  { id: 'sign_decision',      label: 'رفع القرار للتوقيع',     owner: 'المدير العام' },
+  { id: 'issue_cert',         label: 'إصدار شهادة التأسيس',   owner: 'مسجل الشركات' },
 ]
 
 /**
- * توحيد وتنظيف مسار خطوات التأسيس لتطابق المحطات الـ 6 الرسمية دائماً
+ * توحيد وتنظيف مسار خطوات التأسيس لتطابق المحطات الـ 8 الرسمية دائماً
  */
 export function sanitizeFormationWorkflowSteps(
   rawSteps: Array<{ id?: string; step_key?: string; step_order?: number; label?: string; state?: 'done' | 'doing' | 'wait'; owner_kind?: string | null; done_by?: string | null; done_at?: string | null }> | undefined | null,
@@ -152,9 +154,9 @@ export function sanitizeFormationWorkflowSteps(
     }))
   }
 
-  // Check if rawSteps is already exactly the 6 official steps matching WORKFLOW keys
+  // Check if rawSteps is already exactly the 8 official steps matching WORKFLOW keys
   const isClean = Array.isArray(rawSteps) && 
-    rawSteps.length === 6 && 
+    rawSteps.length === 8 && 
     rawSteps.every((s, i) => s.step_key === WORKFLOW[i].id)
 
   if (isClean && rawSteps) {
@@ -171,14 +173,16 @@ export function sanitizeFormationWorkflowSteps(
     }))
   }
 
-  // If rawSteps had legacy or extra steps, compute the progress and project into the 6 official steps
+  // If rawSteps had legacy or extra steps, compute the progress and project into the 8 official steps
   const doneCount = Array.isArray(rawSteps) ? rawSteps.filter(s => s.state === 'done').length : 0
-  const normalizedDone = Math.min(doneCount, 6)
+  const normalizedDone = Math.min(doneCount, 8)
 
   return WORKFLOW.map((wf, idx) => {
     let state: 'done' | 'doing' | 'wait' = 'wait'
+    let done_at: string | null = null
     if (idx < normalizedDone) {
       state = 'done'
+      done_at = rawSteps?.[idx]?.done_at || createdAt || new Date().toISOString()
     } else if (idx === normalizedDone) {
       state = 'doing'
     }
@@ -191,7 +195,7 @@ export function sanitizeFormationWorkflowSteps(
       owner_kind: wf.owner,
       state,
       done_by: null,
-      done_at: null,
+      done_at,
     }
   })
 }

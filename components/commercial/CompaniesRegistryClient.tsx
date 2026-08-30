@@ -355,7 +355,7 @@ export default function CompaniesRegistryClient({ companies = [] }: Props) {
             setSelectedCompanyForDetails(null)
             router.refresh()
           }}
-          onDelete={(deletedId) => {
+          onDelete={(deletedId: string) => {
             setCompaniesList(prev => prev.filter(c => c.id !== deletedId))
           }}
         />
