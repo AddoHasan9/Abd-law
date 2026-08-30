@@ -1,0 +1,141 @@
+{
+  "version": 1,
+  "project": {
+    "name": "demoPJ",
+    "productType": null,
+    "stack": [
+      "nextjs",
+      "react",
+      "tailwind-v3"
+    ]
+  },
+  "sources": {
+    "tokens": [
+      "styles/globals.css"
+    ],
+    "components": [
+      "components/ui"
+    ],
+    "assets": [],
+    "instructions": []
+  },
+  "design": {
+    "colorMode": "light",
+    "colors": {
+      "--t-spring": {
+        "value": ".4s cubic-bezier(.175, .885, .32, 1.275)",
+        "source": "styles/globals.css"
+      },
+      "--gold-border": {
+        "value": "rgba(212, 175, 55, 0.35)",
+        "source": "styles/globals.css"
+      },
+      "--accent": {
+        "value": "#D4AF37",
+        "source": "styles/globals.css"
+      },
+      "--accent-soft": {
+        "value": "rgba(56, 189, 248, 0.14)",
+        "source": "styles/globals.css"
+      },
+      "--glass-border": {
+        "value": "rgba(255, 255, 255, 0.08)",
+        "source": "styles/globals.css"
+      }
+    },
+    "typography": {
+      "--font-ui": {
+        "value": "var(--font-tajawal), 'Tajawal', -apple-system, 'Segoe UI', system-ui, sans-serif",
+        "source": "styles/globals.css"
+      },
+      "--font-display": {
+        "value": "var(--font-cairo), 'Cairo', var(--font-ui)",
+        "source": "styles/globals.css"
+      },
+      "--text": {
+        "value": "#F1F5F9",
+        "source": "styles/globals.css"
+      },
+      "--text-1": {
+        "value": "#FFFFFF",
+        "source": "styles/globals.css"
+      },
+      "--text-2": {
+        "value": "#CBD5E1",
+        "source": "styles/globals.css"
+      },
+      "--text-3": {
+        "value": "#94A3B8",
+        "source": "styles/globals.css"
+      }
+    },
+    "spacing": {},
+    "radius": {},
+    "shadows": {
+      "--glass-shadow": {
+        "value": "0 12px 36px -4px rgba(0, 0, 0, 0.45), 0 2px 8px rgba(0, 0, 0, 0.25)",
+        "source": "styles/globals.css"
+      },
+      "--shadow-1": {
+        "value": "0 2px 8px rgba(0, 0, 0, 0.25)",
+        "source": "styles/globals.css"
+      },
+      "--shadow-2": {
+        "value": "0 8px 24px rgba(0, 0, 0, 0.35)",
+        "source": "styles/globals.css"
+      },
+      "--shadow-3": {
+        "value": "0 16px 48px rgba(0, 0, 0, 0.5)",
+        "source": "styles/globals.css"
+      }
+    },
+    "motion": {},
+    "density": "unknown"
+  },
+  "components": {
+    "installed": [
+      "Empty",
+      "ErrorBoundary",
+      "Icon",
+      "Kit",
+      "Placeholder",
+      "QuickHelpGuide",
+      "Skeleton",
+      "WorkflowStatus"
+    ],
+    "preferredPrimitives": [],
+    "patterns": []
+  },
+  "constraints": {
+    "must": [],
+    "avoid": []
+  },
+  "decisions": [],
+  "evidence": [
+    {
+      "fact": "components.installed",
+      "source": "components/ui"
+    },
+    {
+      "fact": "design.colorMode:light",
+      "source": "styles/globals.css"
+    },
+    {
+      "fact": "design.tokens",
+      "source": "styles/globals.css"
+    },
+    {
+      "fact": "project.stack:nextjs",
+      "source": "package.json"
+    },
+    {
+      "fact": "project.stack:react",
+      "source": "package.json"
+    },
+    {
+      "fact": "project.stack:tailwind-v3",
+      "source": "package.json"
+    }
+  ],
+  "generatedAt": "2026-08-30T08:51:30.912Z"
+}

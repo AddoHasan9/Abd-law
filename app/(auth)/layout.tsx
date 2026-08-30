@@ -8,7 +8,7 @@ export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
   viewportFit: 'cover',
-  themeColor: '#0B1220',
+  themeColor: '#080D17',
 }
 
 export default function AuthLayout({ children }: { children: React.ReactNode }) {
