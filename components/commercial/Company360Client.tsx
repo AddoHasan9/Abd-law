@@ -312,7 +312,7 @@ export default function Company360Client({
 
   // السجل الزمني الحقيقي — يأتي مباشرة من جدول company_timeline، الأحدث أولاً، مرقّم للعرض تصاعدياً
   const numberedTimelineEvents = useMemo(() => {
-    const chronological = [...timeline].reverse()
+    const chronological = [...(timeline || [])].reverse()
     return chronological.map((ev, idx) => ({
       id: ev.id,
       num: idx + 1,

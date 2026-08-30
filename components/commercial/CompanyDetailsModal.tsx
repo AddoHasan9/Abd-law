@@ -116,8 +116,8 @@ export default function CompanyDetailsModal({ company, isOpen, onClose, onDelete
     setIdLoading(true)
     const res = await getCompanyIDsAction(company.id)
     setIdLoading(false)
-    if (res.success) {
-      setCompanyIDs(res.data)
+    if (res.success && res.data) {
+      setCompanyIDs(res.data || [])
     }
   }, [company])
 
@@ -125,7 +125,7 @@ export default function CompanyDetailsModal({ company, isOpen, onClose, onDelete
     if (!company?.id) return
     const res = await getTaxAssessmentsAction(company.id)
     if (res.success && res.data) {
-      setTaxAssessments(res.data)
+      setTaxAssessments(res.data || [])
     }
   }, [company?.id])
 
