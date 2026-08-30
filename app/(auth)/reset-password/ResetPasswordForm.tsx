@@ -1,17 +1,9 @@
 'use client'
 
-/**
- * نموذج تعيين كلمة مرور جديدة
- * ------------------------------------------------------------
- * Supabase يضع رمز الاستعادة في رابط الإيميل. عند فتح الرابط،
- * مكتبة العميل تكتشفه تلقائياً وتطلق حدث PASSWORD_RECOVERY —
- * من هذه اللحظة الجلسة مؤقتة تسمح فقط بتغيير كلمة المرور.
- */
 import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
-import { Icon } from '@/components/ui/Icon'
 
 export default function ResetPasswordForm() {
   const searchParams = useSearchParams()
@@ -19,12 +11,12 @@ export default function ResetPasswordForm() {
   const recoveryType = searchParams?.get('type')
   const isRecoveryLink = recoveryType === 'recovery' && !!recoveryToken
 
-  const [ready, setReady]       = useState(false)
+  const [ready, setReady] = useState(false)
   const [password, setPassword] = useState('')
-  const [confirm, setConfirm]   = useState('')
-  const [error, setError]       = useState<string | null>(null)
-  const [done, setDone]         = useState(false)
-  const [loading, setLoading]   = useState(false)
+  const [confirm, setConfirm] = useState('')
+  const [error, setError] = useState<string | null>(null)
+  const [done, setDone] = useState(false)
+  const [loading, setLoading] = useState(false)
 
   const supabase = useMemo(() => createClient(), [])
 
@@ -53,9 +45,7 @@ export default function ResetPasswordForm() {
       if (data.session && !ready) {
         setReady(true)
       }
-    }).catch(() => {
-      // تجاهل الأخطاء المحلية، نعرض رسالة عامة بعد المهلة
-    })
+    }).catch(() => {})
 
     return () => {
       subscription.unsubscribe()
@@ -83,7 +73,7 @@ export default function ResetPasswordForm() {
 
     if (error) {
       console.error('Reset password failed:', error)
-      setError('تعذّر حفظ كلمة المرور. جرّب رابط الإيميل من جديد أو اطلب رابط جديد.')
+      setError('تعذّر حفظ كلمة المرور. جرّب رابط الإيميل من جديد أو اطلب رابطاً جديداً.')
       return
     }
 
@@ -92,12 +82,20 @@ export default function ResetPasswordForm() {
 
   if (done) {
     return (
-      <div className="login-card">
-        <div className="login-mark" style={{ background: 'var(--ok)' }}><Icon name="check" /></div>
-        <h1>تم تغيير كلمة المرور</h1>
-        <p className="sub">تقدر الآن تسجّل الدخول بكلمة المرور الجديدة.</p>
-        <Link href="/login" className="btn btn-primary btn-block" style={{ marginTop: 10 }}>
-          الذهاب لتسجيل الدخول
+      <div className="flex flex-col items-center text-center space-y-4 py-4">
+        <div className="w-16 h-16 rounded-2xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 flex items-center justify-center shadow-lg shadow-emerald-500/10">
+          <span className="material-symbols-outlined text-[32px]">check_circle</span>
+        </div>
+        <h1 className="text-2xl font-extrabold text-white">تم تغيير كلمة المرور بنجاح</h1>
+        <p className="text-xs text-slate-400 leading-relaxed max-w-sm">
+          تم تحديث كلمة المرور لحسابك. يمكنك الآن تسجيل الدخول بكلمة المرور الجديدة.
+        </p>
+        <Link
+          href="/login"
+          className="w-full h-12 mt-4 rounded-xl bg-gradient-to-r from-amber-400 via-amber-500 to-amber-600 text-slate-950 font-extrabold text-sm flex items-center justify-center gap-2 shadow-lg shadow-amber-500/20 hover:scale-[1.01] transition-all"
+        >
+          <span>الذهاب لتسجيل الدخول</span>
+          <span className="material-symbols-outlined text-[18px] rotate-180">arrow_right_alt</span>
         </Link>
       </div>
     )
@@ -105,63 +103,67 @@ export default function ResetPasswordForm() {
 
   if (!ready) {
     return (
-      <div className="login-card">
-        <div className="login-mark"><Icon name="scale" /></div>
-        <h1>جارٍ التحقق من الرابط…</h1>
-        <p className="sub">
-          إذا فتحت هذه الصفحة مباشرة بلا رابط من الإيميل، ارجع لبريدك
-          واضغط رابط إعادة تعيين كلمة المرور.
+      <div className="flex flex-col items-center text-center space-y-4 py-4">
+        <div className="w-14 h-14 rounded-2xl bg-white/[0.05] border border-white/10 text-amber-400 flex items-center justify-center">
+          <span className="material-symbols-outlined text-[28px] animate-pulse">lock_reset</span>
+        </div>
+        <h1 className="text-xl font-extrabold text-white">جارٍ التحقق من الرابط…</h1>
+        <p className="text-xs text-slate-400 leading-relaxed max-w-sm">
+          إذا فتحت هذه الصفحة مباشرة بلا رابط من البريد، يرجى مراجعة بريدك الإلكتروني والضغط على الرابط المرسل.
         </p>
+        <Link href="/login" className="text-xs text-amber-400 hover:underline pt-2">
+          العودة لصفحة تسجيل الدخول
+        </Link>
       </div>
     )
   }
 
   return (
-    <div className="login-card">
-      <div className="login-mark"><Icon name="scale" /></div>
-      <h1>تعيين كلمة مرور جديدة</h1>
-      <p className="sub">اكتب كلمة مرور جديدة لحسابك.</p>
+    <div className="space-y-6">
+      <div className="text-right">
+        <h1 className="text-2xl font-extrabold text-white">تعيين كلمة مرور جديدة</h1>
+        <p className="text-xs text-slate-400 mt-1">اكتب كلمة مرور جديدة وقوية لحسابك.</p>
+      </div>
 
-      {error && <div className="login-err">{error}</div>}
+      {error && (
+        <div className="flex items-center gap-2.5 p-3 rounded-xl bg-rose-500/10 border border-rose-500/25 text-rose-400 text-xs font-semibold">
+          <span className="material-symbols-outlined text-[18px]">error</span>
+          <span>{error}</span>
+        </div>
+      )}
 
-      <form onSubmit={handleSubmit} className="flex flex-col gap-4 text-start w-full">
-        <div className="flex flex-col gap-1.5 w-full">
-          <label htmlFor="rp-pass" className="font-bold text-xs text-[var(--text-2)] text-right block">
-            كلمة المرور الجديدة
-          </label>
-          <div className="relative flex items-center w-full">
+      <form onSubmit={handleSubmit} className="space-y-4 text-right">
+        <div className="space-y-1.5">
+          <label className="block text-xs font-bold text-slate-300">كلمة المرور الجديدة</label>
+          <div className="relative group">
             <input
-              id="rp-pass"
               type="password"
               autoComplete="new-password"
               placeholder="••••••••"
-              dir="ltr"
               value={password}
               onChange={e => setPassword(e.target.value)}
-              className="input !h-11 !pr-11 !pl-4 text-left font-medium focus:ring-2 focus:ring-[var(--accent)]/30 focus:border-[var(--accent)] transition-all"
+              className="w-full h-12 pr-11 pl-4 rounded-xl bg-white/[0.04] border border-white/10 focus:border-amber-500/70 text-white placeholder-slate-500 text-sm outline-none transition-all text-right dir-ltr"
+              style={{ direction: 'ltr', textAlign: 'right' }}
             />
-            <span className="material-symbols-outlined absolute right-3.5 text-[20px] text-[var(--text-3)] pointer-events-none select-none">
+            <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 material-symbols-outlined text-[20px] pointer-events-none">
               lock
             </span>
           </div>
         </div>
 
-        <div className="flex flex-col gap-1.5 w-full">
-          <label htmlFor="rp-confirm" className="font-bold text-xs text-[var(--text-2)] text-right block">
-            تأكيد كلمة المرور
-          </label>
-          <div className="relative flex items-center w-full">
+        <div className="space-y-1.5">
+          <label className="block text-xs font-bold text-slate-300">تأكيد كلمة المرور</label>
+          <div className="relative group">
             <input
-              id="rp-confirm"
               type="password"
               autoComplete="new-password"
               placeholder="••••••••"
-              dir="ltr"
               value={confirm}
               onChange={e => setConfirm(e.target.value)}
-              className="input !h-11 !pr-11 !pl-4 text-left font-medium focus:ring-2 focus:ring-[var(--accent)]/30 focus:border-[var(--accent)] transition-all"
+              className="w-full h-12 pr-11 pl-4 rounded-xl bg-white/[0.04] border border-white/10 focus:border-amber-500/70 text-white placeholder-slate-500 text-sm outline-none transition-all text-right dir-ltr"
+              style={{ direction: 'ltr', textAlign: 'right' }}
             />
-            <span className="material-symbols-outlined absolute right-3.5 text-[20px] text-[var(--text-3)] pointer-events-none select-none">
+            <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 material-symbols-outlined text-[20px] pointer-events-none">
               lock_reset
             </span>
           </div>
@@ -169,16 +171,13 @@ export default function ResetPasswordForm() {
 
         <button
           type="submit"
-          className="btn btn-primary btn-block btn-animated shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 text-base font-bold py-3 mt-2 rounded-2xl"
           disabled={loading}
+          className="w-full h-12 mt-2 rounded-xl bg-gradient-to-r from-amber-400 via-amber-500 to-amber-600 text-slate-950 font-extrabold text-sm flex items-center justify-center gap-2 shadow-lg shadow-amber-500/20 hover:scale-[1.01] transition-all cursor-pointer"
         >
           {loading ? (
-            <span className="flex items-center justify-center gap-2">
-              <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-              <span>جارٍ الحفظ…</span>
-            </span>
+            <span className="w-4 h-4 border-2 border-slate-950 border-t-transparent rounded-full animate-spin" />
           ) : (
-            'حفظ كلمة المرور'
+            <span>حفظ وتعيين كلمة المرور</span>
           )}
         </button>
       </form>
