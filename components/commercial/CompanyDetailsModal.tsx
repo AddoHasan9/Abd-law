@@ -506,59 +506,74 @@ export default function CompanyDetailsModal({ company, isOpen, onClose, onDelete
   return createPortal(
     <div id="modal-root" className="on">
       <div className="modal-veil" onClick={onClose} role="presentation" aria-hidden="true" />
-      <div className="modal" style={{ '--modal-max-w': 'var(--modal-lg, 780px)', display: 'flex', flexDirection: 'column', maxHeight: '90vh' } as React.CSSProperties}>
+      <div className="modal" style={{ '--modal-max-w': 'var(--modal-xl, 920px)', display: 'flex', flexDirection: 'column', maxHeight: '92vh' } as React.CSSProperties}>
         
         {/* Head */}
-        <div className="modal-head">
-          <div className="co-ico" style={{ width: '40px', height: '40px', borderRadius: '12px', background: 'var(--accent-soft)', color: 'var(--accent)', display: 'grid', placeItems: 'center' }}>
+        <div className="modal-head" style={{ padding: '18px 24px' }}>
+          <div className="co-ico" style={{ width: '42px', height: '42px', borderRadius: '14px', background: 'var(--accent-soft)', color: 'var(--accent)', display: 'grid', placeItems: 'center', flexShrink: 0 }}>
             <Icon name="build" />
           </div>
           <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <h3 style={{ margin: 0 }}>{company.name}</h3>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+              <h3 style={{ margin: 0, fontSize: '16px', fontWeight: 800 }}>{company.name}</h3>
               <WorkflowStatus status={company.status} entityId={company.id} entityType="company" size="sm" />
             </div>
-            <span style={{ fontSize: '12px', color: 'var(--text-3)' }}>تعديل ومتابعة بيانات الشركة وتحديث المحطات</span>
+            <span style={{ fontSize: '12px', color: 'var(--text-3)', marginTop: '2px', display: 'block' }}>تعديل ومتابعة بيانات الشركة وتحديث المحطات</span>
           </div>
           <button type="button" onClick={onClose} className="icon-btn" aria-label="إغلاق">
             ✕
           </button>
         </div>
 
-        {/* Tabs Bar */}
-        <div style={{ display: 'flex', borderBottom: '1px solid var(--line-soft)', padding: '0 20px', gap: '8px', overflowX: 'auto', background: 'var(--surface)' }}>
+        {/* Spacious Wide Tabs Bar */}
+        <div style={{
+          display: 'flex',
+          borderBottom: '2px solid var(--line-soft)',
+          padding: '6px 20px 0 20px',
+          gap: '6px',
+          overflowX: 'auto',
+          background: 'var(--surface-2)',
+          alignItems: 'flex-end',
+        }}>
           {[
             { id: 'info', label: 'البيانات الأساسية', icon: 'build' },
-            { id: 'workflow', label: 'سير العمل (6 محطات)', icon: 'steps' },
+            { id: 'workflow', label: 'سير العمل (8 محطات)', icon: 'steps' },
             { id: 'cert', label: 'الشهادة والوديعة', icon: 'vault' },
             { id: 'tax', label: 'التحاسب الضريبي', icon: 'scale' },
             ...(isCompanyEstablished ? [{ id: 'financial', label: 'الحسابات الختامية', icon: 'doc' }] : []),
             { id: 'ids', label: 'الهويات والرقيمات', icon: 'badge' },
             { id: 'notes', label: 'النواقص والملاحظات', icon: 'doc' },
-          ].map(tab => (
-            <button
-              key={tab.id}
-              type="button"
-              onClick={() => setActiveTab(tab.id as typeof activeTab)}
-              style={{
-                padding: '10px 14px',
-                border: 'none',
-                background: 'none',
-                borderBottom: activeTab === tab.id ? '2px solid var(--accent)' : '2px solid transparent',
-                color: activeTab === tab.id ? 'var(--accent)' : 'var(--text-2)',
-                fontWeight: activeTab === tab.id ? 700 : 500,
-                fontSize: '13px',
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '6px',
-                whiteSpace: 'nowrap',
-              }}
-            >
-              <Icon name={tab.icon as 'build' | 'steps' | 'vault' | 'doc' | 'badge'} style={{ width: '14px', height: '14px' }} />
-              <span>{tab.label}</span>
-            </button>
-          ))}
+          ].map(tab => {
+            const isActive = activeTab === tab.id
+            return (
+              <button
+                key={tab.id}
+                type="button"
+                onClick={() => setActiveTab(tab.id as typeof activeTab)}
+                style={{
+                  padding: '12px 18px',
+                  border: 'none',
+                  background: isActive ? 'var(--surface)' : 'transparent',
+                  borderBottom: isActive ? '3px solid var(--accent)' : '3px solid transparent',
+                  color: isActive ? 'var(--accent)' : 'var(--text-2)',
+                  fontWeight: isActive ? 800 : 600,
+                  fontSize: '13.5px',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  whiteSpace: 'nowrap',
+                  borderRadius: '12px 12px 0 0',
+                  boxShadow: isActive ? '0 -2px 10px rgba(0,0,0,0.04)' : 'none',
+                  transition: 'all 0.18s ease',
+                  marginBottom: '-2px',
+                }}
+              >
+                <Icon name={tab.icon as 'build' | 'steps' | 'vault' | 'doc' | 'badge'} style={{ width: '16px', height: '16px' }} />
+                <span>{tab.label}</span>
+              </button>
+            )
+          })}
         </div>
 
         {/* Content Form Container */}
