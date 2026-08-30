@@ -8,7 +8,7 @@
  *   <IconSprite />              مرة واحدة في التخطيط الجذري
  *   <Icon name="brief" />       في أي مكان
  */
-import type { SVGProps } from 'react'
+import React, { type SVGProps } from 'react'
 
 export type IconName = keyof typeof SYMBOLS
 

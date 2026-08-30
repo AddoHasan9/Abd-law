@@ -52,7 +52,7 @@ const TIMELINE_EVENT_LABELS: Record<string, string> = {
   note: 'نشاط',
 }
 
-const ALL_ID_TYPES: Array<{ type: 'importer_id' | 'tax_id' | 'planning_id' | 'chamber_id'; label: string; tagClass: string }> = [
+export const ALL_ID_TYPES: Array<{ type: 'importer_id' | 'tax_id' | 'planning_id' | 'chamber_id'; label: string; tagClass: string }> = [
   { type: 'tax_id', label: 'هوية ضريبية', tagClass: 'tag-ok' },
   { type: 'chamber_id', label: 'هوية الغرفة التجارية', tagClass: 'tag-orange' },
   { type: 'importer_id', label: 'هوية مستورد', tagClass: 'tag-blue' },
