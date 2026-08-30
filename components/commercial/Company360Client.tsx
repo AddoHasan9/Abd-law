@@ -106,11 +106,11 @@ export default function Company360Client({
   const [companyStatusVal, setCompanyStatusVal] = useState(company.status || 'new')
 
   // Accounting Breakdown Form State
-  const accNotes = (typeof company.accounting_notes === 'object' ? company.accounting_notes : {}) as AccountingBreakdown
-  const [accountantFee, setAccountantFee] = useState(accNotes.accountant_fee ? formatNumberWithCommas(accNotes.accountant_fee) : '')
-  const [registrationFee, setRegistrationFee] = useState(accNotes.registration_fee ? formatNumberWithCommas(accNotes.registration_fee) : '')
-  const [govFee, setGovFee] = useState(accNotes.gov_fee ? formatNumberWithCommas(accNotes.gov_fee) : '')
-  const [otherExpenses, setOtherExpenses] = useState(accNotes.other_expenses ? formatNumberWithCommas(accNotes.other_expenses) : '')
+  const accNotes = (company.accounting_notes && typeof company.accounting_notes === 'object' ? company.accounting_notes : null) as AccountingBreakdown | null
+  const [accountantFee, setAccountantFee] = useState(accNotes?.accountant_fee ? formatNumberWithCommas(accNotes.accountant_fee) : '')
+  const [registrationFee, setRegistrationFee] = useState(accNotes?.registration_fee ? formatNumberWithCommas(accNotes.registration_fee) : '')
+  const [govFee, setGovFee] = useState(accNotes?.gov_fee ? formatNumberWithCommas(accNotes.gov_fee) : '')
+  const [otherExpenses, setOtherExpenses] = useState(accNotes?.other_expenses ? formatNumberWithCommas(accNotes.other_expenses) : '')
 
   // Modals state
   const [isFSModalOpen, setIsFSModalOpen] = useState(false)
@@ -440,7 +440,7 @@ export default function Company360Client({
         <WorkflowStepperDiagram
           taskTitle={`مسار تأسيس: ${company.name}`}
           taskCode={company.task_no || '—'}
-          taskCategory="القسم التجاري - محطات التأسيس الرسمية الثمانية"
+          taskCategory="القسم التجاري - مسار محطات التأسيس الرسمية"
           companyId={company.id}
           isEstablished={company.status === 'established' || Boolean(company.deposit_released) || Boolean(company.cert_date)}
           rawSteps={company.workflow_steps}
