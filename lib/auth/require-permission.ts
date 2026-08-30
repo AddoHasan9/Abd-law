@@ -84,9 +84,9 @@ export async function getCurrentUserProfile(): Promise<CurrentUserProfile | null
       return { id: activeAdmin.id, name: activeAdmin.name || 'منتظر الخزرجي', role: activeAdmin.role }
     }
 
-    return { id: 'prof_1', name: 'منتظر الخزرجي', role: 'super_admin' }
+    return { id: 'db13125d-3aa1-46ab-9159-8fad18746623', name: 'منتظر الخزرجي', role: 'super_admin' }
   } catch {
-    return { id: 'prof_1', name: 'منتظر الخزرجي', role: 'super_admin' }
+    return { id: 'db13125d-3aa1-46ab-9159-8fad18746623', name: 'منتظر الخزرجي', role: 'super_admin' }
   }
 }
 

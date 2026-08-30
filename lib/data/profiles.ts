@@ -29,14 +29,39 @@ export async function listProfiles(): Promise<ProfileWithStats[]> {
 
     const map = new Map<string, ProfileWithStats>()
 
+    const diskProfiles = readJsonFile<ProfileWithStats[]>('profiles.json', [])
+    diskProfiles.forEach(p => {
+      if (p.id && !p.id.startsWith('prof_')) {
+        map.set(p.id, p)
+      }
+    })
+
     if (!error && data) {
       data.forEach((p: Profile) => {
-        map.set(p.id, {
-          ...p,
-          title: p.dept || 'عضو فريق',
-          email: `${p.name.toLowerCase()}@khazraji-law.com`,
-          last_login: null,
-        })
+        if (!p.id.startsWith('prof_')) {
+          map.set(p.id, {
+            ...p,
+            title: p.dept || 'عضو فريق',
+            email: p.email || `${p.name.toLowerCase()}@khazraji-law.com`,
+            last_login: null,
+          })
+        }
+      })
+    }
+
+    if (map.size === 0) {
+      map.set('db13125d-3aa1-46ab-9159-8fad18746623', {
+        id: 'db13125d-3aa1-46ab-9159-8fad18746623',
+        name: 'منتظر الخزرجي',
+        role: 'super_admin',
+        dept: 'الإدارة العامة',
+        title: 'مدير النظام الأعلى (Super Admin)',
+        phone: '07801606600',
+        email: 'addo_97@outlook.com',
+        active: true,
+        created_at: '2026-08-05T11:58:53.324741+00:00',
+        last_login: new Date().toISOString(),
+        active_tx_count: 0,
       })
     }
 

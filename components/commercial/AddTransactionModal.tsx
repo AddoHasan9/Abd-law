@@ -16,10 +16,7 @@ interface Props {
 }
 
 const DEFAULT_LAWYERS = [
-  { id: 'prof_1', name: 'منتظر' },
-  { id: 'prof_2', name: 'عباس' },
-  { id: 'prof_3', name: 'مروة' },
-  { id: 'prof_4', name: 'علي' },
+  { id: 'db13125d-3aa1-46ab-9159-8fad18746623', name: 'منتظر الخزرجي' },
 ]
 
 export default function AddTransactionModal({ isOpen, onClose, companies, lawyers = DEFAULT_LAWYERS }: Props) {

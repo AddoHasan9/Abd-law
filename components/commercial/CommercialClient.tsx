@@ -116,12 +116,9 @@ export default function CommercialClient({ rows = [], companies = [] }: Props) {
   // Extract lawyer/staff options
   const lawyerList = useMemo(() => {
     const map = new Map<string, string>()
-    map.set('prof_1', 'منتظر')
-    map.set('prof_2', 'عباس')
-    map.set('prof_3', 'مروة')
-    map.set('prof_4', 'علي')
+    map.set('db13125d-3aa1-46ab-9159-8fad18746623', 'منتظر الخزرجي')
     localRows.forEach(r => {
-      if (r.profiles?.id && r.profiles?.name) {
+      if (r.profiles?.id && r.profiles?.name && !r.profiles.id.startsWith('prof_')) {
         map.set(r.profiles.id, r.profiles.name)
       }
     })

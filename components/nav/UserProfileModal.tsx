@@ -85,7 +85,7 @@ export default function UserProfileModal({ isOpen, onClose, profile }: Props) {
     setSuccess(null)
 
     const res = await updateMyProfileAction({
-      id: profile?.id || 'prof_1',
+      id: profile?.id || 'db13125d-3aa1-46ab-9159-8fad18746623',
       name: name.trim(),
       phone: phone.trim() || null,
       age: age ? Number(age) : null,

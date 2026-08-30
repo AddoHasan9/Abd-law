@@ -535,10 +535,7 @@ export default function AddLLCTransactionModal({
                 >
                   <option value="">اختر المحامي المسؤول...</option>
                   {(lawyers.length > 0 ? lawyers : [
-                    { id: 'prof_1', name: 'منتظر' },
-                    { id: 'prof_2', name: 'عباس' },
-                    { id: 'prof_3', name: 'مروة' },
-                    { id: 'prof_4', name: 'علي' },
+                    { id: 'db13125d-3aa1-46ab-9159-8fad18746623', name: 'منتظر الخزرجي' },
                   ]).map(l => (
                     <option key={l.id} value={l.id}>
                       {l.name}

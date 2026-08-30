@@ -34,14 +34,21 @@ export default function DashboardClient({ stats, profiles = [] }: Props) {
   })
 
   // Dynamic active lawyers from users table
-  const activeLawyers = profiles.filter(p => p.active !== false)
+  const activeLawyers = profiles.filter(p => p.active !== false && !p.id.startsWith('prof_'))
   const displayLawyers: ProfileWithStats[] = activeLawyers.length
     ? activeLawyers
     : [
-        { id: 'prof_1', name: 'منتظر', role: 'super_admin', title: 'مدير النظام الأعلى', active_tx_count: 0, active: true, created_at: '', dept: 'إدارة النظام والعمليات', phone: null },
-        { id: 'prof_2', name: 'عباس', role: 'manager', title: 'مدير عمليات', active_tx_count: 0, active: true, created_at: '', dept: 'قسم قضايا الشركات والودائع', phone: null },
-        { id: 'prof_3', name: 'مروة', role: 'lawyer', title: 'محامية', active_tx_count: 0, active: true, created_at: '', dept: 'قسم تأسيس الشركات والهويات', phone: null },
-        { id: 'prof_4', name: 'علي', role: 'lawyer', title: 'محامي', active_tx_count: 0, active: true, created_at: '', dept: 'قسم المتابعة الميدانية والضرائب', phone: null },
+        {
+          id: 'db13125d-3aa1-46ab-9159-8fad18746623',
+          name: 'منتظر الخزرجي',
+          role: 'super_admin',
+          title: 'مدير النظام الأعلى (Super Admin)',
+          active_tx_count: 0,
+          active: true,
+          created_at: '',
+          dept: 'الإدارة العامة',
+          phone: null,
+        },
       ]
 
   const maxWorkload = Math.max(...displayLawyers.map(l => l.active_tx_count ?? 0), 1)

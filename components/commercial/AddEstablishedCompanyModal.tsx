@@ -481,10 +481,7 @@ export default function AddEstablishedCompanyModal({ isOpen, onClose, onSuccess 
                     required
                   >
                     <option value="">اختر المحامي المسؤول...</option>
-                    <option value="prof_1">منتظر</option>
-                    <option value="prof_2">عباس</option>
-                    <option value="prof_3">مروة</option>
-                    <option value="prof_4">علي</option>
+                    <option value="db13125d-3aa1-46ab-9159-8fad18746623">منتظر الخزرجي</option>
                   </select>
                 </div>
               </div>
