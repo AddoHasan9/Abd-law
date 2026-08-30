@@ -2239,20 +2239,10 @@
     border-right: 3px solid var(--accent);
   }
 
-  @media (max-width: 1080px) {
-    #sidebar {
-      position: fixed;
-      inset-block: 0;
-      inset-inline-end: 0;
-      transform: translateX(100%);
-      transition: transform var(--t-base);
-      box-shadow: var(--shadow-3);
-    }
-
-    body.side-open #sidebar {
-      transform: none;
-    }
-  }
+  /* ملاحظة: القائمة المنزلقة للجوال مُعرّفة بالكامل في @media (max-width: 1024px)
+     أدناه — وهي نفس نقطة التوقّف التي يظهر عندها زر القائمة (#menu-btn).
+     أي كتلة منفصلة بنقطة توقّف مختلفة (مثل 1080px) تخلق نطاقًا يختفي فيه
+     الشريط الجانبي دون وجود زر لإظهاره. */
 
   /* ============================================================
      تنسيق حقول الإدخال والسيطرة المتجاوبة الشاملة (Form Controls & Modals)
