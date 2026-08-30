@@ -391,13 +391,30 @@ export default function FinancialStatementsClient({ companies = [] }: Props) {
                 <tbody>
                   {visibleGrouped.map(item => (
                     <tr key={item.companyId || item.companyName} style={{ borderBottom: '1px solid var(--line-soft)' }}>
-                      <td style={{ padding: '12px 14px' }}>
+                      <td style={{ padding: '14px 16px', fontWeight: 700 }}>
                         <button
                           type="button"
                           onClick={() => setSelectedFSCompany(item)}
-                          style={{ background: 'none', border: 'none', color: 'var(--accent)', fontWeight: 700, cursor: 'pointer', padding: 0, fontSize: '13.5px', textAlign: 'right' }}
+                          style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, textAlign: 'right', display: 'flex', alignItems: 'center', gap: '10px' }}
+                          className="group"
                         >
-                          {item.companyName}
+                          <div
+                            style={{
+                              width: '32px',
+                              height: '32px',
+                              borderRadius: '8px',
+                              background: 'var(--accent-soft)',
+                              color: 'var(--accent)',
+                              display: 'grid',
+                              placeItems: 'center',
+                              flexShrink: 0,
+                            }}
+                          >
+                            <span className="material-symbols-outlined text-[18px]">domain</span>
+                          </div>
+                          <span style={{ color: 'var(--text)', fontWeight: 800, fontSize: '13.5px' }} className="group-hover:text-[var(--accent)] transition-colors">
+                            {item.companyName}
+                          </span>
                         </button>
                       </td>
 

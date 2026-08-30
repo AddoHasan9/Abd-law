@@ -422,21 +422,42 @@ export default function CommercialClient({ rows = [], companies = [] }: Props) {
         </button>
       </div>
 
-      {/* Main Table Card with Distinct Cyan Velvet Frame */}
-      <div className="w-full bg-[var(--surface)] border-[1.5px] border-[#38BDF8]/40 hover:border-[#38BDF8]/60 rounded-[26px] shadow-[0_8px_32px_rgba(0,0,0,0.37),0_0_16px_rgba(56,189,248,0.06)] overflow-hidden relative transition-all duration-300">
+      {/* Main Table Card — Unified Premium Design Matching Companies Registry */}
+      <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
         
         {/* Table Header Bar */}
-        <div className="px-6 py-4.5 flex items-center justify-between border-b border-[#38BDF8]/20 bg-[var(--surface-2)]/80">
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-[#38BDF8]/15 border border-[#38BDF8]/30 flex items-center justify-center text-[#38BDF8] shadow-xs">
+        <div
+          style={{
+            padding: '16px 20px',
+            borderBottom: '1px solid var(--line-soft)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            flexWrap: 'wrap',
+            gap: '12px',
+            background: 'var(--surface)',
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <div
+              style={{
+                width: '36px',
+                height: '36px',
+                borderRadius: '10px',
+                background: 'var(--accent-soft)',
+                color: 'var(--accent)',
+                display: 'grid',
+                placeItems: 'center',
+              }}
+            >
               <span className="material-symbols-outlined text-[20px]">table_rows</span>
             </div>
             <div>
-              <h3 className="text-base font-extrabold text-[var(--text)] m-0">جدول المعاملات التجارية</h3>
-              <p className="text-[11px] text-[var(--text-3)] font-medium mt-0.5">متابعة كافة معاملات وحركات الشركات وقسم المحدودة</p>
+              <h3 style={{ margin: 0, fontSize: '15.5px', fontWeight: 800, color: 'var(--text)' }}>جدول المعاملات التجارية</h3>
+              <p style={{ margin: 0, fontSize: '12px', color: 'var(--text-3)' }}>متابعة كافة معاملات وحركات الشركات وقسم المحدودة</p>
             </div>
           </div>
-          <span className="count-note num text-xs font-bold text-[#38BDF8] bg-[#38BDF8]/10 border border-[#38BDF8]/30 px-3.5 py-1.5 rounded-full shadow-xs">
+          <span className="tag tag-blue num" style={{ fontSize: '12px', fontWeight: 700, padding: '4px 12px' }}>
             {filteredRows.length} من {localRows.length} معاملة
           </span>
         </div>
@@ -452,21 +473,21 @@ export default function CommercialClient({ rows = [], companies = [] }: Props) {
             لا توجد معاملات مطابقة للفلاتر المحددة.
           </div>
         ) : (
-          <div className="overflow-x-auto w-full">
-            <table className="w-full text-right border-collapse">
+          <div style={{ overflowX: 'auto', width: '100%' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'right' }}>
               <thead>
-                <tr className="bg-[var(--surface-2)]/90 border-b border-[#38BDF8]/15 text-xs text-[var(--text-3)] font-extrabold select-none">
-                  <th className="py-3.5 px-6 text-right font-bold">اسم الشركة</th>
-                  <th className="py-3.5 px-4 text-center font-bold">نوع الخدمة</th>
-                  <th className="py-3.5 px-4 text-center font-bold">المحامي المكلف</th>
-                  <th className="py-3.5 px-4 text-center font-bold">المسؤول عن الشركة</th>
-                  <th className="py-3.5 px-4 text-center font-bold">الأولوية</th>
-                  <th className="py-3.5 px-4 text-center font-bold">حالة سير العمل</th>
-                  <th className="py-3.5 px-4 text-center font-bold">تاريخ المعاملة</th>
-                  <th className="py-3.5 px-4 text-center font-bold w-[70px]">الإجراءات</th>
+                <tr style={{ borderBottom: '1px solid var(--line-soft)', background: 'var(--surface-2)', fontSize: '12px', color: 'var(--text-3)' }}>
+                  <th style={{ padding: '14px 16px', fontWeight: 700, textAlign: 'right', minWidth: '280px' }}>اسم الشركة</th>
+                  <th style={{ padding: '14px 14px', fontWeight: 700, textAlign: 'center', minWidth: '150px' }}>نوع الخدمة</th>
+                  <th style={{ padding: '14px 14px', fontWeight: 700, textAlign: 'center', minWidth: '130px' }}>المحامي المكلف</th>
+                  <th style={{ padding: '14px 14px', fontWeight: 700, textAlign: 'center', minWidth: '150px' }}>المسؤول عن الشركة</th>
+                  <th style={{ padding: '14px 14px', fontWeight: 700, textAlign: 'center', minWidth: '110px' }}>الأولوية</th>
+                  <th style={{ padding: '14px 14px', fontWeight: 700, textAlign: 'center', minWidth: '130px' }}>حالة سير العمل</th>
+                  <th style={{ padding: '14px 14px', fontWeight: 700, textAlign: 'center', minWidth: '120px' }}>تاريخ المعاملة</th>
+                  <th style={{ padding: '14px 16px', fontWeight: 700, textAlign: 'center', width: '80px' }}>الإجراءات</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[var(--line-soft)]">
+              <tbody>
                 {filteredRows.map(t => {
                   const pr = priorityOf(t.priority)
                   const companyObj = t.company_id ? companyMap.get(t.company_id) || t.companies : t.companies
@@ -482,26 +503,51 @@ export default function CommercialClient({ rows = [], companies = [] }: Props) {
                   return (
                     <tr
                       key={t.id}
-                      className={`transition-colors duration-150 hover:bg-[var(--surface-2)]/50 ${
-                        isIncompleteRecord ? 'bg-amber-500/5 border-r-4 border-amber-500' : ''
-                      }`}
+                      style={{
+                        borderBottom: '1px solid var(--line-soft)',
+                        transition: 'background 0.15s',
+                        background: isIncompleteRecord ? 'rgba(245, 158, 11, 0.05)' : 'transparent',
+                      }}
+                      className="hover:bg-[var(--surface-2)]"
                     >
                       {/* 1. Company Name */}
-                      <td className="py-4 px-6 text-right align-middle font-bold">
-                        {companyName ? (
-                          <div className="text-sm font-extrabold text-[var(--text)]">{companyName}</div>
-                        ) : (
-                          <span className="badge-late">سجل غير مكتمل</span>
-                        )}
-                        {t.description && (
-                          <div className="text-xs text-[var(--text-3)] font-normal mt-1">
-                            {t.description}
+                      <td style={{ padding: '14px 16px', fontWeight: 700 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                          <div
+                            style={{
+                              width: '32px',
+                              height: '32px',
+                              borderRadius: '8px',
+                              background: 'var(--accent-soft)',
+                              color: 'var(--accent)',
+                              display: 'grid',
+                              placeItems: 'center',
+                              flexShrink: 0,
+                            }}
+                          >
+                            <span className="material-symbols-outlined text-[18px]">domain</span>
                           </div>
-                        )}
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                            <span
+                              style={{
+                                color: 'var(--text)',
+                                fontWeight: 800,
+                                fontSize: '13.5px',
+                              }}
+                            >
+                              {companyName || 'سجل غير مكتمل'}
+                            </span>
+                            {t.description && (
+                              <span style={{ fontSize: '11.5px', color: 'var(--text-3)', fontWeight: 500 }}>
+                                {t.description}
+                              </span>
+                            )}
+                          </div>
+                        </div>
                       </td>
 
                       {/* 2. Service Type */}
-                      <td className="py-4 px-4 text-center align-middle">
+                      <td style={{ padding: '14px 14px', textAlign: 'center', verticalAlign: 'middle' }}>
                         {(() => {
                           const isFormation = t.type === 'formation' || t.type === 'tasis'
                           const isDepositReleased = companyObj?.deposit_released || Boolean(companyObj?.deposit_released_at)
@@ -509,19 +555,19 @@ export default function CommercialClient({ rows = [], companies = [] }: Props) {
 
                           if (isFormation && isDepositReleased) {
                             return (
-                              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/25 text-emerald-400 text-xs font-bold whitespace-nowrap shadow-xs">
-                                <span className="material-symbols-outlined text-[14px]">verified</span>
+                              <span className="tag tag-ok" style={{ fontSize: '11px', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                                <span className="material-symbols-outlined text-[13px]">verified</span>
                                 <span>تأسيس (أُطلقت الوديعة)</span>
-                              </div>
+                              </span>
                             )
                           }
 
                           if (isInDepositPhase) {
                             return (
-                              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/25 text-amber-400 text-xs font-bold whitespace-nowrap shadow-xs">
-                                <span className="material-symbols-outlined text-[14px]">hourglass_top</span>
+                              <span className="tag tag-warn" style={{ fontSize: '11px', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                                <span className="material-symbols-outlined text-[13px]">hourglass_top</span>
                                 <span>تأسيس · قيد إطلاق الوديعة</span>
-                              </div>
+                              </span>
                             )
                           }
 
@@ -537,7 +583,7 @@ export default function CommercialClient({ rows = [], companies = [] }: Props) {
                                   background: stStyle.bg,
                                   border: stStyle.border,
                                   color: stStyle.color,
-                                  fontSize: '12px',
+                                  fontSize: '11.5px',
                                   fontWeight: 700,
                                   whiteSpace: 'nowrap',
                                 }}
@@ -556,7 +602,7 @@ export default function CommercialClient({ rows = [], companies = [] }: Props) {
                           }
 
                           return (
-                            <span className="badge-late">
+                            <span className="tag tag-bad" style={{ fontSize: '11px', fontWeight: 700 }}>
                               سجل غير مكتمل
                             </span>
                           )
@@ -564,34 +610,22 @@ export default function CommercialClient({ rows = [], companies = [] }: Props) {
                       </td>
 
                       {/* 3. Assigned Lawyer */}
-                      <td className="py-4 px-4 text-center align-middle">
+                      <td style={{ padding: '14px 14px', textAlign: 'center', verticalAlign: 'middle', fontWeight: 600, fontSize: '12.5px', color: 'var(--text)' }}>
                         {lawyerName ? (
-                          <span className="font-bold text-[var(--text)] text-xs">
-                            {lawyerName}
-                          </span>
+                          <span style={{ fontWeight: 700, color: 'var(--text)' }}>{lawyerName}</span>
                         ) : (
-                          <span className="badge-type opacity-60">
-                            غير معيّن
-                          </span>
+                          <span className="tag tag-gray" style={{ fontSize: '11px' }}>غير معيّن</span>
                         )}
                       </td>
 
                       {/* 4. Person In Charge */}
-                      <td className="py-4 px-4 text-center align-middle">
-                        <div className="flex flex-col items-center gap-1">
-                          <div className="font-bold text-xs text-[var(--text)]">
-                            {pic.name === 'سجل غير مكتمل' ? (
-                              <span className="text-[var(--text-3)] italic text-xs">سجل غير مكتمل</span>
-                            ) : (
-                              pic.name
-                            )}
-                          </div>
+                      <td style={{ padding: '14px 14px', textAlign: 'center', verticalAlign: 'middle' }}>
+                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '3px' }}>
+                          <span style={{ fontWeight: 700, fontSize: '12.5px', color: 'var(--text)' }}>
+                            {pic.name === 'سجل غير مكتمل' ? <span style={{ color: 'var(--text-3)', fontStyle: 'italic' }}>سجل غير مكتمل</span> : pic.name}
+                          </span>
                           {pic.roleLabel && (
-                            <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold ${
-                              pic.roleLabel === 'المدير المفوض'
-                                ? 'bg-[#38BDF8]/15 text-[#38BDF8] border border-[#38BDF8]/30'
-                                : 'bg-amber-500/15 text-amber-400 border border-amber-500/30'
-                            }`}>
+                            <span className="tag tag-blue" style={{ fontSize: '10px', padding: '1px 8px', fontWeight: 700 }}>
                               {pic.roleLabel}
                             </span>
                           )}
@@ -599,15 +633,15 @@ export default function CommercialClient({ rows = [], companies = [] }: Props) {
                       </td>
 
                       {/* 5. Priority */}
-                      <td className="py-4 px-4 text-center align-middle">
-                        <span className={`tag ${pr.tag}`} style={{ fontSize: '11.5px', fontWeight: 700 }}>
+                      <td style={{ padding: '14px 14px', textAlign: 'center', verticalAlign: 'middle' }}>
+                        <span className={`tag ${pr.tag}`} style={{ fontSize: '11px', fontWeight: 700 }}>
                           {pr.label}
                         </span>
                       </td>
 
                       {/* 6. Reusable Workflow Status Badge Component */}
-                      <td className="py-4 px-4 text-center align-middle">
-                        <div className="flex justify-center">
+                      <td style={{ padding: '14px 14px', textAlign: 'center', verticalAlign: 'middle' }}>
+                        <div style={{ display: 'flex', justifyContent: 'center' }}>
                           <WorkflowStatus
                             status={t.status}
                             entityId={t.id}
@@ -619,7 +653,7 @@ export default function CommercialClient({ rows = [], companies = [] }: Props) {
                       </td>
 
                       {/* 7. Transaction Date */}
-                      <td style={{ padding: '14px 14px', textAlign: 'center', verticalAlign: 'middle', fontSize: '12.5px' }} className="num">
+                      <td style={{ padding: '14px 14px', textAlign: 'center', verticalAlign: 'middle', fontSize: '12px' }} className="num">
                         {formatDate(t.tx_date)}
                       </td>
 

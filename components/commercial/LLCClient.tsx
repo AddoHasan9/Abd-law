@@ -229,11 +229,25 @@ export default function LLCClient({ transactions = [], companies = [], lawyers =
                             textAlign: 'right',
                             display: 'flex',
                             alignItems: 'center',
-                            gap: '6px',
+                            gap: '10px',
                           }}
                           className="group"
                           title="اضغط لعرض وتعديل تفاصيل المعاملة"
                         >
+                          <div
+                            style={{
+                              width: '32px',
+                              height: '32px',
+                              borderRadius: '8px',
+                              background: 'var(--accent-soft)',
+                              color: 'var(--accent)',
+                              display: 'grid',
+                              placeItems: 'center',
+                              flexShrink: 0,
+                            }}
+                          >
+                            <span className="material-symbols-outlined text-[18px]">domain</span>
+                          </div>
                           <span style={{ color: 'var(--text)', fontSize: '13.5px', fontWeight: 800 }} className="group-hover:text-[var(--accent)] transition-colors">
                             {tx.companies?.name || 'شركة محدودة'}
                           </span>

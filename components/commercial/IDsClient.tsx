@@ -357,9 +357,24 @@ export default function IDsClient({ companies = [], initialCompanyId }: Props) {
                     >
                       {/* Company Name */}
                       <td style={{ padding: '14px 16px', fontWeight: 700 }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                          <span className="material-symbols-outlined text-[18px] text-[var(--accent)]">corporate_fare</span>
-                          <span>{r.company_name || 'شركة غير معرفة'}</span>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                          <div
+                            style={{
+                              width: '32px',
+                              height: '32px',
+                              borderRadius: '8px',
+                              background: 'var(--accent-soft)',
+                              color: 'var(--accent)',
+                              display: 'grid',
+                              placeItems: 'center',
+                              flexShrink: 0,
+                            }}
+                          >
+                            <span className="material-symbols-outlined text-[18px]">domain</span>
+                          </div>
+                          <span style={{ color: 'var(--text)', fontWeight: 800, fontSize: '13.5px' }}>
+                            {r.company_name || 'شركة غير معرفة'}
+                          </span>
                         </div>
                       </td>
 
