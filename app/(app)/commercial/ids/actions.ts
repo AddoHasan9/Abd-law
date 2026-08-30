@@ -204,8 +204,8 @@ export async function createCompanyIDAction(payload: {
     const diskIDs = readJsonFile<CompanyIDRecord[]>('company_ids.json', [])
     const existingDuplicate = diskIDs.find(
       x => x.company_id === targetCompanyId &&
-           x.id_type === payload.id_type &&
-           (x.status === 'in_progress' || (!x.id_number && !x.issue_date))
+        x.id_type === payload.id_type &&
+        (x.status === 'in_progress' || (!x.id_number && !x.issue_date))
     )
 
     if (existingDuplicate) {
@@ -313,7 +313,7 @@ export async function createCompanyIDAction(payload: {
         description: payload.notes?.trim() || `إصدار ${ID_TYPE_LABELS[payload.id_type] || payload.id_type}`,
         created_at: createdAt,
       })
-    } catch {}
+    } catch { }
 
     const diskTxs = readJsonFile<TransactionFull[]>('transactions.json', [])
     diskTxs.unshift(txRecord)
@@ -330,7 +330,7 @@ export async function createCompanyIDAction(payload: {
           : `بدء معاملة إصدار ${ID_TYPE_LABELS[payload.id_type] || payload.id_type} (قيد الإجراء)`,
         related_link: '/commercial/ids',
       })
-    } catch {}
+    } catch { }
 
     try {
       revalidatePath('/commercial/ids')
@@ -338,7 +338,7 @@ export async function createCompanyIDAction(payload: {
       revalidatePath(`/commercial/companies/${targetCompanyId}`)
       revalidatePath('/commercial')
       revalidatePath('/dashboard')
-    } catch {}
+    } catch { }
 
     return { success: true, record: diskRecord }
   } catch (err: unknown) {
@@ -414,14 +414,14 @@ export async function updateCompanyIDAction(
         status: isDone ? 'completed' : (payload.status === 'lacks' ? 'incomplete' : 'in_progress'),
         due_date: payload.expiry_date || null,
       }).eq('id', id)
-    } catch {}
+    } catch { }
 
     try {
       revalidatePath('/commercial/ids')
       revalidatePath('/commercial/companies')
       revalidatePath('/commercial')
       revalidatePath('/dashboard')
-    } catch {}
+    } catch { }
 
     return { success: true, record: updatedRec }
   } catch (err: unknown) {
@@ -474,7 +474,7 @@ export async function deleteCompanyIDAction(id: string) {
       revalidatePath('/commercial/companies')
       revalidatePath('/commercial')
       revalidatePath('/dashboard')
-    } catch {}
+    } catch { }
 
     return { success: true }
   } catch {
