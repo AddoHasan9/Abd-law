@@ -1,5 +1,7 @@
 import type { Metadata, Viewport } from 'next'
 import { Tajawal, Cairo } from 'next/font/google'
+import { Toaster } from '@/components/ui/Toaster'
+import { QueryProvider } from '@/components/providers/QueryProvider'
 import '@/styles/globals.css'
 
 const tajawal = Tajawal({
@@ -55,7 +57,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         />
       </head>
       <body className="min-h-screen antialiased bg-[var(--bg)] text-[var(--text)] transition-colors duration-200">
-        {children}
+        <QueryProvider>
+          <Toaster />
+          {children}
+        </QueryProvider>
       </body>
     </html>
   )
