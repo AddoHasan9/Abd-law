@@ -48,11 +48,14 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           rel="stylesheet"
           href="https://fonts.googleapis.com/css2?family=Chivo:wght@400;600;700;800;900&family=Inter:wght@400;500;600;700&display=swap"
         />
-        {/* Theme script to prevent flicker */}
+        {/* Theme script to prevent flicker and initialize light mode default */}
         <script
           dangerouslySetInnerHTML={{
-            __html: `try{var t=localStorage.getItem('theme');
-              if(t)document.documentElement.dataset.theme=t;}catch(e){}`,
+            __html: `try{var t=localStorage.getItem('theme')||'light';
+              document.documentElement.dataset.theme=t;
+              if(t==='dark'){document.documentElement.classList.add('dark');}
+              else{document.documentElement.classList.remove('dark');}
+            }catch(e){}`,
           }}
         />
       </head>

@@ -94,7 +94,7 @@ export default function LoginForm() {
   if (isRedirecting) {
     return (
       <div className="flex flex-col items-center justify-center h-full w-full max-w-[420px] mx-auto py-12 text-center text-right animate-in fade-in zoom-in-95 duration-300" dir="rtl">
-        <div className="relative w-22 h-22 rounded-3xl bg-white/[0.08] border border-cyan-500/30 p-3 flex items-center justify-center shadow-2xl shadow-cyan-500/20 mb-6 backdrop-blur-2xl animate-pulse">
+        <div className="relative w-22 h-22 rounded-3xl bg-blue-500/10 dark:bg-white/[0.08] border border-blue-500/30 dark:border-cyan-500/30 p-3 flex items-center justify-center shadow-2xl shadow-blue-500/20 mb-6 backdrop-blur-2xl animate-pulse">
           <Image
             src="/logo.png"
             alt="شعار المكتب"
@@ -106,17 +106,17 @@ export default function LoginForm() {
         </div>
 
         <div className="flex flex-col gap-2 items-center">
-          <div className="flex items-center gap-2 text-cyan-400 font-extrabold text-base">
-            <span className="w-2.5 h-2.5 rounded-full bg-cyan-400 animate-ping" />
+          <div className="flex items-center gap-2 text-emerald-600 dark:text-cyan-400 font-extrabold text-base">
+            <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 dark:bg-cyan-400 animate-ping" />
             <span>تم التحقق من الحساب بنجاح</span>
           </div>
-          <p className="text-xs text-slate-300 max-w-xs leading-relaxed mt-1">
+          <p className="text-xs text-slate-600 dark:text-slate-300 max-w-xs leading-relaxed mt-1">
             جارٍ تهيئة الجلسة وتحميل بيانات لوحة التحكم والمعاملات…
           </p>
         </div>
 
-        <div className="w-48 h-1.5 bg-white/10 rounded-full overflow-hidden mt-6">
-          <div className="h-full bg-gradient-to-r from-blue-500 via-indigo-500 to-cyan-400 rounded-full animate-progress" />
+        <div className="w-48 h-1.5 bg-slate-200 dark:bg-white/10 rounded-full overflow-hidden mt-6">
+          <div className="h-full bg-gradient-to-r from-blue-600 via-indigo-600 to-cyan-500 rounded-full animate-progress" />
         </div>
       </div>
     )
@@ -125,8 +125,8 @@ export default function LoginForm() {
   return (
     <div className="flex flex-col justify-center h-full w-full max-w-[420px] mx-auto py-2">
       {/* Mobile Top Brand Header */}
-      <div className="lg:hidden flex items-center gap-3.5 mb-6 pb-4 border-b border-white/10 text-right">
-        <div className="w-12 h-12 rounded-2xl bg-white/[0.08] border border-amber-500/30 p-1.5 flex items-center justify-center shadow-lg shadow-amber-500/10 backdrop-blur-md shrink-0">
+      <div className="lg:hidden flex items-center gap-3.5 mb-6 pb-4 border-b border-slate-200/80 dark:border-white/10 text-right">
+        <div className="w-12 h-12 rounded-2xl bg-white dark:bg-white/[0.08] border border-blue-500/30 dark:border-amber-500/30 p-1.5 flex items-center justify-center shadow-lg shadow-black/5 backdrop-blur-md shrink-0">
           <Image
             src="/logo.png"
             alt="شعار المكتب"
@@ -137,11 +137,11 @@ export default function LoginForm() {
           />
         </div>
         <div className="min-w-0 flex-1">
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10.5px] font-bold bg-amber-500/15 border border-amber-500/30 text-amber-300">
-            <Sparkles className="w-3 h-3 text-amber-400 animate-pulse" />
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10.5px] font-bold bg-blue-500/10 dark:bg-amber-500/15 border border-blue-500/20 dark:border-amber-500/30 text-blue-700 dark:text-amber-300">
+            <Sparkles className="w-3 h-3 text-blue-600 dark:text-amber-400 animate-pulse" />
             منظومة العمل القانوني
           </span>
-          <h2 className="text-sm font-extrabold text-white mt-1 truncate">
+          <h2 className="text-sm font-extrabold text-slate-900 dark:text-white mt-1 truncate">
             مكتب المحامي عبدالحسن الخزرجي
           </h2>
         </div>
@@ -150,10 +150,10 @@ export default function LoginForm() {
       {/* Form Content with GSAP Stagger Entrance */}
       <FadeInStagger className="space-y-6">
         <div className="text-right">
-          <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
+          <h1 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight font-display transition-colors">
             تسجيل الدخول
           </h1>
-          <p className="text-xs sm:text-sm text-slate-300 mt-1.5 leading-relaxed">
+          <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 mt-1.5 leading-relaxed font-medium transition-colors">
             أهلاً بك مجدداً، أدخل بياناتك للوصول إلى لوحة العمل وإدارة المعاملات.
           </p>
         </div>
@@ -162,7 +162,7 @@ export default function LoginForm() {
         <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-4.5">
           {/* Email Field */}
           <div className="space-y-1.5 text-right">
-            <label htmlFor="login-email" className="block text-xs font-bold text-slate-200">
+            <label htmlFor="login-email" className="block text-xs font-bold text-slate-800 dark:text-slate-200 transition-colors">
               البريد الإلكتروني
             </label>
             <div className="relative group">
@@ -172,13 +172,13 @@ export default function LoginForm() {
                 autoComplete="email"
                 placeholder="name@example.com"
                 dir="ltr"
-                className="w-full h-12 pr-11 pl-4 rounded-2xl bg-white/[0.06] hover:bg-white/[0.09] focus:bg-white/[0.12] border border-white/15 focus:border-cyan-400 text-white placeholder-slate-400 text-sm outline-none transition-all duration-300 focus:ring-4 focus:ring-cyan-500/20 text-right backdrop-blur-md"
+                className="w-full h-12 pr-11 pl-4 rounded-2xl bg-white dark:bg-white/[0.06] hover:bg-slate-50 dark:hover:bg-white/[0.09] focus:bg-white dark:focus:bg-white/[0.12] border border-slate-300/80 dark:border-white/15 focus:border-blue-600 dark:focus:border-cyan-400 text-slate-900 dark:text-white placeholder-slate-400 text-sm outline-none transition-all duration-300 focus:ring-4 focus:ring-blue-500/15 dark:focus:ring-cyan-500/20 text-right backdrop-blur-md shadow-xs"
                 {...register('email')}
               />
-              <Mail className="absolute right-3.5 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400 group-focus-within:text-cyan-400 transition-colors pointer-events-none" />
+              <Mail className="absolute right-3.5 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400 group-focus-within:text-blue-600 dark:group-focus-within:text-cyan-400 transition-colors pointer-events-none" />
             </div>
             {errors.email && (
-              <p className="text-[11.5px] font-bold text-rose-400 animate-in fade-in duration-200">
+              <p className="text-[11.5px] font-bold text-rose-600 dark:text-rose-400 animate-in fade-in duration-200">
                 {errors.email.message}
               </p>
             )}
@@ -187,12 +187,12 @@ export default function LoginForm() {
           {/* Password Field */}
           <div className="space-y-1.5 text-right">
             <div className="flex items-center justify-between">
-              <label htmlFor="login-password" className="block text-xs font-bold text-slate-200">
+              <label htmlFor="login-password" className="block text-xs font-bold text-slate-800 dark:text-slate-200 transition-colors">
                 كلمة المرور
               </label>
               <Link
                 href="/reset-password"
-                className="text-[11.5px] text-cyan-400 hover:text-cyan-300 hover:underline font-semibold transition-colors"
+                className="text-[11.5px] text-blue-600 dark:text-cyan-400 hover:underline font-semibold transition-colors"
               >
                 نسيت كلمة المرور؟
               </Link>
@@ -204,15 +204,15 @@ export default function LoginForm() {
                 autoComplete="current-password"
                 placeholder="••••••••"
                 dir="ltr"
-                className="w-full h-12 pr-11 pl-11 rounded-2xl bg-white/[0.06] hover:bg-white/[0.09] focus:bg-white/[0.12] border border-white/15 focus:border-cyan-400 text-white placeholder-slate-400 text-sm outline-none transition-all duration-300 focus:ring-4 focus:ring-cyan-500/20 text-right backdrop-blur-md"
+                className="w-full h-12 pr-11 pl-11 rounded-2xl bg-white dark:bg-white/[0.06] hover:bg-slate-50 dark:hover:bg-white/[0.09] focus:bg-white dark:focus:bg-white/[0.12] border border-slate-300/80 dark:border-white/15 focus:border-blue-600 dark:focus:border-cyan-400 text-slate-900 dark:text-white placeholder-slate-400 text-sm outline-none transition-all duration-300 focus:ring-4 focus:ring-blue-500/15 dark:focus:ring-cyan-500/20 text-right backdrop-blur-md shadow-xs"
                 {...register('password')}
               />
-              <Lock className="absolute right-3.5 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400 group-focus-within:text-cyan-400 transition-colors pointer-events-none" />
+              <Lock className="absolute right-3.5 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400 group-focus-within:text-blue-600 dark:group-focus-within:text-cyan-400 transition-colors pointer-events-none" />
               <button
                 type="button"
                 onClick={() => setShowPassword(v => !v)}
                 tabIndex={-1}
-                className="absolute left-3 top-1/2 -translate-y-1/2 w-8 h-8 rounded-xl flex items-center justify-center text-slate-400 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
+                className="absolute left-3 top-1/2 -translate-y-1/2 w-8 h-8 rounded-xl flex items-center justify-center text-slate-400 hover:text-slate-700 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/10 transition-colors cursor-pointer"
                 aria-label={showPassword ? 'إخفاء كلمة المرور' : 'إظهار كلمة المرور'}
               >
                 {showPassword ? (
@@ -223,24 +223,24 @@ export default function LoginForm() {
               </button>
             </div>
             {errors.password && (
-              <p className="text-[11.5px] font-bold text-rose-400 animate-in fade-in duration-200">
+              <p className="text-[11.5px] font-bold text-rose-600 dark:text-rose-400 animate-in fade-in duration-200">
                 {errors.password.message}
               </p>
             )}
           </div>
 
           {/* Remember me */}
-          <div className="flex items-center gap-2.5 pt-1 text-xs text-slate-300">
+          <div className="flex items-center gap-2.5 pt-1 text-xs text-slate-700 dark:text-slate-300">
             <input
               id="remember-me"
               type="checkbox"
               checked={rememberMe}
               onChange={e => setValue('rememberMe', e.target.checked)}
-              className="w-4 h-4 rounded-md border-white/20 bg-white/10 text-cyan-500 focus:ring-0 cursor-pointer accent-cyan-500"
+              className="w-4 h-4 rounded-md border-slate-300 dark:border-white/20 bg-white dark:bg-white/10 text-blue-600 dark:text-cyan-500 focus:ring-0 cursor-pointer accent-blue-600 dark:accent-cyan-500"
             />
             <label
               htmlFor="remember-me"
-              className="text-xs text-slate-300 hover:text-white font-medium cursor-pointer transition-colors"
+              className="text-xs text-slate-700 dark:text-slate-300 hover:text-slate-950 dark:hover:text-white font-medium cursor-pointer transition-colors"
             >
               تذكر تسجيل الدخول على هذا المتصفح
             </label>
@@ -250,7 +250,7 @@ export default function LoginForm() {
           <button
             type="submit"
             disabled={isSubmitting}
-            className="w-full h-12 mt-2 rounded-2xl bg-gradient-to-r from-blue-600 via-indigo-600 to-cyan-500 hover:from-blue-500 hover:to-cyan-400 text-white font-extrabold text-sm flex items-center justify-center gap-2.5 shadow-xl shadow-blue-500/25 hover:shadow-cyan-500/35 hover:scale-[1.01] active:scale-[0.99] transition-all duration-300 disabled:opacity-60 disabled:pointer-events-none cursor-pointer border border-white/20"
+            className="w-full h-12 mt-2 rounded-2xl bg-gradient-to-r from-blue-600 via-indigo-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white font-extrabold text-sm flex items-center justify-center gap-2.5 shadow-xl shadow-blue-500/25 hover:shadow-blue-500/40 hover:scale-[1.01] active:scale-[0.99] transition-all duration-300 disabled:opacity-60 disabled:pointer-events-none cursor-pointer border border-white/20"
           >
             {isSubmitting ? (
               <div className="flex items-center gap-2">
@@ -267,8 +267,8 @@ export default function LoginForm() {
         </form>
 
         {/* Security Trust Pill */}
-        <div className="flex items-center justify-center gap-2 text-[11.5px] text-slate-400 select-none pt-1">
-          <ShieldCheck className="h-4 w-4 text-emerald-400" />
+        <div className="flex items-center justify-center gap-2 text-[11.5px] text-slate-500 dark:text-slate-400 select-none pt-1 transition-colors">
+          <ShieldCheck className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
           <span>النظام متصل ومشفر بمعيار الأمان 256-bit</span>
         </div>
       </FadeInStagger>
