@@ -323,7 +323,7 @@ export default function TaxAssessmentClient({ assessments = [], companies = [], 
       </div>
 
       {/* Main Table Card */}
-      <div className="w-full bg-[var(--surface)] border border-[var(--line-soft)] rounded-[24px] shadow-sm overflow-hidden relative">
+      <div className="w-full glass-card !p-0 rounded-[22px] border-0 shadow-sm overflow-hidden bg-[var(--surface-glass)] relative">
         {filteredItems.length === 0 ? (
           <div className="p-12">
             <Empty
@@ -350,7 +350,8 @@ export default function TaxAssessmentClient({ assessments = [], companies = [], 
               </thead>
               <tbody>
                 {filteredItems.map(item => {
-                  const coName = item.company_name || companies.find(c => c.id === item.company_id)?.name || 'شركة غير معرفة'
+                  const targetCo = companies.find(c => c.id === item.company_id)
+                  const coName = item.company_name || targetCo?.name || '—'
                   const isCleared = item.status === 'tax_cleared'
 
                   return (
@@ -451,11 +452,21 @@ export default function TaxAssessmentClient({ assessments = [], companies = [], 
 
                       {/* Actions */}
                       <td className="p-3.5 text-left whitespace-nowrap">
-                        <div className="flex items-center gap-1.5">
+                        <div className="flex items-center gap-2">
+                          {item.company_id && (
+                            <Link
+                              href={`/commercial/companies/${item.company_id}`}
+                              className="btn btn-primary !py-1 !px-2.5 !text-xs !font-bold !rounded-xl flex items-center gap-1 text-white shadow-xs"
+                              title="الانتقال إلى ملف الشركة الشامل 360°"
+                            >
+                              <span>ملف 360°</span>
+                              <span className="material-symbols-outlined text-[13px]">arrow_left</span>
+                            </Link>
+                          )}
                           <button
                             type="button"
                             onClick={() => openEditModal(item)}
-                            className="btn btn-ghost px-2.5 py-1 text-xs font-bold"
+                            className="btn btn-ghost px-2 py-1 text-xs font-bold border border-[var(--border)]"
                             title="تعديل ملف التحاسب الضريبي"
                           >
                             ✎ تعديل

@@ -150,9 +150,11 @@ export default function AddTaxAssessmentModal({
 
     const selectedLawyer = lawyers.find(l => l.id === lawyerId)
     const lawyerName = selectedLawyer?.name || (lawyerId ? 'المحامي المكلف' : undefined)
+    const selectedCo = companies.find(c => c.id === companyId)
 
     const payload = {
       company_id: companyId,
+      company_name: selectedCo?.name || undefined,
       year: Number(year),
       tax_branch: taxBranch,
       tax_file_number: taxFileNumber,

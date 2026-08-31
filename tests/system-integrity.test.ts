@@ -218,8 +218,7 @@ describe('Duplicate Data Prevention Tests', () => {
   })
 
   it('detects and blocks duplicate tax assessments for the same company and year', async () => {
-    const { createTaxAssessmentAction } = await import('../app/(app)/commercial/tax-assessment/actions')
-    const { deleteCompanyAction } = await import('../app/(app)/commercial/companies/actions')
+    const { createTaxAssessmentAction, deleteTaxAssessmentAction } = await import('../app/(app)/commercial/tax-assessment/actions')
     const testCompanyId = `dup_tax_co_${Date.now()}`
     const testYear = 2024
 
@@ -241,6 +240,8 @@ describe('Duplicate Data Prevention Tests', () => {
     assert.match(res2.error || '', /تم تسجيل تحاسب ضريبي لهذه الشركة لسنة/)
 
     // Cleanup
-    await deleteCompanyAction(testCompanyId)
+    if (res1.data?.id) {
+      await deleteTaxAssessmentAction(res1.data.id)
+    }
   })
 })

@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache'
 import { createAdminClient } from '@/lib/supabase/server'
 import { logTimelineEvent } from '@/lib/data/timeline'
 import { readJsonFile, writeJsonFile } from '@/lib/data/fs-store'
+import { listCompanies } from '@/lib/data/companies'
 import type { Company, TaxAssessment, TransactionFull } from '@/types/database'
 import { requirePermission } from '@/lib/auth/require-permission'
 
@@ -20,6 +21,7 @@ function generateUUID() {
 
 export interface CreateTaxAssessmentPayload {
   company_id: string
+  company_name?: string
   year: number
   tax_branch?: string
   tax_file_number?: string
@@ -40,7 +42,8 @@ export interface CreateTaxAssessmentPayload {
 
 export async function getTaxAssessmentsAction(companyId?: string): Promise<{ success: boolean; data?: TaxAssessment[]; error?: string }> {
   try {
-    const diskCompanies = readJsonFile<Company[]>('companies.json', [])
+    const allCompanies = await listCompanies()
+    const compMap = new Map<string, string>(allCompanies.map(c => [c.id, c.name]))
     const diskAssessments = readJsonFile<TaxAssessment[]>('tax_assessments.json', [])
 
     let dbItems: TaxAssessment[] = []
@@ -52,7 +55,7 @@ export async function getTaxAssessmentsAction(companyId?: string): Promise<{ suc
       if (!error && data) {
         dbItems = (data as Array<TaxAssessment & { companies?: { name?: string } | null }>).map(d => ({
           ...d,
-          company_name: d.companies?.name || diskCompanies.find(c => c.id === d.company_id)?.name || null,
+          company_name: d.companies?.name || compMap.get(d.company_id) || null,
         }))
       }
     } catch {}
@@ -61,11 +64,25 @@ export async function getTaxAssessmentsAction(companyId?: string): Promise<{ suc
     dbItems.forEach(i => map.set(i.id, i))
     diskAssessments.forEach(i => {
       const existing = map.get(i.id)
-      const coName = i.company_name || diskCompanies.find(c => c.id === i.company_id)?.name || null
+      const coName = i.company_name || compMap.get(i.company_id) || null
       map.set(i.id, { ...(existing || {}), ...i, company_name: coName })
     })
 
-    let list = Array.from(map.values()).sort((a, b) => b.year - a.year)
+    let list = Array.from(map.values())
+      .map(item => ({
+        ...item,
+        company_name: compMap.get(item.company_id) || item.company_name || null,
+      }))
+      .filter(item => {
+        // Exclude any test artifact dummy companies or orphaned records
+        if (!item.company_id || item.company_id.startsWith('dup_tax_co_') || item.company_id.startsWith('test_co_')) {
+          return false
+        }
+        // Must belong to a valid registered company in companies list or have a confirmed valid company_name
+        return Boolean(compMap.has(item.company_id) || item.company_name)
+      })
+      .sort((a, b) => b.year - a.year)
+
     if (companyId) {
       list = list.filter(x => x.company_id === companyId)
     }
@@ -123,8 +140,8 @@ export async function createTaxAssessmentAction(payload: CreateTaxAssessmentPayl
       }
     } catch {}
 
-    const diskCompanies = readJsonFile<Company[]>('companies.json', [])
-    const targetCompany = diskCompanies.find(c => c.id === payload.company_id)
+    const allCompanies = await listCompanies()
+    const targetCompany = allCompanies.find(c => c.id === payload.company_id)
 
     const assessmentId = generateUUID()
     const createdAt = new Date().toISOString()
@@ -132,7 +149,7 @@ export async function createTaxAssessmentAction(payload: CreateTaxAssessmentPayl
     const newRecord: TaxAssessment = {
       id: assessmentId,
       company_id: payload.company_id,
-      company_name: targetCompany?.name || null,
+      company_name: targetCompany?.name || payload.company_name || null,
       year: Number(payload.year),
       tax_branch: payload.tax_branch?.trim() || null,
       tax_file_number: payload.tax_file_number?.trim() || targetCompany?.tax_no || null,
