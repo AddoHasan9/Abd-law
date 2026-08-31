@@ -18,6 +18,8 @@ interface Props {
   onEditYear: (statement: FinancialStatement) => void
   onDeleteYear: (statementId: string) => void
   onMarkSubmitted: (statementId: string) => void
+  onMarkTaxSubmitted?: (statementId: string) => void
+  onMarkRegistrarSubmitted?: (statementId: string) => void
   canSubmit?: boolean
   canDelete?: boolean
 }
@@ -32,6 +34,8 @@ export default function CompanyFSDetailsModal({
   onEditYear,
   onDeleteYear,
   onMarkSubmitted,
+  onMarkTaxSubmitted,
+  onMarkRegistrarSubmitted,
   canSubmit = true,
   canDelete = true,
 }: Props) {
@@ -46,7 +50,7 @@ export default function CompanyFSDetailsModal({
   if (!mounted || !isOpen || !company) return null
 
   // Calculate Company History Stats
-  const completedStatements = statements.filter(s => s.date_submitted)
+  const completedStatements = statements.filter(s => s.date_submitted || s.date_submitted_registrar)
   const completedYearsCount = completedStatements.length
   const totalRequiredCount = requiredItems.length + completedYearsCount
   const pendingCount = requiredItems.length
@@ -66,7 +70,14 @@ export default function CompanyFSDetailsModal({
   const allYearsMap = new Map<number, {
     year: number
     dateReceived?: string | null
-    dateSubmitted?: string | null
+    dateSubmittedTax?: string | null
+    dateSubmittedRegistrar?: string | null
+    isTaxSubmitted: boolean
+    isRegistrarSubmitted: boolean
+    taxStatusLabel: string
+    taxTagClass: string
+    registrarStatusLabel: string
+    registrarTagClass: string
     statusLabel: string
     tagClass: string
     penaltyAmount: number
@@ -80,7 +91,14 @@ export default function CompanyFSDetailsModal({
     allYearsMap.set(s.year, {
       year: s.year,
       dateReceived: s.date_received,
-      dateSubmitted: s.date_submitted,
+      dateSubmittedTax: calc.taxDateSubmitted,
+      dateSubmittedRegistrar: calc.registrarDateSubmitted,
+      isTaxSubmitted: Boolean(calc.isTaxSubmitted),
+      isRegistrarSubmitted: Boolean(calc.isRegistrarSubmitted),
+      taxStatusLabel: calc.taxStatusLabel || '',
+      taxTagClass: calc.taxTagClass || 'tag-gray',
+      registrarStatusLabel: calc.registrarStatusLabel || '',
+      registrarTagClass: calc.registrarTagClass || 'tag-gray',
       statusLabel: calc.statusLabel,
       tagClass: calc.tagClass,
       penaltyAmount: calc.penaltyAmount,
@@ -92,10 +110,22 @@ export default function CompanyFSDetailsModal({
   // 2. Add pending required years
   requiredItems.forEach(r => {
     if (!allYearsMap.has(r.requiredYear)) {
+      const year = r.requiredYear
+      const submissionYear = year + 1
+      const taxDeadline = `${submissionYear}-07-31`
+      const isPastTax = new Date() > new Date(submissionYear, 6, 31)
+
       allYearsMap.set(r.requiredYear, {
         year: r.requiredYear,
         dateReceived: null,
-        dateSubmitted: null,
+        dateSubmittedTax: null,
+        dateSubmittedRegistrar: null,
+        isTaxSubmitted: false,
+        isRegistrarSubmitted: false,
+        taxStatusLabel: isPastTax ? 'متأخرة عن مهلة 31/7' : `مهلة الضرائب: 31/07/${submissionYear}`,
+        taxTagClass: isPastTax ? 'tag-bad' : 'tag-blue',
+        registrarStatusLabel: r.statusLabel,
+        registrarTagClass: r.tagClass,
         statusLabel: r.statusLabel,
         tagClass: r.tagClass,
         penaltyAmount: r.penaltyAmount,
@@ -109,7 +139,7 @@ export default function CompanyFSDetailsModal({
   return createPortal(
     <div id="modal-root" className="on">
       <div className="modal-veil" onClick={onClose} role="presentation" aria-hidden="true" />
-      <div className="modal" style={{ '--modal-max-w': 'var(--modal-xl, 880px)', display: 'flex', flexDirection: 'column', maxHeight: '90vh' } as React.CSSProperties}>
+      <div className="modal" style={{ '--modal-max-w': 'var(--modal-xl, 920px)', display: 'flex', flexDirection: 'column', maxHeight: '90vh' } as React.CSSProperties}>
         
         {/* Modal Header */}
         <div className="modal-head" style={{ flex: 'none' }}>
@@ -129,7 +159,7 @@ export default function CompanyFSDetailsModal({
           <div style={{ flex: 1, minWidth: 0 }}>
             <h3 style={{ margin: 0 }}>تفاصيل الحسابات الختامية: {company.name}</h3>
             <span style={{ fontSize: '11.5px', color: 'var(--text-3)' }}>
-              سجل الميزانيات السنوية والغرامات لشركة {company.name}
+              سجل تسليم الميزانيات للضرائب ومسجل الشركات والغرامات
             </span>
           </div>
           <button type="button" onClick={onClose} className="icon-btn" aria-label="إغلاق">
@@ -157,14 +187,14 @@ export default function CompanyFSDetailsModal({
             </div>
 
             <div style={{ padding: '12px 14px', background: pendingCount > 0 ? 'var(--warn-soft)' : 'var(--surface-2)', border: pendingCount > 0 ? '1px solid var(--warn)' : '1px solid var(--line-soft)', borderRadius: 'var(--r-md)' }}>
-              <div style={{ fontSize: '11px', color: pendingCount > 0 ? 'var(--warn)' : 'var(--text-3)', fontWeight: 600 }}>السنوات المتأخرة / المستحقة</div>
+              <div style={{ fontSize: '11px', color: pendingCount > 0 ? 'var(--warn)' : 'var(--text-3)', fontWeight: 600 }}>السنوات المستحقة</div>
               <div style={{ fontSize: '18px', fontWeight: 800, color: pendingCount > 0 ? 'var(--warn)' : 'var(--text)', marginTop: '2px' }}>
                 {pendingCount} سنة
               </div>
             </div>
 
             <div style={{ padding: '12px 14px', background: totalPenaltyAmount > 0 ? 'var(--bad-soft)' : 'var(--surface-2)', border: totalPenaltyAmount > 0 ? '1px solid var(--bad)' : '1px solid var(--line-soft)', borderRadius: 'var(--r-md)' }}>
-              <div style={{ fontSize: '11px', color: totalPenaltyAmount > 0 ? 'var(--bad)' : 'var(--text-3)', fontWeight: 600 }}>إجمالي الغرامات المحسوبة</div>
+              <div style={{ fontSize: '11px', color: totalPenaltyAmount > 0 ? 'var(--bad)' : 'var(--text-3)', fontWeight: 600 }}>إجمالي غرامات مسجل الشركات</div>
               <div style={{ fontSize: '17px', fontWeight: 800, color: totalPenaltyAmount > 0 ? 'var(--bad)' : 'var(--text-3)', marginTop: '2px' }}>
                 {formatMoney(totalPenaltyAmount)}
               </div>
@@ -200,7 +230,7 @@ export default function CompanyFSDetailsModal({
           <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
               <div style={{ fontSize: '13.5px', fontWeight: 700, color: 'var(--text)' }}>
-                سجل الحسابات الختامية حسب السنوات ({historyList.length})
+                سجل تسليم الحسابات الختامية حسب السنوات ({historyList.length})
               </div>
               <button
                 type="button"
@@ -219,9 +249,9 @@ export default function CompanyFSDetailsModal({
                   <thead>
                     <tr style={{ background: 'var(--surface-2)', borderBottom: '1px solid var(--line)' }}>
                       <th style={{ padding: '10px 14px', textAlign: 'center' }}>السنة</th>
-                      <th style={{ padding: '10px 14px', textAlign: 'center' }}>تاريخ الاستلام</th>
-                      <th style={{ padding: '10px 14px', textAlign: 'center' }}>تاريخ التقديم</th>
-                      <th style={{ padding: '10px 14px', textAlign: 'center' }}>الحالة</th>
+                      <th style={{ padding: '10px 14px', textAlign: 'center' }}>استلام المستندات</th>
+                      <th style={{ padding: '10px 14px', textAlign: 'center' }}>تسليم الضرائب (31/7)</th>
+                      <th style={{ padding: '10px 14px', textAlign: 'center' }}>تسليم مسجل الشركات (7/10)</th>
                       <th style={{ padding: '10px 14px', textAlign: 'center' }}>الغرامة</th>
                       <th style={{ padding: '10px 14px', textAlign: 'center' }}>الملاحظات</th>
                       <th style={{ padding: '10px 14px', textAlign: 'left' }}>إجراءات</th>
@@ -232,28 +262,64 @@ export default function CompanyFSDetailsModal({
                       <tr key={item.year} style={{ borderBottom: '1px solid var(--line-soft)' }}>
                         <td style={{ padding: '12px 14px', textAlign: 'center', fontWeight: 800 }}>
                           <div>السنة المالية {item.year}</div>
-                          <div style={{ fontSize: '10.5px', color: 'var(--text-3)', fontWeight: 600, marginTop: '4px', display: 'flex', flexDirection: 'column', gap: '2px' }}>
-                            <span style={{ color: '#d97706' }}>ضرائب الشركات: 31/07/{item.year + 1}</span>
-                            <span>مسجل الشركات: 07/10/{item.year + 1}</span>
-                          </div>
                         </td>
 
                         <td style={{ padding: '12px 14px', textAlign: 'center', color: 'var(--text-2)' }}>
                           {item.dateReceived || '—'}
                         </td>
 
+                        {/* Tax Commission Status */}
                         <td style={{ padding: '12px 14px', textAlign: 'center' }}>
-                          {item.dateSubmitted ? (
-                            <span className="tag tag-ok">{item.dateSubmitted}</span>
+                          {item.isTaxSubmitted ? (
+                            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2px' }}>
+                              <span className="tag tag-ok" style={{ fontSize: '11px' }}>
+                                ✓ مسلّمة ({item.dateSubmittedTax})
+                              </span>
+                            </div>
                           ) : (
-                            <span style={{ color: 'var(--text-3)' }}>لم تُقدَّم بعد</span>
+                            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px' }}>
+                              <span className={`tag ${item.taxTagClass}`} style={{ fontSize: '11px' }}>
+                                {item.taxStatusLabel}
+                              </span>
+                              {item.statementObj && canSubmit && onMarkTaxSubmitted && (
+                                <button
+                                  type="button"
+                                  onClick={() => onMarkTaxSubmitted(item.statementObj!.id)}
+                                  className="btn btn-ghost"
+                                  style={{ padding: '1px 6px', fontSize: '10.5px', color: '#d97706' }}
+                                >
+                                  تسجيل تسليم الضرائب
+                                </button>
+                              )}
+                            </div>
                           )}
                         </td>
 
+                        {/* Registrar Status */}
                         <td style={{ padding: '12px 14px', textAlign: 'center' }}>
-                          <span className={`tag ${item.tagClass}`}>
-                            {item.statusLabel}
-                          </span>
+                          {item.isRegistrarSubmitted ? (
+                            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2px' }}>
+                              <span className="tag tag-ok" style={{ fontSize: '11px' }}>
+                                ✓ مسلّمة ({item.dateSubmittedRegistrar})
+                              </span>
+                            </div>
+                          ) : (
+                            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px' }}>
+                              <span className={`tag ${item.registrarTagClass}`} style={{ fontSize: '11px' }}>
+                                {item.registrarStatusLabel}
+                              </span>
+                              {item.statementObj && canSubmit && onMarkRegistrarSubmitted && (
+                                <button
+                                  type="button"
+                                  onClick={() => onMarkRegistrarSubmitted(item.statementObj!.id)}
+                                  className="btn btn-ghost"
+                                  style={{ padding: '1px 6px', fontSize: '10.5px', color: 'var(--accent)' }}
+                                >
+                                  تسجيل تسليم المسجل
+                                </button>
+                              )}
+                            </div>
+                          )}
                         </td>
 
                         <td style={{ padding: '12px 14px', textAlign: 'center', fontWeight: item.penaltyAmount > 0 ? 700 : 400, color: item.penaltyAmount > 0 ? 'var(--bad)' : 'var(--text-3)' }}>
@@ -268,14 +334,15 @@ export default function CompanyFSDetailsModal({
                           <div style={{ display: 'flex', gap: '6px', justifyContent: 'flex-end' }}>
                             {item.statementObj ? (
                               <>
-                                {!item.dateSubmitted && canSubmit && (
+                                {(!item.isRegistrarSubmitted || !item.isTaxSubmitted) && canSubmit && (
                                   <button
                                     type="button"
                                     onClick={() => onMarkSubmitted(item.statementObj!.id)}
                                     className="btn btn-go"
                                     style={{ padding: '2px 8px', fontSize: '11px' }}
+                                    title="تسليم لكلا الدائرتين معاً اليوم"
                                   >
-                                    تسجيل التقديم
+                                    تسليم كامل
                                   </button>
                                 )}
                                 <button

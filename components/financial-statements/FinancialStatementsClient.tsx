@@ -8,7 +8,9 @@ import {
   getFSContactStatusesAction,
   updateFSContactStatusAction,
   deleteFinancialStatementAction,
-  markStatementSubmittedAction
+  markStatementSubmittedAction,
+  markStatementTaxSubmittedAction,
+  markStatementRegistrarSubmittedAction,
 } from '@/app/(app)/commercial/financial-statements/actions'
 import {
   calculateRequiredFSForCompanies,
@@ -198,8 +200,20 @@ export default function FinancialStatementsClient({ companies = [] }: Props) {
   }
 
   const handleMarkSubmitted = async (id: string) => {
-    if (!confirm('تسجيل تقديم الميزانية اليوم للنظام الحكومي؟')) return
+    if (!confirm('تسجيل تقديم الميزانية اليوم لكلا الدائرتين (الضرائب ومسجل الشركات)؟')) return
     await markStatementSubmittedAction(id)
+    loadData()
+  }
+
+  const handleMarkTaxSubmitted = async (id: string) => {
+    if (!confirm('تسجيل تسليم الميزانية اليوم للهيئة العامة للضرائب؟')) return
+    await markStatementTaxSubmittedAction(id)
+    loadData()
+  }
+
+  const handleMarkRegistrarSubmitted = async (id: string) => {
+    if (!confirm('تسجيل تسليم الميزانية اليوم لدائرة تسجيل الشركات؟')) return
+    await markStatementRegistrarSubmittedAction(id)
     loadData()
   }
 
@@ -656,6 +670,8 @@ export default function FinancialStatementsClient({ companies = [] }: Props) {
           }}
           onDeleteYear={handleDelete}
           onMarkSubmitted={handleMarkSubmitted}
+          onMarkTaxSubmitted={handleMarkTaxSubmitted}
+          onMarkRegistrarSubmitted={handleMarkRegistrarSubmitted}
           canSubmit={canSubmitFS}
           canDelete={canDeleteFS}
         />

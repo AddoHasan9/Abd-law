@@ -25,7 +25,10 @@ interface DynamicYearRow {
   rowId: string
   year: number
   date_received: string
-  date_submitted: string
+  tax_submitted: boolean
+  date_submitted_tax: string
+  registrar_submitted: boolean
+  date_submitted_registrar: string
   notes: string
 }
 
@@ -58,7 +61,10 @@ export default function AddFinancialStatementModal({
   // Edit Mode State (for single statement editing)
   const [editYear, setEditYear] = useState<number>(currentYear - 1)
   const [editDateReceived, setEditDateReceived] = useState('')
-  const [editDateSubmitted, setEditDateSubmitted] = useState('')
+  const [editTaxSubmitted, setEditTaxSubmitted] = useState(false)
+  const [editDateSubmittedTax, setEditDateSubmittedTax] = useState('')
+  const [editRegistrarSubmitted, setEditRegistrarSubmitted] = useState(false)
+  const [editDateSubmittedRegistrar, setEditDateSubmittedRegistrar] = useState('')
   const [editNotes, setEditNotes] = useState('')
 
   const autocompleteRef = useRef<HTMLDivElement>(null)
@@ -114,7 +120,15 @@ export default function AddFinancialStatementModal({
       setCompanySearch(co ? co.name : editingStatement.company_name || '')
       setEditYear(editingStatement.year || currentYear)
       setEditDateReceived(editingStatement.date_received || '')
-      setEditDateSubmitted(editingStatement.date_submitted || '')
+
+      const hasTax = Boolean(editingStatement.date_submitted_tax || editingStatement.tax_submitted)
+      setEditTaxSubmitted(hasTax)
+      setEditDateSubmittedTax(editingStatement.date_submitted_tax || (hasTax ? editingStatement.date_submitted || '' : ''))
+
+      const hasReg = Boolean(editingStatement.date_submitted_registrar || editingStatement.registrar_submitted || editingStatement.date_submitted)
+      setEditRegistrarSubmitted(hasReg)
+      setEditDateSubmittedRegistrar(editingStatement.date_submitted_registrar || editingStatement.date_submitted || '')
+
       setEditNotes(editingStatement.notes || '')
     } else {
       const initialCo = list.find(c => c.id === initialCompanyId) || (list.length > 0 ? list[0] : null)
@@ -127,14 +141,15 @@ export default function AddFinancialStatementModal({
           rowId: Math.random().toString(),
           year: currentYear - 1,
           date_received: '',
-          date_submitted: '',
+          tax_submitted: false,
+          date_submitted_tax: '',
+          registrar_submitted: false,
+          date_submitted_registrar: '',
           notes: '',
         },
       ])
     }
   }, [editingStatement, initialCompanyId, isOpen, companies, loadedCompanies, currentYear])
-
-  useModalBodyLock(isOpen)
 
   if (!mounted || !isOpen) return null
 
@@ -166,7 +181,10 @@ export default function AddFinancialStatementModal({
         rowId: Math.random().toString(),
         year: nextAvailableYear,
         date_received: '',
-        date_submitted: '',
+        tax_submitted: false,
+        date_submitted_tax: '',
+        registrar_submitted: false,
+        date_submitted_registrar: '',
         notes: '',
       },
     ])
@@ -179,9 +197,20 @@ export default function AddFinancialStatementModal({
   }
 
   // Update field in dynamic row
-  const handleRowChange = (rowId: string, field: keyof DynamicYearRow, value: string | number) => {
+  const handleRowChange = (rowId: string, field: keyof DynamicYearRow, value: string | number | boolean) => {
     setRows(prev =>
-      prev.map(r => (r.rowId === rowId ? { ...r, [field]: value } : r))
+      prev.map(r => {
+        if (r.rowId !== rowId) return r
+        const updated = { ...r, [field]: value }
+        // Auto-set today date when enabling switch if date was empty
+        if (field === 'tax_submitted' && value === true && !r.date_submitted_tax) {
+          updated.date_submitted_tax = new Date().toISOString().slice(0, 10)
+        }
+        if (field === 'registrar_submitted' && value === true && !r.date_submitted_registrar) {
+          updated.date_submitted_registrar = new Date().toISOString().slice(0, 10)
+        }
+        return updated
+      })
     )
   }
 
@@ -219,7 +248,11 @@ export default function AddFinancialStatementModal({
       const res = await updateFinancialStatementAction(editingStatement.id, {
         year: editYear,
         date_received: editDateReceived,
-        date_submitted: editDateSubmitted,
+        date_submitted_tax: editTaxSubmitted ? (editDateSubmittedTax || new Date().toISOString().slice(0, 10)) : '',
+        date_submitted_registrar: editRegistrarSubmitted ? (editDateSubmittedRegistrar || new Date().toISOString().slice(0, 10)) : '',
+        date_submitted: editRegistrarSubmitted ? (editDateSubmittedRegistrar || new Date().toISOString().slice(0, 10)) : '',
+        tax_submitted: editTaxSubmitted,
+        registrar_submitted: editRegistrarSubmitted,
         notes: editNotes,
       })
 
@@ -249,7 +282,9 @@ export default function AddFinancialStatementModal({
         rows: rows.map(r => ({
           year: r.year,
           date_received: r.date_received,
-          date_submitted: r.date_submitted,
+          date_submitted_tax: r.tax_submitted ? (r.date_submitted_tax || new Date().toISOString().slice(0, 10)) : undefined,
+          date_submitted_registrar: r.registrar_submitted ? (r.date_submitted_registrar || new Date().toISOString().slice(0, 10)) : undefined,
+          date_submitted: r.registrar_submitted ? (r.date_submitted_registrar || new Date().toISOString().slice(0, 10)) : undefined,
           notes: r.notes,
         })),
       })
@@ -267,17 +302,21 @@ export default function AddFinancialStatementModal({
     }
   }
 
+  const setTodayDate = (setter: (val: string) => void) => {
+    setter(new Date().toISOString().slice(0, 10))
+  }
+
   return createPortal(
     <div id="modal-root" className="on">
       <div className="modal-veil" onClick={onClose} role="presentation" aria-hidden="true" />
-      <div className="modal" style={{ '--modal-max-w': 'var(--modal-lg, 780px)', display: 'flex', flexDirection: 'column', maxHeight: '90vh' } as React.CSSProperties}>
+      <div className="modal" style={{ '--modal-max-w': 'var(--modal-lg, 840px)', display: 'flex', flexDirection: 'column', maxHeight: '90vh' } as React.CSSProperties}>
         {/* Head */}
         <div className="modal-head" style={{ flex: 'none' }}>
           <div
             style={{
-              width: '36px',
-              height: '36px',
-              borderRadius: '10px',
+              width: '38px',
+              height: '38px',
+              borderRadius: '12px',
               background: 'var(--accent-soft)',
               color: 'var(--accent)',
               display: 'grid',
@@ -287,9 +326,9 @@ export default function AddFinancialStatementModal({
             <Icon name="doc" />
           </div>
           <div style={{ flex: 1, minWidth: 0 }}>
-            <h3 style={{ margin: 0 }}>{editingStatement ? 'تعديل الحسابات الختامية' : 'إضافة حسابات ختامية'}</h3>
-            <span style={{ fontSize: '11.5px', color: 'var(--text-3)' }}>
-              {editingStatement ? `تعديل سجّل الميزانية لسنة ${editingStatement.year}` : 'ابحث عن الشركة المسجلة ثم أضف الميزانيات والسنوات المطلوبة'}
+            <h3 style={{ margin: 0, fontSize: '16px', fontWeight: 800 }}>{editingStatement ? 'تعديل الحسابات الختامية' : 'إضافة حسابات ختامية'}</h3>
+            <span style={{ fontSize: '12px', color: 'var(--text-3)' }}>
+              {editingStatement ? `تعديل سجّل الميزانية لسنة ${editingStatement.year}` : 'تسجيل تسليم الميزانيات للضرائب (31/7) ومسجل الشركات (7/10)'}
             </span>
           </div>
           <button type="button" onClick={onClose} className="icon-btn" aria-label="إغلاق">
@@ -312,12 +351,26 @@ export default function AddFinancialStatementModal({
               </div>
             )}
 
-            {/* Legal Rule Banner */}
-            <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-700 dark:text-amber-300 text-xs font-semibold flex items-center gap-2">
-              <span className="material-symbols-outlined text-[18px] flex-none">info</span>
-              <span>
-                الموعد القانوني لتقديم الحسابات الختامية هو <strong>7/10 من كل سنة</strong>
-              </span>
+            {/* Legal Deadlines Banner */}
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
+              gap: '10px',
+              padding: '12px 14px',
+              background: 'rgba(217, 119, 6, 0.08)',
+              border: '1px solid rgba(217, 119, 6, 0.25)',
+              borderRadius: 'var(--r-md)',
+              fontSize: '12px',
+              color: 'var(--text)',
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <span style={{ color: '#d97706', fontSize: '16px' }}>🏛️</span>
+                <span>مهلة الضرائب القانونية: <strong>31 تموز (31/7)</strong></span>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <span style={{ color: '#2563eb', fontSize: '16px' }}>🏢</span>
+                <span>مهلة مسجل الشركات: <strong>7 تشرين الأول (7/10)</strong></span>
+              </div>
             </div>
 
             {/* 1. Full-Width Searchable Company Selector at the Top */}
@@ -340,7 +393,7 @@ export default function AddFinancialStatementModal({
                   placeholder="ابحث عن شركة مسجلة أو اكتب اسم شركة خارجية..."
                   disabled={Boolean(editingStatement || initialCompanyId)}
                   autoComplete="off"
-                  style={{ width: '100%', height: '40px', fontSize: '13.5px' }}
+                  style={{ width: '100%', height: '42px', fontSize: '13.5px' }}
                   required
                 />
                 {selectedCompany && (
@@ -414,7 +467,7 @@ export default function AddFinancialStatementModal({
                       <div
                         key={c.id}
                         onMouseDown={e => {
-                          e.preventDefault() // Prevents blur before click
+                          e.preventDefault()
                           setSelectedCompany(c)
                           setCompanySearch(c.name)
                           setIsDropdownOpen(false)
@@ -448,21 +501,21 @@ export default function AddFinancialStatementModal({
               <div
                 style={{
                   background: 'var(--surface-2)',
-                  border: '1px solid var(--line-soft)',
-                  borderRadius: 'var(--r-md)',
-                  padding: '16px',
+                  border: '1px solid var(--line)',
+                  borderRadius: 'var(--r-lg)',
+                  padding: '18px',
                   display: 'flex',
                   flexDirection: 'column',
-                  gap: '14px',
+                  gap: '16px',
                 }}
               >
-                <div style={{ fontSize: '13px', fontWeight: 700, color: 'var(--accent)', borderBottom: '1px solid var(--line-soft)', paddingBottom: '8px' }}>
+                <div style={{ fontSize: '14px', fontWeight: 800, color: 'var(--accent)', borderBottom: '1px solid var(--line-soft)', paddingBottom: '8px' }}>
                   تعديل الحسابات الختامية لسنة {editYear}
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '14px' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '14px' }}>
                   <div className="field">
-                    <label htmlFor="edit-fs-year">سنة الحسابات الختامية *</label>
+                    <label htmlFor="edit-fs-year" style={{ fontSize: '12px', fontWeight: 700 }}>سنة الحسابات الختامية *</label>
                     <select
                       id="edit-fs-year"
                       className="input"
@@ -479,38 +532,159 @@ export default function AddFinancialStatementModal({
                   </div>
 
                   <div className="field">
-                    <label htmlFor="edit-fs-rec">تاريخ استلام المستندات (من العميل)</label>
-                    <input
-                      id="edit-fs-rec"
-                      type="date"
-                      className="input"
-                      value={editDateReceived}
-                      onChange={e => setEditDateReceived(e.target.value)}
-                    />
+                    <label htmlFor="edit-fs-rec" style={{ fontSize: '12px', fontWeight: 700 }}>تاريخ استلام المستندات من العميل</label>
+                    <div style={{ display: 'flex', gap: '6px' }}>
+                      <input
+                        id="edit-fs-rec"
+                        type="date"
+                        className="input"
+                        value={editDateReceived}
+                        onChange={e => setEditDateReceived(e.target.value)}
+                        style={{ flex: 1 }}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setTodayDate(setEditDateReceived)}
+                        className="btn btn-ghost"
+                        style={{ padding: '0 10px', fontSize: '11px', whiteSpace: 'nowrap' }}
+                      >
+                        اليوم
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Delivery Controls: Taxes & Registrar */}
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '14px', marginTop: '6px' }}>
+                  
+                  {/* Tax Commission Delivery */}
+                  <div style={{
+                    background: editTaxSubmitted ? 'rgba(16, 185, 129, 0.06)' : 'var(--surface)',
+                    border: `1px solid ${editTaxSubmitted ? 'rgba(16, 185, 129, 0.3)' : 'var(--line-soft)'}`,
+                    borderRadius: 'var(--r-md)',
+                    padding: '14px',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '10px',
+                  }}>
+                    <label style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer', userSelect: 'none' }}>
+                      <input
+                        type="checkbox"
+                        checked={editTaxSubmitted}
+                        onChange={e => {
+                          const checked = e.target.checked
+                          setEditTaxSubmitted(checked)
+                          if (checked && !editDateSubmittedTax) {
+                            setEditDateSubmittedTax(new Date().toISOString().slice(0, 10))
+                          }
+                        }}
+                        style={{ width: '18px', height: '18px', accentColor: 'var(--accent)', cursor: 'pointer' }}
+                      />
+                      <div>
+                        <div style={{ fontSize: '13px', fontWeight: 800, color: 'var(--text)' }}>
+                          تم التسليم للهيئة العامة للضرائب 🏛️
+                        </div>
+                        <div style={{ fontSize: '11px', color: 'var(--text-3)' }}>
+                          المهلة القصوى: 31/07/{editYear + 1}
+                        </div>
+                      </div>
+                    </label>
+
+                    {editTaxSubmitted && (
+                      <div className="field" style={{ margin: 0 }}>
+                        <label style={{ fontSize: '11.5px', fontWeight: 600, color: 'var(--text-2)' }}>تاريخ التسليم للضرائب</label>
+                        <div style={{ display: 'flex', gap: '6px' }}>
+                          <input
+                            type="date"
+                            className="input"
+                            value={editDateSubmittedTax}
+                            onChange={e => setEditDateSubmittedTax(e.target.value)}
+                            style={{ flex: 1, height: '36px', fontSize: '13px' }}
+                            required={editTaxSubmitted}
+                          />
+                          <button
+                            type="button"
+                            onClick={() => setTodayDate(setEditDateSubmittedTax)}
+                            className="btn btn-ghost"
+                            style={{ padding: '0 10px', fontSize: '11px', whiteSpace: 'nowrap' }}
+                          >
+                            اليوم
+                          </button>
+                        </div>
+                      </div>
+                    )}
                   </div>
 
-                  <div className="field">
-                    <label htmlFor="edit-fs-sub">تاريخ التقديم في النظام الحكومي</label>
-                    <input
-                      id="edit-fs-sub"
-                      type="date"
-                      className="input"
-                      value={editDateSubmitted}
-                      onChange={e => setEditDateSubmitted(e.target.value)}
-                    />
+                  {/* Registrar Delivery */}
+                  <div style={{
+                    background: editRegistrarSubmitted ? 'rgba(59, 130, 246, 0.06)' : 'var(--surface)',
+                    border: `1px solid ${editRegistrarSubmitted ? 'rgba(59, 130, 246, 0.3)' : 'var(--line-soft)'}`,
+                    borderRadius: 'var(--r-md)',
+                    padding: '14px',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '10px',
+                  }}>
+                    <label style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer', userSelect: 'none' }}>
+                      <input
+                        type="checkbox"
+                        checked={editRegistrarSubmitted}
+                        onChange={e => {
+                          const checked = e.target.checked
+                          setEditRegistrarSubmitted(checked)
+                          if (checked && !editDateSubmittedRegistrar) {
+                            setEditDateSubmittedRegistrar(new Date().toISOString().slice(0, 10))
+                          }
+                        }}
+                        style={{ width: '18px', height: '18px', accentColor: 'var(--accent)', cursor: 'pointer' }}
+                      />
+                      <div>
+                        <div style={{ fontSize: '13px', fontWeight: 800, color: 'var(--text)' }}>
+                          تم التسليم لدائرة تسجيل الشركات 🏢
+                        </div>
+                        <div style={{ fontSize: '11px', color: 'var(--text-3)' }}>
+                          المهلة القصوى: 07/10/{editYear + 1}
+                        </div>
+                      </div>
+                    </label>
+
+                    {editRegistrarSubmitted && (
+                      <div className="field" style={{ margin: 0 }}>
+                        <label style={{ fontSize: '11.5px', fontWeight: 600, color: 'var(--text-2)' }}>تاريخ التسليم لمسجل الشركات</label>
+                        <div style={{ display: 'flex', gap: '6px' }}>
+                          <input
+                            type="date"
+                            className="input"
+                            value={editDateSubmittedRegistrar}
+                            onChange={e => setEditDateSubmittedRegistrar(e.target.value)}
+                            style={{ flex: 1, height: '36px', fontSize: '13px' }}
+                            required={editRegistrarSubmitted}
+                          />
+                          <button
+                            type="button"
+                            onClick={() => setTodayDate(setEditDateSubmittedRegistrar)}
+                            className="btn btn-ghost"
+                            style={{ padding: '0 10px', fontSize: '11px', whiteSpace: 'nowrap' }}
+                          >
+                            اليوم
+                          </button>
+                        </div>
+                      </div>
+                    )}
                   </div>
 
-                  <div className="field">
-                    <label htmlFor="edit-fs-notes">ملاحظات إضافية (اختياري)</label>
-                    <input
-                      id="edit-fs-notes"
-                      type="text"
-                      className="input"
-                      value={editNotes}
-                      onChange={e => setEditNotes(e.target.value)}
-                      placeholder="أية ملاحظات خاصة بالميزانية..."
-                    />
-                  </div>
+                </div>
+
+                <div className="field">
+                  <label htmlFor="edit-fs-notes" style={{ fontSize: '12px', fontWeight: 700 }}>ملاحظات إضافية (اختياري)</label>
+                  <input
+                    id="edit-fs-notes"
+                    type="text"
+                    className="input"
+                    value={editNotes}
+                    onChange={e => setEditNotes(e.target.value)}
+                    placeholder="أية ملاحظات خاصة بالميزانية..."
+                  />
                 </div>
               </div>
             ) : (
@@ -522,7 +696,7 @@ export default function AddFinancialStatementModal({
                     style={{
                       background: 'var(--surface-2)',
                       border: '1px solid var(--line)',
-                      borderRadius: 'var(--r-md)',
+                      borderRadius: 'var(--r-lg)',
                       padding: '16px',
                       display: 'flex',
                       flexDirection: 'column',
@@ -533,8 +707,8 @@ export default function AddFinancialStatementModal({
                     {/* Card Header */}
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid var(--line-soft)', paddingBottom: '10px' }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--accent)' }} />
-                        <span style={{ fontSize: '13.5px', fontWeight: 700, color: 'var(--text)' }}>
+                        <span style={{ width: '10px', height: '10px', borderRadius: '50%', background: 'var(--accent)' }} />
+                        <span style={{ fontSize: '14px', fontWeight: 800, color: 'var(--text)' }}>
                           الحسابات الختامية لسنة {row.year}
                         </span>
                       </div>
@@ -559,10 +733,10 @@ export default function AddFinancialStatementModal({
                       )}
                     </div>
 
-                    {/* Balanced 2-Column Responsive Field Grid */}
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '14px' }}>
+                    {/* 2-Column Inputs Grid */}
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '14px' }}>
                       <div className="field">
-                        <label style={{ fontSize: '12px', fontWeight: 600 }}>سنة الميزانية *</label>
+                        <label style={{ fontSize: '12px', fontWeight: 700 }}>سنة الميزانية *</label>
                         <select
                           className="input"
                           value={row.year}
@@ -578,35 +752,145 @@ export default function AddFinancialStatementModal({
                       </div>
 
                       <div className="field">
-                        <label style={{ fontSize: '12px', fontWeight: 600 }}>تاريخ الاستلام من العميل</label>
-                        <input
-                          type="date"
-                          className="input"
-                          value={row.date_received}
-                          onChange={e => handleRowChange(row.rowId, 'date_received', e.target.value)}
-                        />
+                        <label style={{ fontSize: '12px', fontWeight: 700 }}>تاريخ الاستلام من العميل</label>
+                        <div style={{ display: 'flex', gap: '6px' }}>
+                          <input
+                            type="date"
+                            className="input"
+                            value={row.date_received}
+                            onChange={e => handleRowChange(row.rowId, 'date_received', e.target.value)}
+                            style={{ flex: 1 }}
+                          />
+                          <button
+                            type="button"
+                            onClick={() => handleRowChange(row.rowId, 'date_received', new Date().toISOString().slice(0, 10))}
+                            className="btn btn-ghost"
+                            style={{ padding: '0 10px', fontSize: '11px', whiteSpace: 'nowrap' }}
+                          >
+                            اليوم
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Dual Delivery Cards */}
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '12px' }}>
+                      
+                      {/* Taxes Delivery Switch */}
+                      <div style={{
+                        background: row.tax_submitted ? 'rgba(16, 185, 129, 0.06)' : 'var(--surface)',
+                        border: `1px solid ${row.tax_submitted ? 'rgba(16, 185, 129, 0.3)' : 'var(--line-soft)'}`,
+                        borderRadius: 'var(--r-md)',
+                        padding: '12px 14px',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: '8px',
+                      }}>
+                        <label style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer', userSelect: 'none' }}>
+                          <input
+                            type="checkbox"
+                            checked={row.tax_submitted}
+                            onChange={e => handleRowChange(row.rowId, 'tax_submitted', e.target.checked)}
+                            style={{ width: '18px', height: '18px', accentColor: 'var(--accent)', cursor: 'pointer' }}
+                          />
+                          <div>
+                            <div style={{ fontSize: '13px', fontWeight: 800, color: 'var(--text)' }}>
+                              تم التسليم للضرائب 🏛️
+                            </div>
+                            <div style={{ fontSize: '11px', color: 'var(--text-3)' }}>
+                              المهلة: 31/07/{row.year + 1}
+                            </div>
+                          </div>
+                        </label>
+
+                        {row.tax_submitted && (
+                          <div className="field" style={{ margin: 0 }}>
+                            <label style={{ fontSize: '11.5px', fontWeight: 600, color: 'var(--text-2)' }}>تاريخ التسليم للضرائب</label>
+                            <div style={{ display: 'flex', gap: '6px' }}>
+                              <input
+                                type="date"
+                                className="input"
+                                value={row.date_submitted_tax}
+                                onChange={e => handleRowChange(row.rowId, 'date_submitted_tax', e.target.value)}
+                                style={{ flex: 1, height: '36px', fontSize: '13px' }}
+                                required={row.tax_submitted}
+                              />
+                              <button
+                                type="button"
+                                onClick={() => handleRowChange(row.rowId, 'date_submitted_tax', new Date().toISOString().slice(0, 10))}
+                                className="btn btn-ghost"
+                                style={{ padding: '0 10px', fontSize: '11px', whiteSpace: 'nowrap' }}
+                              >
+                                اليوم
+                              </button>
+                            </div>
+                          </div>
+                        )}
                       </div>
 
-                      <div className="field">
-                        <label style={{ fontSize: '12px', fontWeight: 600 }}>تاريخ التقديم في النظام الحكومي</label>
-                        <input
-                          type="date"
-                          className="input"
-                          value={row.date_submitted}
-                          onChange={e => handleRowChange(row.rowId, 'date_submitted', e.target.value)}
-                        />
+                      {/* Registrar Delivery Switch */}
+                      <div style={{
+                        background: row.registrar_submitted ? 'rgba(59, 130, 246, 0.06)' : 'var(--surface)',
+                        border: `1px solid ${row.registrar_submitted ? 'rgba(59, 130, 246, 0.3)' : 'var(--line-soft)'}`,
+                        borderRadius: 'var(--r-md)',
+                        padding: '12px 14px',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: '8px',
+                      }}>
+                        <label style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer', userSelect: 'none' }}>
+                          <input
+                            type="checkbox"
+                            checked={row.registrar_submitted}
+                            onChange={e => handleRowChange(row.rowId, 'registrar_submitted', e.target.checked)}
+                            style={{ width: '18px', height: '18px', accentColor: 'var(--accent)', cursor: 'pointer' }}
+                          />
+                          <div>
+                            <div style={{ fontSize: '13px', fontWeight: 800, color: 'var(--text)' }}>
+                              تم التسليم لمسجل الشركات 🏢
+                            </div>
+                            <div style={{ fontSize: '11px', color: 'var(--text-3)' }}>
+                              المهلة: 07/10/{row.year + 1}
+                            </div>
+                          </div>
+                        </label>
+
+                        {row.registrar_submitted && (
+                          <div className="field" style={{ margin: 0 }}>
+                            <label style={{ fontSize: '11.5px', fontWeight: 600, color: 'var(--text-2)' }}>تاريخ التسليم لمسجل الشركات</label>
+                            <div style={{ display: 'flex', gap: '6px' }}>
+                              <input
+                                type="date"
+                                className="input"
+                                value={row.date_submitted_registrar}
+                                onChange={e => handleRowChange(row.rowId, 'date_submitted_registrar', e.target.value)}
+                                style={{ flex: 1, height: '36px', fontSize: '13px' }}
+                                required={row.registrar_submitted}
+                              />
+                              <button
+                                type="button"
+                                onClick={() => handleRowChange(row.rowId, 'date_submitted_registrar', new Date().toISOString().slice(0, 10))}
+                                className="btn btn-ghost"
+                                style={{ padding: '0 10px', fontSize: '11px', whiteSpace: 'nowrap' }}
+                              >
+                                اليوم
+                              </button>
+                            </div>
+                          </div>
+                        )}
                       </div>
 
-                      <div className="field">
-                        <label style={{ fontSize: '12px', fontWeight: 600 }}>ملاحظات إضافية (اختياري)</label>
-                        <input
-                          type="text"
-                          className="input"
-                          value={row.notes}
-                          onChange={e => handleRowChange(row.rowId, 'notes', e.target.value)}
-                          placeholder="أية ملاحظات خاصة بالميزانية..."
-                        />
-                      </div>
+                    </div>
+
+                    <div className="field">
+                      <label style={{ fontSize: '12px', fontWeight: 700 }}>ملاحظات إضافية (اختياري)</label>
+                      <input
+                        type="text"
+                        className="input"
+                        value={row.notes}
+                        onChange={e => handleRowChange(row.rowId, 'notes', e.target.value)}
+                        placeholder="أية ملاحظات خاصة بالميزانية..."
+                      />
                     </div>
                   </div>
                 ))}
@@ -616,12 +900,12 @@ export default function AddFinancialStatementModal({
                   type="button"
                   onClick={handleAddRow}
                   style={{
-                    padding: '10px 16px',
+                    padding: '12px 18px',
                     borderRadius: 'var(--r-md)',
                     border: '1px dashed var(--accent)',
                     background: 'var(--accent-soft)',
                     color: 'var(--accent)',
-                    fontSize: '13px',
+                    fontSize: '13.5px',
                     fontWeight: 700,
                     cursor: 'pointer',
                     display: 'flex',

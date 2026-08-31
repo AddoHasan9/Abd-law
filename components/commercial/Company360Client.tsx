@@ -499,11 +499,16 @@ export default function Company360Client({
             <span style={{ fontSize: '12px', color: 'var(--text-3)' }}>لا توجد سنوات مسجلة بعد</span>
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
-              {[...financialStatements].sort((a, b) => a.year - b.year).map(fs => (
-                <span key={fs.id} style={{ fontSize: '12px', color: fs.date_submitted ? 'var(--ok)' : 'var(--warn)' }}>
-                  {fs.date_submitted ? '✓' : '⏳'} {fs.year} {fs.date_submitted ? 'مُقدّمة' : 'قيد الانتظار'}
-                </span>
-              ))}
+              {[...financialStatements].sort((a, b) => a.year - b.year).map(fs => {
+                const hasTax = Boolean(fs.date_submitted_tax || fs.tax_submitted)
+                const hasReg = Boolean(fs.date_submitted_registrar || fs.registrar_submitted || fs.date_submitted)
+                const isFull = hasTax && hasReg
+                return (
+                  <span key={fs.id} style={{ fontSize: '12px', color: isFull ? 'var(--ok)' : hasTax || hasReg ? 'var(--warn)' : 'var(--text-3)' }}>
+                    {isFull ? '✓' : hasTax || hasReg ? '⚠️' : '⏳'} {fs.year} {isFull ? 'مكتملة (الضرائب والمسجل)' : hasTax ? 'مسلّمة للضرائب فقط' : hasReg ? 'مسلّمة للمسجل فقط' : 'قيد الانتظار'}
+                  </span>
+                )
+              })}
             </div>
           )}
         </div>
@@ -993,21 +998,40 @@ export default function Company360Client({
                   ⏳ السنة المالية المستحقة ({new Date().getFullYear() - 1}): قيد المتابعة والتثبيت
                 </div>
               ) : (
-                financialStatements.map(fs => (
-                  <div key={fs.id} style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '13.5px', padding: '10px 14px', background: 'var(--surface-2)', borderRadius: 'var(--r-sm)', border: '1px solid var(--line-soft)' }}>
-                    <span>{fs.date_submitted ? '✅' : '⏳'}</span>
-                    <span style={{ fontWeight: 700 }}>
-                      {fs.date_submitted
-                        ? `تم تقديم الحسابات الختامية لسنة (${fs.year})`
-                        : `الحسابات الختامية قيد الإجراء لسنة (${fs.year})`}
-                    </span>
-                    {fs.date_submitted && (
-                      <span style={{ fontSize: '11.5px', color: 'var(--text-3)', marginInlineStart: 'auto' }}>
-                        تاريخ التقديم: {formatDate(fs.date_submitted)}
-                      </span>
-                    )}
-                  </div>
-                ))
+                financialStatements.map(fs => {
+                  const hasTax = Boolean(fs.date_submitted_tax || fs.tax_submitted)
+                  const hasReg = Boolean(fs.date_submitted_registrar || fs.registrar_submitted || fs.date_submitted)
+                  const isFull = hasTax && hasReg
+
+                  return (
+                    <div key={fs.id} style={{ display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '13px', padding: '12px 14px', background: 'var(--surface-2)', borderRadius: 'var(--r-md)', border: '1px solid var(--line-soft)' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                          <span>{isFull ? '✅' : hasTax || hasReg ? '⚠️' : '⏳'}</span>
+                          <strong style={{ fontSize: '13.5px' }}>السنة المالية {fs.year}</strong>
+                        </div>
+                        <span className={`tag ${isFull ? 'tag-ok' : hasTax || hasReg ? 'tag-warn' : 'tag-gray'}`} style={{ fontSize: '11px' }}>
+                          {isFull ? 'مكتملة ومسلّمة للدائرتين ✓' : hasTax ? 'مسلّمة للضرائب فقط' : hasReg ? 'مسلّمة للمسجل فقط' : 'قيد الانتظار'}
+                        </span>
+                      </div>
+
+                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '8px', fontSize: '11.5px', color: 'var(--text-2)', background: 'var(--surface)', padding: '8px 10px', borderRadius: 'var(--r-sm)' }}>
+                        <div>
+                          <span style={{ color: 'var(--text-3)' }}>🏛️ الهيئة العامة للضرائب: </span>
+                          <strong style={{ color: hasTax ? 'var(--ok)' : 'var(--warn)' }}>
+                            {hasTax ? `✓ تم التسليم (${formatDate(fs.date_submitted_tax || fs.date_submitted || '')})` : '⏳ لم تُسلّم بعد (مهلة 31/7)'}
+                          </strong>
+                        </div>
+                        <div>
+                          <span style={{ color: 'var(--text-3)' }}>🏢 دائرة تسجيل الشركات: </span>
+                          <strong style={{ color: hasReg ? 'var(--ok)' : 'var(--warn)' }}>
+                            {hasReg ? `✓ تم التسليم (${formatDate(fs.date_submitted_registrar || fs.date_submitted || '')})` : '⏳ لم تُسلّم بعد (مهلة 7/10)'}
+                          </strong>
+                        </div>
+                      </div>
+                    </div>
+                  )
+                })
               )}
             </div>
           )}

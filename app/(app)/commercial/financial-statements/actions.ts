@@ -6,11 +6,10 @@ import type { FinancialStatement } from '@/types/database'
 import { createNotificationAction } from '@/app/(app)/notifications/actions'
 import { logTimelineEvent } from '@/lib/data/timeline'
 import { requirePermission } from '@/lib/auth/require-permission'
-
-// In-Memory Fallback Store if Supabase table financial_statements is missing or unmigrated
-let inMemoryFinancialStatements: FinancialStatement[] = []
+import { readJsonFile, writeJsonFile } from '@/lib/data/fs-store'
 
 export async function getFinancialStatementsAction(companyId?: string) {
+  const diskFS = readJsonFile<FinancialStatement[]>('financial_statements.json', [])
   try {
     const supabase = createAdminClient()
     let query = supabase
@@ -24,22 +23,17 @@ export async function getFinancialStatementsAction(companyId?: string) {
 
     const { data, error } = await query
 
-    if (error) {
-      console.warn('Supabase financial_statements fetch warning, using in-memory store:', error.message)
-      let items = [...inMemoryFinancialStatements]
-      if (companyId) {
-        items = items.filter(x => x.company_id === companyId)
-      }
-      return { success: true, data: items }
-    }
-
-    const items = (data || []).map((item: {
+    const dbItems: FinancialStatement[] = (!error && data) ? (data || []).map((item: {
       id: string
       company_id: string
       companies?: { name?: string } | null
       year: number
       date_received?: string | null
       date_submitted?: string | null
+      date_submitted_tax?: string | null
+      date_submitted_registrar?: string | null
+      tax_submitted?: boolean
+      registrar_submitted?: boolean
       notes?: string | null
       created_at: string
     }) => ({
@@ -48,15 +42,36 @@ export async function getFinancialStatementsAction(companyId?: string) {
       company_name: item.companies?.name || null,
       year: item.year,
       date_received: item.date_received,
-      date_submitted: item.date_submitted,
+      date_submitted: item.date_submitted || item.date_submitted_registrar,
+      date_submitted_tax: item.date_submitted_tax,
+      date_submitted_registrar: item.date_submitted_registrar || item.date_submitted,
+      tax_submitted: item.tax_submitted || Boolean(item.date_submitted_tax),
+      registrar_submitted: item.registrar_submitted || Boolean(item.date_submitted_registrar || item.date_submitted),
       notes: item.notes,
       created_at: item.created_at,
-    })) as FinancialStatement[]
+    })) : []
 
-    return { success: true, data: items }
+    const map = new Map<string, FinancialStatement>()
+    diskFS.forEach(f => {
+      if (!companyId || f.company_id === companyId) {
+        map.set(f.id, f)
+      }
+    })
+    dbItems.forEach(f => {
+      const existing = map.get(f.id)
+      map.set(f.id, {
+        ...existing,
+        ...f,
+        date_submitted_tax: f.date_submitted_tax || existing?.date_submitted_tax,
+        date_submitted_registrar: f.date_submitted_registrar || existing?.date_submitted_registrar || f.date_submitted,
+      })
+    })
+
+    const result = Array.from(map.values()).sort((a, b) => b.year - a.year)
+    return { success: true, data: result }
   } catch (err) {
-    console.warn('getFinancialStatementsAction exception, using in-memory store:', err)
-    let items = [...inMemoryFinancialStatements]
+    console.warn('getFinancialStatementsAction exception, using disk store:', err)
+    let items = [...diskFS]
     if (companyId) {
       items = items.filter(x => x.company_id === companyId)
     }
@@ -69,6 +84,8 @@ export async function createFinancialStatementAction(payload: {
   year: number
   date_received?: string
   date_submitted?: string
+  date_submitted_tax?: string
+  date_submitted_registrar?: string
   notes?: string
 }) {
   return createFinancialStatementsBatchAction({
@@ -78,6 +95,8 @@ export async function createFinancialStatementAction(payload: {
         year: payload.year,
         date_received: payload.date_received,
         date_submitted: payload.date_submitted,
+        date_submitted_tax: payload.date_submitted_tax,
+        date_submitted_registrar: payload.date_submitted_registrar,
         notes: payload.notes,
       },
     ],
@@ -91,6 +110,8 @@ export async function createFinancialStatementsBatchAction(payload: {
     year: number
     date_received?: string
     date_submitted?: string
+    date_submitted_tax?: string
+    date_submitted_registrar?: string
     notes?: string
   }>
 }) {
@@ -160,21 +181,21 @@ export async function createFinancialStatementsBatchAction(payload: {
       }
     }
 
-    // Check existing years in database for this company
+    // Check existing years in database or disk for this company
     const existingYears = new Set<number>()
-    const { data: existingRecords, error: fetchErr } = await supabase
-      .from('financial_statements')
-      .select('year')
-      .eq('company_id', payload.company_id)
+    const diskFS = readJsonFile<FinancialStatement[]>('financial_statements.json', [])
+    diskFS
+      .filter(x => x.company_id === payload.company_id)
+      .forEach(x => existingYears.add(x.year))
 
-    if (fetchErr) {
-      // Fallback check
-      inMemoryFinancialStatements
-        .filter(x => x.company_id === payload.company_id)
-        .forEach(x => existingYears.add(x.year))
-    } else {
-      (existingRecords || []).forEach(r => existingYears.add(r.year))
-    }
+    try {
+      const { data: existingRecords } = await supabase
+        .from('financial_statements')
+        .select('year')
+        .eq('company_id', payload.company_id)
+
+      ;(existingRecords || []).forEach(r => existingYears.add(r.year))
+    } catch {}
 
     const duplicates = yearsInPayload.filter(y => existingYears.has(y))
     if (duplicates.length > 0) {
@@ -186,54 +207,71 @@ export async function createFinancialStatementsBatchAction(payload: {
       company_id: payload.company_id,
       year: r.year,
       date_received: r.date_received || null,
-      date_submitted: r.date_submitted || null,
+      date_submitted: r.date_submitted || r.date_submitted_registrar || null,
+      date_submitted_tax: r.date_submitted_tax || null,
+      date_submitted_registrar: r.date_submitted_registrar || r.date_submitted || null,
       notes: r.notes?.trim() || null,
     }))
 
-    const { data: inserted, error: insertErr } = await supabase
-      .from('financial_statements')
-      .insert(insertData)
-      .select()
-
     let insertedRecords: FinancialStatement[] = []
+    try {
+      const { data: inserted, error: insertErr } = await supabase
+        .from('financial_statements')
+        .insert(insertData)
+        .select()
 
-    if (insertErr || !inserted) {
-      console.warn('Supabase insert failed, using fallback in-memory store:', insertErr?.message)
-      // Save into inMemoryFinancialStatements fallback store
+      if (!insertErr && inserted) {
+        insertedRecords = inserted.map((item: {
+          id: string
+          company_id: string
+          year: number
+          date_received?: string | null
+          date_submitted?: string | null
+          date_submitted_tax?: string | null
+          date_submitted_registrar?: string | null
+          notes?: string | null
+          created_at: string
+        }) => ({
+          id: item.id,
+          company_id: item.company_id,
+          company_name: companyName,
+          year: item.year,
+          date_received: item.date_received,
+          date_submitted: item.date_submitted || item.date_submitted_registrar,
+          date_submitted_tax: item.date_submitted_tax,
+          date_submitted_registrar: item.date_submitted_registrar || item.date_submitted,
+          tax_submitted: Boolean(item.date_submitted_tax),
+          registrar_submitted: Boolean(item.date_submitted_registrar || item.date_submitted),
+          notes: item.notes,
+          created_at: item.created_at,
+        }))
+      }
+    } catch {}
+
+    if (insertedRecords.length === 0) {
       for (const r of payload.rows) {
         const item: FinancialStatement = {
-          id: 'mem_' + Math.random().toString(36).substring(2, 9),
+          id: 'fs_' + Math.random().toString(36).substring(2, 9),
           company_id: payload.company_id,
           company_name: companyName,
           year: r.year,
           date_received: r.date_received || null,
-          date_submitted: r.date_submitted || null,
+          date_submitted: r.date_submitted || r.date_submitted_registrar || null,
+          date_submitted_tax: r.date_submitted_tax || null,
+          date_submitted_registrar: r.date_submitted_registrar || r.date_submitted || null,
+          tax_submitted: Boolean(r.date_submitted_tax),
+          registrar_submitted: Boolean(r.date_submitted_registrar || r.date_submitted),
           notes: r.notes?.trim() || null,
           created_at: new Date().toISOString(),
         }
-        inMemoryFinancialStatements.unshift(item)
         insertedRecords.push(item)
       }
-    } else {
-      insertedRecords = inserted.map((item: {
-        id: string
-        company_id: string
-        year: number
-        date_received?: string | null
-        date_submitted?: string | null
-        notes?: string | null
-        created_at: string
-      }) => ({
-        id: item.id,
-        company_id: item.company_id,
-        company_name: companyName,
-        year: item.year,
-        date_received: item.date_received,
-        date_submitted: item.date_submitted,
-        notes: item.notes,
-        created_at: item.created_at,
-      }))
     }
+
+    // Persist to disk store
+    const currentDisk = readJsonFile<FinancialStatement[]>('financial_statements.json', [])
+    insertedRecords.forEach(rec => currentDisk.unshift(rec))
+    writeJsonFile('financial_statements.json', currentDisk)
 
     // Send summary notification for created batch
     await createNotificationAction({
@@ -263,14 +301,16 @@ export async function updateFinancialStatementAction(
     year?: number
     date_received?: string
     date_submitted?: string
+    date_submitted_tax?: string
+    date_submitted_registrar?: string
+    tax_submitted?: boolean
+    registrar_submitted?: boolean
     notes?: string
   }
 ) {
-  // تسجيل "تاريخ التقديم" هو فعليًا تقديم البيان المالي — يتطلب صلاحية submit
-  // المنفصلة عن create/edit (بعض الأدوار مثل lawyer تقدر تُنشئ/تعدّل لكن لا تُقدّم)
   const denied = await requirePermission(
     'financial_statements',
-    payload.date_submitted !== undefined ? 'submit' : 'create'
+    (payload.date_submitted !== undefined || payload.date_submitted_tax !== undefined || payload.date_submitted_registrar !== undefined) ? 'submit' : 'create'
   )
   if (denied) return denied
 
@@ -281,31 +321,68 @@ export async function updateFinancialStatementAction(
     if (payload.year !== undefined) updateData.year = payload.year
     if (payload.date_received !== undefined) updateData.date_received = payload.date_received || null
     if (payload.date_submitted !== undefined) updateData.date_submitted = payload.date_submitted || null
+    if (payload.date_submitted_tax !== undefined) updateData.date_submitted_tax = payload.date_submitted_tax || null
+    if (payload.date_submitted_registrar !== undefined) {
+      updateData.date_submitted_registrar = payload.date_submitted_registrar || null
+      updateData.date_submitted = payload.date_submitted_registrar || null
+    }
     if (payload.notes !== undefined) updateData.notes = payload.notes.trim() || null
 
-    const { data: updated, error } = await supabase
-      .from('financial_statements')
-      .update(updateData)
-      .eq('id', id)
-      .select('company_id, year, companies(name)')
-      .single()
+    let targetCompanyId: string | null = null
+    let targetYear: number | null = null
+    let companyName: string | null = null
 
-    if (error) {
-      // Fallback update in-memory
-      const idx = inMemoryFinancialStatements.findIndex(x => x.id === id)
-      if (idx !== -1) {
-        if (payload.year !== undefined) inMemoryFinancialStatements[idx].year = payload.year
-        if (payload.date_received !== undefined) inMemoryFinancialStatements[idx].date_received = payload.date_received || null
-        if (payload.date_submitted !== undefined) inMemoryFinancialStatements[idx].date_submitted = payload.date_submitted || null
-        if (payload.notes !== undefined) inMemoryFinancialStatements[idx].notes = payload.notes.trim() || null
+    try {
+      const { data: updated, error } = await supabase
+        .from('financial_statements')
+        .update(updateData)
+        .eq('id', id)
+        .select('company_id, year, companies(name)')
+        .single()
+
+      if (!error && updated) {
+        targetCompanyId = updated.company_id
+        targetYear = updated.year
+        companyName = (updated as unknown as { companies?: { name?: string } | null }).companies?.name || null
       }
-    } else if (payload.date_submitted !== undefined && updated?.company_id) {
-      const companyName = (updated as unknown as { companies?: { name?: string } | null }).companies?.name
+    } catch {}
+
+    // Update disk store
+    const diskFS = readJsonFile<FinancialStatement[]>('financial_statements.json', [])
+    const idx = diskFS.findIndex(x => x.id === id)
+    if (idx !== -1) {
+      if (payload.year !== undefined) diskFS[idx].year = payload.year
+      if (payload.date_received !== undefined) diskFS[idx].date_received = payload.date_received || null
+      if (payload.date_submitted !== undefined) diskFS[idx].date_submitted = payload.date_submitted || null
+      if (payload.date_submitted_tax !== undefined) {
+        diskFS[idx].date_submitted_tax = payload.date_submitted_tax || null
+        diskFS[idx].tax_submitted = Boolean(payload.date_submitted_tax)
+      }
+      if (payload.date_submitted_registrar !== undefined) {
+        diskFS[idx].date_submitted_registrar = payload.date_submitted_registrar || null
+        diskFS[idx].date_submitted = payload.date_submitted_registrar || null
+        diskFS[idx].registrar_submitted = Boolean(payload.date_submitted_registrar)
+      }
+      if (payload.tax_submitted !== undefined) diskFS[idx].tax_submitted = payload.tax_submitted
+      if (payload.registrar_submitted !== undefined) diskFS[idx].registrar_submitted = payload.registrar_submitted
+      if (payload.notes !== undefined) diskFS[idx].notes = payload.notes.trim() || null
+      writeJsonFile('financial_statements.json', diskFS)
+
+      targetCompanyId = targetCompanyId || diskFS[idx].company_id
+      targetYear = targetYear || diskFS[idx].year
+      companyName = companyName || diskFS[idx].company_name || null
+    }
+
+    if (targetCompanyId && (payload.date_submitted_tax || payload.date_submitted_registrar || payload.date_submitted)) {
+      const parts: string[] = []
+      if (payload.date_submitted_tax) parts.push(`الهيئة العامة للضرائب (${payload.date_submitted_tax})`)
+      if (payload.date_submitted_registrar || payload.date_submitted) parts.push(`مسجل الشركات (${payload.date_submitted_registrar || payload.date_submitted})`)
+
       await logTimelineEvent({
-        company_id: updated.company_id,
+        company_id: targetCompanyId,
         event_type: 'fs_submitted',
-        title: `تقديم الحسابات الختامية للسنة المالية ${updated.year}`,
-        description: companyName ? `تم تسجيل تقديم الحسابات الختامية لشركة ${companyName}.` : undefined,
+        title: `تسليم الحسابات الختامية لسنة ${targetYear || ''}`,
+        description: `تم تسليم الحسابات إلى: ${parts.join(' و ')} ${companyName ? `لشركة ${companyName}` : ''}.`,
         related_link: '/commercial/financial-statements',
       })
     }
@@ -322,9 +399,25 @@ export async function updateFinancialStatementAction(
   }
 }
 
+export async function markStatementTaxSubmittedAction(id: string, dateSubmitted?: string) {
+  const submitDate = dateSubmitted || new Date().toISOString().slice(0, 10)
+  return updateFinancialStatementAction(id, { date_submitted_tax: submitDate, tax_submitted: true })
+}
+
+export async function markStatementRegistrarSubmittedAction(id: string, dateSubmitted?: string) {
+  const submitDate = dateSubmitted || new Date().toISOString().slice(0, 10)
+  return updateFinancialStatementAction(id, { date_submitted_registrar: submitDate, date_submitted: submitDate, registrar_submitted: true })
+}
+
 export async function markStatementSubmittedAction(id: string, dateSubmitted?: string) {
   const submitDate = dateSubmitted || new Date().toISOString().slice(0, 10)
-  return updateFinancialStatementAction(id, { date_submitted: submitDate })
+  return updateFinancialStatementAction(id, {
+    date_submitted_registrar: submitDate,
+    date_submitted_tax: submitDate,
+    date_submitted: submitDate,
+    tax_submitted: true,
+    registrar_submitted: true,
+  })
 }
 
 export async function deleteFinancialStatementAction(id: string) {
@@ -333,14 +426,10 @@ export async function deleteFinancialStatementAction(id: string) {
 
   try {
     const supabase = createAdminClient()
-    const { error } = await supabase
-      .from('financial_statements')
-      .delete()
-      .eq('id', id)
-
-    if (error) {
-      inMemoryFinancialStatements = inMemoryFinancialStatements.filter(x => x.id !== id)
-    }
+    try {
+      const diskFS = readJsonFile<FinancialStatement[]>('financial_statements.json', [])
+      writeJsonFile('financial_statements.json', diskFS.filter(x => x.id !== id))
+    } catch {}
 
     revalidatePath('/commercial/financial-statements')
     revalidatePath('/commercial/companies')
@@ -349,8 +438,10 @@ export async function deleteFinancialStatementAction(id: string) {
 
     return { success: true }
   } catch {
-    // Fallback in-memory delete
-    inMemoryFinancialStatements = inMemoryFinancialStatements.filter(x => x.id !== id)
+    try {
+      const diskFS = readJsonFile<FinancialStatement[]>('financial_statements.json', [])
+      writeJsonFile('financial_statements.json', diskFS.filter(x => x.id !== id))
+    } catch {}
     return { success: true }
   }
 }

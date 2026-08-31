@@ -20,6 +20,7 @@ export function getFSYearOptions(): number[] {
 
 /**
  * حساب حالة الموعد النهائي والغرامة للحسابات الختامية لسنة ماليّة معينة
+ * تدعم الفصل التام بين موعد تسليم الضرائب (31/7) وموعد تسليم مسجل الشركات (7/10).
  */
 export function calculateFSState(
   fs: Partial<FinancialStatement> & { year: number },
@@ -28,43 +29,45 @@ export function calculateFSState(
   const year = fs.year
   const submissionYear = year + 1
   const startDate = `${year}-01-01`
-  const deadlineDate = `${submissionYear}-10-07`
+  const deadlineDate = `${submissionYear}-10-07` // دائرة تسجيل الشركات
   const penaltyStartDate = `${submissionYear}-10-08`
+  const taxDeadlineDate = `${submissionYear}-07-31` // الهيئة العامة للضرائب
 
-  const dateSubmitted = fs.date_submitted || null
   const dateReceived = fs.date_received || null
-  const isSubmitted = Boolean(dateSubmitted)
 
-  const deadlineObj = new Date(submissionYear, 9, 7) // 7 October of submission year (N = year + 1)
-  const penaltyStartObj = new Date(submissionYear, 9, 8) // 8 October of submission year
+  // 1. تسليم دائرة تسجيل الشركات (Registrar of Companies - 7/10)
+  const registrarDateSubmitted = fs.date_submitted_registrar || fs.date_submitted || (fs.registrar_submitted ? (fs.date_submitted || new Date().toISOString().slice(0, 10)) : null)
+  const isRegistrarSubmitted = Boolean(registrarDateSubmitted)
+
+  const deadlineObj = new Date(submissionYear, 9, 7) // 7 October
+  const penaltyStartObj = new Date(submissionYear, 9, 8) // 8 October
 
   let daysLeft = 0
   let daysLate = 0
   let penaltyAmount = 0
   let isCapped = false
-  let status: FSStatus = 'pending'
-  let statusLabel = ''
-  let tagClass = 'tag-gray'
+  let registrarStatus: FSStatus = 'pending'
+  let registrarStatusLabel = ''
+  let registrarTagClass = 'tag-gray'
 
-  if (isSubmitted && dateSubmitted) {
-    const subDateObj = new Date(dateSubmitted.slice(0, 10))
+  if (isRegistrarSubmitted && registrarDateSubmitted) {
+    const subDateObj = new Date(registrarDateSubmitted.slice(0, 10))
     if (subDateObj <= deadlineObj) {
-      status = 'submitted'
-      statusLabel = 'مقدمة في الموعد ✓'
-      tagClass = 'tag-ok'
+      registrarStatus = 'submitted'
+      registrarStatusLabel = 'تم التسليم لمسجل الشركات في الموعد ✓'
+      registrarTagClass = 'tag-ok'
       penaltyAmount = 0
       daysLeft = 0
       daysLate = 0
     } else {
-      status = 'submitted_late'
+      registrarStatus = 'submitted_late'
       daysLate = Math.max(1, Math.floor((subDateObj.getTime() - penaltyStartObj.getTime()) / 86_400_000) + 1)
       penaltyAmount = Math.min(daysLate * FS_DAILY_PENALTY, FS_MAX_PENALTY)
       isCapped = penaltyAmount >= FS_MAX_PENALTY
-      statusLabel = `مقدمة متأخرة (${formatMoney(penaltyAmount)})`
-      tagClass = 'tag-warn'
+      registrarStatusLabel = `تم التسليم لمسجل الشركات متأخراً (${formatMoney(penaltyAmount)})`
+      registrarTagClass = 'tag-warn'
     }
   } else {
-    // لم تُقدم بعد (معلقة)
     today.setHours(0, 0, 0, 0)
     deadlineObj.setHours(0, 0, 0, 0)
     penaltyStartObj.setHours(0, 0, 0, 0)
@@ -75,63 +78,101 @@ export function calculateFSState(
       penaltyAmount = 0
 
       if (daysLeft <= 30) {
-        status = 'due_soon'
-        statusLabel = `تقترب المهلة (${daysLeft} يوم)`
-        tagClass = 'tag-warn'
+        registrarStatus = 'due_soon'
+        registrarStatusLabel = `تقترب مهلة مسجل الشركات (${daysLeft} يوم)`
+        registrarTagClass = 'tag-warn'
       } else {
-        status = 'pending'
-        statusLabel = `قيد الانتظار (${daysLeft} يوم)`
-        tagClass = 'tag-blue'
+        registrarStatus = 'pending'
+        registrarStatusLabel = `قيد الانتظار لمسجل الشركات (${daysLeft} يوم)`
+        registrarTagClass = 'tag-blue'
       }
     } else {
-      // تجاوزت المهلة وجاري احتساب الغرامة
       daysLeft = 0
       daysLate = Math.max(1, Math.floor((today.getTime() - penaltyStartObj.getTime()) / 86_400_000) + 1)
       penaltyAmount = Math.min(daysLate * FS_DAILY_PENALTY, FS_MAX_PENALTY)
       isCapped = penaltyAmount >= FS_MAX_PENALTY
 
       if (isCapped) {
-        status = 'penalty_max'
-        statusLabel = `الحد الأقصى للغرامة (${formatMoney(penaltyAmount)})`
-        tagClass = 'tag-bad'
+        registrarStatus = 'penalty_max'
+        registrarStatusLabel = `الحد الأقصى لغرامة مسجل الشركات (${formatMoney(penaltyAmount)})`
+        registrarTagClass = 'tag-bad'
       } else {
-        status = 'penalty_running'
-        statusLabel = `تتراكم الغرامة (${formatMoney(penaltyAmount)})`
-        tagClass = 'tag-bad'
+        registrarStatus = 'penalty_running'
+        registrarStatusLabel = `تتراكم غرامة مسجل الشركات (${formatMoney(penaltyAmount)})`
+        registrarTagClass = 'tag-bad'
       }
     }
   }
 
-  const taxDeadlineDate = `${submissionYear}-07-31`
-  const taxDeadlineObj = new Date(submissionYear, 6, 31) // 31 July of submission year (الهيئة العامة للضرائب - قسم الشركات)
+  // 2. تسليم الهيئة العامة للضرائب (General Commission of Taxes - 31/7)
+  const taxDateSubmitted = fs.date_submitted_tax || (fs.tax_submitted ? (fs.date_submitted || new Date().toISOString().slice(0, 10)) : null)
+  const isTaxSubmitted = Boolean(taxDateSubmitted)
+
+  const taxDeadlineObj = new Date(submissionYear, 6, 31) // 31 July
+  taxDeadlineObj.setHours(0, 0, 0, 0)
 
   let taxDaysLeft = 0
   let taxDaysLate = 0
+  let taxStatus: FSStatus = 'pending'
   let taxStatusLabel = ''
+  let taxTagClass = 'tag-gray'
 
-  if (isSubmitted && dateSubmitted) {
-    const subDateObj = new Date(dateSubmitted.slice(0, 10))
-    if (subDateObj <= taxDeadlineObj) {
+  if (isTaxSubmitted && taxDateSubmitted) {
+    const taxSubDateObj = new Date(taxDateSubmitted.slice(0, 10))
+    if (taxSubDateObj <= taxDeadlineObj) {
+      taxStatus = 'submitted'
       taxDaysLeft = 0
       taxDaysLate = 0
-      taxStatusLabel = 'مقدمة للضرائب في الموعد (قبل 31/7) ✓'
+      taxStatusLabel = 'تم التسليم للضرائب في الموعد (قبل 31/7) ✓'
+      taxTagClass = 'tag-ok'
     } else {
-      taxDaysLate = Math.max(1, Math.floor((subDateObj.getTime() - taxDeadlineObj.getTime()) / 86_400_000))
-      taxStatusLabel = `مقدمة للضرائب بعد 31/7 (تأخير ${taxDaysLate} يوم)`
+      taxStatus = 'submitted_late'
+      taxDaysLate = Math.max(1, Math.floor((taxSubDateObj.getTime() - taxDeadlineObj.getTime()) / 86_400_000))
+      taxStatusLabel = `تم التسليم للضرائب متأخراً بعد 31/7 (${taxDaysLate} يوم تأخير)`
+      taxTagClass = 'tag-warn'
     }
   } else {
-    taxDeadlineObj.setHours(0, 0, 0, 0)
     if (today <= taxDeadlineObj) {
       taxDaysLeft = Math.max(0, Math.ceil((taxDeadlineObj.getTime() - today.getTime()) / 86_400_000))
       taxDaysLate = 0
-      taxStatusLabel = taxDaysLeft <= 30
-        ? `مهلة الضرائب (31/7): متبقي ${taxDaysLeft} يوم ⚠️`
-        : `مهلة الضرائب (31/7): متبقي ${taxDaysLeft} يوم`
+      if (taxDaysLeft <= 30) {
+        taxStatus = 'due_soon'
+        taxStatusLabel = `مهلة الضرائب (31/7): متبقي ${taxDaysLeft} يوم ⚠️`
+        taxTagClass = 'tag-warn'
+      } else {
+        taxStatus = 'pending'
+        taxStatusLabel = `مهلة الضرائب (31/7): متبقي ${taxDaysLeft} يوم`
+        taxTagClass = 'tag-blue'
+      }
     } else {
       taxDaysLeft = 0
       taxDaysLate = Math.max(1, Math.floor((today.getTime() - taxDeadlineObj.getTime()) / 86_400_000))
+      taxStatus = 'overdue'
       taxStatusLabel = `متأخرة عن مهلة تسليم الضرائب 31/7 (${taxDaysLate} يوم تأخير)`
+      taxTagClass = 'tag-bad'
     }
+  }
+
+  // 3. الحالة العامة الموحدة (Overall Status & Presentation)
+  const isFullySubmitted = isRegistrarSubmitted && isTaxSubmitted
+  const isSubmitted = isRegistrarSubmitted // For backwards compatibility
+
+  let status: FSStatus = registrarStatus
+  let statusLabel = registrarStatusLabel
+  let tagClass = registrarTagClass
+
+  if (isFullySubmitted) {
+    status = 'submitted'
+    statusLabel = penaltyAmount > 0 ? `مكتملة ومسلّمة للدائرتين (غرامة: ${formatMoney(penaltyAmount)})` : 'مكتملة ومسلّمة للدائرتين بنجاح ✓'
+    tagClass = penaltyAmount > 0 ? 'tag-warn' : 'tag-ok'
+  } else if (isRegistrarSubmitted && !isTaxSubmitted) {
+    status = taxStatus === 'overdue' ? 'overdue' : 'pending'
+    statusLabel = `مسلّمة للمسجل — بانتظار تسليم الضرائب (${taxDaysLate > 0 ? `${taxDaysLate} يوم تأخير` : 'مهلة 31/7'})`
+    tagClass = taxStatus === 'overdue' ? 'tag-bad' : 'tag-warn'
+  } else if (!isRegistrarSubmitted && isTaxSubmitted) {
+    status = registrarStatus
+    statusLabel = `مسلّمة للضرائب — بانتظار مسجل الشركات (${daysLate > 0 ? `غرامة: ${formatMoney(penaltyAmount)}` : 'مهلة 7/10'})`
+    tagClass = registrarTagClass
   }
 
   return {
@@ -145,9 +186,19 @@ export function calculateFSState(
     taxDeadlineDate,
     taxDaysLeft,
     taxDaysLate,
+    taxStatus,
     taxStatusLabel,
+    taxTagClass,
+    isTaxSubmitted,
+    taxDateSubmitted,
+    isRegistrarSubmitted,
+    registrarDateSubmitted,
+    registrarStatus,
+    registrarStatusLabel,
+    registrarTagClass,
+    isFullySubmitted,
     dateReceived,
-    dateSubmitted,
+    dateSubmitted: registrarDateSubmitted,
     isSubmitted,
     daysLeft,
     daysLate,

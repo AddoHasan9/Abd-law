@@ -221,13 +221,40 @@ export async function listTransactions(filters?: {
     })
   } catch {}
 
-  let result = Array.from(map.values())
+  let rawList = Array.from(map.values())
   if (filters?.type) {
     const filterType = filters.type.trim()
-    result = result.filter(t => t.type === filterType || (filterType === 'formation' && t.type === 'tasis') || (filterType === 'tasis' && t.type === 'formation'))
+    rawList = rawList.filter(t => t.type === filterType || (filterType === 'formation' && t.type === 'tasis') || (filterType === 'tasis' && t.type === 'formation'))
   }
-  if (filters?.status)   result = result.filter(t => t.status === filters.status)
-  if (filters?.lawyerId) result = result.filter(t => t.lawyer_id === filters.lawyerId)
+  if (filters?.status)   rawList = rawList.filter(t => t.status === filters.status)
+  if (filters?.lawyerId) rawList = rawList.filter(t => t.lawyer_id === filters.lawyerId)
+
+  // Enforce strict deduplication so no duplicate transactions exist for the same company and type
+  const dedupMap = new Map<string, TransactionFull>()
+  for (const t of rawList) {
+    let dedupKey = `tx_${t.id}`
+    if (t.company_id && (t.type === 'tasis' || t.type === 'formation')) {
+      dedupKey = `co_tasis_${t.company_id}`
+    } else if (t.company_id && (t.type === 'tax_id' || t.type === 'importer_id' || t.type === 'chamber_id' || t.type === 'planning_id')) {
+      dedupKey = `co_id_${t.company_id}_${t.type}`
+    }
+
+    const existing = dedupMap.get(dedupKey)
+    if (!existing) {
+      dedupMap.set(dedupKey, t)
+    } else {
+      // Keep the more complete record (has fee / lawyer / newer created_at)
+      if ((t.fee && !existing.fee) || (t.lawyer_id && !existing.lawyer_id) || new Date(t.created_at || '').getTime() > new Date(existing.created_at || '').getTime()) {
+        dedupMap.set(dedupKey, {
+          ...existing,
+          ...t,
+          companies: t.companies || existing.companies,
+        })
+      }
+    }
+  }
+
+  const result = Array.from(dedupMap.values())
 
   return result.sort(
     (a, b) => new Date(b.created_at || '').getTime() - new Date(a.created_at || '').getTime()

@@ -431,7 +431,11 @@ export interface FinancialStatement {
   company_name?: string | null
   year: number
   date_received?: string | null
-  date_submitted?: string | null
+  date_submitted?: string | null // alias / legacy for registrar submission
+  date_submitted_tax?: string | null // تاريخ التسليم للهيئة العامة للضرائب (مهلة 31/7)
+  date_submitted_registrar?: string | null // تاريخ التسليم لدائرة تسجيل الشركات (مهلة 7/10)
+  tax_submitted?: boolean
+  registrar_submitted?: boolean
   notes?: string | null
   created_at: string
 }
@@ -449,7 +453,17 @@ export interface FinancialStatementState {
   taxDeadlineDate?: string
   taxDaysLeft?: number
   taxDaysLate?: number
+  taxStatus?: FSStatus
   taxStatusLabel?: string
+  taxTagClass?: string
+  isTaxSubmitted?: boolean
+  taxDateSubmitted?: string | null
+  isRegistrarSubmitted?: boolean
+  registrarDateSubmitted?: string | null
+  registrarStatus?: FSStatus
+  registrarStatusLabel?: string
+  registrarTagClass?: string
+  isFullySubmitted?: boolean
   dateReceived?: string | null
   dateSubmitted?: string | null
   isSubmitted: boolean
