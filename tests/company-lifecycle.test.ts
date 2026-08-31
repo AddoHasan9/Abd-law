@@ -56,11 +56,13 @@ describe('End-to-End Company Lifecycle & Auto-Promotion Test', () => {
       assert.strictEqual(found?.status, 'established', 'Company status must become established')
       assert.strictEqual(found?.deposit_released, true, 'deposit_released must be true')
     } finally {
-      // Guaranteed clean up of test companies and deposits
+      // Guaranteed clean up of test companies, deposits, and timeline
       const diskCompanies = readJsonFile<CompanyWithWorkflow[]>('companies.json', []).filter(c => c.id !== testCompanyId && !c.id.startsWith('test_co_'))
       writeJsonFile('companies.json', diskCompanies)
       const diskDeps = readJsonFile<Array<{ company_id: string }>>('deposits.json', []).filter(d => d.company_id !== testCompanyId && !d.company_id?.startsWith('test_co_'))
       writeJsonFile('deposits.json', diskDeps)
+      const diskTimeline = readJsonFile<Array<{ company_id: string }>>('company_timeline.json', []).filter(t => t.company_id !== testCompanyId && !t.company_id?.startsWith('test_co_'))
+      writeJsonFile('company_timeline.json', diskTimeline)
     }
   })
 })

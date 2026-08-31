@@ -34,11 +34,19 @@ export async function logTimelineEvent(payload: {
     created_at: new Date().toISOString(),
   }
 
-  // 1. التخزين القرصي المباشر بدعم دوام البيانات
+  // 1. التخزين القرصي المباشر بدعم دوام البيانات ومنع التكرار
   try {
     const diskEvents = readJsonFile<TimelineEvent[]>('company_timeline.json', [])
-    diskEvents.unshift(newEvent)
-    writeJsonFile('company_timeline.json', diskEvents)
+    const isDuplicate = diskEvents.some(
+      e => e.company_id === payload.company_id &&
+           e.event_type === payload.event_type &&
+           e.title === payload.title &&
+           (Date.now() - new Date(e.created_at || '').getTime()) < 3600000 // Within 1 hour
+    )
+    if (!isDuplicate) {
+      diskEvents.unshift(newEvent)
+      writeJsonFile('company_timeline.json', diskEvents)
+    }
   } catch (err) {
     console.warn('logTimelineEvent disk notice:', err)
   }
@@ -63,10 +71,12 @@ export async function logTimelineEvent(payload: {
   }
 }
 
-/** يجلب السجل الزمني الكامل لشركة، الأحدث أولاً مع دمج التخزين القرصي */
+/** يجلب السجل الزمني الكامل لشركة، الأحدث أولاً مع دمج التخزين القرصي وتصفية التكرار */
 export async function getCompanyTimeline(companyId: string): Promise<TimelineEvent[]> {
   const diskEvents = readJsonFile<TimelineEvent[]>('company_timeline.json', [])
-  const companyDiskEvents = diskEvents.filter(e => e.company_id === companyId)
+  const companyDiskEvents = diskEvents.filter(
+    e => e.company_id === companyId && !e.company_id.startsWith('test_co_') && !e.company_id.startsWith('dup_')
+  )
 
   try {
     const supabase = createAdminClient()
@@ -76,17 +86,28 @@ export async function getCompanyTimeline(companyId: string): Promise<TimelineEve
       .eq('company_id', companyId)
       .order('created_at', { ascending: false })
 
-    if (error || !data) {
-      return companyDiskEvents
-    }
-
     const map = new Map<string, TimelineEvent>()
     companyDiskEvents.forEach(e => map.set(e.id, e))
-    ;(data as TimelineEvent[]).forEach(e => map.set(e.id, e))
+    if (!error && data) {
+      ;(data as TimelineEvent[]).forEach(e => map.set(e.id, e))
+    }
 
-    return Array.from(map.values()).sort(
+    // Deduplicate by (event_type + title + date)
+    const seen = new Set<string>()
+    const deduplicated: TimelineEvent[] = []
+    const sorted = Array.from(map.values()).sort(
       (a, b) => new Date(b.created_at || '').getTime() - new Date(a.created_at || '').getTime()
     )
+
+    for (const ev of sorted) {
+      const key = `${ev.event_type}_${ev.title}_${(ev.created_at || '').slice(0, 10)}`
+      if (!seen.has(key)) {
+        seen.add(key)
+        deduplicated.push(ev)
+      }
+    }
+
+    return deduplicated
   } catch (err) {
     console.warn('getCompanyTimeline exception fallback:', err)
     return companyDiskEvents

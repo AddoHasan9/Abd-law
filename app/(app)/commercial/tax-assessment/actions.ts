@@ -248,14 +248,18 @@ export async function createTaxAssessmentAction(payload: CreateTaxAssessmentPayl
     diskTxs.unshift(txRecord)
     writeJsonFile('transactions.json', diskTxs)
 
-    // Log Timeline Event
-    await logTimelineEvent({
-      company_id: payload.company_id,
-      event_type: 'tax_assessment_started',
-      title: `بدء معاملة التحاسب الضريبي لسنة ${payload.year}`,
-      description: `تم فتح ملف التحاسب الضريبي في الهيئة العامة للضرائب (${newRecord.tax_branch || 'الفرع المختص'}) بمتابعة المحامي ${newRecord.assigned_lawyer_name || 'المعين'}.`,
-      related_link: '/commercial/tax-assessment',
-    })
+    // Log Timeline Event for real companies only
+    try {
+      if (payload.company_id && !payload.company_id.startsWith('dup_') && !payload.company_id.startsWith('test_co_')) {
+        await logTimelineEvent({
+          company_id: payload.company_id,
+          event_type: 'tax_assessment_started',
+          title: `بدء معاملة التحاسب الضريبي لسنة ${payload.year}`,
+          description: `تم فتح ملف التحاسب الضريبي في الهيئة العامة للضرائب (${newRecord.tax_branch || 'الفرع المختص'}) بمتابعة المحامي ${newRecord.assigned_lawyer_name || 'المعين'}.`,
+          related_link: '/commercial/tax-assessment',
+        })
+      }
+    } catch {}
 
     try {
       revalidatePath('/commercial/tax-assessment')

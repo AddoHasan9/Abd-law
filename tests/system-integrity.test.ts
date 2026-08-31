@@ -189,31 +189,40 @@ describe('Duplicate Data Prevention Tests', () => {
   it('detects and blocks duplicate government IDs for the same company and type', async () => {
     const { createCompanyIDAction, deleteCompanyIDAction } = await import('../app/(app)/commercial/ids/actions')
     const testCompanyId = `dup_co_${Date.now()}`
+    let createdRecordId: string | null = null
 
-    // First creation: should succeed
-    const res1 = await createCompanyIDAction({
-      company_id: testCompanyId,
-      company_name: 'شركة اختبار منع التكرار',
-      id_type: 'tax_id',
-      lawyer_id: 'db13125d-3aa1-46ab-9159-8fad18746623',
-      status: 'in_progress',
-    })
-    assert.strictEqual(res1.success, true)
+    try {
+      // First creation: should succeed
+      const res1 = await createCompanyIDAction({
+        company_id: testCompanyId,
+        company_name: 'شركة اختبار فحص التكرار المعزولة',
+        id_type: 'tax_id',
+        lawyer_id: 'db13125d-3aa1-46ab-9159-8fad18746623',
+        status: 'in_progress',
+      })
+      assert.strictEqual(res1.success, true)
+      if (res1.record?.id) {
+        createdRecordId = res1.record.id
+      }
 
-    // Second creation for same company + same id_type: MUST BE BLOCKED
-    const res2 = await createCompanyIDAction({
-      company_id: testCompanyId,
-      company_name: 'شركة اختبار منع التكرار',
-      id_type: 'tax_id',
-      lawyer_id: 'db13125d-3aa1-46ab-9159-8fad18746623',
-      status: 'in_progress',
-    })
-    assert.strictEqual(res2.success, false)
-    assert.match(res2.error || '', /يوجد سجل \(هوية ضريبية\) مسجل مسبقاً/)
-
-    // Cleanup
-    if (res1.record?.id) {
-      await deleteCompanyIDAction(res1.record.id)
+      // Second creation for same company + same id_type: MUST BE BLOCKED
+      const res2 = await createCompanyIDAction({
+        company_id: testCompanyId,
+        company_name: 'شركة اختبار فحص التكرار المعزولة',
+        id_type: 'tax_id',
+        lawyer_id: 'db13125d-3aa1-46ab-9159-8fad18746623',
+        status: 'in_progress',
+      })
+      assert.strictEqual(res2.success, false)
+      assert.match(res2.error || '', /يوجد سجل \(هوية ضريبية\) مسجل مسبقاً/)
+    } finally {
+      // Cleanup
+      if (createdRecordId) {
+        await deleteCompanyIDAction(createdRecordId)
+      }
+      const { readJsonFile, writeJsonFile } = await import('../lib/data/fs-store')
+      const diskTimeline = readJsonFile<Array<{ company_id?: string }>>('company_timeline.json', [])
+      writeJsonFile('company_timeline.json', diskTimeline.filter(e => e.company_id !== testCompanyId && !e.company_id?.startsWith('dup_') && !e.company_id?.startsWith('test_co_')))
     }
   })
 
@@ -221,27 +230,36 @@ describe('Duplicate Data Prevention Tests', () => {
     const { createTaxAssessmentAction, deleteTaxAssessmentAction } = await import('../app/(app)/commercial/tax-assessment/actions')
     const testCompanyId = `dup_tax_co_${Date.now()}`
     const testYear = 2024
+    let createdTaxId: string | null = null
 
-    // First creation: should succeed
-    const res1 = await createTaxAssessmentAction({
-      company_id: testCompanyId,
-      year: testYear,
-      lawyer_id: 'db13125d-3aa1-46ab-9159-8fad18746623',
-    })
-    assert.strictEqual(res1.success, true)
+    try {
+      // First creation: should succeed
+      const res1 = await createTaxAssessmentAction({
+        company_id: testCompanyId,
+        year: testYear,
+        lawyer_id: 'db13125d-3aa1-46ab-9159-8fad18746623',
+      })
+      assert.strictEqual(res1.success, true)
+      if (res1.data?.id) {
+        createdTaxId = res1.data.id
+      }
 
-    // Second creation for same company + same year: MUST BE BLOCKED
-    const res2 = await createTaxAssessmentAction({
-      company_id: testCompanyId,
-      year: testYear,
-      lawyer_id: 'db13125d-3aa1-46ab-9159-8fad18746623',
-    })
-    assert.strictEqual(res2.success, false)
-    assert.match(res2.error || '', /تم تسجيل تحاسب ضريبي لهذه الشركة لسنة/)
-
-    // Cleanup
-    if (res1.data?.id) {
-      await deleteTaxAssessmentAction(res1.data.id)
+      // Second creation for same company + same year: MUST BE BLOCKED
+      const res2 = await createTaxAssessmentAction({
+        company_id: testCompanyId,
+        year: testYear,
+        lawyer_id: 'db13125d-3aa1-46ab-9159-8fad18746623',
+      })
+      assert.strictEqual(res2.success, false)
+      assert.match(res2.error || '', /تم تسجيل تحاسب ضريبي لهذه الشركة لسنة/)
+    } finally {
+      // Cleanup
+      if (createdTaxId) {
+        await deleteTaxAssessmentAction(createdTaxId)
+      }
+      const { readJsonFile, writeJsonFile } = await import('../lib/data/fs-store')
+      const diskTimeline = readJsonFile<Array<{ company_id?: string }>>('company_timeline.json', [])
+      writeJsonFile('company_timeline.json', diskTimeline.filter(e => e.company_id !== testCompanyId && !e.company_id?.startsWith('dup_') && !e.company_id?.startsWith('test_co_')))
     }
   })
 })

@@ -174,34 +174,18 @@ export async function createCompanyIDAction(payload: {
           if (dbCo) {
             targetCompanyId = dbCo.id
           } else {
-            targetCompanyId = generateUUID()
-            const newCoRecord = {
-              id: targetCompanyId,
-              name: compName,
-              kind: 'محدودة',
-              status: 'established',
-              created_at: new Date().toISOString(),
-            }
-            try {
-              await supabase.from('companies').insert(newCoRecord)
-            } catch (insErr) {
-              console.warn('Company auto-insert in DB notice:', insErr)
-            }
-
-            diskCompanies.unshift(newCoRecord as unknown as CompanyWithWorkflow)
-            writeJsonFile('companies.json', diskCompanies)
+            targetCompanyId = payload.company_id || generateUUID()
           }
         } catch (e) {
-          console.warn('Company auto-linking lookup notice:', e)
           if (!targetCompanyId) {
-            targetCompanyId = generateUUID()
+            targetCompanyId = payload.company_id || generateUUID()
           }
         }
       }
     }
 
     if (!targetCompanyId) {
-      targetCompanyId = generateUUID()
+      targetCompanyId = payload.company_id || generateUUID()
     }
 
     // --- CHECK DUPLICATION (DB + Disk) ---
@@ -345,17 +329,19 @@ export async function createCompanyIDAction(payload: {
     diskTxs.unshift(txRecord)
     writeJsonFile('transactions.json', diskTxs)
 
-    // Log timeline event
+    // Log timeline event for real companies only
     try {
-      const isComplete = finalStatus === 'done'
-      await logTimelineEvent({
-        company_id: targetCompanyId,
-        event_type: 'id_issued',
-        title: isComplete
-          ? `إصدار ${ID_TYPE_LABELS[payload.id_type] || payload.id_type}${idNumber ? ` (${idNumber})` : ''}`
-          : `بدء معاملة إصدار ${ID_TYPE_LABELS[payload.id_type] || payload.id_type} (قيد الإجراء)`,
-        related_link: '/commercial/ids',
-      })
+      if (targetCompanyId && !targetCompanyId.startsWith('dup_') && !targetCompanyId.startsWith('test_co_')) {
+        const isComplete = finalStatus === 'done'
+        await logTimelineEvent({
+          company_id: targetCompanyId,
+          event_type: 'id_issued',
+          title: isComplete
+            ? `إصدار ${ID_TYPE_LABELS[payload.id_type] || payload.id_type}${idNumber ? ` (${idNumber})` : ''}`
+            : `بدء معاملة إصدار ${ID_TYPE_LABELS[payload.id_type] || payload.id_type} (قيد الإجراء)`,
+          related_link: '/commercial/ids',
+        })
+      }
     } catch { }
 
     try {
