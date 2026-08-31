@@ -7,12 +7,8 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import * as z from 'zod'
 import { toast } from 'sonner'
-import { Mail, Lock, Eye, EyeOff, ArrowLeft, ShieldCheck, Loader2 } from 'lucide-react'
+import { Mail, Lock, Eye, EyeOff, ArrowLeft, ShieldCheck, Loader2, Sparkles } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Button } from '@/components/ui/button'
-import { Checkbox } from '@/components/ui/checkbox'
 import { FadeInStagger } from '@/components/ui/FadeInStagger'
 
 const loginSchema = z.object({
@@ -69,11 +65,11 @@ export default function LoginForm() {
         return
       }
 
-      // Success
-      toast.success('تم التحقق من الحساب بنجاح، جاري الدخول...')
+      // Success Feedback
+      toast.success('تم التحقق بنجاح، جاري تهيئة لوحة التحكم...')
       setIsRedirecting(true)
 
-      // Audit log in background
+      // Audit trail in background
       try {
         if (authData?.user) {
           fetch('/api/audit', {
@@ -90,37 +86,37 @@ export default function LoginForm() {
 
       window.location.href = '/'
     } catch {
-      toast.error('حدث خطأ غير متوقع في الاتصال بالخادم')
+      toast.error('حدث خطأ في الاتصال بالخادم، يرجى المحاولة لاحقاً')
     }
   }
 
-  // Visual Redirecting Screen
+  // Redirecting Screen
   if (isRedirecting) {
     return (
       <div className="flex flex-col items-center justify-center h-full w-full max-w-[420px] mx-auto py-12 text-center text-right animate-in fade-in zoom-in-95 duration-300" dir="rtl">
-        <div className="relative w-20 h-20 rounded-2xl bg-primary/10 border border-primary/30 p-2.5 flex items-center justify-center shadow-xl shadow-primary/10 mb-6 animate-pulse">
+        <div className="relative w-22 h-22 rounded-3xl bg-white/[0.08] border border-cyan-500/30 p-3 flex items-center justify-center shadow-2xl shadow-cyan-500/20 mb-6 backdrop-blur-2xl animate-pulse">
           <Image
             src="/logo.png"
             alt="شعار المكتب"
-            width={64}
-            height={64}
-            className="object-contain w-full h-full"
+            width={72}
+            height={72}
+            className="object-contain w-full h-full drop-shadow-md"
             priority
           />
         </div>
 
         <div className="flex flex-col gap-2 items-center">
-          <div className="flex items-center gap-2 text-emerald-600 dark:text-emerald-400 font-extrabold text-base">
-            <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping" />
+          <div className="flex items-center gap-2 text-cyan-400 font-extrabold text-base">
+            <span className="w-2.5 h-2.5 rounded-full bg-cyan-400 animate-ping" />
             <span>تم التحقق من الحساب بنجاح</span>
           </div>
-          <p className="text-xs text-muted-foreground max-w-xs leading-relaxed mt-1">
+          <p className="text-xs text-slate-300 max-w-xs leading-relaxed mt-1">
             جارٍ تهيئة الجلسة وتحميل بيانات لوحة التحكم والمعاملات…
           </p>
         </div>
 
-        <div className="w-48 h-1.5 bg-secondary rounded-full overflow-hidden mt-6">
-          <div className="h-full bg-gradient-to-r from-primary to-blue-500 rounded-full animate-progress" />
+        <div className="w-48 h-1.5 bg-white/10 rounded-full overflow-hidden mt-6">
+          <div className="h-full bg-gradient-to-r from-blue-500 via-indigo-500 to-cyan-400 rounded-full animate-progress" />
         </div>
       </div>
     )
@@ -129,8 +125,8 @@ export default function LoginForm() {
   return (
     <div className="flex flex-col justify-center h-full w-full max-w-[420px] mx-auto py-2">
       {/* Mobile Top Brand Header */}
-      <div className="lg:hidden flex items-center gap-3 mb-6 pb-4 border-b border-border/80 text-right">
-        <div className="w-12 h-12 rounded-2xl bg-primary/10 border border-primary/20 p-1.5 flex items-center justify-center shadow-sm shrink-0">
+      <div className="lg:hidden flex items-center gap-3.5 mb-6 pb-4 border-b border-white/10 text-right">
+        <div className="w-12 h-12 rounded-2xl bg-white/[0.08] border border-amber-500/30 p-1.5 flex items-center justify-center shadow-lg shadow-amber-500/10 backdrop-blur-md shrink-0">
           <Image
             src="/logo.png"
             alt="شعار المكتب"
@@ -141,48 +137,48 @@ export default function LoginForm() {
           />
         </div>
         <div className="min-w-0 flex-1">
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10.5px] font-bold bg-primary/10 border border-primary/20 text-primary">
-            <span className="w-1.5 h-1.5 rounded-full bg-primary animate-ping" />
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10.5px] font-bold bg-amber-500/15 border border-amber-500/30 text-amber-300">
+            <Sparkles className="w-3 h-3 text-amber-400 animate-pulse" />
             منظومة العمل القانوني
           </span>
-          <h2 className="text-sm font-extrabold text-foreground mt-1 truncate">
+          <h2 className="text-sm font-extrabold text-white mt-1 truncate">
             مكتب المحامي عبدالحسن الخزرجي
           </h2>
         </div>
       </div>
 
-      {/* Form Header with GSAP Stagger */}
+      {/* Form Content with GSAP Stagger Entrance */}
       <FadeInStagger className="space-y-6">
         <div className="text-right">
-          <h1 className="text-2xl sm:text-3xl font-extrabold text-foreground tracking-tight font-display">
+          <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
             تسجيل الدخول
           </h1>
-          <p className="text-xs sm:text-sm text-muted-foreground mt-1.5 leading-relaxed">
-            أهلاً بك مجدداً، أدخل بياناتك للوصول إلى لوحة العمل.
+          <p className="text-xs sm:text-sm text-slate-300 mt-1.5 leading-relaxed">
+            أهلاً بك مجدداً، أدخل بياناتك للوصول إلى لوحة العمل وإدارة المعاملات.
           </p>
         </div>
 
         {/* Login Form */}
-        <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-4">
+        <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-4.5">
           {/* Email Field */}
           <div className="space-y-1.5 text-right">
-            <Label htmlFor="login-email" className="text-xs font-bold text-foreground">
+            <label htmlFor="login-email" className="block text-xs font-bold text-slate-200">
               البريد الإلكتروني
-            </Label>
-            <div className="relative">
-              <Input
+            </label>
+            <div className="relative group">
+              <input
                 id="login-email"
                 type="email"
                 autoComplete="email"
                 placeholder="name@example.com"
                 dir="ltr"
-                className="h-11 pr-10 pl-3 text-right bg-background/80 border-border/80 focus-visible:ring-primary focus-visible:border-primary text-foreground"
+                className="w-full h-12 pr-11 pl-4 rounded-2xl bg-white/[0.06] hover:bg-white/[0.09] focus:bg-white/[0.12] border border-white/15 focus:border-cyan-400 text-white placeholder-slate-400 text-sm outline-none transition-all duration-300 focus:ring-4 focus:ring-cyan-500/20 text-right backdrop-blur-md"
                 {...register('email')}
               />
-              <Mail className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+              <Mail className="absolute right-3.5 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400 group-focus-within:text-cyan-400 transition-colors pointer-events-none" />
             </div>
             {errors.email && (
-              <p className="text-[11.5px] font-bold text-destructive animate-in fade-in duration-200">
+              <p className="text-[11.5px] font-bold text-rose-400 animate-in fade-in duration-200">
                 {errors.email.message}
               </p>
             )}
@@ -191,32 +187,32 @@ export default function LoginForm() {
           {/* Password Field */}
           <div className="space-y-1.5 text-right">
             <div className="flex items-center justify-between">
-              <Label htmlFor="login-password" className="text-xs font-bold text-foreground">
+              <label htmlFor="login-password" className="block text-xs font-bold text-slate-200">
                 كلمة المرور
-              </Label>
+              </label>
               <Link
                 href="/reset-password"
-                className="text-[11.5px] text-primary hover:underline font-semibold"
+                className="text-[11.5px] text-cyan-400 hover:text-cyan-300 hover:underline font-semibold transition-colors"
               >
                 نسيت كلمة المرور؟
               </Link>
             </div>
-            <div className="relative">
-              <Input
+            <div className="relative group">
+              <input
                 id="login-password"
                 type={showPassword ? 'text' : 'password'}
                 autoComplete="current-password"
                 placeholder="••••••••"
                 dir="ltr"
-                className="h-11 pr-10 pl-10 text-right bg-background/80 border-border/80 focus-visible:ring-primary focus-visible:border-primary text-foreground"
+                className="w-full h-12 pr-11 pl-11 rounded-2xl bg-white/[0.06] hover:bg-white/[0.09] focus:bg-white/[0.12] border border-white/15 focus:border-cyan-400 text-white placeholder-slate-400 text-sm outline-none transition-all duration-300 focus:ring-4 focus:ring-cyan-500/20 text-right backdrop-blur-md"
                 {...register('password')}
               />
-              <Lock className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+              <Lock className="absolute right-3.5 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400 group-focus-within:text-cyan-400 transition-colors pointer-events-none" />
               <button
                 type="button"
                 onClick={() => setShowPassword(v => !v)}
                 tabIndex={-1}
-                className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
+                className="absolute left-3 top-1/2 -translate-y-1/2 w-8 h-8 rounded-xl flex items-center justify-center text-slate-400 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
                 aria-label={showPassword ? 'إخفاء كلمة المرور' : 'إظهار كلمة المرور'}
               >
                 {showPassword ? (
@@ -227,50 +223,52 @@ export default function LoginForm() {
               </button>
             </div>
             {errors.password && (
-              <p className="text-[11.5px] font-bold text-destructive animate-in fade-in duration-200">
+              <p className="text-[11.5px] font-bold text-rose-400 animate-in fade-in duration-200">
                 {errors.password.message}
               </p>
             )}
           </div>
 
           {/* Remember me */}
-          <div className="flex items-center gap-2 pt-1 text-xs">
-            <Checkbox
+          <div className="flex items-center gap-2.5 pt-1 text-xs text-slate-300">
+            <input
               id="remember-me"
+              type="checkbox"
               checked={rememberMe}
-              onCheckedChange={checked => setValue('rememberMe', Boolean(checked))}
+              onChange={e => setValue('rememberMe', e.target.checked)}
+              className="w-4 h-4 rounded-md border-white/20 bg-white/10 text-cyan-500 focus:ring-0 cursor-pointer accent-cyan-500"
             />
-            <Label
+            <label
               htmlFor="remember-me"
-              className="text-xs text-muted-foreground font-medium cursor-pointer"
+              className="text-xs text-slate-300 hover:text-white font-medium cursor-pointer transition-colors"
             >
-              تذكر تسجيل الدخول على هذا الجهاز
-            </Label>
+              تذكر تسجيل الدخول على هذا المتصفح
+            </label>
           </div>
 
           {/* Submit Button */}
-          <Button
+          <button
             type="submit"
             disabled={isSubmitting}
-            className="w-full h-11 mt-2 text-sm font-bold bg-primary hover:bg-primary/90 text-primary-foreground shadow-md transition-all duration-200 cursor-pointer"
+            className="w-full h-12 mt-2 rounded-2xl bg-gradient-to-r from-blue-600 via-indigo-600 to-cyan-500 hover:from-blue-500 hover:to-cyan-400 text-white font-extrabold text-sm flex items-center justify-center gap-2.5 shadow-xl shadow-blue-500/25 hover:shadow-cyan-500/35 hover:scale-[1.01] active:scale-[0.99] transition-all duration-300 disabled:opacity-60 disabled:pointer-events-none cursor-pointer border border-white/20"
           >
             {isSubmitting ? (
               <div className="flex items-center gap-2">
-                <Loader2 className="h-4 w-4 animate-spin" />
+                <Loader2 className="h-4 w-4 animate-spin text-white" />
                 <span>جارٍ التحقق والدخول…</span>
               </div>
             ) : (
               <div className="flex items-center gap-2">
                 <span>دخول إلى المنظومة</span>
-                <ArrowLeft className="h-4 w-4" />
+                <ArrowLeft className="h-4 w-4 transition-transform group-hover:-translate-x-1" />
               </div>
             )}
-          </Button>
+          </button>
         </form>
 
         {/* Security Trust Pill */}
-        <div className="flex items-center justify-center gap-2 text-[11.5px] text-muted-foreground select-none pt-2">
-          <ShieldCheck className="h-4 w-4 text-emerald-500" />
+        <div className="flex items-center justify-center gap-2 text-[11.5px] text-slate-400 select-none pt-1">
+          <ShieldCheck className="h-4 w-4 text-emerald-400" />
           <span>النظام متصل ومشفر بمعيار الأمان 256-bit</span>
         </div>
       </FadeInStagger>

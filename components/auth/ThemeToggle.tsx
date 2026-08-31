@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from 'react'
 import { Sun, Moon } from 'lucide-react'
-import { Button } from '@/components/ui/button'
 
 export function ThemeToggle() {
   const [dark, setDark] = useState(false)
@@ -14,7 +13,6 @@ export function ThemeToggle() {
     if (savedTheme) {
       setDark(savedTheme === 'dark')
     } else {
-      // Default to light mode as requested by user
       setDark(false)
       document.documentElement.dataset.theme = 'light'
     }
@@ -32,25 +30,29 @@ export function ThemeToggle() {
 
   if (!mounted) {
     return (
-      <div className="w-10 h-10 rounded-xl bg-card border border-border/80" />
+      <div className="w-10 h-10 rounded-2xl bg-white/5 border border-white/10" />
     )
   }
 
   return (
-    <Button
+    <button
       type="button"
-      variant="outline"
-      size="icon"
       onClick={toggle}
-      className="rounded-xl border-border/80 bg-card/80 backdrop-blur-md hover:bg-secondary text-foreground shadow-sm transition-all duration-200 cursor-pointer"
+      className="flex items-center gap-2 px-3.5 py-2 rounded-2xl bg-white/[0.08] dark:bg-slate-900/60 hover:bg-white/[0.14] dark:hover:bg-slate-800/80 border border-white/15 dark:border-white/10 backdrop-blur-xl shadow-lg shadow-black/20 text-slate-100 transition-all duration-300 hover:scale-105 active:scale-95 cursor-pointer text-xs font-bold"
       title={dark ? 'التبديل إلى الوضع النهاري' : 'التبديل إلى الوضع الليلي'}
       aria-label={dark ? 'التبديل إلى الوضع النهاري' : 'التبديل إلى الوضع الليلي'}
     >
       {dark ? (
-        <Sun className="h-4 w-4 text-amber-400 animate-in spin-in-180 duration-300" />
+        <>
+          <Sun className="h-4 w-4 text-amber-400 animate-in spin-in-180 duration-300" />
+          <span className="text-amber-200">الوضع النهاري</span>
+        </>
       ) : (
-        <Moon className="h-4 w-4 text-blue-600 animate-in spin-in-180 duration-300" />
+        <>
+          <Moon className="h-4 w-4 text-cyan-400 animate-in spin-in-180 duration-300" />
+          <span className="text-cyan-200">الوضع الليلي</span>
+        </>
       )}
-    </Button>
+    </button>
   )
 }
