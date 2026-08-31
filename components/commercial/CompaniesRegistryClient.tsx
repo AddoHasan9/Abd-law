@@ -171,9 +171,9 @@ export default function CompaniesRegistryClient({ companies = [] }: Props) {
       </div>
 
       {/* Companies Standard Strip Table */}
-      <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
+      <div className="glass-card !p-0 rounded-[22px] border border-[var(--border)] overflow-hidden shadow-sm">
         {filteredCompanies.length === 0 ? (
-          <div style={{ padding: '32px' }}>
+          <div className="p-8">
             <Empty
               icon="build2"
               title="لا توجد شركات مطابقة في قسم الشركات"
@@ -181,130 +181,109 @@ export default function CompaniesRegistryClient({ companies = [] }: Props) {
             />
           </div>
         ) : (
-          <div style={{ overflowX: 'auto' }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px' }}>
+          <div className="overflow-x-auto w-full">
+            <table className="w-full border-collapse text-right text-xs">
               <thead>
-                <tr style={{ background: 'var(--surface-2)', borderBottom: '1px solid var(--line)' }}>
-                  <th style={{ padding: '12px 16px', textAlign: 'right' }}>اسم الشركة</th>
-                  <th style={{ padding: '12px 14px', textAlign: 'center' }}>النوع</th>
-                  <th style={{ padding: '12px 14px', textAlign: 'center' }}>المدير المفوض</th>
-                  <th style={{ padding: '12px 14px', textAlign: 'center' }}>رأس المال</th>
-                  <th style={{ padding: '12px 14px', textAlign: 'center' }}>مسجل الشركات</th>
-                  <th style={{ padding: '12px 14px', textAlign: 'center' }}>رقم الضرائب</th>
-                  <th style={{ padding: '12px 14px', textAlign: 'center' }}>رقم وتاريخ الشهادة</th>
-                  <th style={{ padding: '12px 14px', textAlign: 'center' }}>الميزانيات</th>
-                  <th style={{ padding: '12px 16px', textAlign: 'left' }}>إجراءات</th>
+                <tr className="border-b border-[var(--border)] bg-[var(--surface-2)]/80 text-xs text-[var(--text-2)] font-bold">
+                  <th className="py-3.5 px-4 text-right min-w-[240px]">اسم الشركة</th>
+                  <th className="py-3.5 px-3 text-center min-w-[110px]">النوع</th>
+                  <th className="py-3.5 px-3 text-center min-w-[140px]">المدير المفوض</th>
+                  <th className="py-3.5 px-3 text-center min-w-[130px]">رأس المال</th>
+                  <th className="py-3.5 px-3 text-center min-w-[120px]">مسجل الشركات</th>
+                  <th className="py-3.5 px-3 text-center min-w-[120px]">رقم الضرائب</th>
+                  <th className="py-3.5 px-3 text-center min-w-[150px]">رقم وتاريخ الشهادة</th>
+                  <th className="py-3.5 px-3 text-center min-w-[120px]">الميزانيات</th>
+                  <th className="py-3.5 px-4 text-left min-w-[160px]">إجراءات</th>
                 </tr>
               </thead>
-              <tbody>
+              <tbody className="divide-y divide-[var(--border-soft)]">
                 {filteredCompanies.map(co => {
-                  const activeManager = co.managers?.find(m => m.active)?.name || co.managers?.[0]?.name || co.manager || '—'
-                  const shList = co.shareholders || []
-                  const shCount = shList.length
+                  const activeManager = co.managers?.find(m => m.active)?.name || co.managers?.[0]?.name || '—'
 
                   return (
                     <tr
                       key={co.id}
                       onClick={() => openDetails(co)}
-                      style={{ borderBottom: '1px solid var(--line-soft)', transition: 'background 0.15s', cursor: 'pointer' }}
-                      className="hover:bg-[var(--surface-2)]"
+                      className="hover:bg-blue-500/[0.04] dark:hover:bg-blue-500/[0.08] transition-colors duration-200 cursor-pointer"
                       title="اضغط لعرض وتعديل أو حذف تفاصيل الشركة"
                     >
                       {/* Company Name */}
-                      <td style={{ padding: '14px 16px', fontWeight: 700 }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                          <div
-                            style={{
-                              width: '32px',
-                              height: '32px',
-                              borderRadius: '8px',
-                              background: 'var(--accent-soft)',
-                              color: 'var(--accent)',
-                              display: 'grid',
-                              placeItems: 'center',
-                              flexShrink: 0,
-                            }}
-                          >
-                            <span className="material-symbols-outlined text-[18px]">domain</span>
+                      <td className="py-3.5 px-4">
+                        <div className="flex items-center gap-3">
+                          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[var(--accent-soft)] to-blue-500/10 border border-[var(--accent)]/20 text-[var(--accent)] flex items-center justify-center shrink-0 shadow-xs">
+                            <span className="material-symbols-outlined text-[19px]">domain</span>
                           </div>
-                          <span
-                            style={{
-                              color: 'var(--text)',
-                              fontWeight: 800,
-                              fontSize: '13.5px',
-                            }}
-                          >
+                          <span className="font-bold text-[13.5px] text-[var(--text)] leading-snug">
                             {co.name}
                           </span>
                         </div>
                       </td>
 
                       {/* Kind */}
-                      <td style={{ padding: '14px 14px', textAlign: 'center' }}>
-                        <span className="tag tag-gray" style={{ fontSize: '11px' }}>
+                      <td className="py-3.5 px-3 text-center align-middle">
+                        <span className="text-[10.5px] font-bold text-[var(--text-2)] bg-[var(--surface-2)] px-2.5 py-0.5 rounded-full border border-[var(--border)]">
                           {co.kind ?? 'محدودة'}
                         </span>
                       </td>
 
                       {/* Manager */}
-                      <td style={{ padding: '14px 14px', textAlign: 'center', fontWeight: 600, color: 'var(--text)' }}>
+                      <td className="py-3.5 px-3 text-center align-middle font-bold text-[12.5px] text-[var(--text)]">
                         {activeManager}
                       </td>
 
                       {/* Capital */}
-                      <td style={{ padding: '14px 14px', textAlign: 'center', fontWeight: 700, color: 'var(--ok)' }} className="num">
+                      <td className="py-3.5 px-3 text-center align-middle font-black text-emerald-600 dark:text-emerald-400 num">
                         {co.capital ? formatMoney(co.capital) : '—'}
                       </td>
 
                       {/* Registrar No */}
-                      <td style={{ padding: '14px 14px', textAlign: 'center', fontWeight: 700 }} className="num">
+                      <td className="py-3.5 px-3 text-center align-middle font-bold num">
                         {co.registrar_no ? (
-                          <span style={{ background: 'var(--surface-3)', padding: '2px 8px', borderRadius: '4px', border: '1px solid var(--line-soft)' }}>
+                          <span className="bg-[var(--surface-2)] text-[var(--text-2)] px-2 py-0.5 rounded-md border border-[var(--border)] text-xs">
                             {co.registrar_no}
                           </span>
                         ) : '—'}
                       </td>
 
                       {/* Tax No */}
-                      <td style={{ padding: '14px 14px', textAlign: 'center', fontWeight: 700 }} className="num">
+                      <td className="py-3.5 px-3 text-center align-middle font-bold num">
                         {co.tax_no ? (
-                          <span style={{ background: 'var(--surface-3)', padding: '2px 8px', borderRadius: '4px', border: '1px solid var(--line-soft)' }}>
+                          <span className="bg-[var(--surface-2)] text-[var(--text-2)] px-2 py-0.5 rounded-md border border-[var(--border)] text-xs">
                             {co.tax_no}
                           </span>
                         ) : '—'}
                       </td>
 
                       {/* Cert No & Date */}
-                      <td style={{ padding: '14px 14px', textAlign: 'center', fontSize: '12px' }} className="num">
+                      <td className="py-3.5 px-3 text-center align-middle text-xs font-semibold num">
                         {co.cert_no ? (
                           <span>
-                            {co.cert_no} <span style={{ color: 'var(--text-3)' }}>({co.cert_date ? formatDate(co.cert_date) : ''})</span>
+                            {co.cert_no} <span className="text-[var(--text-3)]">({co.cert_date ? formatDate(co.cert_date) : ''})</span>
                           </span>
                         ) : '—'}
                       </td>
 
                       {/* Financial Statements */}
-                      <td style={{ padding: '14px 14px', textAlign: 'center' }}>
+                      <td className="py-3.5 px-3 text-center align-middle">
                         {co.last_completed_fs_year ? (
-                          <span className="tag tag-blue" style={{ fontSize: '10.5px', fontWeight: 700 }}>
+                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-blue-500/10 text-blue-700 dark:text-blue-300 border border-blue-500/20">
                             ميزانية {co.last_completed_fs_year}
                           </span>
                         ) : (
-                          <span style={{ color: 'var(--text-3)', fontSize: '11px' }}>غير مدرجة</span>
+                          <span className="text-[var(--text-3)] text-xs font-medium">غير مدرجة</span>
                         )}
                       </td>
 
                       {/* Actions */}
-                      <td style={{ padding: '14px 16px', textAlign: 'left', whiteSpace: 'nowrap' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <td className="py-3.5 px-4 text-left align-middle whitespace-nowrap">
+                        <div className="flex items-center gap-2">
                           <button
                             type="button"
                             onClick={(e) => {
                               e.stopPropagation()
                               openDetails(co)
                             }}
-                            className="btn btn-ghost"
-                            style={{ fontSize: '12px', fontWeight: 700, padding: '4px 10px', color: 'var(--text)' }}
+                            className="btn btn-ghost !py-1 !px-2.5 !text-xs !font-bold"
                             title="تعديل تفاصيل الشركة أو حذفها"
                           >
                             <Icon name="gear" />
@@ -314,8 +293,7 @@ export default function CompaniesRegistryClient({ companies = [] }: Props) {
                           <Link
                             href={`/commercial/companies/${co.id}`}
                             onClick={(e) => e.stopPropagation()}
-                            className="btn btn-primary"
-                            style={{ fontSize: '12px', fontWeight: 700, padding: '4px 10px', display: 'inline-flex', alignItems: 'center', gap: '4px' }}
+                            className="btn btn-primary !py-1 !px-3 !text-xs !font-bold inline-flex items-center gap-1"
                           >
                             <span>ملف 360°</span>
                             <span className="material-symbols-outlined text-[14px]">arrow_left</span>

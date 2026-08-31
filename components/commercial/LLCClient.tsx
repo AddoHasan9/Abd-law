@@ -1,12 +1,12 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { Icon } from '@/components/ui/Icon'
 import { Empty } from '@/components/ui/Empty'
 import { WorkflowStatus } from '@/components/ui/WorkflowStatus'
-import type { TransactionFull, Company } from '@/types/database'
+import type { TransactionFull, Company, CompanyWithWorkflow } from '@/types/database'
 import AddLLCTransactionModal, { LLC_TX_TYPES } from './AddLLCTransactionModal'
 import LLCTransactionDetailsModal from './LLCTransactionDetailsModal'
 import { formatDate, formatMoney } from '@/lib/constants'
@@ -43,6 +43,7 @@ export default function LLCClient({ transactions = [], companies = [], lawyers =
   const [activeTab, setActiveTab] = useState<string>('all')
   const [searchTerm, setSearchTerm] = useState('')
   const [isAddModalOpen, setIsAddModalOpen] = useState(false)
+  const companyMap = useMemo(() => new Map((companies as CompanyWithWorkflow[]).map(c => [c.id, c])), [companies])
   const [selectedInitialType, setSelectedInitialType] = useState('capital-up')
 
   // Edit / Details Modal State
@@ -174,9 +175,9 @@ export default function LLCClient({ transactions = [], companies = [], lawyers =
       </div>
 
       {/* Table of Transactions */}
-      <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
+      <div className="glass-card !p-0 rounded-[22px] border border-[var(--border)] overflow-hidden shadow-sm">
         {filteredTransactions.length === 0 ? (
-          <div style={{ padding: '32px' }}>
+          <div className="p-8">
             <Empty
               icon="badge"
               title="لا توجد معاملات مسجلة في هذا التصنيف"
@@ -184,21 +185,21 @@ export default function LLCClient({ transactions = [], companies = [], lawyers =
             />
           </div>
         ) : (
-          <div style={{ overflowX: 'auto' }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px' }}>
+          <div className="overflow-x-auto w-full">
+            <table className="w-full border-collapse text-right text-xs">
               <thead>
-                <tr style={{ background: 'var(--surface-2)', borderBottom: '1px solid var(--line)' }}>
-                  <th style={{ padding: '12px 16px', textAlign: 'right' }}>الشركة (اضغط للتفاصيل)</th>
-                  <th style={{ padding: '12px 14px', textAlign: 'center' }}>نوع المعاملة</th>
-                  <th style={{ padding: '12px 14px', textAlign: 'center' }}>المدير المفوض</th>
-                  <th style={{ padding: '12px 14px', textAlign: 'center' }}>تاريخ البدء بالتكليف</th>
-                  <th style={{ padding: '12px 14px', textAlign: 'right' }}>تفاصيل / النواقص</th>
-                  <th style={{ padding: '12px 14px', textAlign: 'center' }}>الحالة</th>
-                  <th style={{ padding: '12px 14px', textAlign: 'center' }}>الأتعاب</th>
-                  <th style={{ padding: '12px 16px', textAlign: 'left' }}>إجراءات</th>
+                <tr className="border-b border-[var(--border)] bg-[var(--surface-2)]/80 text-xs text-[var(--text-2)] font-bold">
+                  <th className="py-3.5 px-4 text-right min-w-[220px]">الشركة (اضغط للتفاصيل)</th>
+                  <th className="py-3.5 px-3 text-center min-w-[130px]">نوع المعاملة</th>
+                  <th className="py-3.5 px-3 text-center min-w-[130px]">المدير المفوض</th>
+                  <th className="py-3.5 px-3 text-center min-w-[120px]">تاريخ البدء</th>
+                  <th className="py-3.5 px-3 text-right min-w-[220px]">تفاصيل / النواقص</th>
+                  <th className="py-3.5 px-3 text-center min-w-[120px]">الحالة</th>
+                  <th className="py-3.5 px-3 text-center min-w-[110px]">الأتعاب</th>
+                  <th className="py-3.5 px-4 text-left min-w-[150px]">إجراءات</th>
                 </tr>
               </thead>
-              <tbody>
+              <tbody className="divide-y divide-[var(--border-soft)]">
                 {filteredTransactions.map(tx => {
                   const typeMeta = LLC_TYPE_BADGES[tx.type] || { label: tx.type, tagClass: 'tag-gray' }
 
@@ -210,102 +211,76 @@ export default function LLCClient({ transactions = [], companies = [], lawyers =
                     customDetail = `البائع: ${tx.seller_name || '—'} ➔ المشتري: ${tx.buyer_name || '—'}`
                   }
 
+                  const compObj = tx.company_id ? companyMap.get(tx.company_id) : (tx.companies as CompanyWithWorkflow | null)
+                  const activeMgr = compObj?.managers?.find(m => m.active)?.name || compObj?.managers?.[0]?.name || '—'
+
                   return (
                     <tr
                       key={tx.id}
-                      style={{ borderBottom: '1px solid var(--line-soft)', transition: 'background 0.15s' }}
-                      className="hover:bg-[var(--surface-2)]"
+                      className="hover:bg-blue-500/[0.04] dark:hover:bg-blue-500/[0.08] transition-colors duration-200"
                     >
                       {/* Company Name (Clickable to open Details Modal) */}
-                      <td style={{ padding: '14px 16px', fontWeight: 700 }}>
+                      <td className="py-3.5 px-4">
                         <button
                           type="button"
                           onClick={() => openEditModal(tx)}
-                          style={{
-                            background: 'none',
-                            border: 'none',
-                            padding: 0,
-                            cursor: 'pointer',
-                            textAlign: 'right',
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '10px',
-                          }}
-                          className="group"
+                          className="flex items-center gap-3 text-right group w-full bg-transparent border-0 p-0 cursor-pointer"
                           title="اضغط لعرض وتعديل تفاصيل المعاملة"
                         >
-                          <div
-                            style={{
-                              width: '32px',
-                              height: '32px',
-                              borderRadius: '8px',
-                              background: 'var(--accent-soft)',
-                              color: 'var(--accent)',
-                              display: 'grid',
-                              placeItems: 'center',
-                              flexShrink: 0,
-                            }}
-                          >
-                            <span className="material-symbols-outlined text-[18px]">domain</span>
+                          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[var(--accent-soft)] to-blue-500/10 border border-[var(--accent)]/20 text-[var(--accent)] flex items-center justify-center shrink-0 shadow-xs group-hover:scale-105 transition-transform">
+                            <span className="material-symbols-outlined text-[19px]">domain</span>
                           </div>
-                          <span style={{ color: 'var(--text)', fontSize: '13.5px', fontWeight: 800 }} className="group-hover:text-[var(--accent)] transition-colors">
+                          <span className="font-bold text-[13.5px] text-[var(--text)] group-hover:text-[var(--accent)] transition-colors leading-snug">
                             {tx.companies?.name || 'شركة محدودة'}
                           </span>
                         </button>
                       </td>
 
                       {/* Tx Type */}
-                      <td style={{ padding: '14px 14px', textAlign: 'center', verticalAlign: 'middle' }}>
+                      <td className="py-3.5 px-3 text-center align-middle">
                         <span
                           style={{
-                            display: 'inline-flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            padding: '3px 10px',
-                            borderRadius: '6px',
                             background: typeMeta.bg || 'var(--surface-2)',
-                            border: typeMeta.border || '1px solid var(--line-soft)',
+                            border: typeMeta.border || '1px solid var(--border)',
                             color: typeMeta.color || 'var(--text)',
-                            fontSize: '12px',
-                            fontWeight: 700,
-                            whiteSpace: 'nowrap',
                           }}
+                          className="inline-flex items-center justify-center px-3 py-1 rounded-full text-xs font-bold whitespace-nowrap shadow-xs"
                         >
                           {typeMeta.label}
                         </span>
                       </td>
 
                       {/* Manager Name */}
-                      <td style={{ padding: '14px 14px', textAlign: 'center', color: 'var(--text-2)', fontWeight: 600 }}>
-                        {tx.companies?.manager || '—'}
+                      <td className="py-3.5 px-3 text-center align-middle text-xs font-bold text-[var(--text-2)]">
+                        {activeMgr}
                       </td>
 
                       {/* Start Date */}
-                      <td style={{ padding: '14px 14px', textAlign: 'center', fontSize: '12px' }} className="num">
+                      <td className="py-3.5 px-3 text-center align-middle text-xs font-bold text-[var(--text-2)] num">
                         {tx.tx_date ? formatDate(tx.tx_date) : '—'}
                       </td>
 
                       {/* Details & Lacks */}
-                      <td style={{ padding: '14px 14px', textAlign: 'right', maxWidth: '260px' }}>
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                      <td className="py-3.5 px-3 text-right align-middle max-w-[260px]">
+                        <div className="flex flex-col gap-1">
                           {customDetail && (
-                            <span style={{ fontSize: '11.5px', fontWeight: 700, color: 'var(--text)' }}>
+                            <span className="text-xs font-bold text-[var(--text)]">
                               {customDetail}
                             </span>
                           )}
                           {tx.lacks ? (
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--bad)', fontSize: '12px', fontWeight: 600 }}>
-                              <span className="material-symbols-outlined text-[15px] flex-none">warning</span>
+                            <div className="flex items-center gap-1.5 text-rose-600 dark:text-rose-400 text-xs font-bold">
+                              <span className="material-symbols-outlined text-[15px] shrink-0">warning</span>
                               <span className="line-clamp-1" title={tx.lacks}>{tx.lacks}</span>
                             </div>
                           ) : !customDetail ? (
-                            <span style={{ color: 'var(--text-3)', fontSize: '12px' }}>لا توجد نواقص</span>
+                            <span className="text-[var(--text-3)] text-xs">لا توجد نواقص</span>
                           ) : null}
                         </div>
                       </td>
 
                       {/* Status */}
-                      <td style={{ padding: '14px 14px', textAlign: 'center' }}>
+                      <td className="py-3.5 px-3 text-center align-middle">
                         <WorkflowStatus
                           status={tx.status}
                           entityId={tx.id}
@@ -315,18 +290,17 @@ export default function LLCClient({ transactions = [], companies = [], lawyers =
                       </td>
 
                       {/* Fee */}
-                      <td style={{ padding: '14px 14px', textAlign: 'center', fontWeight: 700 }} className="num">
+                      <td className="py-3.5 px-3 text-center align-middle font-bold text-xs num text-[var(--text)]">
                         {tx.fee ? formatMoney(tx.fee) : '—'}
                       </td>
 
                       {/* Actions */}
-                      <td style={{ padding: '14px 16px', textAlign: 'left', whiteSpace: 'nowrap' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <td className="py-3.5 px-4 text-left align-middle whitespace-nowrap">
+                        <div className="flex items-center gap-2">
                           {tx.company_id && (
                             <Link
                               href={`/commercial/companies/${tx.company_id}`}
-                              className="btn btn-primary"
-                              style={{ fontSize: '12px', fontWeight: 700, padding: '4px 10px', display: 'inline-flex', alignItems: 'center', gap: '4px' }}
+                              className="btn btn-primary !py-1 !px-3 !text-xs !font-bold inline-flex items-center gap-1"
                               title="فتح ملف الشركة الشامل"
                             >
                               <span>ملف 360°</span>
@@ -337,8 +311,7 @@ export default function LLCClient({ transactions = [], companies = [], lawyers =
                           <button
                             type="button"
                             onClick={() => handleDelete(tx.id)}
-                            className="btn btn-ghost"
-                            style={{ color: 'var(--bad)', fontSize: '12px', padding: '4px 8px' }}
+                            className="btn btn-ghost !py-1 !px-2 text-rose-600 dark:text-rose-400 hover:bg-rose-500/10"
                             title="حذف المعاملة"
                           >
                             <span className="material-symbols-outlined text-[16px]">delete</span>

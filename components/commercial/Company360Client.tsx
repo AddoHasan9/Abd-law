@@ -627,32 +627,34 @@ export default function Company360Client({
               لا يوجد مساهمون مسجلون تفصيلياً بعد لهذه الشركة.
             </div>
           ) : (
-            <div style={{ overflowX: 'auto' }}>
-              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px' }}>
+            <div className="overflow-x-auto w-full">
+              <table className="w-full border-collapse text-right text-xs">
                 <thead>
-                  <tr style={{ background: 'var(--surface-2)', borderBottom: '1px solid var(--line)' }}>
-                    <th style={{ padding: '8px 12px', textAlign: 'right' }}>اسم المساهم</th>
-                    <th style={{ padding: '8px 12px', textAlign: 'center' }}>صفة الشراكة</th>
-                    <th style={{ padding: '8px 12px', textAlign: 'center' }}>عدد الأسهم (د.ع)</th>
-                    <th style={{ padding: '8px 12px', textAlign: 'center' }}>النسبة المئوية (%)</th>
-                    <th style={{ padding: '8px 12px', textAlign: 'center' }}>الجنسية / الهاتف / الملاحظات</th>
+                  <tr className="border-b border-[var(--border)] bg-[var(--surface-2)]/80 text-xs text-[var(--text-2)] font-bold">
+                    <th className="py-3 px-4 text-right">اسم المساهم</th>
+                    <th className="py-3 px-3 text-center">صفة الشراكة</th>
+                    <th className="py-3 px-3 text-center">عدد الأسهم (د.ع)</th>
+                    <th className="py-3 px-3 text-center">النسبة المئوية (%)</th>
+                    <th className="py-3 px-4 text-center">الجنسية / الهاتف / الملاحظات</th>
                   </tr>
                 </thead>
-                <tbody>
+                <tbody className="divide-y divide-[var(--border-soft)]">
                   {company.shareholders.map((sh, idx) => (
-                    <tr key={sh.id || idx} style={{ borderBottom: '1px solid var(--line-soft)' }}>
-                      <td style={{ padding: '10px 12px', fontWeight: 700 }}>
-                        {sh.name}
-                        {idx === 0 && <span className="tag tag-ok" style={{ fontSize: '10px', marginRight: '8px' }}>المساهم الرئيسي ★</span>}
+                    <tr key={sh.id || idx} className="hover:bg-blue-500/[0.04] dark:hover:bg-blue-500/[0.08] transition-colors">
+                      <td className="py-3 px-4 font-bold text-[13px] text-[var(--text)]">
+                        <div className="flex items-center gap-2">
+                          <span>{sh.name}</span>
+                          {idx === 0 && <span className="tag tag-ok !text-[10px] !py-0.5 !px-2">المساهم الرئيسي ★</span>}
+                        </div>
                       </td>
-                      <td style={{ padding: '10px 12px', textAlign: 'center' }}>{idx === 0 ? 'مؤسس أول' : 'شريك مساهم'}</td>
-                      <td style={{ padding: '10px 12px', textAlign: 'center', fontWeight: 700 }} className="num">
+                      <td className="py-3 px-3 text-center align-middle font-medium text-[var(--text-2)]">{idx === 0 ? 'مؤسس أول' : 'شريك مساهم'}</td>
+                      <td className="py-3 px-3 text-center align-middle font-bold text-emerald-600 dark:text-emerald-400 num">
                         {sh.share_amount ? `${formatNumberWithCommas(sh.share_amount)} د.ع` : '—'}
                       </td>
-                      <td style={{ padding: '10px 12px', textAlign: 'center', fontWeight: 800, color: 'var(--accent)' }} className="num">
+                      <td className="py-3 px-3 text-center align-middle font-extrabold text-[var(--accent)] num">
                         {sh.share_percentage !== undefined && sh.share_percentage !== null ? `${sh.share_percentage}%` : '—'}
                       </td>
-                      <td style={{ padding: '10px 12px', textAlign: 'center', color: 'var(--text-3)' }}>{sh.nationality || sh.notes || '—'}</td>
+                      <td className="py-3 px-4 text-center align-middle text-[var(--text-3)]">{sh.nationality || sh.notes || '—'}</td>
                     </tr>
                   ))}
                 </tbody>

@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback, useMemo } from 'react'
+import Link from 'next/link'
 import { Icon } from '@/components/ui/Icon'
 import { Empty } from '@/components/ui/Empty'
 import {
@@ -322,22 +323,22 @@ export default function IDsClient({ companies = [], initialCompanyId }: Props) {
             />
           </div>
         ) : (
-          <div style={{ overflowX: 'auto' }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px' }}>
+          <div className="overflow-x-auto w-full">
+            <table className="w-full border-collapse text-right text-xs">
               <thead>
-                <tr style={{ background: 'var(--surface-2)', borderBottom: '1px solid var(--line)' }}>
-                  <th style={{ padding: '12px 16px', textAlign: 'right' }}>الشركة</th>
-                  <th style={{ padding: '12px 14px', textAlign: 'center' }}>نوع الهوية</th>
-                  <th style={{ padding: '12px 14px', textAlign: 'center' }}>المدير المفوض</th>
-                  <th style={{ padding: '12px 14px', textAlign: 'center' }}>الدرجة</th>
-                  <th style={{ padding: '12px 14px', textAlign: 'center' }}>بدء المعاملة</th>
-                  <th style={{ padding: '12px 14px', textAlign: 'center' }}>رقم الهوية</th>
-                  <th style={{ padding: '12px 14px', textAlign: 'center' }}>الإصدار والانتهاء</th>
-                  <th style={{ padding: '12px 14px', textAlign: 'center' }}>الحالة</th>
-                  <th style={{ padding: '12px 16px', textAlign: 'left' }}>إجراءات</th>
+                <tr className="border-b border-[var(--border)] bg-[var(--surface-2)]/80 text-xs text-[var(--text-2)] font-bold">
+                  <th className="py-3.5 px-4 text-right min-w-[220px]">الشركة</th>
+                  <th className="py-3.5 px-3 text-center min-w-[130px]">نوع الهوية</th>
+                  <th className="py-3.5 px-3 text-center min-w-[130px]">المدير المفوض</th>
+                  <th className="py-3.5 px-3 text-center min-w-[100px]">الدرجة</th>
+                  <th className="py-3.5 px-3 text-center min-w-[110px]">بدء المعاملة</th>
+                  <th className="py-3.5 px-3 text-center min-w-[120px]">رقم الهوية</th>
+                  <th className="py-3.5 px-3 text-center min-w-[140px]">الإصدار والانتهاء</th>
+                  <th className="py-3.5 px-3 text-center min-w-[120px]">الحالة</th>
+                  <th className="py-3.5 px-4 text-left min-w-[150px]">إجراءات</th>
                 </tr>
               </thead>
-              <tbody>
+              <tbody className="divide-y divide-[var(--border-soft)]">
                 {filteredRecords.map(r => {
                   const typeMeta = ID_TYPE_CONFIG[r.id_type] || { label: r.id_type, tagClass: 'tag-gray', color: '#64748B' }
                   const isDone = r.status === 'done' || Boolean(r.id_number || r.issue_date)
@@ -348,128 +349,111 @@ export default function IDsClient({ companies = [], initialCompanyId }: Props) {
                   return (
                     <tr
                       key={r.id}
-                      style={{
-                        borderBottom: '1px solid var(--line-soft)',
-                        background: !isDone ? 'rgba(245, 158, 11, 0.02)' : 'transparent',
-                        transition: 'background 0.15s',
-                      }}
-                      className="hover:bg-[var(--surface-2)]"
+                      className="hover:bg-blue-500/[0.04] dark:hover:bg-blue-500/[0.08] transition-colors duration-200"
                     >
                       {/* Company Name */}
-                      <td style={{ padding: '14px 16px', fontWeight: 700 }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                          <div
-                            style={{
-                              width: '32px',
-                              height: '32px',
-                              borderRadius: '8px',
-                              background: 'var(--accent-soft)',
-                              color: 'var(--accent)',
-                              display: 'grid',
-                              placeItems: 'center',
-                              flexShrink: 0,
-                            }}
-                          >
-                            <span className="material-symbols-outlined text-[18px]">domain</span>
+                      <td className="py-3.5 px-4">
+                        <div className="flex items-center gap-3">
+                          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[var(--accent-soft)] to-blue-500/10 border border-[var(--accent)]/20 text-[var(--accent)] flex items-center justify-center shrink-0 shadow-xs">
+                            <span className="material-symbols-outlined text-[19px]">domain</span>
                           </div>
-                          <span style={{ color: 'var(--text)', fontWeight: 800, fontSize: '13.5px' }}>
+                          <span className="font-bold text-[13.5px] text-[var(--text)] leading-snug">
                             {r.company_name || 'شركة غير معرفة'}
                           </span>
                         </div>
                       </td>
 
                       {/* ID Type */}
-                      <td style={{ padding: '14px', textAlign: 'center' }}>
-                        <span className="badge-type">
+                      <td className="py-3.5 px-3 text-center align-middle">
+                        <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-blue-500/10 text-blue-700 dark:text-blue-300 border border-blue-500/20">
                           {typeMeta.label}
                         </span>
                       </td>
 
                       {/* Manager */}
-                      <td style={{ padding: '14px', textAlign: 'center', color: 'var(--text-2)', fontWeight: 600 }}>
+                      <td className="py-3.5 px-3 text-center align-middle text-xs font-bold text-[var(--text-2)]">
                         {r.manager_name || '—'}
                       </td>
 
                       {/* Chamber Grade */}
-                      <td style={{ padding: '14px', textAlign: 'center' }}>
+                      <td className="py-3.5 px-3 text-center align-middle">
                         {r.id_type === 'chamber_id' && r.grade ? (
-                          <span style={{ fontWeight: 800, color: 'var(--accent)', fontSize: '12px' }}>درجة {r.grade}</span>
+                          <span className="font-extrabold text-[var(--accent)] text-xs bg-[var(--accent-soft)] px-2.5 py-0.5 rounded-full border border-[var(--accent)]/20">درجة {r.grade}</span>
                         ) : (
-                          <span style={{ color: 'var(--text-3)' }}>—</span>
+                          <span className="text-[var(--text-3)]">—</span>
                         )}
                       </td>
 
                       {/* Start Date */}
-                      <td style={{ padding: '14px', textAlign: 'center', color: 'var(--text-3)', fontSize: '12px' }}>
+                      <td className="py-3.5 px-3 text-center align-middle text-xs font-semibold text-[var(--text-2)] num">
                         {r.tx_start_date || r.created_at.slice(0, 10)}
                       </td>
 
                       {/* ID Number */}
-                      <td style={{ padding: '14px', textAlign: 'center' }}>
+                      <td className="py-3.5 px-3 text-center align-middle">
                         {r.id_number ? (
-                          <span className="num" style={{ fontWeight: 800, color: 'var(--text-1)', background: 'var(--surface-2)', padding: '2px 8px', borderRadius: '4px' }}>
+                          <span className="num font-bold text-xs bg-[var(--surface-2)] text-[var(--text)] px-2.5 py-1 rounded-md border border-[var(--border)]">
                             {r.id_number}
                           </span>
                         ) : (
-                          <span style={{ color: 'var(--text-3)', fontSize: '11.5px' }}>قيد الإجراء</span>
+                          <span className="text-[var(--text-3)] text-xs font-medium">قيد الإجراء</span>
                         )}
                       </td>
 
                       {/* Issue & Expiry Dates */}
-                      <td style={{ padding: '14px', textAlign: 'center', fontSize: '12px' }}>
+                      <td className="py-3.5 px-3 text-center align-middle text-xs">
                         {r.issue_date || r.expiry_date ? (
-                          <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', alignItems: 'center' }}>
-                            {r.issue_date && <span>إصدار: <strong className="num">{r.issue_date}</strong></span>}
+                          <div className="flex flex-col gap-0.5 items-center">
+                            {r.issue_date && <span>إصدار: <strong className="num text-[var(--text)]">{r.issue_date}</strong></span>}
                             {r.expiry_date && (
-                              <span style={{ color: isExpired ? 'var(--bad)' : isExpiringSoon ? 'var(--warn)' : 'var(--text-2)' }}>
+                              <span className={isExpired ? 'text-rose-600 font-bold' : isExpiringSoon ? 'text-amber-600 font-bold' : 'text-[var(--text-2)]'}>
                                 انتهاء: <strong className="num">{r.expiry_date}</strong>
                               </span>
                             )}
                           </div>
                         ) : (
-                          <span style={{ color: 'var(--text-3)', fontSize: '11.5px' }}>قيد الإجراء</span>
+                          <span className="text-[var(--text-3)] text-xs font-medium">قيد الإجراء</span>
                         )}
                       </td>
 
                       {/* Status Badge */}
-                      <td style={{ padding: '14px', textAlign: 'center' }}>
+                      <td className="py-3.5 px-3 text-center align-middle">
                         {r.status === 'lacks' ? (
-                          <span className="badge-late">
+                          <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-rose-500/10 text-rose-600 border border-rose-500/20">
                             ⚠️ بها نواقص
                           </span>
                         ) : r.status === 'paused' ? (
-                          <span className="badge-waiting">
+                          <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-amber-500/10 text-amber-700 border border-amber-500/20">
                             ⏸️ متوقفة مؤقتاً
                           </span>
                         ) : !isDone || r.status === 'in_progress' ? (
-                          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-extrabold bg-amber-500/15 text-amber-400 border border-amber-500/30 shadow-[0_0_12px_rgba(245,158,11,0.15)]">
-                            <span className="w-3.5 h-3.5 border-2 border-amber-400/30 border-t-amber-400 rounded-full animate-spin flex-none" />
+                          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-500/30">
+                            <span className="w-2.5 h-2.5 border-2 border-amber-500 border-t-transparent rounded-full animate-spin flex-none" />
                             <span>قيد الإصدار</span>
                           </span>
                         ) : isExpired ? (
-                          <span className="badge-late">
-                            ✕ منتهية الصلاحية
+                          <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-rose-500/15 text-rose-600 border border-rose-500/30">
+                            منتهية الصلاحية
                           </span>
                         ) : isExpiringSoon ? (
-                          <span className="badge-waiting">
-                            ⚠️ قريبة الانتهاء ({daysRemaining} يوم)
+                          <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-500/30">
+                            توشك على الانتهاء
                           </span>
                         ) : (
-                          <span className="badge-completed">
-                            ✓ مكتملة وسارية
+                          <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border border-emerald-500/20">
+                            سارية المفعول
                           </span>
                         )}
                       </td>
 
                       {/* Actions */}
-                      <td style={{ padding: '14px 16px', textAlign: 'left', whiteSpace: 'nowrap' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <td className="py-3.5 px-4 text-left align-middle whitespace-nowrap">
+                        <div className="flex items-center gap-1.5">
                           {!isDone && (
                             <button
                               type="button"
                               onClick={() => openEditModal(r)}
-                              className="btn btn-go"
-                              style={{ padding: '4px 10px', fontSize: '12px', fontWeight: 700 }}
+                              className="btn btn-primary !py-1 !px-2.5 !text-xs !font-bold"
                               title="إكمال بيانات الهوية وتاريخ الإصدار والانتهاء"
                             >
                               <span>إكمال الهوية ✓</span>
@@ -478,21 +462,32 @@ export default function IDsClient({ companies = [], initialCompanyId }: Props) {
                           <button
                             type="button"
                             onClick={() => openEditModal(r)}
-                            className="btn btn-ghost"
-                            style={{ padding: '4px 8px', fontSize: '12px', fontWeight: 700 }}
-                            title="تعديل بيانات الهوية"
+                            className="btn btn-ghost !py-1 !px-2.5 !text-xs !font-bold"
+                            title="تعديل تفاصيل الهوية"
                           >
-                            ✎ تعديل
+                            <span className="material-symbols-outlined text-[14px]">edit</span>
+                            <span>تعديل</span>
                           </button>
+
+                          {r.company_id && (
+                            <Link
+                              href={`/commercial/companies/${r.company_id}`}
+                              className="btn btn-primary !py-1 !px-3 !text-xs !font-bold inline-flex items-center gap-1"
+                              title="فتح ملف الشركة الشامل"
+                            >
+                              <span>ملف 360°</span>
+                              <span className="material-symbols-outlined text-[14px]">arrow_left</span>
+                            </Link>
+                          )}
+
                           {canDeleteID && (
                             <button
                               type="button"
                               onClick={() => handleDelete(r.id, r.company_name)}
-                              className="btn btn-ghost"
-                              style={{ padding: '4px 8px', fontSize: '12px', color: 'var(--bad)', fontWeight: 700 }}
+                              className="btn btn-ghost !py-1 !px-2 text-rose-600 dark:text-rose-400 hover:bg-rose-500/10"
                               title="حذف الهوية"
                             >
-                              ✕
+                              <span className="material-symbols-outlined text-[15px]">delete</span>
                             </button>
                           )}
                         </div>
