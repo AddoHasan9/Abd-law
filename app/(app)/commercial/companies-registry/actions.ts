@@ -60,12 +60,9 @@ export async function createEstablishedCompanyAction(payload: AddEstablishedComp
       return { success: false, error: 'اسم الشركة مطلوب ولا يمكن تركه فارغاً' }
     }
 
-    if (!payload.lawyer_id?.trim()) {
-      return { success: false, error: 'المحامي المكلّف / المسؤول مطلوب (إلزامي)' }
-    }
-
     const companyId = generateUUID()
     const name = payload.name.trim()
+    const lawyerId = payload.lawyer_id?.trim() || 'db13125d-3aa1-46ab-9159-8fad18746623'
 
     // منع تكرار الشركات بالاسم نفسه
     const diskCompanies = readJsonFile<CompanyWithWorkflow[]>('companies.json', [])

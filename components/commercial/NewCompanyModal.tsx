@@ -26,6 +26,7 @@ export default function NewCompanyModal({ isOpen, onClose }: Props) {
   // رأس المال والأتعاب
   const [capital, setCapital] = useState('')
   const [fee, setFee] = useState('')
+  const [selectedLawyerId, setSelectedLawyerId] = useState('db13125d-3aa1-46ab-9159-8fad18746623')
   const [lawyers, setLawyers] = useState<Array<{ id: string; name: string }>>([
     { id: 'db13125d-3aa1-46ab-9159-8fad18746623', name: 'منتظر الخزرجي' }
   ])
@@ -36,10 +37,13 @@ export default function NewCompanyModal({ isOpen, onClose }: Props) {
       const res = await getActiveLawyersAction()
       if (res.success && res.data && res.data.length > 0) {
         setLawyers(res.data)
+        if (!selectedLawyerId) {
+          setSelectedLawyerId(res.data[0].id)
+        }
       }
     }
     loadLawyers()
-  }, [])
+  }, [selectedLawyerId])
 
   useModalBodyLock(isOpen)
 
@@ -184,38 +188,37 @@ export default function NewCompanyModal({ isOpen, onClose }: Props) {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
-    setLoading(true)
     setError(null)
 
     const formData = new FormData(e.currentTarget)
-
-    const name = formData.get('name')?.toString() || ''
-    const lawyer_id = formData.get('lawyer_id')?.toString() || ''
-    if (!lawyer_id) {
-      setError('المحامي المكلّف / المسؤول مطلوب (إلزامي)')
-      setLoading(false)
+    const name = formData.get('name')?.toString()?.trim() || ''
+    if (!name) {
+      setError('يرجى إدخال اسم الشركة (إلزامي)')
       return
     }
 
+    setLoading(true)
+
+    const lawyer_id = selectedLawyerId || formData.get('lawyer_id')?.toString() || lawyers[0]?.id || 'db13125d-3aa1-46ab-9159-8fad18746623'
     const kind = shareholders.length > 1 ? 'محدودة' : 'فردية'
     const capitalRaw = capital || formData.get('capital')?.toString() || '0'
     const capitalNum = parseFloat(capitalRaw.replace(/[^0-9.]/g, '')) || 0
-    const manager = formData.get('manager')?.toString() || ''
+    const manager = formData.get('manager')?.toString()?.trim() || ''
     const activity = ''
-    const phone = formData.get('phone')?.toString() || ''
-    const address = formData.get('address')?.toString() || ''
+    const phone = formData.get('phone')?.toString()?.trim() || ''
+    const address = formData.get('address')?.toString()?.trim() || ''
     const has_reservation_letter = hasReservationLetter
     const reservation_letter_governorate = hasReservationLetter ? reservationGovernorate : ''
-    const lacks = formData.get('lacks')?.toString() || ''
+    const lacks = formData.get('lacks')?.toString()?.trim() || ''
     const status = formData.get('status')?.toString() || 'progress'
     const feeRaw = formData.get('fee')?.toString() || '0'
     const feeVal = parseFloat(feeRaw.replace(/[^0-9.]/g, '')) || 0
     const currency = formData.get('currency')?.toString() || 'IQD'
     const tx_date = formData.get('tx_date')?.toString() || new Date().toISOString().slice(0, 10)
     const due_date = formData.get('due_date')?.toString() || ''
-    const notes = formData.get('notes')?.toString() || ''
+    const notes = formData.get('notes')?.toString()?.trim() || ''
 
-    const cleanShareholders = shareholders
+    let cleanShareholders = shareholders
       .filter(s => s.name.trim())
       .map(s => ({
         name: s.name.trim(),
@@ -223,6 +226,16 @@ export default function NewCompanyModal({ isOpen, onClose }: Props) {
         share_amount: parseFloat(s.share_amount.replace(/[^0-9.]/g, '')) || 0,
         share_percentage: parseFloat(s.share_percentage) || 0,
       }))
+
+    // If no shareholders entered but manager is provided, use manager as single shareholder
+    if (cleanShareholders.length === 0 && manager) {
+      cleanShareholders = [{
+        name: manager,
+        phone: phone,
+        share_amount: capitalNum,
+        share_percentage: 100,
+      }]
+    }
 
     const lockedServices = FORMATION_SERVICES.filter(s => s.locked).map(s => s.id)
     const services = Array.from(new Set([...selectedServices, ...lockedServices]))
@@ -444,7 +457,6 @@ export default function NewCompanyModal({ isOpen, onClose }: Props) {
                       value={sh.name}
                       onChange={e => updateShareholder(sh.id, 'name', e.target.value)}
                       placeholder="الاسم الثلاثي للشريك"
-                      required
                     />
                   </div>
 
@@ -633,8 +645,13 @@ export default function NewCompanyModal({ isOpen, onClose }: Props) {
                   <label htmlFor="modal-tx-lawyer" style={{ fontWeight: 700, color: 'var(--accent)' }}>
                     المحامي المكلّف / المسؤول *
                   </label>
-                  <select id="modal-tx-lawyer" name="lawyer_id" className="input" required defaultValue={lawyers[0]?.id || ''}>
-                    <option value="" disabled>اختر المحامي المسؤول...</option>
+                  <select
+                    id="modal-tx-lawyer"
+                    name="lawyer_id"
+                    className="input"
+                    value={selectedLawyerId}
+                    onChange={e => setSelectedLawyerId(e.target.value)}
+                  >
                     {lawyers.map(l => (
                       <option key={l.id} value={l.id}>{l.name}</option>
                     ))}
@@ -691,13 +708,20 @@ export default function NewCompanyModal({ isOpen, onClose }: Props) {
           </div>
 
           {/* Foot */}
-          <div className="modal-foot">
-            <button type="submit" className="btn btn-primary" disabled={loading}>
-              {loading ? 'جاري التأسيس...' : 'تأسيس الشركة وتوليد سير العمل'}
-            </button>
-            <button type="button" onClick={onClose} className="btn btn-ghost" disabled={loading}>
-              إلغاء
-            </button>
+          <div className="modal-foot" style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+            {error && (
+              <div className="login-err" style={{ width: '100%', marginBottom: 0 }}>
+                ⚠️ {error}
+              </div>
+            )}
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '10px', width: '100%' }}>
+              <button type="submit" className="btn btn-primary" disabled={loading} style={{ minWidth: '160px' }}>
+                {loading ? 'جاري التأسيس...' : 'تأسيس الشركة وتوليد سير العمل'}
+              </button>
+              <button type="button" onClick={onClose} className="btn btn-ghost" disabled={loading}>
+                إلغاء
+              </button>
+            </div>
           </div>
         </form>
       </div>

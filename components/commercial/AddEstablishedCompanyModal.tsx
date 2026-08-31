@@ -68,7 +68,7 @@ export default function AddEstablishedCompanyModal({ isOpen, onClose, onSuccess 
   // Authorized Manager (Saved strictly in company_managers)
   const [manager, setManager] = useState('')
   const [managerPhone, setManagerPhone] = useState('')
-  const [lawyerId, setLawyerId] = useState('')
+  const [lawyerId, setLawyerId] = useState('db13125d-3aa1-46ab-9159-8fad18746623')
 
   // Shareholders
   const [shareholders, setShareholders] = useState<ShareholderInput[]>([
@@ -94,10 +94,13 @@ export default function AddEstablishedCompanyModal({ isOpen, onClose, onSuccess 
       const res = await getActiveLawyersAction()
       if (res.success && res.data && res.data.length > 0) {
         setLawyers(res.data)
+        if (!lawyerId) {
+          setLawyerId(res.data[0].id)
+        }
       }
     }
     loadLawyers()
-  }, [])
+  }, [lawyerId])
 
   useModalBodyLock(isOpen)
 
@@ -234,26 +237,20 @@ export default function AddEstablishedCompanyModal({ isOpen, onClose, onSuccess 
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    setError(null)
 
     if (!name.trim()) {
       setError('يرجى إدخال اسم الشركة (إلزامي)')
       return
     }
 
-    if (!manager.trim()) {
-      setError('يرجى إدخال اسم المدير المفوض للشركة (إلزامي)')
-      return
-    }
-
-    if (!lawyerId.trim()) {
-      setError('المحامي المكلّف / المسؤول مطلوب (إلزامي)')
-      return
-    }
-
     setLoading(true)
-    setError(null)
 
-    const cleanShareholders = shareholders
+    const finalLawyerId = lawyerId.trim() || lawyers[0]?.id || 'db13125d-3aa1-46ab-9159-8fad18746623'
+    const finalManager = manager.trim() || 'المدير المفوض'
+    const capitalNum = parseFloat(capital.replace(/[^0-9.]/g, '')) || 0
+
+    let cleanShareholders = shareholders
       .filter(s => s.name.trim())
       .map(s => ({
         name: s.name.trim(),
@@ -261,6 +258,15 @@ export default function AddEstablishedCompanyModal({ isOpen, onClose, onSuccess 
         share_amount: parseFloat(s.share_amount.replace(/[^0-9.]/g, '')) || undefined,
         phone: s.phone.trim() || undefined,
       }))
+
+    if (cleanShareholders.length === 0) {
+      cleanShareholders = [{
+        name: finalManager,
+        phone: phone.trim() || undefined,
+        share_percentage: 100,
+        share_amount: capitalNum || undefined,
+      }]
+    }
 
     const activeIDs = companyIDs
       .filter(id => id.enabled)
@@ -272,14 +278,12 @@ export default function AddEstablishedCompanyModal({ isOpen, onClose, onSuccess 
         grade: id.id_type === 'chamber_id' ? id.grade : undefined,
       }))
 
-    const capitalNum = parseFloat(capital.replace(/[^0-9.]/g, '')) || 0
-
     const res = await createEstablishedCompanyAction({
       name: name.trim(),
-      kind: shareholders.length > 1 ? 'محدودة' : kind,
+      kind: cleanShareholders.length > 1 ? 'محدودة' : kind,
       capital: capitalNum,
-      lawyer_id: lawyerId,
-      manager: manager.trim(),
+      lawyer_id: finalLawyerId,
+      manager: finalManager,
       manager_phone: managerPhone.trim() || undefined,
       cert_no: certNo.trim() || undefined,
       cert_date: certDate || undefined,
@@ -947,13 +951,20 @@ export default function AddEstablishedCompanyModal({ isOpen, onClose, onSuccess 
           </div>
 
           {/* Modal Foot */}
-          <div className="modal-foot">
-            <button type="submit" className="btn btn-primary" disabled={loading}>
-              {loading ? 'جاري الحفظ والتسجيل...' : 'حفظ الشركة في قسم الشركات'}
-            </button>
-            <button type="button" onClick={onClose} className="btn btn-ghost" disabled={loading}>
-              إلغاء
-            </button>
+          <div className="modal-foot" style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+            {error && (
+              <div className="login-err" style={{ width: '100%', marginBottom: 0 }}>
+                ⚠️ {error}
+              </div>
+            )}
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '10px', width: '100%' }}>
+              <button type="submit" className="btn btn-primary" disabled={loading} style={{ minWidth: '160px' }}>
+                {loading ? 'جاري الحفظ والتسجيل...' : 'حفظ الشركة في قسم الشركات'}
+              </button>
+              <button type="button" onClick={onClose} className="btn btn-ghost" disabled={loading}>
+                إلغاء
+              </button>
+            </div>
           </div>
         </form>
       </div>

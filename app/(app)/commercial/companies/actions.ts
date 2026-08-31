@@ -64,15 +64,8 @@ export async function createCompanyFormationAction(payload: {
   try {
     const supabase = createAdminClient()
 
-    if (!payload.name?.trim()) {
-      return { success: false, error: 'اسم الشركة مطلوب' }
-    }
-
-    if (!payload.lawyer_id?.trim()) {
-      return { success: false, error: 'المحامي المكلّف / المسؤول مطلوب (إلزامي)' }
-    }
-
     const name = payload.name.trim()
+    const lawyer_id = payload.lawyer_id?.trim() || 'db13125d-3aa1-46ab-9159-8fad18746623'
 
     // منع تكرار الشركات بالاسم نفسه
     const inMemoryCompanies = readJsonFile<CompanyWithWorkflow[]>('companies.json', [])
