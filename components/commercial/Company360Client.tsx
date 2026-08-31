@@ -1147,6 +1147,7 @@ export default function Company360Client({
             router.refresh()
           }}
           companies={[company]}
+          initialCompany={company}
           initialIdType={idModalType}
           record={editingIDRecord}
         />

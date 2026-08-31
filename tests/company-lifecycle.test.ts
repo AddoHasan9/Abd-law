@@ -13,11 +13,22 @@ describe('End-to-End Company Lifecycle & Auto-Promotion Test', () => {
       const diskCompanies = readJsonFile<CompanyWithWorkflow[]>('companies.json', [])
       const newCo: CompanyWithWorkflow = {
         id: testCompanyId,
+        task_no: null,
+        client_id: null,
         name: `شركة اختبار التأسيس المحدودة ${Date.now()}`,
+        name_en: null,
         kind: 'محدودة المسؤولية',
         capital: 5000000,
-        status: 'forming',
+        manager: null,
+        cert_no: null,
+        cert_date: null,
         deposit_released: false,
+        activity: null,
+        address: null,
+        phone: null,
+        lacks: null,
+        external: false,
+        status: 'forming',
         created_at: new Date().toISOString(),
         workflow_steps: [],
       }

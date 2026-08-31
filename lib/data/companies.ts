@@ -107,6 +107,7 @@ export async function listCompanies(): Promise<CompanyWithWorkflow[]> {
           : diskShareholders.filter(s => s.company_id === c.id)
 
         map.set(c.id, {
+          ...diskCo,
           ...c,
           status,
           deposit_released: isDepositReleased,
@@ -164,15 +165,17 @@ export async function getCompany(id: string): Promise<CompanyWithWorkflow | null
   try {
     const diskCompanies = readJsonFile<CompanyWithWorkflow[]>('companies.json', [])
     const foundDisk = diskCompanies.find(c => c.id === id)
+    const diskManagers = readJsonFile<CompanyManager[]>('company_managers.json', []).filter(m => m.company_id === id)
+    const diskShareholders = readJsonFile<CompanyShareholder[]>('company_shareholders.json', []).filter(s => s.company_id === id)
 
     const supabase = await createClient()
-    const { data, error } = await supabase
+    const { data } = await supabase
       .from('companies')
       .select('*, workflow_steps(*)')
       .eq('id', id)
       .single()
 
-    const rawCompany = data || foundDisk
+    const rawCompany = data ? { ...foundDisk, ...data } : foundDisk
     if (!rawCompany) return null
 
     const isEst = rawCompany.status === 'established' || Boolean(rawCompany.deposit_released) || Boolean(rawCompany.cert_date)
@@ -182,8 +185,15 @@ export async function getCompany(id: string): Promise<CompanyWithWorkflow | null
 
     const workflowSteps = sanitizeFormationWorkflowSteps(rawSteps, id, isEst, rawCompany.created_at)
 
+    const managers: CompanyManager[] = diskManagers.length > 0 ? diskManagers : (rawCompany.managers || [])
+    const activeManager = managers.find((m: CompanyManager) => m.active)?.name || managers[0]?.name || rawCompany.manager || null
+    const shareholders: CompanyShareholder[] = diskShareholders.length > 0 ? diskShareholders : (rawCompany.shareholders || [])
+
     return {
       ...rawCompany,
+      manager: activeManager,
+      managers,
+      shareholders,
       workflow_steps: workflowSteps,
     } as CompanyWithWorkflow
   } catch {

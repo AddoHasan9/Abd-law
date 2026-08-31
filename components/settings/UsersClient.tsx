@@ -11,6 +11,7 @@ import {
   saveUserAction,
   toggleUserActiveAction,
   deleteUserAction,
+  permanentDeleteUserAction,
   resetUserPasswordAction,
   getUserAuditLogsAction,
   type UserAuditRecord,
@@ -228,6 +229,33 @@ export default function UsersClient({ initialProfiles }: Props) {
       setMessage({ type: 'ok', text: `تم تعطيل وأرشفة حساب ${user.name} مع حفظ كافة السجلات` })
       const auditRes = await getUserAuditLogsAction()
       if (auditRes.success && auditRes.data) setAuditLogs(auditRes.data)
+    }
+  }
+
+  const handlePermanentDeleteUser = async (user: ProfileWithStats) => {
+    if (!isSuperAdmin) {
+      alert('عذراً، يقتصر حذف الحسابات نهائياً على Super Admin فقط')
+      return
+    }
+    if (user.role === 'super_admin' || user.id === 'db13125d-3aa1-46ab-9159-8fad18746623') {
+      alert('لا يمكن حذف حساب Super Admin الرئيسي نهائياً')
+      return
+    }
+    if (!confirm(`تحذير نهائي: هل تريد حذف المستخدم "${user.name}" نهائياً من النظام وقاعدة بيانات Supabase Auth؟\nلا يمكن التراجع عن هذا الإجراء.`)) {
+      return
+    }
+
+    setLoading(true)
+    const res = await permanentDeleteUserAction(user.id)
+    setLoading(false)
+
+    if (res.success) {
+      setProfiles(prev => prev.filter(p => p.id !== user.id))
+      setMessage({ type: 'ok', text: `تم حذف المستخدم ${user.name} نهائياً من النظام وقاعدة البيانات` })
+      const auditRes = await getUserAuditLogsAction()
+      if (auditRes.success && auditRes.data) setAuditLogs(auditRes.data)
+    } else {
+      setMessage({ type: 'err', text: res.error || 'فشل حذف المستخدم' })
     }
   }
 
@@ -532,9 +560,7 @@ export default function UsersClient({ initialProfiles }: Props) {
                             <span>إعادة ضبط كلمة المرور</span>
                           </button>
 
-                          <hr className="border-[var(--glass-border)] my-1" />
-
-                          {/* Soft Delete (Super Admin only) */}
+                          {/* Soft Delete / Archive */}
                           {isSuperAdmin && u.role !== 'super_admin' && (
                             <button
                               type="button"
@@ -542,10 +568,25 @@ export default function UsersClient({ initialProfiles }: Props) {
                                 setActiveMenuId(null)
                                 handleSoftDeleteUser(u)
                               }}
-                              className="flex items-center gap-2.5 w-full px-3 py-2 rounded-xl text-xs font-semibold text-red-500 hover:bg-red-500/10 transition-colors"
+                              className="flex items-center gap-2.5 w-full px-3 py-2 rounded-xl text-xs font-semibold text-amber-500 hover:bg-amber-500/10 transition-colors"
                             >
-                              <span className="material-symbols-outlined text-[16px]">delete</span>
-                              <span>أرشفة الحساب ناعماً</span>
+                              <span className="material-symbols-outlined text-[16px]">archive</span>
+                              <span>أرشفة وتعطيل الحساب</span>
+                            </button>
+                          )}
+
+                          {/* Permanent Delete */}
+                          {isSuperAdmin && u.role !== 'super_admin' && u.id !== 'db13125d-3aa1-46ab-9159-8fad18746623' && (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setActiveMenuId(null)
+                                handlePermanentDeleteUser(u)
+                              }}
+                              className="flex items-center gap-2.5 w-full px-3 py-2 rounded-xl text-xs font-semibold text-rose-500 hover:bg-rose-500/10 transition-colors"
+                            >
+                              <span className="material-symbols-outlined text-[16px]">delete_forever</span>
+                              <span>حذف المستخدم نهائياً</span>
                             </button>
                           )}
                         </div>

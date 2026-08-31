@@ -11,6 +11,7 @@ export default function LoginForm() {
   const [rememberMe, setRememberMe] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
+  const [isRedirecting, setIsRedirecting] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
 
   async function handleLogin(e: React.FormEvent) {
@@ -28,7 +29,7 @@ export default function LoginForm() {
 
     setLoading(true)
     const supabase = createClient()
-    const { error } = await supabase.auth.signInWithPassword({
+    const { error, data } = await supabase.auth.signInWithPassword({
       email: email.trim(),
       password,
     })
@@ -46,12 +47,62 @@ export default function LoginForm() {
       return
     }
 
+    // Immediate visual feedback to prevent perceived freeze
+    setIsRedirecting(true)
+
+    // Log login activity in background
+    try {
+      if (data?.user) {
+        fetch('/api/audit', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            userId: data.user.id,
+            action: 'login',
+            details: `تسجيل دخول ناجح للمستخدم ${data.user.email}`,
+          }),
+        }).catch(() => {})
+      }
+    } catch {}
+
     window.location.href = '/dashboard'
+  }
+
+  // Full-screen executive loading transition overlay
+  if (isRedirecting) {
+    return (
+      <div className="flex flex-col items-center justify-center h-full w-full max-w-[420px] mx-auto py-12 text-center animate-fade-in text-right" dir="rtl">
+        <div className="relative w-20 h-20 rounded-2xl bg-white/[0.08] border border-amber-500/40 p-2.5 flex items-center justify-center shadow-2xl shadow-amber-500/20 mb-6 animate-pulse">
+          <Image
+            src="/logo.png"
+            alt="شعار المكتب"
+            width={64}
+            height={64}
+            className="object-contain w-full h-full"
+            priority
+          />
+        </div>
+
+        <div className="flex flex-col gap-2 items-center">
+          <div className="flex items-center gap-2 text-emerald-400 font-extrabold text-base">
+            <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping" />
+            <span>تم التحقق من الحساب بنجاح</span>
+          </div>
+          <p className="text-xs text-slate-400 max-w-xs leading-relaxed mt-1">
+            جارٍ تهيئة الجلسة وتحميل بيانات لوحة التحكم والمعاملات…
+          </p>
+        </div>
+
+        <div className="w-48 h-1.5 bg-white/10 rounded-full overflow-hidden mt-6">
+          <div className="h-full bg-gradient-to-r from-amber-400 to-amber-500 rounded-full animate-progress" />
+        </div>
+      </div>
+    )
   }
 
   return (
     <div className="flex flex-col justify-center h-full w-full max-w-[420px] mx-auto py-1 sm:py-2">
-      {/* Mobile Top Brand Header (Compact & Clean on Mobile Screens) */}
+      {/* Mobile Top Brand Header */}
       <div className="lg:hidden flex items-center gap-3 mb-5 pb-3.5 border-b border-white/10 text-right">
         <div className="w-12 h-12 rounded-xl bg-white/[0.06] border border-amber-500/30 p-1.5 flex items-center justify-center shadow-md shadow-amber-500/10 shrink-0">
           <Image

@@ -204,22 +204,39 @@ export async function createCompanyIDAction(payload: {
       targetCompanyId = generateUUID()
     }
 
-    // --- CHECK DUPLICATION ---
-    // If the same company already has an in-progress transaction for this ID type, reject with warning!
+    // --- CHECK DUPLICATION (DB + Disk) ---
+    // If the same company already has an active or in-progress record for this ID type, prevent accidental duplicate
     const diskIDs = readJsonFile<CompanyIDRecord[]>('company_ids.json', [])
     const existingDuplicate = diskIDs.find(
-      x => x.company_id === targetCompanyId &&
-        x.id_type === payload.id_type &&
-        (x.status === 'in_progress' || (!x.id_number && !x.issue_date))
+      x => x.company_id === targetCompanyId && x.id_type === payload.id_type
     )
 
     if (existingDuplicate) {
       const typeLabel = ID_TYPE_LABELS[payload.id_type] || payload.id_type
+      const statusLabel = existingDuplicate.status === 'done' ? 'صادرة وفعالة' : 'قيد الإجراء'
       return {
         success: false,
-        error: `توجد معاملة إصدار (${typeLabel}) قيد الإجراء مسبقاً لهذه الشركة بتاريخ ${existingDuplicate.tx_start_date || existingDuplicate.created_at.slice(0, 10)}. يمكنك إكمالها مباشرة من الجدول.`,
+        error: `يوجد سجل (${typeLabel}) مسجل مسبقاً لهذه الشركة (الحالة: ${statusLabel}). يرجى تعديل أو تجديد السجل القائم بدلاً من إنشاء هوية مكررة.`,
       }
     }
+
+    // Check in Supabase as well
+    try {
+      const { data: dbExisting } = await supabase
+        .from('company_ids')
+        .select('id, id_type, status')
+        .eq('company_id', targetCompanyId)
+        .eq('id_type', payload.id_type)
+        .maybeSingle()
+
+      if (dbExisting) {
+        const typeLabel = ID_TYPE_LABELS[payload.id_type] || payload.id_type
+        return {
+          success: false,
+          error: `يوجد سجل (${typeLabel}) مسجل مسبقاً في قاعدة البيانات لهذه الشركة. يرجى تعديل السجل الحالي.`,
+        }
+      }
+    } catch {}
 
     const recordId = generateUUID()
     const idNumber = payload.id_number?.trim() || null

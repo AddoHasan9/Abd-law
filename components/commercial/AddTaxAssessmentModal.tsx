@@ -5,6 +5,7 @@ import { createPortal } from 'react-dom'
 import { useModalBodyLock } from '@/lib/hooks/useModalBodyLock'
 import { formatNumberWithCommas } from '@/lib/constants'
 import { createTaxAssessmentAction, updateTaxAssessmentAction } from '@/app/(app)/commercial/tax-assessment/actions'
+import { getActiveLawyersAction } from '@/app/(app)/settings/users/actions'
 import type { Company, TaxAssessment } from '@/types/database'
 
 interface Props {
@@ -26,7 +27,7 @@ export default function AddTaxAssessmentModal({
   isOpen,
   onClose,
   companies = [],
-  lawyers = [],
+  lawyers: initialLawyers = [],
   initialCompanyId,
   editingAssessment,
   onSuccess,
@@ -34,6 +35,20 @@ export default function AddTaxAssessmentModal({
   const [mounted, setMounted] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [lawyers, setLawyers] = useState<Array<{ id: string; name: string }>>(
+    initialLawyers.length > 0 ? initialLawyers : [{ id: 'db13125d-3aa1-46ab-9159-8fad18746623', name: 'منتظر الخزرجي' }]
+  )
+
+  useEffect(() => {
+    setMounted(true)
+    async function load() {
+      const res = await getActiveLawyersAction()
+      if (res.success && res.data && res.data.length > 0) {
+        setLawyers(res.data)
+      }
+    }
+    load()
+  }, [])
 
   const currentYear = new Date().getFullYear()
   const defaultYear = currentYear - 1 // 2025

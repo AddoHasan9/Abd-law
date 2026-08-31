@@ -5,6 +5,7 @@ import { createPortal } from 'react-dom'
 import { Icon } from '@/components/ui/Icon'
 import { TX_TYPES, formatNumberWithCommas } from '@/lib/constants'
 import { createTransactionAction } from '@/app/(app)/commercial/actions'
+import { getActiveLawyersAction } from '@/app/(app)/settings/users/actions'
 import type { Company } from '@/types/database'
 import { useModalBodyLock } from '@/lib/hooks/useModalBodyLock'
 
@@ -15,15 +16,24 @@ interface Props {
   lawyers?: Array<{ id: string; name: string }>
 }
 
-const DEFAULT_LAWYERS = [
-  { id: 'db13125d-3aa1-46ab-9159-8fad18746623', name: 'منتظر الخزرجي' },
-]
-
-export default function AddTransactionModal({ isOpen, onClose, companies, lawyers = DEFAULT_LAWYERS }: Props) {
+export default function AddTransactionModal({ isOpen, onClose, companies, lawyers: initialLawyers }: Props) {
   const [mounted, setMounted] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [amount, setAmount] = useState('')
+  const [activeLawyers, setActiveLawyers] = useState<Array<{ id: string; name: string }>>(
+    initialLawyers && initialLawyers.length > 0 ? initialLawyers : [{ id: 'db13125d-3aa1-46ab-9159-8fad18746623', name: 'منتظر الخزرجي' }]
+  )
+
+  useEffect(() => {
+    async function load() {
+      const res = await getActiveLawyersAction()
+      if (res.success && res.data && res.data.length > 0) {
+        setActiveLawyers(res.data)
+      }
+    }
+    load()
+  }, [])
 
   // Dual Company Selection State
   const [selectedCompany, setSelectedCompany] = useState<Company | null>(null)
@@ -264,9 +274,9 @@ export default function AddTransactionModal({ isOpen, onClose, companies, lawyer
                 <label htmlFor="tx-lawyer" style={{ fontWeight: 700, color: 'var(--accent)' }}>
                   المحامي المكلّف / المسؤول *
                 </label>
-                <select id="tx-lawyer" name="lawyer_id" className="input" required defaultValue="">
+                <select id="tx-lawyer" name="lawyer_id" className="input" required defaultValue={activeLawyers[0]?.id || ''}>
                   <option value="" disabled>اختر المحامي المسؤول...</option>
-                  {lawyers.map(l => (
+                  {activeLawyers.map(l => (
                     <option key={l.id} value={l.id}>
                       {l.name}
                     </option>

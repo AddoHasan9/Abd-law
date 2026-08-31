@@ -6,6 +6,7 @@ import { Icon } from '@/components/ui/Icon'
 import { formatNumberWithCommas } from '@/lib/constants'
 import { useModalBodyLock } from '@/lib/hooks/useModalBodyLock'
 import { createLLCTransactionAction } from '@/app/(app)/commercial/llc/actions'
+import { getActiveLawyersAction } from '@/app/(app)/settings/users/actions'
 import type { Company } from '@/types/database'
 
 interface Props {
@@ -32,12 +33,26 @@ export default function AddLLCTransactionModal({
   onClose,
   companies = [],
   initialType = 'capital-up',
-  lawyers = [],
+  lawyers: initialLawyers = [],
   onSuccess,
 }: Props) {
   const [mounted, setMounted] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [lawyers, setLawyers] = useState<Array<{ id: string; name: string }>>(
+    initialLawyers.length > 0 ? initialLawyers : [{ id: 'db13125d-3aa1-46ab-9159-8fad18746623', name: 'منتظر الخزرجي' }]
+  )
+
+  useEffect(() => {
+    setMounted(true)
+    async function load() {
+      const res = await getActiveLawyersAction()
+      if (res.success && res.data && res.data.length > 0) {
+        setLawyers(res.data)
+      }
+    }
+    load()
+  }, [])
 
   const [txType, setTxType] = useState(initialType)
 

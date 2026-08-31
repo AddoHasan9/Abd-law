@@ -6,10 +6,11 @@ import { useRouter } from 'next/navigation'
 import {
   WORKFLOW_STATUS_LIST,
   getWorkflowStatusConfig,
-  WorkflowStatusKey,
-  WorkflowStatusConfig,
+  type WorkflowStatusKey,
+  type WorkflowStatusConfig,
 } from '@/lib/workflow-status'
 import { updateWorkflowStatusAction } from '@/app/(app)/commercial/workflow-actions'
+import { cn } from '@/lib/utils'
 
 export interface WorkflowStatusProps {
   status: string | null | undefined
@@ -106,6 +107,7 @@ export function WorkflowStatus({
       window.addEventListener('scroll', handleScrollOrResize, true)
       window.addEventListener('resize', handleScrollOrResize)
     }
+
     return () => {
       document.removeEventListener('mousedown', handleClickOutside)
       window.removeEventListener('scroll', handleScrollOrResize, true)
@@ -113,140 +115,170 @@ export function WorkflowStatus({
     }
   }, [isOpen])
 
-  const toggleDropdown = () => {
+  // Toast Auto-Dismiss
+  useEffect(() => {
+    if (toastMessage) {
+      const timer = setTimeout(() => setToastMessage(null), 3500)
+      return () => clearTimeout(timer)
+    }
+  }, [toastMessage])
+
+  function calculateDropdownPosition() {
+    if (!buttonRef.current) return
+    const rect = buttonRef.current.getBoundingClientRect()
+    const viewportHeight = window.innerHeight
+    const viewportWidth = window.innerWidth
+    const estimatedMenuHeight = 340
+
+    const spaceBelow = viewportHeight - rect.bottom
+    const openUpward = spaceBelow < estimatedMenuHeight && rect.top > estimatedMenuHeight
+
+    const rightFromViewport = viewportWidth - rect.right
+
+    if (openUpward) {
+      setDropdownCoords({
+        bottom: viewportHeight - rect.top + 6,
+        right: Math.max(12, rightFromViewport),
+        openUpward: true,
+      })
+    } else {
+      setDropdownCoords({
+        top: rect.bottom + 6,
+        right: Math.max(12, rightFromViewport),
+        openUpward: false,
+      })
+    }
+  }
+
+  function toggleDropdown(e: React.MouseEvent) {
+    e.stopPropagation()
     if (readOnly || isUpdating) return
     if (!isOpen) {
-      if (buttonRef.current) {
-        const rect = buttonRef.current.getBoundingClientRect()
-        const spaceBelow = window.innerHeight - rect.bottom
-        const openUpward = spaceBelow < 310 && rect.top > 310
-
-        setDropdownCoords({
-          top: openUpward ? undefined : rect.bottom + 6,
-          bottom: openUpward ? window.innerHeight - rect.top + 6 : undefined,
-          right: window.innerWidth - rect.right,
-          openUpward,
-        })
-      }
+      calculateDropdownPosition()
       setIsOpen(true)
     } else {
       setIsOpen(false)
     }
   }
 
-  const triggerToast = (msg: string) => {
-    setToastMessage(msg)
-    setTimeout(() => {
-      setToastMessage(null)
-    }, 3500)
-  }
-
-  const performStatusUpdate = async (
+  async function performStatusUpdate(
     targetKey: WorkflowStatusKey,
-    reasonsData?: string[] | string | null,
-    notesData?: string | null
-  ) => {
+    reasonOrReasons?: string[] | string | null,
+    notes?: string | null
+  ) {
     setIsUpdating(true)
-    const fromStatus = currentStatusKey
-    const newConfig = getWorkflowStatusConfig(targetKey)
+    const oldKey = currentStatusKey
+    const targetConfig = getWorkflowStatusConfig(targetKey)
 
-    // Optimistic local update
+    // Optimistic UI update
     setCurrentStatusKey(targetKey)
+    setIsOpen(false)
+    setPendingTargetKey(null)
+
     if (onStatusChange) {
-      onStatusChange(targetKey, newConfig)
+      onStatusChange(targetKey, targetConfig)
     }
 
-    if (entityId) {
-      const res = await updateWorkflowStatusAction({
+    if (!entityId) {
+      setIsUpdating(false)
+      setToastMessage(`تم تغيير الحالة إلى: ${targetConfig.label}`)
+      return
+    }
+
+    try {
+      const result = await updateWorkflowStatusAction({
         entityId,
         entityType,
         companyId,
-        fromStatus,
+        fromStatus: oldKey,
         toStatus: targetKey,
         actorName,
-        reasons: reasonsData,
-        notes: notesData,
+        notes: notes || null,
+        reasons: reasonOrReasons || null,
       })
 
-      if (!res.success) {
-        // Rollback
-        setCurrentStatusKey(fromStatus)
-        triggerToast('تعذّر تحديث حالة سير العمل')
-      } else {
-        triggerToast('تم تحديث حالة سير العمل بنجاح')
+      if (result.success) {
+        setToastMessage(`تم التحديث بنجاح إلى: ${targetConfig.label}`)
         router.refresh()
+      } else {
+        // Rollback on failure
+        setCurrentStatusKey(oldKey)
+        alert(result.error || 'فشل تحديث الحالة في الخادم')
       }
-    } else {
-      triggerToast('تم تحديث حالة سير العمل بنجاح')
+    } catch {
+      setCurrentStatusKey(oldKey)
+      alert('حدث خطأ أثناء الاتصال بالخادم')
+    } finally {
+      setIsUpdating(false)
+    }
+  }
+
+  function handleOptionClick(targetKey: WorkflowStatusKey) {
+    if (targetKey === currentStatusKey) {
+      setIsOpen(false)
+      return
     }
 
-    setIsUpdating(false)
-    setPendingTargetKey(null)
-    resetModalFields()
-  }
-
-  const resetModalFields = () => {
-    setModalNotes('')
-    setModalReasonInput('')
-    setSelectedMultiReasons([])
-    setSelectedGovReason('')
-    setModalError(null)
-  }
-
-  const handleOptionClick = (targetKey: WorkflowStatusKey) => {
-    setIsOpen(false)
-    if (targetKey === currentStatusKey) return
-
-    // Check if target status requires a modal per Business Rules
+    // Modal requirement check
     if (
-      targetKey === 'completed' ||
       targetKey === 'closed' ||
       targetKey === 'cancelled' ||
       targetKey === 'waiting_client' ||
-      targetKey === 'waiting_government'
+      targetKey === 'waiting_government' ||
+      targetKey === 'completed'
     ) {
-      resetModalFields()
+      setIsOpen(false)
+      setModalNotes('')
+      setModalReasonInput('')
+      setSelectedMultiReasons([])
+      setSelectedGovReason('')
+      setModalError(null)
       setPendingTargetKey(targetKey)
-    } else {
-      performStatusUpdate(targetKey)
+      return
     }
+
+    // Direct transition for others (new, in_progress, under_review)
+    performStatusUpdate(targetKey)
   }
 
-  const handleModalSubmit = () => {
+  function handleModalSubmit() {
     if (!pendingTargetKey) return
     setModalError(null)
 
     if (pendingTargetKey === 'closed') {
       if (!modalReasonInput.trim()) {
-        setModalError('يرجى إدخال سبب الإغلاق الإلزامي.')
+        setModalError('يرجى كتابة سبب إغلاق المعاملة.')
         return
       }
       performStatusUpdate(pendingTargetKey, modalReasonInput.trim(), modalNotes.trim() || null)
     } else if (pendingTargetKey === 'cancelled') {
       if (!modalReasonInput.trim()) {
-        setModalError('يرجى إدخال سبب الإلغاء الإلزامي.')
+        setModalError('يرجى كتابة سبب الإلغاء.')
         return
       }
       performStatusUpdate(pendingTargetKey, modalReasonInput.trim(), modalNotes.trim() || null)
     } else if (pendingTargetKey === 'waiting_client') {
-      const finalReasons = [...selectedMultiReasons]
-      if (finalReasons.includes('أخرى') && modalReasonInput.trim()) {
-        const idx = finalReasons.indexOf('أخرى')
-        finalReasons[idx] = `أخرى: ${modalReasonInput.trim()}`
-      }
-      if (finalReasons.length === 0 && !modalReasonInput.trim()) {
-        setModalError('يرجى اختيار سبب واحد على الأقل للانتظار.')
+      if (selectedMultiReasons.length === 0) {
+        setModalError('يرجى تحديد سبب واحد على الأقل من أسباب الانتظار.')
         return
+      }
+      const finalReasons = [...selectedMultiReasons]
+      if (selectedMultiReasons.includes('أخرى') && modalReasonInput.trim()) {
+        finalReasons.push(`أخرى: ${modalReasonInput.trim()}`)
       }
       performStatusUpdate(pendingTargetKey, finalReasons, modalNotes.trim() || null)
     } else if (pendingTargetKey === 'waiting_government') {
-      let finalReason = selectedGovReason
-      if (finalReason === 'جهة أخرى' && modalReasonInput.trim()) {
-        finalReason = `جهة أخرى: ${modalReasonInput.trim()}`
-      }
-      if (!finalReason) {
-        setModalError('يرجى تحديد الجهة أو إدخال السبب.')
+      if (!selectedGovReason) {
+        setModalError('يرجى تحديد الجهة الحكومية.')
         return
+      }
+      let finalReason = selectedGovReason
+      if (selectedGovReason === 'جهة أخرى') {
+        if (!modalReasonInput.trim()) {
+          setModalError('يرجى تحديد اسم الجهة الأخرى.')
+          return
+        }
+        finalReason = `جهة أخرى: ${modalReasonInput.trim()}`
       }
       performStatusUpdate(pendingTargetKey, finalReason, modalNotes.trim() || null)
     } else if (pendingTargetKey === 'completed') {
@@ -256,46 +288,31 @@ export function WorkflowStatus({
 
   const displayConfig = getWorkflowStatusConfig(currentStatusKey)
 
-  // Size variations
-  const sizeStyles: Record<'sm' | 'md' | 'lg', React.CSSProperties> = {
-    sm: { padding: '3px 10px', fontSize: '11.5px', height: '26px' },
-    md: { padding: '5px 14px', fontSize: '12.5px', height: '32px' },
-    lg: { padding: '7px 18px', fontSize: '13.5px', height: '38px' },
+  const sizeClasses = {
+    sm: 'h-6 px-2.5 text-[11.5px]',
+    md: 'h-8 px-3.5 text-xs',
+    lg: 'h-9 px-4 text-[13.5px]',
   }
 
   return (
-    <div
-      style={{
-        position: 'relative',
-        display: 'inline-block',
-        ...style,
-      }}
-      className={`workflow-status-container ${className}`}
-    >
-      {/* Status Badge Button (NO ICONS) */}
+    <div className={cn('relative inline-block text-right', className)} style={style} dir="rtl">
+      {/* Status Badge Trigger */}
       <button
         ref={buttonRef}
         type="button"
         disabled={readOnly || isUpdating}
         onClick={toggleDropdown}
+        className={cn(
+          'inline-flex items-center justify-center font-bold rounded-full whitespace-nowrap transition-all duration-150 select-none shadow-xs border',
+          sizeClasses[size],
+          readOnly ? 'cursor-default' : 'cursor-pointer hover:opacity-90 active:scale-[0.98]',
+          isUpdating && 'opacity-60 pointer-events-none'
+        )}
         style={{
-          display: 'inline-flex',
-          alignItems: 'center',
-          justifyContent: 'center',
           backgroundColor: displayConfig.bg,
-          border: `1.5px solid ${displayConfig.border}`,
+          borderColor: displayConfig.border,
           color: displayConfig.text,
-          fontWeight: 600,
-          borderRadius: '9999px',
-          cursor: readOnly ? 'default' : 'pointer',
-          outline: 'none',
-          whiteSpace: 'nowrap',
-          transition: 'all 150ms ease-in-out',
-          opacity: isUpdating ? 0.7 : 1,
-          boxShadow: '0 1px 2px rgba(0,0,0,0.04)',
-          ...sizeStyles[size],
         }}
-        className="workflow-status-badge"
       >
         <span>{displayConfig.label}</span>
       </button>
@@ -304,151 +321,81 @@ export function WorkflowStatus({
       {isOpen && dropdownCoords && typeof document !== 'undefined' && createPortal(
         <div
           ref={menuRef}
+          className="fixed z-[999999] min-w-[220px] bg-surface border border-border-glass rounded-xl shadow-2xl p-1.5 animate-scale-in text-right divide-y divide-border-soft"
           style={{
-            position: 'fixed',
             top: dropdownCoords.top !== undefined ? `${dropdownCoords.top}px` : 'auto',
             bottom: dropdownCoords.bottom !== undefined ? `${dropdownCoords.bottom}px` : 'auto',
             right: `${dropdownCoords.right}px`,
-            zIndex: 999999,
-            minWidth: '220px',
-            backgroundColor: '#ffffff',
-            border: '1px solid #e5e7eb',
-            borderRadius: '12px',
-            boxShadow: '0 12px 30px -4px rgba(0, 0, 0, 0.18), 0 4px 12px rgba(0, 0, 0, 0.08)',
-            padding: '6px',
-            animation: 'wfFadeScale 180ms cubic-bezier(0.16, 1, 0.3, 1) forwards',
           }}
-          className="workflow-status-dropdown"
           onClick={e => e.stopPropagation()}
+          dir="rtl"
         >
-          <div
-            style={{
-              padding: '6px 10px',
-              fontSize: '11px',
-              fontWeight: 700,
-              color: '#9ca3af',
-              borderBottom: '1px solid #f3f4f6',
-              marginBottom: '4px',
-            }}
-          >
+          <div className="px-2.5 py-1 text-[11px] font-bold text-text-3 select-none">
             حالة سير العمل
           </div>
-          {WORKFLOW_STATUS_LIST.map(cfg => {
-            const isSelected = cfg.key === currentStatusKey
-            return (
-              <div
-                key={cfg.key}
-                onClick={() => handleOptionClick(cfg.key)}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  padding: '8px 12px',
-                  borderRadius: '8px',
-                  cursor: 'pointer',
-                  fontSize: '12.5px',
-                  fontWeight: isSelected ? 700 : 500,
-                  backgroundColor: isSelected ? `${cfg.bg}` : 'transparent',
-                  color: isSelected ? cfg.text : '#374151',
-                  border: isSelected ? `1px solid ${cfg.border}` : '1px solid transparent',
-                  marginBottom: '2px',
-                  transition: 'background-color 150ms ease-in-out',
-                }}
-                onMouseEnter={e => {
-                  if (!isSelected) {
-                    e.currentTarget.style.backgroundColor = '#f9fafb'
+          <div className="pt-1 flex flex-col gap-0.5">
+            {WORKFLOW_STATUS_LIST.map(cfg => {
+              const isSelected = cfg.key === currentStatusKey
+              return (
+                <button
+                  key={cfg.key}
+                  type="button"
+                  onClick={() => handleOptionClick(cfg.key)}
+                  className={cn(
+                    'w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs font-bold transition-colors cursor-pointer text-right',
+                    isSelected
+                      ? 'shadow-xs border'
+                      : 'hover:bg-surface-2 text-text-2 border border-transparent'
+                  )}
+                  style={
+                    isSelected
+                      ? {
+                          backgroundColor: cfg.bg,
+                          color: cfg.text,
+                          borderColor: cfg.border,
+                        }
+                      : undefined
                   }
-                }}
-                onMouseLeave={e => {
-                  if (!isSelected) {
-                    e.currentTarget.style.backgroundColor = 'transparent'
-                  }
-                }}
-              >
-                <span>{cfg.label}</span>
-                {isSelected && (
-                  <span
-                    style={{
-                      fontSize: '11px',
-                      fontWeight: 700,
-                      color: cfg.text,
-                      padding: '1px 6px',
-                      borderRadius: '4px',
-                      backgroundColor: 'rgba(255,255,255,0.7)',
-                    }}
-                  >
-                    محددة
-                  </span>
-                )}
-              </div>
-            )
-          })}
+                >
+                  <span>{cfg.label}</span>
+                  {isSelected && (
+                    <span className="text-[10px] px-1.5 py-0.5 rounded bg-surface/80 text-text font-bold">
+                      محددة
+                    </span>
+                  )}
+                </button>
+              )
+            })}
+          </div>
         </div>,
         document.body
       )}
 
       {/* Success Toast */}
       {toastMessage && (
-        <div
-          style={{
-            position: 'fixed',
-            bottom: '24px',
-            left: '24px',
-            zIndex: 9999,
-            backgroundColor: '#10b981',
-            color: '#ffffff',
-            padding: '10px 18px',
-            borderRadius: '10px',
-            fontWeight: 600,
-            fontSize: '13px',
-            boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.15)',
-            animation: 'wfFadeScale 200ms ease-out forwards',
-          }}
-        >
-          {toastMessage}
+        <div className="fixed bottom-6 left-6 z-[99999] bg-success text-white px-4 py-2.5 rounded-xl font-bold text-xs shadow-lg animate-fade-in flex items-center gap-2">
+          <span className="material-symbols-outlined text-[18px]">check_circle</span>
+          <span>{toastMessage}</span>
         </div>
       )}
 
       {/* Interactive Business Rule Modal */}
       {pendingTargetKey && (
         <div
-          style={{
-            position: 'fixed',
-            inset: 0,
-            zIndex: 99999,
-            backgroundColor: 'rgba(15, 23, 42, 0.55)',
-            backdropFilter: 'blur(3px)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            padding: '16px',
-            animation: 'wfFadeScale 150ms ease-out forwards',
-          }}
+          role="dialog"
+          aria-modal="true"
+          className="fixed inset-0 z-[99999] bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 animate-fade-in text-right"
+          dir="rtl"
         >
-          <div
-            style={{
-              backgroundColor: '#ffffff',
-              borderRadius: '16px',
-              width: '100%',
-              maxWidth: '460px',
-              padding: '24px',
-              boxShadow: '0 20px 25px -5px rgba(0,0,0,0.1), 0 8px 10px -6px rgba(0,0,0,0.1)',
-            }}
-          >
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
-              <h3 style={{ fontSize: '16px', fontWeight: 700, margin: 0, color: '#111827' }}>
+          <div className="bg-surface border border-border-glass rounded-2xl w-full max-w-md p-6 shadow-2xl flex flex-col gap-4 animate-scale-in text-text">
+            <div className="flex items-center justify-between border-b border-border-soft pb-3">
+              <h3 className="text-sm font-bold text-text">
                 تغيير حالة سير العمل: {getWorkflowStatusConfig(pendingTargetKey).label}
               </h3>
               <button
                 type="button"
                 onClick={() => setPendingTargetKey(null)}
-                style={{
-                  border: 'none',
-                  background: 'none',
-                  fontSize: '18px',
-                  color: '#9ca3af',
-                  cursor: 'pointer',
-                }}
+                className="w-7 h-7 rounded-lg flex items-center justify-center text-text-3 hover:text-text hover:bg-surface-2 transition-colors cursor-pointer"
               >
                 ✕
               </button>
@@ -456,78 +403,61 @@ export function WorkflowStatus({
 
             {/* Modal Error Alert */}
             {modalError && (
-              <div
-                style={{
-                  backgroundColor: '#fef2f2',
-                  border: '1px solid #fca5a5',
-                  color: '#dc2626',
-                  padding: '8px 12px',
-                  borderRadius: '8px',
-                  fontSize: '12.5px',
-                  fontWeight: 600,
-                  marginBottom: '14px',
-                }}
-              >
+              <div className="p-3 rounded-xl bg-destructive/10 border border-destructive/30 text-destructive text-xs font-bold animate-shake">
                 {modalError}
               </div>
             )}
 
             {/* 1. Closed: Mandatory Closing Reason */}
             {pendingTargetKey === 'closed' && (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                <label style={{ fontSize: '13px', fontWeight: 600, color: '#374151' }}>
-                  سبب الإغلاق <span style={{ color: '#dc2626' }}>* (إلزامي)</span>
+              <div className="flex flex-col gap-1.5">
+                <label className="text-xs font-semibold text-text-2">
+                  سبب الإغلاق <span className="text-destructive">* (إلزامي)</span>
                 </label>
                 <textarea
                   rows={3}
-                  className="input"
                   placeholder="أدخل سبب إغلاق المعاملة أو الملف..."
                   value={modalReasonInput}
                   onChange={e => setModalReasonInput(e.target.value)}
-                  style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #d1d5db', fontSize: '13px' }}
+                  className="flex w-full rounded-xl bg-surface-2 border border-border p-3 text-text placeholder:text-text-3 text-xs font-medium focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
                 />
               </div>
             )}
 
             {/* 2. Cancelled: Mandatory Cancellation Reason */}
             {pendingTargetKey === 'cancelled' && (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                <label style={{ fontSize: '13px', fontWeight: 600, color: '#374151' }}>
-                  سبب الإلغاء <span style={{ color: '#dc2626' }}>* (إلزامي)</span>
+              <div className="flex flex-col gap-1.5">
+                <label className="text-xs font-semibold text-text-2">
+                  سبب الإلغاء <span className="text-destructive">* (إلزامي)</span>
                 </label>
                 <textarea
                   rows={3}
-                  className="input"
                   placeholder="أدخل سبب إلغاء المعاملة بالتفصيل..."
                   value={modalReasonInput}
                   onChange={e => setModalReasonInput(e.target.value)}
-                  style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #d1d5db', fontSize: '13px' }}
+                  className="flex w-full rounded-xl bg-surface-2 border border-border p-3 text-text placeholder:text-text-3 text-xs font-medium focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
                 />
               </div>
             )}
 
             {/* 3. Waiting for Client: Multi-Select Reasons */}
             {pendingTargetKey === 'waiting_client' && (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                <label style={{ fontSize: '13px', fontWeight: 600, color: '#374151' }}>
+              <div className="flex flex-col gap-2">
+                <label className="text-xs font-semibold text-text-2">
                   أسباب الانتظار من العميل (اختر سبب أو أكثر):
                 </label>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                <div className="flex flex-col gap-1.5">
                   {WAITING_CLIENT_REASONS.map(reason => {
                     const isChecked = selectedMultiReasons.includes(reason)
                     return (
                       <label
                         key={reason}
-                        style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: '8px',
-                          fontSize: '13px',
-                          cursor: 'pointer',
-                          padding: '6px 10px',
-                          borderRadius: '6px',
-                          backgroundColor: isChecked ? '#f3e8ff' : '#f9fafb',
-                        }}
+                        className={cn(
+                          'flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-medium cursor-pointer border transition-colors',
+                          isChecked
+                            ? 'bg-amber-500/10 border-amber-500/30 text-amber-700 dark:text-amber-300 font-bold'
+                            : 'bg-surface-2 border-border-soft text-text-2 hover:bg-surface-3'
+                        )}
                       >
                         <input
                           type="checkbox"
@@ -539,6 +469,7 @@ export function WorkflowStatus({
                               setSelectedMultiReasons(selectedMultiReasons.filter(r => r !== reason))
                             }
                           }}
+                          className="accent-primary"
                         />
                         <span>{reason}</span>
                       </label>
@@ -548,11 +479,10 @@ export function WorkflowStatus({
                 {selectedMultiReasons.includes('أخرى') && (
                   <input
                     type="text"
-                    className="input"
                     placeholder="حدد السبب الآخر..."
                     value={modalReasonInput}
                     onChange={e => setModalReasonInput(e.target.value)}
-                    style={{ width: '100%', padding: '8px 12px', borderRadius: '8px', border: '1px solid #d1d5db', fontSize: '13px' }}
+                    className="flex h-9 w-full rounded-xl bg-surface-2 border border-border px-3 text-xs font-medium text-text placeholder:text-text-3 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 mt-1"
                   />
                 )}
               </div>
@@ -560,32 +490,29 @@ export function WorkflowStatus({
 
             {/* 4. Waiting for Government: Select Reason */}
             {pendingTargetKey === 'waiting_government' && (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                <label style={{ fontSize: '13px', fontWeight: 600, color: '#374151' }}>
+              <div className="flex flex-col gap-2">
+                <label className="text-xs font-semibold text-text-2">
                   الجهة الحكومية المسببة للانتظار:
                 </label>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                <div className="flex flex-col gap-1.5">
                   {WAITING_GOV_REASONS.map(reason => {
                     const isSelected = selectedGovReason === reason
                     return (
                       <label
                         key={reason}
-                        style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: '8px',
-                          fontSize: '13px',
-                          cursor: 'pointer',
-                          padding: '6px 10px',
-                          borderRadius: '6px',
-                          backgroundColor: isSelected ? '#fdf8f6' : '#f9fafb',
-                        }}
+                        className={cn(
+                          'flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-medium cursor-pointer border transition-colors',
+                          isSelected
+                            ? 'bg-orange-500/10 border-orange-500/30 text-orange-700 dark:text-orange-300 font-bold'
+                            : 'bg-surface-2 border-border-soft text-text-2 hover:bg-surface-3'
+                        )}
                       >
                         <input
                           type="radio"
                           name="govReason"
                           checked={isSelected}
                           onChange={() => setSelectedGovReason(reason)}
+                          className="accent-primary"
                         />
                         <span>{reason}</span>
                       </label>
@@ -595,11 +522,10 @@ export function WorkflowStatus({
                 {selectedGovReason === 'جهة أخرى' && (
                   <input
                     type="text"
-                    className="input"
                     placeholder="حدد اسم الجهة الأخرى..."
                     value={modalReasonInput}
                     onChange={e => setModalReasonInput(e.target.value)}
-                    style={{ width: '100%', padding: '8px 12px', borderRadius: '8px', border: '1px solid #d1d5db', fontSize: '13px' }}
+                    className="flex h-9 w-full rounded-xl bg-surface-2 border border-border px-3 text-xs font-medium text-text placeholder:text-text-3 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 mt-1"
                   />
                 )}
               </div>
@@ -607,69 +533,50 @@ export function WorkflowStatus({
 
             {/* 5. Completed: Optional Notes */}
             {pendingTargetKey === 'completed' && (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                <label style={{ fontSize: '13px', fontWeight: 600, color: '#374151' }}>
-                  ملاحظات الإنجاز <span style={{ color: '#6b7280', fontWeight: 400 }}>(اختياري)</span>
+              <div className="flex flex-col gap-1.5">
+                <label className="text-xs font-semibold text-text-2">
+                  ملاحظات الإنجاز <span className="text-text-3 font-normal">(اختياري)</span>
                 </label>
                 <textarea
                   rows={3}
-                  className="input"
                   placeholder="أدخل أي ملاحظات حول إنجاز هذا الملف..."
                   value={modalNotes}
                   onChange={e => setModalNotes(e.target.value)}
-                  style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #d1d5db', fontSize: '13px' }}
+                  className="flex w-full rounded-xl bg-surface-2 border border-border p-3 text-text placeholder:text-text-3 text-xs font-medium focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
                 />
               </div>
             )}
 
-            {/* Additional Notes Field for Non-Completed where required */}
-            {(pendingTargetKey === 'closed' || pendingTargetKey === 'cancelled' || pendingTargetKey === 'waiting_client' || pendingTargetKey === 'waiting_government') && (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', marginTop: '12px' }}>
-                <label style={{ fontSize: '12px', fontWeight: 600, color: '#6b7280' }}>
-                  ملاحظات إضافية (اختياري)
-                </label>
+            {/* Additional Notes for non-completed */}
+            {(pendingTargetKey === 'closed' ||
+              pendingTargetKey === 'cancelled' ||
+              pendingTargetKey === 'waiting_client' ||
+              pendingTargetKey === 'waiting_government') && (
+              <div className="flex flex-col gap-1.5">
+                <label className="text-xs font-semibold text-text-3">ملاحظات إضافية (اختياري)</label>
                 <input
                   type="text"
-                  className="input"
                   placeholder="ملاحظة إضافية للحرص والتدقيق..."
                   value={modalNotes}
                   onChange={e => setModalNotes(e.target.value)}
-                  style={{ width: '100%', padding: '8px 12px', borderRadius: '8px', border: '1px solid #d1d5db', fontSize: '12.5px' }}
+                  className="flex h-9 w-full rounded-xl bg-surface-2 border border-border px-3 text-xs font-medium text-text placeholder:text-text-3 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
                 />
               </div>
             )}
 
-            {/* Modal Actions */}
-            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '20px' }}>
+            {/* Actions */}
+            <div className="flex items-center justify-end gap-2 pt-2 border-t border-border-soft">
               <button
                 type="button"
                 onClick={() => setPendingTargetKey(null)}
-                style={{
-                  padding: '8px 16px',
-                  borderRadius: '8px',
-                  border: '1px solid #d1d5db',
-                  background: '#ffffff',
-                  color: '#374151',
-                  fontWeight: 600,
-                  fontSize: '13px',
-                  cursor: 'pointer',
-                }}
+                className="h-9 px-4 rounded-xl text-xs font-bold text-text-2 hover:bg-surface-2 transition-colors cursor-pointer"
               >
                 إلغاء
               </button>
               <button
                 type="button"
                 onClick={handleModalSubmit}
-                style={{
-                  padding: '8px 20px',
-                  borderRadius: '8px',
-                  border: 'none',
-                  background: '#2563eb',
-                  color: '#ffffff',
-                  fontWeight: 600,
-                  fontSize: '13px',
-                  cursor: 'pointer',
-                }}
+                className="h-9 px-5 rounded-xl bg-primary text-white text-xs font-bold shadow-sm hover:bg-primary/90 transition-all cursor-pointer"
               >
                 تأكيد التحديث
               </button>
@@ -677,20 +584,6 @@ export function WorkflowStatus({
           </div>
         </div>
       )}
-
-      {/* Global CSS for Animations */}
-      <style jsx global>{`
-        @keyframes wfFadeScale {
-          from {
-            opacity: 0;
-            transform: scale(0.96);
-          }
-          to {
-            opacity: 1;
-            transform: scale(1);
-          }
-        }
-      `}</style>
     </div>
   )
 }

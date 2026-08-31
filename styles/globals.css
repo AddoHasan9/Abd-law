@@ -295,6 +295,8 @@
   html {
     scroll-behavior: smooth;
     color-scheme: light dark;
+    /* تكبير عام خفيف لكل الواجهة — عدّل القيمة (1 = الحجم الأصلي) */
+    zoom: 1.05;
   }
 
   .icon {

@@ -6,7 +6,6 @@ import { formatDate, formatFullDate } from '@/lib/constants'
 import type { DashboardStats } from '@/lib/data/dashboard'
 import type { ProfileWithStats } from '@/lib/data/profiles'
 import RemindersWidget from './RemindersWidget'
-import ExpiryAlertBanner from './ExpiryAlertBanner'
 import { WorkflowStatus } from '@/components/ui/WorkflowStatus'
 
 interface Props {
@@ -56,9 +55,6 @@ export default function DashboardClient({ stats, profiles = [] }: Props) {
   return (
     <div className="flex flex-col w-full gap-6 relative z-10 animate-fade-in-up">
       
-      {/* 0. Government Expiry Banner (Compact & Interactive) */}
-      <ExpiryAlertBanner alerts={stats.expiryAlerts || []} />
-
       {/* 1. Executive Page Header (Calm, Dignified, No Redundant Buttons) */}
       <div className="flex flex-col lg:flex-row lg:items-center justify-between w-full gap-3 lg:gap-4 pb-4 border-b border-[var(--line-soft)]">
         <div className="flex items-start gap-3 min-w-0">
@@ -377,52 +373,9 @@ export default function DashboardClient({ stats, profiles = [] }: Props) {
           </div>
         </div>
 
-        {/* Left 4 Cols: Reminders & Deadlines Mini Widget */}
+        {/* Left 4 Cols: Reminders Widget */}
         <div className="lg:col-span-4 flex flex-col gap-4">
           <RemindersWidget />
-
-          {/* Mini Deadlines & Statutory Alerts Card */}
-          <div className="glass-card rounded-[28px] p-4 flex flex-col gap-2.5 border border-[var(--glass-border)] shadow-xs">
-            <div className="flex items-center justify-between pb-2 border-b border-[var(--line-soft)]">
-              <span className="text-xs font-bold text-[var(--text)] flex items-center gap-1.5">
-                <span className="material-symbols-outlined text-[16px] text-amber-500">timer</span>
-                <span>أقرب المهل القانونية للشركات</span>
-                {stats.urgentDeadlines && stats.urgentDeadlines.length > 0 && (
-                  <span className="px-1.5 py-0.5 rounded-full bg-amber-500/20 text-amber-600 dark:text-amber-400 text-[10px] font-black num">
-                    {stats.urgentDeadlines.length}
-                  </span>
-                )}
-              </span>
-              <Link href="/reminders" className="text-[10.5px] font-bold text-[var(--accent)] hover:underline">
-                كافة المهل ←
-              </Link>
-            </div>
-
-            {stats.urgentDeadlines && stats.urgentDeadlines.length > 0 ? (
-              <div className="flex flex-col gap-2 max-h-[210px] overflow-y-auto pr-1">
-                {stats.urgentDeadlines.map((ud, idx) => (
-                  <Link
-                    key={`${ud.companyId}_${idx}`}
-                    href={`/commercial/companies/${ud.companyId}`}
-                    className="flex items-center justify-between text-xs p-2.5 rounded-xl bg-[var(--surface-2)] border border-[var(--line-soft)] hover:border-[var(--accent)]/40 hover:bg-[var(--surface-3)] transition-all"
-                  >
-                    <div className="flex flex-col min-w-0 flex-1 pl-2">
-                      <span className="font-bold text-[var(--text)] truncate">{ud.companyName}</span>
-                      <span className="text-[10px] text-[var(--text-3)] truncate">{ud.title || 'مهلة قانونية'}</span>
-                    </div>
-                    <span className={`text-[10.5px] font-bold px-2 py-0.5 rounded-full num flex-none ${ud.level === 'late' ? 'bg-red-500/15 text-red-600 dark:text-red-400 border border-red-500/30' : 'bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/30'}`}>
-                      {ud.level === 'late' ? `متأخر ${ud.daysLate} يوماً` : `باقي ${ud.daysLeft} يوماً`}
-                    </span>
-                  </Link>
-                ))}
-              </div>
-            ) : (
-              <div className="flex items-center gap-2 p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-xs font-bold">
-                <span className="material-symbols-outlined text-[18px]">verified</span>
-                <span>سجلات منتظمة — لا توجد مهل متأخرة أو حرجة حالياً ✓</span>
-              </div>
-            )}
-          </div>
         </div>
       </div>
 

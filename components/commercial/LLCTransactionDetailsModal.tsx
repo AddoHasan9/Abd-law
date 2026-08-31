@@ -8,6 +8,7 @@ import { useModalBodyLock } from '@/lib/hooks/useModalBodyLock'
 import { formatNumberWithCommas } from '@/lib/constants'
 import { updateLLCTransactionAction } from '@/app/(app)/commercial/llc/actions'
 import { deleteTransactionAction } from '@/app/(app)/commercial/actions'
+import { getActiveLawyersAction } from '@/app/(app)/settings/users/actions'
 import { LLC_TX_TYPES } from './AddLLCTransactionModal'
 import { WORKFLOW_STATUS_LIST } from '@/lib/workflow-status'
 import type { TransactionFull, Company } from '@/types/database'
@@ -26,7 +27,7 @@ export default function LLCTransactionDetailsModal({
   isOpen,
   onClose,
   transaction,
-  lawyers = [],
+  lawyers: initialLawyers = [],
   onUpdated,
   onDeleted,
 }: Props) {
@@ -34,6 +35,20 @@ export default function LLCTransactionDetailsModal({
   const [loading, setLoading] = useState(false)
   const [deleting, setDeleting] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [lawyers, setLawyers] = useState<Array<{ id: string; name: string }>>(
+    initialLawyers.length > 0 ? initialLawyers : [{ id: 'db13125d-3aa1-46ab-9159-8fad18746623', name: 'منتظر الخزرجي' }]
+  )
+
+  useEffect(() => {
+    setMounted(true)
+    async function load() {
+      const res = await getActiveLawyersAction()
+      if (res.success && res.data && res.data.length > 0) {
+        setLawyers(res.data)
+      }
+    }
+    load()
+  }, [])
 
   // Form Fields
   const [txType, setTxType] = useState('capital-up')

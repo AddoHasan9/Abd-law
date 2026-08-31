@@ -1082,13 +1082,15 @@ export async function deleteCompanyAction(companyId: string) {
     }
 
     // 3. Revalidate all relevant application pages
-    revalidatePath('/commercial/companies-registry')
-    revalidatePath('/commercial/companies')
-    revalidatePath('/commercial/deposits')
-    revalidatePath('/commercial/llc')
-    revalidatePath('/commercial/ids')
-    revalidatePath('/commercial')
-    revalidatePath('/dashboard')
+    try {
+      revalidatePath('/commercial/companies-registry')
+      revalidatePath('/commercial/companies')
+      revalidatePath('/commercial/deposits')
+      revalidatePath('/commercial/llc')
+      revalidatePath('/commercial/ids')
+      revalidatePath('/commercial')
+      revalidatePath('/dashboard')
+    } catch {}
 
     return { success: true }
   } catch (err: unknown) {

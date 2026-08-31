@@ -8,15 +8,21 @@ import {
   updateCompanyIDAction,
   type CompanyIDRecord,
 } from '@/app/(app)/commercial/ids/actions'
-import type { Company, CompanyIDStatus } from '@/types/database'
+import { getActiveLawyersAction } from '@/app/(app)/settings/users/actions'
+import type { Company, CompanyManager, CompanyIDStatus } from '@/types/database'
 import { useModalBodyLock } from '@/lib/hooks/useModalBodyLock'
+import { cn } from '@/lib/utils'
+
+export type CompanyOption = Company & {
+  managers?: CompanyManager[]
+}
 
 interface Props {
   isOpen: boolean
   onClose: () => void
-  companies: Company[]
+  companies: CompanyOption[]
   initialIdType?: 'importer_id' | 'tax_id' | 'planning_id' | 'chamber_id'
-  initialCompany?: Company | null
+  initialCompany?: CompanyOption | null
   /** عند التعديل: السجل المطلوب تحديثه */
   record?: CompanyIDRecord | null
   onSaved?: (record: CompanyIDRecord) => void
@@ -56,7 +62,7 @@ export default function AddIDModal({
   const [actionType, setActionType] = useState<'issue' | 'renew'>('issue')
 
   // Dual Company Selection (Search/Select or Manual typing)
-  const [selectedCompany, setSelectedCompany] = useState<Company | null>(initialCompany)
+  const [selectedCompany, setSelectedCompany] = useState<CompanyOption | null>(initialCompany)
   const [companySearch, setCompanySearch] = useState(initialCompany?.name || '')
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
 
@@ -70,10 +76,21 @@ export default function AddIDModal({
   const [lawyerId, setLawyerId] = useState('')
   const [notes, setNotes] = useState('')
 
+  const [lawyers, setLawyers] = useState<Array<{ id: string; name: string }>>([
+    { id: 'db13125d-3aa1-46ab-9159-8fad18746623', name: 'منتظر الخزرجي' }
+  ])
+
   const autocompleteRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     setMounted(true)
+    async function loadLawyers() {
+      const res = await getActiveLawyersAction()
+      if (res.success && res.data && res.data.length > 0) {
+        setLawyers(res.data)
+      }
+    }
+    loadLawyers()
   }, [])
 
   useEffect(() => {
@@ -85,7 +102,7 @@ export default function AddIDModal({
       setSelectedCompany(foundCo)
       setCompanySearch(record.company_name || foundCo?.name || '')
       setIdNumber(record.id_number || '')
-      setManagerName(record.manager_name || foundCo?.manager || '')
+      setManagerName(record.manager_name || foundCo?.managers?.find(m => m.active)?.name || foundCo?.manager || '')
       setIssueDate(record.issue_date || '')
       setExpiryDate(record.expiry_date || '')
       setTxStartDate(record.tx_start_date || new Date().toISOString().slice(0, 10))
@@ -98,7 +115,8 @@ export default function AddIDModal({
       if (initialCompany) {
         setSelectedCompany(initialCompany)
         setCompanySearch(initialCompany.name)
-        setManagerName(initialCompany.manager || '')
+        const activeMgr = initialCompany.managers?.find((m: CompanyManager) => m.active)?.name || initialCompany.managers?.[0]?.name || initialCompany.manager || ''
+        setManagerName(activeMgr)
       } else {
         setSelectedCompany(null)
         setCompanySearch('')
@@ -137,267 +155,211 @@ export default function AddIDModal({
     e.preventDefault()
 
     const finalCompanyName = companySearch.trim() || selectedCompany?.name || ''
-    if (!isEditMode && !finalCompanyName) {
-      setError('يرجى اختيار شركة مسجلة أو كتابة اسم الشركة يدوياً')
+    if (!finalCompanyName) {
+      setError('يرجى تحديد الشركة أو كتابة اسمها.')
       return
     }
 
     if (!lawyerId) {
-      setError('المحامي المكلّف / المسؤول مطلوب (إلزامي)')
+      setError('يرجى اختيار المحامي المسؤول عن المعاملة.')
       return
     }
 
     setLoading(true)
     setError(null)
 
-    // Use explicitly selected status, or infer done if ID number / dates provided
-    const computedStatus: CompanyIDStatus = status === 'done'
-      ? 'done'
-      : status === 'lacks'
-      ? 'lacks'
-      : status === 'paused'
-      ? 'paused'
-      : (idNumber.trim() || issueDate ? 'done' : 'in_progress')
-
-    const res = isEditMode && record
-      ? await updateCompanyIDAction(record.id, {
+    try {
+      if (isEditMode && record) {
+        const res = await updateCompanyIDAction(record.id, {
           id_number: idNumber.trim() || null,
           manager_name: managerName.trim() || null,
+          grade: idType === 'chamber_id' ? grade : null,
           issue_date: issueDate || null,
           expiry_date: expiryDate || null,
           tx_start_date: txStartDate || null,
-          grade: idType === 'chamber_id' ? grade : null,
-          status: computedStatus,
+          status,
           notes: notes.trim() || null,
         })
-      : await createCompanyIDAction({
-          company_id: selectedCompany?.id,
+
+        if (!res.success) {
+          setError(res.error || 'تعذّر تحديث السجل.')
+          setLoading(false)
+          return
+        }
+
+        if (res.record && onSaved) onSaved(res.record)
+      } else {
+        const res = await createCompanyIDAction({
+          company_id: selectedCompany?.id || undefined,
           company_name: finalCompanyName,
           id_type: idType,
           id_number: idNumber.trim() || undefined,
-          manager_name: managerName.trim() || selectedCompany?.manager || undefined,
-          lawyer_id: lawyerId,
+          manager_name: managerName.trim() || undefined,
+          grade: idType === 'chamber_id' ? grade : undefined,
           issue_date: issueDate || undefined,
           expiry_date: expiryDate || undefined,
           tx_start_date: txStartDate || undefined,
-          grade: idType === 'chamber_id' ? grade : undefined,
-          status: computedStatus,
+          status,
           notes: notes.trim() || undefined,
         })
 
-    setLoading(false)
+        if (!res.success) {
+          setError(res.error || 'تعذّر إنشاء المعاملة.')
+          setLoading(false)
+          return
+        }
 
-    if (res.success) {
-      if (res.record && onSaved) {
-        onSaved(res.record)
+        if (res.record && onSaved) onSaved(res.record)
       }
+
       onClose()
-    } else {
-      setError(res.error || 'حدث خطأ أثناء حفظ الهوية')
+    } catch {
+      setError('حدث خطأ غير متوقع أثناء الحفظ.')
+    } finally {
+      setLoading(false)
     }
   }
 
   return createPortal(
-    <div id="modal-root" className="on">
-      <div className="modal-veil" onClick={onClose} role="presentation" aria-hidden="true" />
-      <div className="modal" style={{ '--modal-max-w': 'var(--modal-md, 640px)', display: 'flex', flexDirection: 'column', maxHeight: '92vh' } as React.CSSProperties}>
-        
-        {/* Modal Head */}
-        <div className="modal-head">
-          <div
-            style={{
-              width: '38px',
-              height: '38px',
-              borderRadius: '12px',
-              background: 'var(--accent-soft)',
-              color: 'var(--accent)',
-              display: 'grid',
-              placeItems: 'center',
-            }}
+    <div
+      role="dialog"
+      aria-modal="true"
+      className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 sm:p-6 overflow-y-auto animate-fade-in text-right"
+      dir="rtl"
+    >
+      <div className="w-full max-w-2xl bg-surface border border-border-glass rounded-2xl shadow-2xl overflow-hidden flex flex-col my-auto transition-all duration-200 animate-scale-in text-text">
+        {/* Header */}
+        <div className="px-6 py-4 border-b border-border-soft flex items-center justify-between gap-4 bg-surface-2/40">
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="w-9 h-9 rounded-xl bg-primary-soft text-primary flex items-center justify-center flex-none">
+              <span className="material-symbols-outlined text-[20px]">badge</span>
+            </div>
+            <div>
+              <h3 className="text-base font-bold text-text truncate">
+                {isEditMode ? `تعديل بيانات ${ID_TYPE_LABELS[idType]}` : `إضافة معاملة ${ID_TYPE_LABELS[idType]}`}
+              </h3>
+              <p className="text-xs text-text-3 mt-0.5">
+                {isEditMode ? 'تحديث وتثبيت وثيقة الهوية المسجلة' : 'تسجيل معاملة إصدار أو تجديد هوية وترخيص مهني'}
+              </p>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label="إغلاق"
+            className="w-8 h-8 rounded-lg flex items-center justify-center text-text-3 hover:text-text hover:bg-surface-3 transition-colors cursor-pointer"
           >
-            <Icon name="badge" />
-          </div>
-          <div style={{ flex: 1, minWidth: 0 }}>
-            <h3 style={{ margin: 0, fontSize: '15.5px' }}>
-              {isEditMode ? 'تعديل بيانات الهوية' : actionType === 'renew' ? `تجديد ${ID_TYPE_LABELS[idType]}` : `إصدار ${ID_TYPE_LABELS[idType]}`}
-            </h3>
-            <span style={{ fontSize: '12px', color: 'var(--text-3)' }}>
-              {isEditMode
-                ? `تحديث بيانات هوية الشركة: ${record?.company_name ?? ''}`
-                : 'بدء معاملة إصدار أو تجديد هوية للشركات المسجلة ومتابعة حالتها'}
-            </span>
-          </div>
-          <button type="button" onClick={onClose} className="icon-btn" aria-label="إغلاق">
-            ✕
+            <span className="material-symbols-outlined text-[20px]">close</span>
           </button>
         </div>
 
-        {/* Modal Form Body */}
-        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', flex: 1, overflow: 'hidden' }}>
-          <div className="modal-body" style={{ display: 'flex', flexDirection: 'column', gap: '14px', overflowY: 'auto', padding: '20px' }}>
+        {/* Form Body */}
+        <form onSubmit={handleSubmit} className="flex flex-col flex-1">
+          <div className="p-6 overflow-y-auto max-h-[75vh] flex-1 flex flex-col gap-4">
             {error && (
-              <div
-                style={{
-                  padding: '12px 14px',
-                  background: 'var(--bad-soft)',
-                  border: '1px solid var(--bad)',
-                  borderRadius: 'var(--r-md)',
-                  color: 'var(--bad)',
-                  fontSize: '13px',
-                  fontWeight: 700,
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '8px',
-                }}
-              >
-                <span className="material-symbols-outlined text-[18px]">warning</span>
-                <span>{error}</span>
+              <div className="p-3.5 rounded-xl bg-destructive/10 border border-destructive/30 text-destructive text-xs font-bold animate-shake">
+                {error}
               </div>
             )}
 
-            {/* Action Type Toggle: إصدار / تجديد */}
+            {/* Type Selector */}
             {!isEditMode && (
-              <div style={{ display: 'flex', gap: '8px', background: 'var(--surface-2)', padding: '4px', borderRadius: 'var(--r-md)', border: '1px solid var(--line-soft)' }}>
-                <button
-                  type="button"
-                  onClick={() => setActionType('issue')}
-                  className={`btn ${actionType === 'issue' ? 'btn-primary' : 'btn-ghost'}`}
-                  style={{ flex: 1, fontSize: '12.5px', padding: '6px' }}
-                >
-                  إصدار جديد
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setActionType('renew')}
-                  className={`btn ${actionType === 'renew' ? 'btn-primary' : 'btn-ghost'}`}
-                  style={{ flex: 1, fontSize: '12.5px', padding: '6px' }}
-                >
-                  تجديد هوية سابقة
-                </button>
+              <div className="flex flex-col gap-1.5">
+                <label className="text-xs font-semibold text-text-2">نوع الهوية / الترخيص الحكومي *</label>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                  {(Object.keys(ID_TYPE_LABELS) as Array<'importer_id' | 'tax_id' | 'planning_id' | 'chamber_id'>).map(typeKey => (
+                    <button
+                      key={typeKey}
+                      type="button"
+                      onClick={() => setIdType(typeKey)}
+                      className={cn(
+                        'flex flex-col items-center justify-center p-3 rounded-xl border text-xs font-bold transition-all duration-150 cursor-pointer text-center gap-1.5',
+                        idType === typeKey
+                          ? 'border-primary bg-primary-soft text-primary shadow-xs'
+                          : 'border-border bg-surface-2 text-text-2 hover:border-text-3/40'
+                      )}
+                    >
+                      <span className="material-symbols-outlined text-[20px]">
+                        {typeKey === 'chamber_id' ? 'account_balance' : typeKey === 'importer_id' ? 'local_shipping' : typeKey === 'tax_id' ? 'receipt_long' : 'domain'}
+                      </span>
+                      <span>{ID_TYPE_LABELS[typeKey]}</span>
+                    </button>
+                  ))}
+                </div>
               </div>
             )}
 
-            {/* ID Type Selector */}
-            <div className="field">
-              <label>نوع الهوية المطلوبة *</label>
-              <select
-                className="input"
-                value={idType}
-                onChange={e => setIdType(e.target.value as 'importer_id' | 'tax_id' | 'planning_id' | 'chamber_id')}
-                disabled={isEditMode}
-                required
-              >
-                <option value="importer_id">هوية مستورد</option>
-                <option value="tax_id">هوية ضريبية</option>
-                <option value="planning_id">هوية التخطيط</option>
-                <option value="chamber_id">هوية الغرفة التجارية</option>
-              </select>
-            </div>
-
-            {/* Dual Searchable Company Input: Select registered company OR type manual name */}
-            <div className="field" style={{ position: 'relative', width: '100%' }} ref={autocompleteRef}>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
-                <label htmlFor="id-co-search" style={{ margin: 0, fontSize: '13px', fontWeight: 700 }}>
-                  اسم الشركة (اختيار من المسجلة أو كتابة يدوية) *
+            {/* Action Type (Issue vs Renew) */}
+            {!isEditMode && (
+              <div className="flex items-center gap-4 p-3 rounded-xl bg-surface-2/60 border border-border-soft">
+                <span className="text-xs font-bold text-text-2">نوع الإجراء:</span>
+                <label className="flex items-center gap-2 text-xs font-medium cursor-pointer">
+                  <input
+                    type="radio"
+                    name="actionType"
+                    checked={actionType === 'issue'}
+                    onChange={() => setActionType('issue')}
+                    className="accent-primary"
+                  />
+                  <span>إصدار جديد</span>
                 </label>
-                {selectedCompany ? (
-                  <span style={{ fontSize: '11.5px', color: 'var(--ok)', fontWeight: 700 }}>
-                    ✓ شركة مسجلة بالنظام
-                  </span>
-                ) : companySearch.trim() ? (
-                  <span style={{ fontSize: '11.5px', color: 'var(--accent)', fontWeight: 700 }}>
-                    ✎ كتابة يدوية
-                  </span>
-                ) : null}
+                <label className="flex items-center gap-2 text-xs font-medium cursor-pointer">
+                  <input
+                    type="radio"
+                    name="actionType"
+                    checked={actionType === 'renew'}
+                    onChange={() => setActionType('renew')}
+                    className="accent-primary"
+                  />
+                  <span>تجديد سنوي</span>
+                </label>
               </div>
+            )}
 
-              <div style={{ position: 'relative', width: '100%' }}>
+            {/* Company Selection */}
+            <div className="relative flex flex-col gap-1.5" ref={autocompleteRef}>
+              <label className="text-xs font-semibold text-text-2">الشركة المعنية *</label>
+              <div className="relative">
                 <input
-                  id="id-co-search"
                   type="text"
-                  className="input"
-                  style={{ width: '100%', minHeight: '42px', fontSize: '14px', padding: '10px 14px' }}
                   value={companySearch}
                   onChange={e => {
                     setCompanySearch(e.target.value)
                     setSelectedCompany(null)
                     setIsDropdownOpen(true)
                   }}
-                  onFocus={() => !isEditMode && setIsDropdownOpen(true)}
-                  placeholder="اختر شركة مسجلة من القائمة أو اكتب اسم الشركة يدوياً..."
-                  autoComplete="off"
-                  disabled={isEditMode}
+                  onFocus={() => setIsDropdownOpen(true)}
+                  placeholder="ابحث عن الشركة أو اكتب اسم الشركة..."
+                  className="flex h-10 w-full rounded-xl bg-surface-2 border border-border px-3.5 pl-10 text-sm font-medium text-text placeholder:text-text-3 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
                   required
                 />
+                <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-text-3 text-[18px]">
+                  business
+                </span>
               </div>
 
-              {/* Autocomplete Dropdown */}
-              {isDropdownOpen && !isEditMode && (
-                <div
-                  style={{
-                    position: 'absolute',
-                    top: 'calc(100% + 4px)',
-                    left: 0,
-                    right: 0,
-                    maxHeight: '200px',
-                    overflowY: 'auto',
-                    background: 'var(--surface)',
-                    border: '1px solid var(--line)',
-                    borderRadius: 'var(--r-md)',
-                    boxShadow: 'var(--shadow-3)',
-                    zIndex: 99999,
-                  }}
-                >
-                  {companySearch.trim() && (
-                    <div
-                      onMouseDown={e => {
-                        e.preventDefault()
-                        setSelectedCompany(null)
-                        setIsDropdownOpen(false)
-                      }}
-                      style={{
-                        padding: '10px 14px',
-                        fontSize: '12.5px',
-                        cursor: 'pointer',
-                        borderBottom: '1px solid var(--line-soft)',
-                        background: 'var(--surface-2)',
-                        color: 'var(--accent)',
-                        fontWeight: 700,
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '6px',
-                      }}
-                    >
-                      <Icon name="plus" />
-                      <span>استخدام الاسم اليدوي: &quot;{companySearch.trim()}&quot;</span>
-                    </div>
-                  )}
-
+              {isDropdownOpen && filteredCompanies.length > 0 && (
+                <div className="absolute top-[calc(100%+4px)] right-0 left-0 max-h-48 overflow-y-auto bg-surface border border-border-glass rounded-xl shadow-xl z-20 divide-y divide-border-soft">
                   {filteredCompanies.map(c => (
-                    <div
+                    <button
                       key={c.id}
+                      type="button"
                       onMouseDown={e => {
                         e.preventDefault()
                         setSelectedCompany(c)
                         setCompanySearch(c.name)
-                        if (c.manager) setManagerName(c.manager)
+                        const activeMgr = c.managers?.find((m: CompanyManager) => m.active)?.name || c.managers?.[0]?.name || c.manager || ''
+                        if (activeMgr) setManagerName(activeMgr)
                         setIsDropdownOpen(false)
                       }}
-                      style={{
-                        padding: '10px 14px',
-                        fontSize: '13px',
-                        cursor: 'pointer',
-                        borderBottom: '1px solid var(--line-soft)',
-                        background: selectedCompany?.id === c.id ? 'var(--accent-soft)' : 'transparent',
-                        color: 'var(--text)',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'space-between',
-                      }}
+                      className={cn(
+                        'w-full flex items-center justify-between px-3.5 py-2.5 text-xs text-right hover:bg-surface-2 transition-colors cursor-pointer',
+                        selectedCompany?.id === c.id && 'bg-primary-soft text-primary font-bold'
+                      )}
                     >
-                      <span style={{ fontWeight: 700 }}>{c.name}</span>
-                      <span style={{ fontSize: '11px', color: 'var(--text-3)' }}>({c.kind || 'شركة'})</span>
-                    </div>
+                      <span className="font-bold text-text truncate">{c.name}</span>
+                      <span className="text-[11px] text-text-3 flex-none mr-2">({c.kind || 'شركة'})</span>
+                    </button>
                   ))}
                 </div>
               )}
@@ -405,15 +367,15 @@ export default function AddIDModal({
 
             {/* Chamber ID Grade */}
             {idType === 'chamber_id' && (
-              <div className="field" style={{ background: 'var(--surface-2)', padding: '12px', borderRadius: 'var(--r-md)', border: '1px solid var(--line-soft)' }}>
-                <label htmlFor="id-chamber-grade" style={{ color: 'var(--accent)', fontWeight: 700 }}>
+              <div className="flex flex-col gap-1.5 p-3 rounded-xl bg-surface-2/60 border border-border-soft">
+                <label htmlFor="id-chamber-grade" className="text-xs font-bold text-primary">
                   درجة الغرفة التجارية *
                 </label>
                 <select
                   id="id-chamber-grade"
-                  className="input"
                   value={grade}
                   onChange={e => setGrade(e.target.value)}
+                  className="flex h-10 w-full rounded-xl bg-surface border border-border px-3.5 text-sm font-semibold text-text focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 cursor-pointer"
                   required
                 >
                   {CHAMBER_GRADES.map(g => (
@@ -426,68 +388,82 @@ export default function AddIDModal({
             )}
 
             {/* Manager Name */}
-            <div className="field">
-              <label htmlFor="id-mgr-name">اسم المدير المفوض المسؤول</label>
+            <div className="flex flex-col gap-1.5">
+              <label htmlFor="id-mgr-name" className="text-xs font-semibold text-text-2">
+                اسم المدير المفوض المسؤول
+              </label>
               <input
                 id="id-mgr-name"
                 type="text"
-                className="input"
                 value={managerName}
                 onChange={e => setManagerName(e.target.value)}
                 placeholder="اسم المدير المفوض..."
+                className="flex h-10 w-full rounded-xl bg-surface-2 border border-border px-3.5 text-sm font-medium text-text placeholder:text-text-3 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
               />
             </div>
 
-            {/* Lawyer & Transaction Start Date */}
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-              <div className="field">
-                <label htmlFor="id-lawyer" style={{ fontWeight: 700, color: 'var(--accent)' }}>
+            {/* Lawyer & Start Date */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="flex flex-col gap-1.5">
+                <label htmlFor="id-lawyer" className="text-xs font-bold text-primary">
                   المحامي المكلّف / المسؤول *
                 </label>
                 <select
                   id="id-lawyer"
-                  className="input"
-                  value={lawyerId}
+                  value={lawyerId || (lawyers[0]?.id || '')}
                   onChange={e => setLawyerId(e.target.value)}
+                  className="flex h-10 w-full rounded-xl bg-surface-2 border border-border px-3.5 text-sm font-semibold text-text focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 cursor-pointer"
                   required
                 >
-                  <option value="">اختر المحامي المسؤول...</option>
-                  <option value="db13125d-3aa1-46ab-9159-8fad18746623">منتظر الخزرجي</option>
+                  <option value="" disabled>اختر المحامي المسؤول...</option>
+                  {lawyers.map(l => (
+                    <option key={l.id} value={l.id}>{l.name}</option>
+                  ))}
                 </select>
               </div>
 
-              <div className="field">
-                <label htmlFor="id-start-date">تاريخ بدء المعاملة *</label>
+              <div className="flex flex-col gap-1.5">
+                <label htmlFor="id-start-date" className="text-xs font-semibold text-text-2">
+                  تاريخ بدء المعاملة *
+                </label>
                 <input
                   id="id-start-date"
                   type="date"
-                  className="input"
                   value={txStartDate}
                   onChange={e => setTxStartDate(e.target.value)}
+                  className="flex h-10 w-full rounded-xl bg-surface-2 border border-border px-3.5 text-sm font-medium text-text focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
                   required
                 />
               </div>
             </div>
 
             {/* Status Selection */}
-            <div className="field">
-              <label style={{ fontWeight: 800, color: 'var(--text)' }}>حالة المعاملة الحالية *</label>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '8px' }}>
+            <div className="flex flex-col gap-1.5">
+              <label className="text-xs font-bold text-text">حالة المعاملة الحالية *</label>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                 <button
                   type="button"
                   onClick={() => setStatus('in_progress')}
-                  className={`btn ${status === 'in_progress' ? 'btn-warn' : 'btn-ghost'}`}
-                  style={{ fontSize: '12px', padding: '8px 10px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}
+                  className={cn(
+                    'flex items-center justify-center gap-1.5 h-9 px-3 rounded-xl border text-xs font-bold transition-all cursor-pointer',
+                    status === 'in_progress'
+                      ? 'border-amber-500/50 bg-amber-500/15 text-amber-600 dark:text-amber-400'
+                      : 'border-border bg-surface-2 text-text-3 hover:text-text'
+                  )}
                 >
-                  <span className="w-2 h-2 rounded-full bg-amber-400 animate-ping" />
-                  <span>قيد الإصدار / الإجراء</span>
+                  <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
+                  <span>قيد الإصدار</span>
                 </button>
 
                 <button
                   type="button"
                   onClick={() => setStatus('done')}
-                  className={`btn ${status === 'done' ? 'btn-go' : 'btn-ghost'}`}
-                  style={{ fontSize: '12px', padding: '8px 10px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}
+                  className={cn(
+                    'flex items-center justify-center gap-1.5 h-9 px-3 rounded-xl border text-xs font-bold transition-all cursor-pointer',
+                    status === 'done'
+                      ? 'border-emerald-500/50 bg-emerald-500/15 text-emerald-600 dark:text-emerald-400'
+                      : 'border-border bg-surface-2 text-text-3 hover:text-text'
+                  )}
                 >
                   <span>✓</span>
                   <span>مكتملة ومُصدرة</span>
@@ -496,8 +472,12 @@ export default function AddIDModal({
                 <button
                   type="button"
                   onClick={() => setStatus('lacks')}
-                  className={`btn ${status === 'lacks' ? 'btn-bad' : 'btn-ghost'}`}
-                  style={{ fontSize: '12px', padding: '8px 10px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}
+                  className={cn(
+                    'flex items-center justify-center gap-1.5 h-9 px-3 rounded-xl border text-xs font-bold transition-all cursor-pointer',
+                    status === 'lacks'
+                      ? 'border-rose-500/50 bg-rose-500/15 text-rose-600 dark:text-rose-400'
+                      : 'border-border bg-surface-2 text-text-3 hover:text-text'
+                  )}
                 >
                   <span>⚠️</span>
                   <span>بها نواقص</span>
@@ -506,95 +486,106 @@ export default function AddIDModal({
                 <button
                   type="button"
                   onClick={() => setStatus('paused')}
-                  className={`btn ${status === 'paused' ? 'btn-gray' : 'btn-ghost'}`}
-                  style={{ fontSize: '12px', padding: '8px 10px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}
+                  className={cn(
+                    'flex items-center justify-center gap-1.5 h-9 px-3 rounded-xl border text-xs font-bold transition-all cursor-pointer',
+                    status === 'paused'
+                      ? 'border-slate-500/50 bg-slate-500/15 text-slate-400'
+                      : 'border-border bg-surface-2 text-text-3 hover:text-text'
+                  )}
                 >
                   <span>⏸️</span>
-                  <span>متوقفة مؤقتاً</span>
+                  <span>متوقفة</span>
                 </button>
               </div>
             </div>
 
-            {/* Informational Guidance Alert */}
-            <div
-              style={{
-                background: 'var(--accent-soft)',
-                border: '1px solid var(--accent)',
-                padding: '10px 14px',
-                borderRadius: 'var(--r-md)',
-                fontSize: '12.5px',
-                color: 'var(--text-2)',
-                lineHeight: 1.6,
-              }}
-            >
-              <strong style={{ color: 'var(--accent)' }}>ملاحظة هامة:</strong> إذا كانت الهوية لا تزال قيد الإنجاز في الدوائر الحكومية، اترك <strong>رقم الهوية وتاريخ الإصدار والانتهاء فارغين</strong>؛ وسيتم إدراجها فوراً كـ <span className="tag tag-warn" style={{ fontSize: '11px', fontWeight: 700 }}>قيد الإصدار / قيد الإجراء</span> ويمكنك إكمالها في أي وقت.
-            </div>
-
-            {/* ID Number & Dates Grid */}
-            <div style={{ background: 'var(--surface-2)', padding: '14px', borderRadius: 'var(--r-md)', border: '1px solid var(--line-soft)', display: 'flex', flexDirection: 'column', gap: '12px' }}>
-              <div style={{ fontSize: '12.5px', fontWeight: 800, color: 'var(--text-2)' }}>
+            {/* Issued Document Details (Optional) */}
+            <div className="flex flex-col gap-3 p-4 rounded-xl bg-surface-2/60 border border-border-soft">
+              <span className="text-xs font-bold text-text-2">
                 بيانات الوثيقة المُصدرة (تُملأ عند اكتمال واستلام الهوية)
-              </div>
+              </span>
 
-              <div className="field">
-                <label htmlFor="id-number">رقم الهوية / الوثيقة (إن وُجد)</label>
+              <div className="flex flex-col gap-1.5">
+                <label htmlFor="id-number" className="text-xs font-medium text-text-3">
+                  رقم الهوية / الوثيقة (إن وُجد)
+                </label>
                 <input
                   id="id-number"
                   type="text"
-                  className="input num"
                   value={idNumber}
                   onChange={e => setIdNumber(e.target.value)}
                   placeholder="مثال: TX-2026-9901 أو رقم الهوية..."
+                  className="flex h-10 w-full rounded-xl bg-surface border border-border px-3.5 text-sm font-medium text-text font-mono placeholder:text-text-3 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
                 />
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-                <div className="field">
-                  <label htmlFor="id-issue-date">تاريخ الإصدار</label>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="flex flex-col gap-1.5">
+                  <label htmlFor="id-issue-date" className="text-xs font-medium text-text-3">
+                    تاريخ الإصدار
+                  </label>
                   <input
                     id="id-issue-date"
                     type="date"
-                    className="input"
                     value={issueDate}
                     onChange={e => setIssueDate(e.target.value)}
+                    className="flex h-10 w-full rounded-xl bg-surface border border-border px-3.5 text-sm font-medium text-text focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
                   />
                 </div>
 
-                <div className="field">
-                  <label htmlFor="id-expiry-date">تاريخ الانتهاء</label>
+                <div className="flex flex-col gap-1.5">
+                  <label htmlFor="id-expiry-date" className="text-xs font-medium text-text-3">
+                    تاريخ الانتهاء
+                  </label>
                   <input
                     id="id-expiry-date"
                     type="date"
-                    className="input"
                     value={expiryDate}
                     onChange={e => setExpiryDate(e.target.value)}
+                    className="flex h-10 w-full rounded-xl bg-surface border border-border px-3.5 text-sm font-medium text-text focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
                   />
                 </div>
               </div>
             </div>
 
             {/* Notes */}
-            <div className="field">
-              <label htmlFor="id-notes">ملاحظات إضافية أو متطلبات</label>
+            <div className="flex flex-col gap-1.5">
+              <label htmlFor="id-notes" className="text-xs font-semibold text-text-2">
+                ملاحظات إضافية أو متطلبات
+              </label>
               <input
                 id="id-notes"
                 type="text"
-                className="input"
                 value={notes}
                 onChange={e => setNotes(e.target.value)}
                 placeholder="أي ملاحظات خاصة بالمعاملة..."
+                className="flex h-10 w-full rounded-xl bg-surface-2 border border-border px-3.5 text-sm font-medium text-text placeholder:text-text-3 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
               />
             </div>
-
           </div>
 
-          {/* Modal Footer */}
-          <div className="modal-foot">
-            <button type="submit" className="btn btn-primary" disabled={loading}>
-              {loading ? 'جاري الحفظ...' : isEditMode ? 'حفظ التعديلات' : idNumber || issueDate ? `حفظ وتثبيت ${ID_TYPE_LABELS[idType]}` : `بدء معاملة إصدار ${ID_TYPE_LABELS[idType]}`}
-            </button>
-            <button type="button" onClick={onClose} className="btn btn-ghost" disabled={loading}>
+          {/* Footer */}
+          <div className="px-6 py-4 border-t border-border-soft bg-surface-2/30 flex items-center justify-end gap-3">
+            <button
+              type="button"
+              onClick={onClose}
+              disabled={loading}
+              className="h-10 px-4 rounded-xl text-xs font-bold text-text-2 hover:bg-surface-2 transition-colors cursor-pointer"
+            >
               إلغاء
+            </button>
+            <button
+              type="submit"
+              disabled={loading}
+              className="h-10 px-5 rounded-xl bg-primary text-white text-xs font-bold shadow-sm hover:bg-primary/90 transition-all cursor-pointer disabled:opacity-50"
+            >
+              {loading
+                ? 'جارٍ الحفظ…'
+                : isEditMode
+                ? 'حفظ التعديلات'
+                : idNumber || issueDate
+                ? `حفظ وتثبيت ${ID_TYPE_LABELS[idType]}`
+                : `بدء معاملة إصدار ${ID_TYPE_LABELS[idType]}`}
             </button>
           </div>
         </form>

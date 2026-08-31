@@ -501,3 +501,85 @@ create table if not exists company_timeline (
 
 alter table company_timeline enable row level security;
 create policy company_timeline_all on company_timeline for all to authenticated using (true);
+
+-- ---------- جداول السجل والمدراء والشركاء والهويات والضرائب وتدقيق المستخدمين ----------
+
+create table if not exists company_managers (
+  id uuid primary key default gen_random_uuid(),
+  company_id uuid not null references companies(id) on delete cascade,
+  name text not null,
+  phone text,
+  id_number text,
+  start_date date,
+  end_date date,
+  active boolean not null default true,
+  notes text,
+  created_at timestamptz not null default now()
+);
+alter table company_managers enable row level security;
+create policy company_managers_all on company_managers for all to authenticated using (true);
+
+create table if not exists company_shareholders (
+  id uuid primary key default gen_random_uuid(),
+  company_id uuid not null references companies(id) on delete cascade,
+  name text not null,
+  share_percentage numeric,
+  share_amount numeric,
+  nationality text default 'عراقي',
+  notes text,
+  created_at timestamptz not null default now()
+);
+alter table company_shareholders enable row level security;
+create policy company_shareholders_all on company_shareholders for all to authenticated using (true);
+
+create table if not exists company_ids (
+  id uuid primary key default gen_random_uuid(),
+  company_id uuid not null references companies(id) on delete cascade,
+  id_type text not null check (id_type in ('importer_id', 'tax_id', 'planning_id', 'chamber_id')),
+  id_number text,
+  manager_name text,
+  issue_date date,
+  expiry_date date,
+  tx_start_date date,
+  grade text,
+  status text not null default 'in_progress',
+  notes text,
+  created_at timestamptz not null default now()
+);
+alter table company_ids enable row level security;
+create policy company_ids_all on company_ids for all to authenticated using (true);
+
+create table if not exists tax_assessments (
+  id uuid primary key default gen_random_uuid(),
+  company_id uuid not null references companies(id) on delete cascade,
+  year integer not null,
+  amount numeric not null default 0,
+  paid_amount numeric not null default 0,
+  receipt_no text,
+  receipt_date date,
+  status text not null default 'in_progress',
+  notes text,
+  created_at timestamptz not null default now(),
+  constraint unique_company_tax_year unique (company_id, year)
+);
+alter table tax_assessments enable row level security;
+create policy tax_assessments_all on tax_assessments for all to authenticated using (true);
+
+create table if not exists user_audit_logs (
+  id text primary key,
+  user_id uuid references profiles(id) on delete set null,
+  user_name text,
+  user_email text,
+  user_role text,
+  action text not null,
+  category text not null,
+  entity_type text,
+  entity_id text,
+  entity_name text,
+  details text not null,
+  ip_address text,
+  created_at timestamptz not null default now()
+);
+alter table user_audit_logs enable row level security;
+create policy user_audit_logs_all on user_audit_logs for all to authenticated using (true);
+

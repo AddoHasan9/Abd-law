@@ -3,6 +3,7 @@ import { useRouter } from 'next/navigation'
 import { createPortal } from 'react-dom'
 import { Icon } from '@/components/ui/Icon'
 import { createCompanyFormationAction } from '@/app/(app)/commercial/companies/actions'
+import { getActiveLawyersAction } from '@/app/(app)/settings/users/actions'
 import { FORMATION_SERVICES, IRAQ_GOVERNORATES, formatNumberWithCommas } from '@/lib/constants'
 import FormationServiceChecklist from './FormationServiceChecklist'
 import { useModalBodyLock } from '@/lib/hooks/useModalBodyLock'
@@ -25,9 +26,19 @@ export default function NewCompanyModal({ isOpen, onClose }: Props) {
   // رأس المال والأتعاب
   const [capital, setCapital] = useState('')
   const [fee, setFee] = useState('')
+  const [lawyers, setLawyers] = useState<Array<{ id: string; name: string }>>([
+    { id: 'db13125d-3aa1-46ab-9159-8fad18746623', name: 'منتظر الخزرجي' }
+  ])
 
   useEffect(() => {
     setMounted(true)
+    async function loadLawyers() {
+      const res = await getActiveLawyersAction()
+      if (res.success && res.data && res.data.length > 0) {
+        setLawyers(res.data)
+      }
+    }
+    loadLawyers()
   }, [])
 
   useModalBodyLock(isOpen)
@@ -631,9 +642,11 @@ export default function NewCompanyModal({ isOpen, onClose }: Props) {
                   <label htmlFor="modal-tx-lawyer" style={{ fontWeight: 700, color: 'var(--accent)' }}>
                     المحامي المكلّف / المسؤول *
                   </label>
-                  <select id="modal-tx-lawyer" name="lawyer_id" className="input" required defaultValue="">
+                  <select id="modal-tx-lawyer" name="lawyer_id" className="input" required defaultValue={lawyers[0]?.id || ''}>
                     <option value="" disabled>اختر المحامي المسؤول...</option>
-                    <option value="db13125d-3aa1-46ab-9159-8fad18746623">منتظر الخزرجي</option>
+                    {lawyers.map(l => (
+                      <option key={l.id} value={l.id}>{l.name}</option>
+                    ))}
                   </select>
                 </div>
 

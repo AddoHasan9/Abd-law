@@ -94,6 +94,35 @@ export async function createTaxAssessmentAction(payload: CreateTaxAssessmentPayl
       return { success: false, error: 'المحامي المكلّف / المسؤول مطلوب (إلزامي)' }
     }
 
+    // Check duplicate tax assessment for same company + year (Disk + DB)
+    const diskAssessments = readJsonFile<TaxAssessment[]>('tax_assessments.json', [])
+    const existingTax = diskAssessments.find(
+      t => t.company_id === payload.company_id && Number(t.year) === Number(payload.year)
+    )
+    if (existingTax) {
+      return {
+        success: false,
+        error: `تم تسجيل تحاسب ضريبي لهذه الشركة لسنة (${payload.year}) مسبقاً. يرجى تعديل السجل القائم بدلاً من إنشاء سجل مكرر.`,
+      }
+    }
+
+    try {
+      const supabase = createAdminClient()
+      const { data: dbExisting } = await supabase
+        .from('tax_assessments')
+        .select('id, year')
+        .eq('company_id', payload.company_id)
+        .eq('year', Number(payload.year))
+        .maybeSingle()
+
+      if (dbExisting) {
+        return {
+          success: false,
+          error: `يوجد تحاسب ضريبي مسجل مسبقاً في قاعدة البيانات لسنة (${payload.year}) لهذه الشركة.`,
+        }
+      }
+    } catch {}
+
     const diskCompanies = readJsonFile<Company[]>('companies.json', [])
     const targetCompany = diskCompanies.find(c => c.id === payload.company_id)
 
@@ -152,7 +181,6 @@ export async function createTaxAssessmentAction(payload: CreateTaxAssessmentPayl
     }
 
     // Save to Local Disk Store
-    const diskAssessments = readJsonFile<TaxAssessment[]>('tax_assessments.json', [])
     diskAssessments.unshift(newRecord)
     writeJsonFile('tax_assessments.json', diskAssessments)
 
@@ -212,10 +240,12 @@ export async function createTaxAssessmentAction(payload: CreateTaxAssessmentPayl
       related_link: '/commercial/tax-assessment',
     })
 
-    revalidatePath('/commercial/tax-assessment')
-    revalidatePath('/commercial')
-    revalidatePath(`/commercial/companies/${payload.company_id}`)
-    revalidatePath('/dashboard')
+    try {
+      revalidatePath('/commercial/tax-assessment')
+      revalidatePath('/commercial')
+      revalidatePath(`/commercial/companies/${payload.company_id}`)
+      revalidatePath('/dashboard')
+    } catch {}
 
     return { success: true, data: newRecord }
   } catch (err: unknown) {
@@ -298,10 +328,12 @@ export async function updateTaxAssessmentAction(
       })
     }
 
-    revalidatePath('/commercial/tax-assessment')
-    revalidatePath('/commercial')
-    revalidatePath(`/commercial/companies/${current.company_id}`)
-    revalidatePath('/dashboard')
+    try {
+      revalidatePath('/commercial/tax-assessment')
+      revalidatePath('/commercial')
+      revalidatePath(`/commercial/companies/${current.company_id}`)
+      revalidatePath('/dashboard')
+    } catch {}
 
     return { success: true, data: updatedRecord }
   } catch (err: unknown) {
@@ -329,8 +361,10 @@ export async function deleteTaxAssessmentAction(id: string): Promise<{ success: 
       await supabase.from('transactions').delete().eq('id', id)
     } catch {}
 
-    revalidatePath('/commercial/tax-assessment')
-    revalidatePath('/commercial')
+    try {
+      revalidatePath('/commercial/tax-assessment')
+      revalidatePath('/commercial')
+    } catch {}
     return { success: true }
   } catch (err: unknown) {
     const msg = err instanceof Error ? err.message : 'فشل حذف سجل التحاسب الضريبي'

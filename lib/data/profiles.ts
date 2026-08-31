@@ -1,13 +1,13 @@
 /**
  * استعلامات وخدمات إدارة فريق العمل والمستخدمين
  * ------------------------------------------------------------
- * مصدر الحقيقة هو جدول profiles في Supabase (يُنشأ صفّه تلقائياً عبر
- * المحفّز on_auth_user_created). دعم التعطيل الناعم Soft-Deactivation
- * والأرشفة لعدم فقدان البيانات.
+ * مصدر الحقيقة هو جدول profiles في Supabase مع التزامن مع profiles.json.
+ * يدعم التعديل الكامل، التعطيل والتفعيل، والحذف الدائم من النظام والسحابة.
  */
 import { createAdminClient } from '@/lib/supabase/server'
 import type { Profile, UserRole, DepartmentTask, TransactionFull } from '@/types/database'
 import { readJsonFile, writeJsonFile } from '@/lib/data/fs-store'
+import { listTransactions } from '@/lib/data/transactions'
 
 export interface ProfileWithStats extends Profile {
   title?: string | null
@@ -16,7 +16,7 @@ export interface ProfileWithStats extends Profile {
   last_login?: string | null
 }
 
-import { listTransactions } from '@/lib/data/transactions'
+const PRIMARY_ADMIN_ID = 'db13125d-3aa1-46ab-9159-8fad18746623'
 
 export async function listProfiles(): Promise<ProfileWithStats[]> {
   try {
@@ -31,27 +31,26 @@ export async function listProfiles(): Promise<ProfileWithStats[]> {
 
     const diskProfiles = readJsonFile<ProfileWithStats[]>('profiles.json', [])
     diskProfiles.forEach(p => {
-      if (p.id && !p.id.startsWith('prof_')) {
+      if (p.id) {
         map.set(p.id, p)
       }
     })
 
-    if (!error && data) {
+    if (!error && data && data.length > 0) {
       data.forEach((p: Profile) => {
-        if (!p.id.startsWith('prof_')) {
-          map.set(p.id, {
-            ...p,
-            title: p.dept || 'عضو فريق',
-            email: p.email || `${p.id}@khazraji-law.com`,
-            last_login: null,
-          })
-        }
+        const diskP = map.get(p.id)
+        map.set(p.id, {
+          ...p,
+          title: p.dept || diskP?.title || 'عضو فريق',
+          email: p.email || diskP?.email || `${p.id}@khazraji-law.com`,
+          last_login: diskP?.last_login || null,
+        })
       })
     }
 
     if (map.size === 0) {
-      map.set('db13125d-3aa1-46ab-9159-8fad18746623', {
-        id: 'db13125d-3aa1-46ab-9159-8fad18746623',
+      map.set(PRIMARY_ADMIN_ID, {
+        id: PRIMARY_ADMIN_ID,
         name: 'منتظر الخزرجي',
         role: 'super_admin',
         dept: 'الإدارة العامة',
@@ -133,14 +132,19 @@ export async function saveProfile(profile: Partial<ProfileWithStats> & { name: s
       updatedProfile = {
         ...profiles[idx],
         ...profile,
+        name: profile.name.trim(),
+        role: profile.role,
         dept: profile.dept ?? profiles[idx].dept ?? null,
+        title: profile.title ?? profiles[idx].title ?? 'عضو فريق',
         phone: profile.phone ?? profiles[idx].phone ?? null,
+        email: profile.email ?? profiles[idx].email ?? undefined,
+        active: profile.active ?? profiles[idx].active ?? true,
       }
       profiles[idx] = updatedProfile
     } else {
       updatedProfile = {
         id: profile.id,
-        name: profile.name,
+        name: profile.name.trim(),
         role: profile.role,
         dept: profile.dept || null,
         title: profile.title || 'عضو فريق',
@@ -155,7 +159,7 @@ export async function saveProfile(profile: Partial<ProfileWithStats> & { name: s
   } else {
     updatedProfile = {
       id: `prof_${Date.now()}`,
-      name: profile.name,
+      name: profile.name.trim(),
       role: profile.role,
       dept: profile.dept || null,
       title: profile.title || 'عضو فريق',
@@ -181,7 +185,9 @@ export async function saveProfile(profile: Partial<ProfileWithStats> & { name: s
       phone: updatedProfile.phone,
       active: updatedProfile.active,
     })
-  } catch {}
+  } catch (err) {
+    console.warn('Supabase saveProfile notice:', err)
+  }
 
   return updatedProfile
 }
@@ -202,7 +208,7 @@ export async function toggleProfileActive(id: string): Promise<boolean> {
   return target.active
 }
 
-/** Soft Delete: Deactivates user account to preserve transactions, audit logs, and timeline history */
+/** Soft Delete: Deactivates user account */
 export async function deleteProfile(id: string): Promise<boolean> {
   const profiles = await listProfiles()
   const target = profiles.find(p => p.id === id)
@@ -215,6 +221,63 @@ export async function deleteProfile(id: string): Promise<boolean> {
     const supabase = createAdminClient()
     await supabase.from('profiles').update({ active: false }).eq('id', id)
   } catch {}
+
+  return true
+}
+
+/** Permanent Delete: Removes user permanently from Supabase Auth, Profiles table, and disk storage */
+export async function permanentDeleteProfile(id: string): Promise<boolean> {
+  if (id === PRIMARY_ADMIN_ID) {
+    throw new Error('لا يمكن حذف حساب مدير النظام الرئيسي (Super Admin)')
+  }
+
+  // 1. Remove from local profiles.json
+  const profiles = readJsonFile<ProfileWithStats[]>('profiles.json', [])
+  const filtered = profiles.filter(p => p.id !== id)
+  writeJsonFile('profiles.json', filtered)
+
+  // 2. Unassign from active transactions to preserve relational integrity
+  try {
+    const diskTxs = readJsonFile<Array<Record<string, unknown>>>('transactions.json', [])
+    let changed = false
+    diskTxs.forEach(t => {
+      if (t.lawyer_id === id) {
+        t.lawyer_id = null
+        changed = true
+      }
+    })
+    if (changed) {
+      writeJsonFile('transactions.json', diskTxs)
+    }
+  } catch {}
+
+  // 3. Delete from Supabase profiles and Supabase Auth
+  try {
+    const supabase = createAdminClient()
+    
+    // Set lawyer_id to null on transactions
+    try {
+      await supabase.from('transactions').update({ lawyer_id: null }).eq('lawyer_id', id)
+    } catch {}
+
+    // Delete from profiles table
+    try {
+      await supabase.from('profiles').delete().eq('id', id)
+    } catch (e) {
+      console.warn('Supabase delete profile notice:', e)
+    }
+
+    // Delete user from Supabase Auth
+    try {
+      if (!id.startsWith('prof_')) {
+        await supabase.auth.admin.deleteUser(id)
+      }
+    } catch (authErr) {
+      console.warn('Supabase auth delete user notice:', authErr)
+    }
+  } catch (err) {
+    console.warn('permanentDeleteProfile exception:', err)
+  }
 
   return true
 }

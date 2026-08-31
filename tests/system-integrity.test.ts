@@ -1,9 +1,13 @@
 import { describe, it } from 'node:test'
 import assert from 'node:assert/strict'
-import { hasPermission, getRolePermissionsMatrix } from '../lib/permissions'
+import { hasPermission } from '../lib/permissions'
 import { buildFallbackProfile } from '../lib/profile-fallback'
 import { canEditCompanyData, canManageDepositWorkflow } from '../lib/rbac'
 import { sanitizeFormationWorkflowSteps } from '../lib/constants'
+import { logUserAuditAction, getAuditLogs } from '../lib/data/audit'
+import { readJsonFile, writeJsonFile } from '../lib/data/fs-store'
+import { listTransactions } from '../lib/data/transactions'
+import type { TransactionFull } from '../types/database'
 
 describe('Security & RBAC Integrity Tests', () => {
   it('hasPermission enforces fail-closed on null/undefined role', () => {
@@ -60,5 +64,183 @@ describe('Company Formation & Deposit Release Lifecycle', () => {
     const steps = sanitizeFormationWorkflowSteps([], 'test_co_2', true, new Date().toISOString())
     assert.strictEqual(steps.length, 8)
     assert.strictEqual(steps.every(s => s.state === 'done'), true)
+  })
+})
+
+describe('User Activity & Operations Audit Trail Tests', () => {
+  it('records user login and logout events with complete metadata', async () => {
+    const testUserId = `test_usr_${Date.now()}`
+    const loginEntry = await logUserAuditAction({
+      userId: testUserId,
+      userEmail: 'lawyer@example.com',
+      userRole: 'lawyer',
+      action: 'login',
+      category: 'auth',
+      details: 'تسجيل دخول ناجح للمحامي',
+    })
+
+    assert.ok(loginEntry.id)
+    assert.strictEqual(loginEntry.action, 'login')
+    assert.strictEqual(loginEntry.category, 'auth')
+
+    const logs = await getAuditLogs({ userId: testUserId })
+    assert.ok(logs.length >= 1)
+    const found = logs.find(l => l.id === loginEntry.id)
+    assert.ok(found)
+    assert.strictEqual(found?.details, 'تسجيل دخول ناجح للمحامي')
+  })
+})
+
+describe('Database & Deletion Blacklist Integrity Tests', () => {
+  it('strictly excludes deleted transactions via blacklist', async () => {
+    const testTxId = `test_tx_${Date.now()}`
+    const diskTxs = readJsonFile<TransactionFull[]>('transactions.json', [])
+    const mockTx: TransactionFull = {
+      id: testTxId,
+      client_id: null,
+      company_id: null,
+      lawyer_id: null,
+      type: 'general',
+      priority: 'medium',
+      status: 'new',
+      tx_date: new Date().toISOString().slice(0, 10),
+      due_date: null,
+      description: 'معاملة اختبارية للحذف',
+      services: [],
+      lacks: null,
+      fee: 0,
+      phone: null,
+      created_at: new Date().toISOString(),
+      clients: null,
+      companies: null,
+      profiles: null,
+    }
+    diskTxs.unshift(mockTx)
+    writeJsonFile('transactions.json', diskTxs)
+
+    // Initial check: transaction is present
+    let txs = await listTransactions()
+    assert.ok(txs.some(t => t.id === testTxId))
+
+    // Blacklist the transaction (simulating deletion)
+    const deletedTxIds = readJsonFile<string[]>('deleted_transaction_ids.json', [])
+    deletedTxIds.push(testTxId)
+    writeJsonFile('deleted_transaction_ids.json', deletedTxIds)
+
+    // Second check: transaction MUST BE excluded
+    txs = await listTransactions()
+    assert.strictEqual(txs.some(t => t.id === testTxId), false, 'Deleted transaction must never appear in listTransactions')
+
+    // Cleanup test artifacts
+    writeJsonFile('transactions.json', diskTxs.filter(t => t.id !== testTxId))
+    writeJsonFile('deleted_transaction_ids.json', deletedTxIds.filter(id => id !== testTxId))
+  })
+})
+
+describe('User Lifecycle & Permanent Deletion Tests', () => {
+  it('saves, edits, and permanently deletes user without leaving remnants', async () => {
+    const { saveProfile, permanentDeleteProfile, listProfiles } = await import('../lib/data/profiles')
+    
+    // 1. Create temporary user
+    const tempUser = await saveProfile({
+      name: 'محامي اختباري للحذف',
+      role: 'lawyer',
+      dept: 'الشركات',
+      email: 'temp_lawyer@example.com',
+    })
+    assert.ok(tempUser.id)
+    assert.strictEqual(tempUser.name, 'محامي اختباري للحذف')
+
+    // 2. Edit user
+    const updated = await saveProfile({
+      id: tempUser.id,
+      name: 'محامي اختباري معدل',
+      role: 'manager',
+      dept: 'الإدارة التجارية',
+    })
+    assert.strictEqual(updated.name, 'محامي اختباري معدل')
+    assert.strictEqual(updated.role, 'manager')
+
+    // 3. Verify user in list
+    let profiles = await listProfiles()
+    assert.ok(profiles.some(p => p.id === tempUser.id))
+
+    // 4. Permanently delete user
+    const deleted = await permanentDeleteProfile(tempUser.id)
+    assert.strictEqual(deleted, true)
+
+    // 5. Verify user is completely removed
+    profiles = await listProfiles()
+    assert.strictEqual(profiles.some(p => p.id === tempUser.id), false, 'User must be permanently removed from profiles')
+  })
+
+  it('prevents deletion of primary Super Admin account', async () => {
+    const { permanentDeleteProfile } = await import('../lib/data/profiles')
+    await assert.rejects(
+      async () => {
+        await permanentDeleteProfile('db13125d-3aa1-46ab-9159-8fad18746623')
+      },
+      /لا يمكن حذف حساب مدير النظام الرئيسي/
+    )
+  })
+})
+
+describe('Duplicate Data Prevention Tests', () => {
+  it('detects and blocks duplicate government IDs for the same company and type', async () => {
+    const { createCompanyIDAction, deleteCompanyIDAction } = await import('../app/(app)/commercial/ids/actions')
+    const testCompanyId = `dup_co_${Date.now()}`
+
+    // First creation: should succeed
+    const res1 = await createCompanyIDAction({
+      company_id: testCompanyId,
+      company_name: 'شركة اختبار منع التكرار',
+      id_type: 'tax_id',
+      lawyer_id: 'db13125d-3aa1-46ab-9159-8fad18746623',
+      status: 'in_progress',
+    })
+    assert.strictEqual(res1.success, true)
+
+    // Second creation for same company + same id_type: MUST BE BLOCKED
+    const res2 = await createCompanyIDAction({
+      company_id: testCompanyId,
+      company_name: 'شركة اختبار منع التكرار',
+      id_type: 'tax_id',
+      lawyer_id: 'db13125d-3aa1-46ab-9159-8fad18746623',
+      status: 'in_progress',
+    })
+    assert.strictEqual(res2.success, false)
+    assert.match(res2.error || '', /يوجد سجل \(هوية ضريبية\) مسجل مسبقاً/)
+
+    // Cleanup
+    if (res1.record?.id) {
+      await deleteCompanyIDAction(res1.record.id)
+    }
+  })
+
+  it('detects and blocks duplicate tax assessments for the same company and year', async () => {
+    const { createTaxAssessmentAction } = await import('../app/(app)/commercial/tax-assessment/actions')
+    const { deleteCompanyAction } = await import('../app/(app)/commercial/companies/actions')
+    const testCompanyId = `dup_tax_co_${Date.now()}`
+    const testYear = 2024
+
+    // First creation: should succeed
+    const res1 = await createTaxAssessmentAction({
+      company_id: testCompanyId,
+      year: testYear,
+      lawyer_id: 'db13125d-3aa1-46ab-9159-8fad18746623',
+    })
+    assert.strictEqual(res1.success, true)
+
+    // Second creation for same company + same year: MUST BE BLOCKED
+    const res2 = await createTaxAssessmentAction({
+      company_id: testCompanyId,
+      year: testYear,
+      lawyer_id: 'db13125d-3aa1-46ab-9159-8fad18746623',
+    })
+    assert.strictEqual(res2.success, false)
+    assert.match(res2.error || '', /تم تسجيل تحاسب ضريبي لهذه الشركة لسنة/)
+
+    // Cleanup
+    await deleteCompanyAction(testCompanyId)
   })
 })

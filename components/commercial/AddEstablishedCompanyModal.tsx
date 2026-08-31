@@ -6,11 +6,14 @@ import { Icon } from '@/components/ui/Icon'
 import { formatNumberWithCommas } from '@/lib/constants'
 import { useModalBodyLock } from '@/lib/hooks/useModalBodyLock'
 import { createEstablishedCompanyAction } from '@/app/(app)/commercial/companies-registry/actions'
+import { getActiveLawyersAction } from '@/app/(app)/settings/users/actions'
+
+import type { CompanyWithWorkflow } from '@/types/database'
 
 interface Props {
   isOpen: boolean
   onClose: () => void
-  onSuccess?: (company?: any) => void
+  onSuccess?: (company?: CompanyWithWorkflow) => void
 }
 
 interface ShareholderInput {
@@ -81,9 +84,19 @@ export default function AddEstablishedCompanyModal({ isOpen, onClose, onSuccess 
 
   // Company IDs
   const [companyIDs, setCompanyIDs] = useState<CompanyIDInput[]>(DEFAULT_ID_TEMPLATES)
+  const [lawyers, setLawyers] = useState<Array<{ id: string; name: string }>>([
+    { id: 'db13125d-3aa1-46ab-9159-8fad18746623', name: 'منتظر الخزرجي' }
+  ])
 
   useEffect(() => {
     setMounted(true)
+    async function loadLawyers() {
+      const res = await getActiveLawyersAction()
+      if (res.success && res.data && res.data.length > 0) {
+        setLawyers(res.data)
+      }
+    }
+    loadLawyers()
   }, [])
 
   useModalBodyLock(isOpen)
@@ -478,12 +491,14 @@ export default function AddEstablishedCompanyModal({ isOpen, onClose, onSuccess 
                   <select
                     id="est-co-lawyer"
                     className="input"
-                    value={lawyerId}
+                    value={lawyerId || (lawyers[0]?.id || '')}
                     onChange={e => setLawyerId(e.target.value)}
                     required
                   >
-                    <option value="">اختر المحامي المسؤول...</option>
-                    <option value="db13125d-3aa1-46ab-9159-8fad18746623">منتظر الخزرجي</option>
+                    <option value="" disabled>اختر المحامي المسؤول...</option>
+                    {lawyers.map(l => (
+                      <option key={l.id} value={l.id}>{l.name}</option>
+                    ))}
                   </select>
                 </div>
               </div>

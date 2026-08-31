@@ -13,6 +13,7 @@ import { createClient } from '@/lib/supabase/client'
 import { buildFallbackProfile } from '@/lib/profile-fallback'
 import { UserRoleProvider } from '@/lib/context/UserRoleContext'
 import QuickHelpGuide from '@/components/ui/QuickHelpGuide'
+import { NavigationProgressBar } from '@/components/ui/NavigationProgressBar'
 import type { DeadlineItem } from './DeadlineCard'
 import type { Profile } from '@/types/database'
 
@@ -68,6 +69,7 @@ export default function AppShell({
 
   return (
     <UserRoleProvider profile={clientProfile}>
+      <NavigationProgressBar />
       <div id="app">
         <div id="side-veil" onClick={() => setOpen(false)} />
 

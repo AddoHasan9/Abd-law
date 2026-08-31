@@ -1,7 +1,14 @@
-import Placeholder from '@/components/ui/Placeholder'
+import { getAuditLogs } from '@/lib/data/audit'
+import AuditLogsClient from '@/components/settings/AuditLogsClient'
 
-export const metadata = { title: 'سجل العمليات — مكتب المحامي عبد الحسن الخزرجي' }
+export const metadata = {
+  title: 'سجل التدقيق والعمليات | مكتب المحامي عبد الحسن الخزرجي',
+  description: 'سجل حركات تسجيل الدخول والخروج والعمليات في النظام',
+}
 
-export default function SettingsAuditPage() {
-  return <Placeholder title="سجل العمليات" icon="log" note="سجل تدقيق كامل لكل العمليات." />
+export const dynamic = 'force-dynamic'
+
+export default async function SettingsAuditPage() {
+  const initialLogs = await getAuditLogs({ limit: 150 })
+  return <AuditLogsClient initialLogs={initialLogs} />
 }
