@@ -71,7 +71,7 @@ export async function checkAndTriggerCompanyDeadlineNotificationsAction() {
       })
     }
 
-    // 2. حسابات ختامية تقترب مهلة تقديمها أو تجاوزتها
+    // 2. حسابات ختامية: فحص مهلة الضرائب 31/7 ومهلة مسجل الشركات 7/10
     const { data: pendingFs } = await supabase
       .from('financial_statements')
       .select('id, company_id, year, date_submitted, companies(name)')
@@ -79,17 +79,29 @@ export async function checkAndTriggerCompanyDeadlineNotificationsAction() {
 
     for (const fs of pendingFs || []) {
       const state = calculateFSState({ year: fs.year })
-      if (state.status !== 'due_soon' && state.status !== 'penalty_running' && state.status !== 'penalty_max') continue
-
       const companyName = (fs as unknown as { companies?: { name?: string } | null }).companies?.name || 'شركة'
 
-      await notifyOnceIfUnread(supabase, {
-        related_company_id: fs.company_id,
-        type: 'fs_deadline',
-        title: `مهلة تقديم الحسابات الختامية ${fs.year} — ${companyName}`,
-        description: state.statusLabel,
-        link_url: '/commercial/financial-statements',
-      })
+      // تنبيه مهلة الضرائب (31/7)
+      if ((state.taxDaysLeft && state.taxDaysLeft <= 30 && state.taxDaysLeft > 0) || (state.taxDaysLate && state.taxDaysLate > 0)) {
+        await notifyOnceIfUnread(supabase, {
+          related_company_id: fs.company_id,
+          type: 'fs_tax_deadline',
+          title: `مهلة الضرائب (31/7) لحسابات ${fs.year} — ${companyName}`,
+          description: state.taxStatusLabel || `آخر موعد لتسليم الحسابات الختامية للهيئة العامة للضرائب (قسم الشركات) هو 31/7`,
+          link_url: '/commercial/financial-statements',
+        })
+      }
+
+      // تنبيه مهلة مسجل الشركات (7/10)
+      if (state.status === 'due_soon' || state.status === 'penalty_running' || state.status === 'penalty_max') {
+        await notifyOnceIfUnread(supabase, {
+          related_company_id: fs.company_id,
+          type: 'fs_deadline',
+          title: `مهلة مسجل الشركات (7/10) لحسابات ${fs.year} — ${companyName}`,
+          description: state.statusLabel,
+          link_url: '/commercial/financial-statements',
+        })
+      }
     }
 
     // 3. شركات تقترب من مهلة إرسال الوديعة على النظام الحكومي

@@ -76,8 +76,13 @@ export function calculateRequiredFSForCompanies(
   })
 
   companies.forEach(company => {
-    // الشركات قيد التأسيس ممنوع مطالبتها أو تكليفها بالحسابات الختامية
-    const isEstablished = company.status === 'established' || Boolean(company.deposit_released) || Boolean(company.cert_date) || Boolean(company.cert_no)
+    // 1. الشركات غير المكلّف بها المكتب لا تطالَب بحسابات ختامية تلقائية
+    if (!company.financial_statements_enabled) {
+      return
+    }
+
+    // 2. الشركات قيد التأسيس ممنوع مطالبتها أو تكليفها بالحسابات الختامية
+    const isEstablished = company.status === 'established' || Boolean(company.deposit_released) || Boolean(company.deposit_released_at)
     if (!isEstablished) {
       return
     }

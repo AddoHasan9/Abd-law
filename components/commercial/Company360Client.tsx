@@ -86,13 +86,13 @@ export default function Company360Client({
 
   // Local Financial Statements Assignment State (Immediate Sync without refresh)
   const [isFsEnabled, setIsFsEnabled] = useState<boolean>(
-    Boolean(company.financial_statements_enabled || company.last_completed_fs_year || financialStatements.length > 0)
+    Boolean(company.financial_statements_enabled)
   )
 
   // إعادة المزامنة مع البيانات الحقيقية القادمة من الخادم بعد أي router.refresh()
   useEffect(() => {
-    setIsFsEnabled(Boolean(company.financial_statements_enabled || company.last_completed_fs_year || financialStatements.length > 0))
-  }, [company.financial_statements_enabled, company.last_completed_fs_year, financialStatements.length])
+    setIsFsEnabled(Boolean(company.financial_statements_enabled))
+  }, [company.financial_statements_enabled])
 
   // Company Overview Form State
   const [name, setName] = useState(company.name || '')

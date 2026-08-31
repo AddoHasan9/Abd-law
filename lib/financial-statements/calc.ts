@@ -102,6 +102,38 @@ export function calculateFSState(
     }
   }
 
+  const taxDeadlineDate = `${submissionYear}-07-31`
+  const taxDeadlineObj = new Date(submissionYear, 6, 31) // 31 July of submission year (الهيئة العامة للضرائب - قسم الشركات)
+
+  let taxDaysLeft = 0
+  let taxDaysLate = 0
+  let taxStatusLabel = ''
+
+  if (isSubmitted && dateSubmitted) {
+    const subDateObj = new Date(dateSubmitted.slice(0, 10))
+    if (subDateObj <= taxDeadlineObj) {
+      taxDaysLeft = 0
+      taxDaysLate = 0
+      taxStatusLabel = 'مقدمة للضرائب في الموعد (قبل 31/7) ✓'
+    } else {
+      taxDaysLate = Math.max(1, Math.floor((subDateObj.getTime() - taxDeadlineObj.getTime()) / 86_400_000))
+      taxStatusLabel = `مقدمة للضرائب بعد 31/7 (تأخير ${taxDaysLate} يوم)`
+    }
+  } else {
+    taxDeadlineObj.setHours(0, 0, 0, 0)
+    if (today <= taxDeadlineObj) {
+      taxDaysLeft = Math.max(0, Math.ceil((taxDeadlineObj.getTime() - today.getTime()) / 86_400_000))
+      taxDaysLate = 0
+      taxStatusLabel = taxDaysLeft <= 30
+        ? `مهلة الضرائب (31/7): متبقي ${taxDaysLeft} يوم ⚠️`
+        : `مهلة الضرائب (31/7): متبقي ${taxDaysLeft} يوم`
+    } else {
+      taxDaysLeft = 0
+      taxDaysLate = Math.max(1, Math.floor((today.getTime() - taxDeadlineObj.getTime()) / 86_400_000))
+      taxStatusLabel = `متأخرة عن مهلة تسليم الضرائب 31/7 (${taxDaysLate} يوم تأخير)`
+    }
+  }
+
   return {
     statementId: fs.id,
     companyId: fs.company_id || '',
@@ -110,6 +142,10 @@ export function calculateFSState(
     startDate,
     deadlineDate,
     penaltyStartDate,
+    taxDeadlineDate,
+    taxDaysLeft,
+    taxDaysLate,
+    taxStatusLabel,
     dateReceived,
     dateSubmitted,
     isSubmitted,

@@ -232,8 +232,9 @@ export default function CompanyFSDetailsModal({
                       <tr key={item.year} style={{ borderBottom: '1px solid var(--line-soft)' }}>
                         <td style={{ padding: '12px 14px', textAlign: 'center', fontWeight: 800 }}>
                           <div>السنة المالية {item.year}</div>
-                          <div style={{ fontSize: '11px', color: 'var(--text-3)', fontWeight: 400, marginTop: '2px' }}>
-                            الموعد: 07/10/{item.year + 1}
+                          <div style={{ fontSize: '10.5px', color: 'var(--text-3)', fontWeight: 600, marginTop: '4px', display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                            <span style={{ color: '#d97706' }}>ضرائب الشركات: 31/07/{item.year + 1}</span>
+                            <span>مسجل الشركات: 07/10/{item.year + 1}</span>
                           </div>
                         </td>
 

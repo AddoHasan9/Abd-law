@@ -83,29 +83,47 @@ export default async function AppLayout({ children }: { children: React.ReactNod
     })
   })
 
-  // 3. غرامات ومهل الحسابات الختامية (الموعد النهائي 7/10 من كل سنة)
+  // 3. غرامات ومهل الحسابات الختامية (ضرائب الشركات 31/7 + مسجل الشركات 7/10)
   const currentYear = new Date().getFullYear()
   companies.forEach(c => {
+    if (!c.financial_statements_enabled) return // فقط الشركات التي تم تكليف المكتب بحساباتها
     if (isCompanyNewAndExempt(c)) return // الشركات الجديدة معفاة حتى إكمال سنة كاملة من التأسيس
-    if (c.financial_statements_enabled || c.last_completed_fs_year) {
-      const lastYear = c.last_completed_fs_year || (c.establishment_date ? parseInt(c.establishment_date.slice(0, 4)) - 1 : currentYear - 2)
-      const pendingYear = lastYear + 1
-      if (pendingYear < currentYear) {
-        const fsState = calculateFSState({ company_id: c.id, year: pendingYear })
+    const lastYear = c.last_completed_fs_year || (c.establishment_date ? parseInt(c.establishment_date.slice(0, 4)) - 1 : currentYear - 2)
+    const pendingYear = lastYear + 1
+    if (pendingYear < currentYear) {
+      const fsState = calculateFSState({ company_id: c.id, year: pendingYear })
+
+      // أ) مهلة تسليم ضرائب الشركات 31/7
+      if ((fsState.taxDaysLeft && fsState.taxDaysLeft <= 30 && fsState.taxDaysLeft > 0) || (fsState.taxDaysLate && fsState.taxDaysLate > 0)) {
         allDeadlines.push({
-          id: `fs_${c.id}_${pendingYear}`,
+          id: `fs_tax_${c.id}_${pendingYear}`,
           companyId: c.id,
           companyName: c.name,
-          title: `ميزانية السنة المالية ${pendingYear}`,
+          title: `تسليم ضرائب الشركات 31/7 (حسابات ${pendingYear})`,
           category: 'financial_statement',
-          categoryLabel: 'الحسابات الختامية',
-          due: fsState.deadlineDate,
-          daysLeft: fsState.daysLeft > 0 ? fsState.daysLeft : -fsState.daysLate,
-          amount: fsState.penaltyAmount,
-          total: 365,
+          categoryLabel: 'ضرائب 31/7',
+          due: fsState.taxDeadlineDate || '',
+          daysLeft: fsState.taxDaysLeft && fsState.taxDaysLeft > 0 ? fsState.taxDaysLeft : -(fsState.taxDaysLate || 0),
+          amount: 0,
+          total: 60,
           linkUrl: `/commercial/financial-statements?companyId=${c.id}`,
         })
       }
+
+      // ب) مهلة مسجل الشركات 7/10
+      allDeadlines.push({
+        id: `fs_reg_${c.id}_${pendingYear}`,
+        companyId: c.id,
+        companyName: c.name,
+        title: `مسجل الشركات 7/10 (ميزانية ${pendingYear})`,
+        category: 'financial_statement',
+        categoryLabel: 'مسجل الشركات 7/10',
+        due: fsState.deadlineDate,
+        daysLeft: fsState.daysLeft > 0 ? fsState.daysLeft : -fsState.daysLate,
+        amount: fsState.penaltyAmount,
+        total: 365,
+        linkUrl: `/commercial/financial-statements?companyId=${c.id}`,
+      })
     }
   })
 

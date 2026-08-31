@@ -38,7 +38,8 @@ export interface AddEstablishedCompanyPayload {
     share_amount?: number
     phone?: string
   }>
-  fs_years: number[]
+  financial_statements_enabled?: boolean
+  fs_years?: number[]
   ids: Array<{
     id_type: 'importer_id' | 'tax_id' | 'planning_id' | 'chamber_id'
     id_number?: string
@@ -88,7 +89,8 @@ export async function createEstablishedCompanyAction(payload: AddEstablishedComp
     const address = payload.address?.trim() || null
     const phone = payload.phone?.trim() || null
     const createdAt = new Date().toISOString()
-    const latestFsYear = payload.fs_years.length > 0 ? Math.max(...payload.fs_years) : null
+    const isFsEnabled = Boolean(payload.financial_statements_enabled)
+    const latestFsYear = isFsEnabled && payload.fs_years && payload.fs_years.length > 0 ? Math.max(...payload.fs_years) : null
 
     // 1. Insert Company into Supabase
     // Note: Do NOT write to companies.manager column (as per AGENTS.md rule)
@@ -107,7 +109,7 @@ export async function createEstablishedCompanyAction(payload: AddEstablishedComp
       external: false,
       deposit_released: true,
       deposit_released_at: createdAt.slice(0, 10),
-      financial_statements_enabled: payload.fs_years.length > 0,
+      financial_statements_enabled: isFsEnabled,
       last_completed_fs_year: latestFsYear,
       establishment_date: certDate || createdAt.slice(0, 10),
     }
@@ -170,8 +172,8 @@ export async function createEstablishedCompanyAction(payload: AddEstablishedComp
       }
     }
 
-    // 4. Insert Financial Statements in financial_statements table
-    if (payload.fs_years && payload.fs_years.length > 0) {
+    // 4. Insert Financial Statements in financial_statements table (if commissioned)
+    if (isFsEnabled && payload.fs_years && payload.fs_years.length > 0) {
       const fsRecords = payload.fs_years.map(y => ({
         id: generateUUID(),
         company_id: companyId,

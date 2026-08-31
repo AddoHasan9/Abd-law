@@ -72,10 +72,11 @@ export default function AddEstablishedCompanyModal({ isOpen, onClose, onSuccess 
     { id: '1', name: '', share_percentage: '100', share_amount: '', phone: '' },
   ])
 
-  // Financial Statements / Budgets (Years submitted)
+  // Financial Statements / Budgets (Years submitted) - Default Disabled unless commissioned
   const currentYear = new Date().getFullYear()
   const availableYears = [currentYear, currentYear - 1, currentYear - 2, currentYear - 3, currentYear - 4, currentYear - 5]
-  const [selectedFsYears, setSelectedFsYears] = useState<number[]>([currentYear])
+  const [enableFinancialStatements, setEnableFinancialStatements] = useState(false)
+  const [selectedFsYears, setSelectedFsYears] = useState<number[]>([])
   const [customYearInput, setCustomYearInput] = useState('')
 
   // Company IDs
@@ -274,7 +275,8 @@ export default function AddEstablishedCompanyModal({ isOpen, onClose, onSuccess 
       phone: phone.trim() || undefined,
       address: address.trim() || undefined,
       shareholders: cleanShareholders,
-      fs_years: selectedFsYears,
+      financial_statements_enabled: enableFinancialStatements,
+      fs_years: enableFinancialStatements ? selectedFsYears : [],
       ids: activeIDs,
     })
 
@@ -712,53 +714,81 @@ export default function AddEstablishedCompanyModal({ isOpen, onClose, onSuccess 
               </div>
             </div>
 
-            {/* 4. الميزانيات الخاصة بالشركة (الحسابات الختامية المقدمة) */}
+            {/* 4. الميزانيات الخاصة بالشركة (الحسابات الختامية) */}
             <div style={{ background: 'var(--surface-2)', padding: '16px', borderRadius: 'var(--r-md)', border: '1px solid var(--line-soft)' }}>
-              <h4 style={{ fontSize: '13.5px', fontWeight: 800, color: 'var(--accent)', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <Icon name="doc" />
-                <span>الميزانيات والحسابات الختامية المقدمة</span>
-              </h4>
-              <p style={{ fontSize: '12px', color: 'var(--text-3)', margin: '0 0 12px 0' }}>
-                حدد السنوات المالية والميزانيات التي تم إنجازها وتقديمها للشركة مسبقاً:
-              </p>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px', flexWrap: 'wrap', gap: '8px' }}>
+                <h4 style={{ fontSize: '13.5px', fontWeight: 800, color: 'var(--accent)', margin: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <Icon name="doc" />
+                  <span>الحسابات الختامية والميزانيات</span>
+                </h4>
 
-              {/* Year tags */}
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginBottom: '12px' }}>
-                {availableYears.map(yr => {
-                  const selected = selectedFsYears.includes(yr)
-                  return (
+                {/* Toggle switch for commissioning the office */}
+                <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', userSelect: 'none' }}>
+                  <input
+                    type="checkbox"
+                    checked={enableFinancialStatements}
+                    onChange={e => {
+                      const val = e.target.checked
+                      setEnableFinancialStatements(val)
+                      if (!val) setSelectedFsYears([])
+                    }}
+                    style={{ width: '16px', height: '16px', accentColor: 'var(--accent)', cursor: 'pointer' }}
+                  />
+                  <span style={{ fontSize: '12px', fontWeight: 700, color: enableFinancialStatements ? 'var(--accent)' : 'var(--text-3)' }}>
+                    تكليف المكتب بالحسابات الختامية
+                  </span>
+                </label>
+              </div>
+
+              {!enableFinancialStatements ? (
+                <p style={{ fontSize: '12px', color: 'var(--text-3)', margin: 0, lineHeight: 1.5 }}>
+                  المكتب غير مكلّف بالحسابات الختامية لهذه الشركة حالياً (لن تظهر الشركة في المهل القانونية أو قسم الميزانيات إلا بعد التكليف).
+                </p>
+              ) : (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginTop: '10px', paddingTop: '10px', borderTop: '1px dashed var(--line-soft)' }}>
+                  <p style={{ fontSize: '12px', color: 'var(--text-2)', margin: 0 }}>
+                    حدد السنوات المالية والميزانيات المنجزة سابقاً لهذه الشركة إن وجدت:
+                  </p>
+
+                  {/* Year tags */}
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                    {availableYears.map(yr => {
+                      const selected = selectedFsYears.includes(yr)
+                      return (
+                        <button
+                          key={yr}
+                          type="button"
+                          onClick={() => toggleFsYear(yr)}
+                          className={`btn ${selected ? 'btn-primary' : 'btn-ghost'}`}
+                          style={{ fontSize: '12px', padding: '6px 14px' }}
+                        >
+                          {selected ? '✓ ' : '+ '} ميزانية {yr}
+                        </button>
+                      )
+                    })}
+                  </div>
+
+                  {/* Custom Year Adder */}
+                  <div style={{ display: 'flex', gap: '8px', maxWidth: '300px' }}>
+                    <input
+                      type="number"
+                      className="input num"
+                      value={customYearInput}
+                      onChange={e => setCustomYearInput(e.target.value)}
+                      placeholder="سنة سابقة أخرى (مثال: 2019)"
+                      style={{ fontSize: '12.5px' }}
+                    />
                     <button
-                      key={yr}
                       type="button"
-                      onClick={() => toggleFsYear(yr)}
-                      className={`btn ${selected ? 'btn-primary' : 'btn-ghost'}`}
-                      style={{ fontSize: '12px', padding: '6px 14px' }}
+                      onClick={addCustomYear}
+                      className="btn btn-ghost"
+                      style={{ fontSize: '12px' }}
                     >
-                      {selected ? '✓ ' : '+ '} ميزانية {yr}
+                      إضافة سنة
                     </button>
-                  )
-                })}
-              </div>
-
-              {/* Custom Year Adder */}
-              <div style={{ display: 'flex', gap: '8px', maxWidth: '300px' }}>
-                <input
-                  type="number"
-                  className="input num"
-                  value={customYearInput}
-                  onChange={e => setCustomYearInput(e.target.value)}
-                  placeholder="سنة سابقة أخرى (مثال: 2019)"
-                  style={{ fontSize: '12.5px' }}
-                />
-                <button
-                  type="button"
-                  onClick={addCustomYear}
-                  className="btn btn-ghost"
-                  style={{ fontSize: '12px' }}
-                >
-                  إضافة سنة
-                </button>
-              </div>
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* 5. الهويات الموجودة بالشركة */}

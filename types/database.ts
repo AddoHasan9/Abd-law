@@ -446,6 +446,10 @@ export interface FinancialStatementState {
   startDate: string
   deadlineDate: string
   penaltyStartDate: string
+  taxDeadlineDate?: string
+  taxDaysLeft?: number
+  taxDaysLate?: number
+  taxStatusLabel?: string
   dateReceived?: string | null
   dateSubmitted?: string | null
   isSubmitted: boolean

@@ -1614,8 +1614,8 @@ export default function CompanyDetailsModal({ company, isOpen, onClose, onDelete
                     width: '48px',
                     height: '48px',
                     borderRadius: '14px',
-                    background: company.financial_statements_enabled || company.last_completed_fs_year ? 'var(--ok-soft)' : 'var(--line-soft)',
-                    color: company.financial_statements_enabled || company.last_completed_fs_year ? 'var(--ok)' : 'var(--text-3)',
+                    background: company.financial_statements_enabled ? 'var(--ok-soft)' : 'var(--line-soft)',
+                    color: company.financial_statements_enabled ? 'var(--ok)' : 'var(--text-3)',
                     display: 'grid',
                     placeItems: 'center',
                   }}
@@ -1629,7 +1629,7 @@ export default function CompanyDetailsModal({ company, isOpen, onClose, onDelete
                   </h4>
                   <div style={{ fontSize: '13px', color: 'var(--text-2)' }}>
                     الحالة الحالية:{' '}
-                    {company.financial_statements_enabled || company.last_completed_fs_year ? (
+                    {company.financial_statements_enabled ? (
                       <span className="tag tag-ok" style={{ fontWeight: 700 }}>✓ مكلّفة بالحسابات الختامية</span>
                     ) : (
                       <span className="tag tag-gray" style={{ fontWeight: 700 }}>● غير مكلّف</span>
@@ -1638,14 +1638,14 @@ export default function CompanyDetailsModal({ company, isOpen, onClose, onDelete
                 </div>
 
                 <p style={{ fontSize: '12px', color: 'var(--text-3)', maxWidth: '420px', margin: 0, lineHeight: 1.6 }}>
-                  {company.financial_statements_enabled || company.last_completed_fs_year
+                  {company.financial_statements_enabled
                     ? 'تم تكليف المكتب بمتابعة الحسابات الختامية والميزانيات السنوية لهذه الشركة. يمكنك إدارة السنوات والغرامات والتذكيرات من مساحة العمل المستقلة.'
                     : !isCompanyEstablished
                     ? 'هذه الشركة قيد التأسيس حالياً — التكليف بالحسابات الختامية ممنوع وغير متاح إلا بعد اكتمال التأسيس بالكامل وصدور الشهادة الرسمية.'
                     : 'إذا قام صاحب الشركة بتكليف المكتب بمتابعة الحسابات الختامية والميزانيات السنوية، اضغط زر التكليف أدناه لفتح وحدة الحسابات الختامية الخاصة بها.'}
                 </p>
 
-                {!(company.financial_statements_enabled || company.last_completed_fs_year) ? (
+                {!company.financial_statements_enabled ? (
                   !isCompanyEstablished ? (
                     <div style={{ padding: '10px 20px', background: 'rgba(239, 68, 68, 0.08)', border: '1px solid rgba(239, 68, 68, 0.25)', borderRadius: 'var(--r-md)', fontSize: '12.5px', color: 'var(--bad)', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '6px' }}>
                       <span>🚫 الحسابات الختامية ممنوعة للشركات قيد التأسيس</span>
@@ -1674,7 +1674,7 @@ export default function CompanyDetailsModal({ company, isOpen, onClose, onDelete
                     </button>
                   )
                 ) : (
-                  <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', justifyContent: 'center' }}>
+                  <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', justifyContent: 'center', alignItems: 'center' }}>
                     <a
                       href={`/commercial/financial-statements?companyId=${company.id}`}
                       className="btn btn-primary"
@@ -1682,6 +1682,27 @@ export default function CompanyDetailsModal({ company, isOpen, onClose, onDelete
                     >
                       فتح مساحة عمل الحسابات الختامية ←
                     </a>
+                    <button
+                      type="button"
+                      disabled={loading}
+                      onClick={async () => {
+                        if (confirm('هل تريد إلغاء تكليف المكتب بالحسابات الختامية لهذه الشركة؟\nلن تظهر الشركة بعد الآن في المهل القانونية أو قسم الميزانيات.')) {
+                          setLoading(true)
+                          const res = await updateCompanyFSSettingsAction(company.id, { financial_statements_enabled: false })
+                          setLoading(false)
+                          if (res.success) {
+                            setMessage({ type: 'ok', text: 'تم إلغاء تكليف المكتب بالحسابات الختامية' })
+                            router.refresh()
+                          } else {
+                            setMessage({ type: 'err', text: res.error || 'تعذّر إلغاء التكليف' })
+                          }
+                        }
+                      }}
+                      className="btn btn-ghost"
+                      style={{ padding: '10px 18px', fontSize: '12.5px', color: 'var(--bad)' }}
+                    >
+                      إلغاء التكليف
+                    </button>
                   </div>
                 )}
               </div>

@@ -9,6 +9,7 @@ import { WORKFLOW_STATUS_LIST, normalizeWorkflowStatus } from '@/lib/workflow-st
 
 import type { ViewDashboardAlert } from '@/types/database'
 import { getActiveExpiryAlerts, type ExpiryAlertItem } from '@/lib/notification-engine'
+import { calculateFSState } from '@/lib/financial-statements/calc'
 
 export interface DashboardStats {
   activeTxCount: number
@@ -25,6 +26,7 @@ export interface DashboardStats {
   urgentDeadlines: Array<{
     companyId: string
     companyName: string
+    title?: string
     daysLeft: number
     daysLate: number
     amount: number
@@ -131,15 +133,18 @@ export async function getDashboardStats(): Promise<DashboardStats> {
   let totalPenaltyAmount = 0
   const urgentDeadlines: DashboardStats['urgentDeadlines'] = []
 
+  // 1. غرامات ومهل إطلاق الوديعة (فقط للشركات قيد التأسيس وغير المطلقة وديعتها)
   for (const co of companies) {
+    if (co.status === 'established' || co.deposit_released || Boolean(co.deposit_released_at)) continue
     const isSub = submittedSet.has(co.id)
-    const pen = penaltyState({ cert_date: co.cert_date, kind: co.kind }, isSub, DEFAULT_PENALTY)
+    const pen = penaltyState(co, isSub, DEFAULT_PENALTY)
     if (pen) {
       totalPenaltyAmount += pen.amount
       if (pen.level === 'late' || pen.level === 'soon') {
         urgentDeadlines.push({
           companyId: co.id,
           companyName: co.name,
+          title: 'إطلاق الوديعة المصرفية',
           daysLeft: pen.daysLeft,
           daysLate: pen.daysLate,
           amount: pen.amount,
@@ -149,6 +154,59 @@ export async function getDashboardStats(): Promise<DashboardStats> {
       }
     }
   }
+
+  // 2. هويات وتراخيص حكومية تقترب من الانتهاء (أو منتهية)
+  expiryAlerts.forEach(a => {
+    urgentDeadlines.push({
+      companyId: a.companyId,
+      companyName: a.companyName,
+      title: a.title,
+      daysLeft: a.daysLeft,
+      daysLate: a.daysLeft < 0 ? Math.abs(a.daysLeft) : 0,
+      amount: a.daysLeft < 0 ? 50000 : 0,
+      due: a.expiryDate || '',
+      level: a.daysLeft < 0 ? 'late' : 'soon',
+    })
+  })
+
+  // 3. الحسابات الختامية (فقط للشركات المكلّف بها المكتب بحساباتها)
+  const currentYear = new Date().getFullYear()
+  companies.forEach(c => {
+    if (!c.financial_statements_enabled) return
+    const lastYear = c.last_completed_fs_year || (c.establishment_date ? parseInt(c.establishment_date.slice(0, 4)) - 1 : currentYear - 2)
+    const pendingYear = lastYear + 1
+    if (pendingYear < currentYear) {
+      const fsState = calculateFSState({ company_id: c.id, year: pendingYear })
+      
+      // مهلة الضرائب 31/7
+      if ((fsState.taxDaysLeft && fsState.taxDaysLeft <= 30 && fsState.taxDaysLeft > 0) || (fsState.taxDaysLate && fsState.taxDaysLate > 0)) {
+        urgentDeadlines.push({
+          companyId: c.id,
+          companyName: c.name,
+          title: `تسليم ضرائب الشركات 31/7 (حسابات ${pendingYear})`,
+          daysLeft: fsState.taxDaysLeft && fsState.taxDaysLeft > 0 ? fsState.taxDaysLeft : -(fsState.taxDaysLate || 0),
+          daysLate: fsState.taxDaysLate || 0,
+          amount: 0,
+          due: fsState.taxDeadlineDate || '',
+          level: (fsState.taxDaysLate && fsState.taxDaysLate > 0) ? 'late' : 'soon',
+        })
+      }
+
+      // مهلة مسجل الشركات 7/10
+      if (fsState.status === 'due_soon' || fsState.status === 'penalty_running' || fsState.status === 'penalty_max') {
+        urgentDeadlines.push({
+          companyId: c.id,
+          companyName: c.name,
+          title: `مسجل الشركات 7/10 (ميزانية ${pendingYear})`,
+          daysLeft: fsState.daysLeft > 0 ? fsState.daysLeft : -fsState.daysLate,
+          daysLate: fsState.daysLate,
+          amount: fsState.penaltyAmount,
+          due: fsState.deadlineDate,
+          level: fsState.daysLate > 0 ? 'late' : 'soon',
+        })
+      }
+    }
+  })
 
   urgentDeadlines.sort((a, b) => a.daysLeft - b.daysLeft)
 
