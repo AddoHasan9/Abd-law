@@ -262,4 +262,47 @@ describe('Duplicate Data Prevention Tests', () => {
       writeJsonFile('company_timeline.json', diskTimeline.filter(e => e.company_id !== testCompanyId && !e.company_id?.startsWith('dup_') && !e.company_id?.startsWith('test_co_')))
     }
   })
+
+  it('permanently deletes company and cascades removal across all modules and transactions', async () => {
+    const { createCompanyFormationAction, deleteCompanyAction } = await import('../app/(app)/commercial/companies/actions')
+    const { listCompanies } = await import('../lib/data/companies')
+    const { listTransactions } = await import('../lib/data/transactions')
+
+    let companyId: string | null = null
+    try {
+      // 1. Create temporary company
+      const createRes = await createCompanyFormationAction({
+        name: `شركة اختبار الحذف النهائي ${Date.now()}`,
+        kind: 'محدودة',
+        capital: 5000000,
+        lawyer_id: 'db13125d-3aa1-46ab-9159-8fad18746623',
+      })
+      assert.strictEqual(createRes.success, true)
+      companyId = createRes.company?.id || null
+      assert.ok(companyId)
+
+      // Verify company exists
+      let companies = await listCompanies()
+      assert.ok(companies.some(c => c.id === companyId))
+
+      // 2. Perform permanent deletion
+      const delRes = await deleteCompanyAction(companyId)
+      assert.strictEqual(delRes?.success, true)
+
+      // 3. Verify company is erased from companies
+      companies = await listCompanies()
+      assert.strictEqual(companies.some(c => c.id === companyId), false, 'Company must be removed from listCompanies')
+
+      // 4. Verify ZERO transactions remain for this company in listTransactions
+      const txs = await listTransactions()
+      assert.strictEqual(txs.some(t => t.company_id === companyId), false, 'All transactions for deleted company must be completely removed')
+    } finally {
+      if (companyId) {
+        await deleteCompanyAction(companyId).catch(() => {})
+      }
+      const { readJsonFile, writeJsonFile } = await import('../lib/data/fs-store')
+      const diskTimeline = readJsonFile<Array<{ company_id?: string }>>('company_timeline.json', [])
+      writeJsonFile('company_timeline.json', diskTimeline.filter(e => e.company_id !== companyId && !e.company_id?.startsWith('dup_') && !e.company_id?.startsWith('test_co_')))
+    }
+  })
 })

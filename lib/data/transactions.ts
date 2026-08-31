@@ -68,19 +68,23 @@ export async function listTransactions(filters?: {
     }
   }
 
+  const companies = await listCompanies()
+  const compMap = new Map(companies.map(c => [c.id, c]))
+  const validCompanyIds = new Set(companies.map(c => c.id))
+
   const map = new Map<string, TransactionFull>()
 
-  // 1. Process disk transactions (filter out deleted ones)
+  // 1. Process disk transactions (filter out deleted ones and orphan company transactions)
   diskTxs.forEach(t => {
     if (deletedTxIds.has(t.id)) return
-    if (t.company_id && deletedCompanyIds.has(t.company_id)) return
+    if (t.company_id && (deletedCompanyIds.has(t.company_id) || !validCompanyIds.has(t.company_id))) return
     map.set(t.id, t)
   })
 
-  // 2. Process DB transactions (filter out deleted ones)
+  // 2. Process DB transactions (filter out deleted ones and orphan company transactions)
   dbTxs.forEach(t => {
     if (deletedTxIds.has(t.id)) return
-    if (t.company_id && deletedCompanyIds.has(t.company_id)) return
+    if (t.company_id && (deletedCompanyIds.has(t.company_id) || !validCompanyIds.has(t.company_id))) return
     const existing = map.get(t.id)
     if (existing) {
       map.set(t.id, {
@@ -99,9 +103,6 @@ export async function listTransactions(filters?: {
 
   // 3. Attach company objects & synthesize missing module transactions
   try {
-    const companies = await listCompanies()
-    const compMap = new Map(companies.map(c => [c.id, c]))
-
     // Attach company object to existing transactions
     for (const [txId, tx] of map.entries()) {
       if (tx.company_id && compMap.has(tx.company_id)) {
@@ -157,7 +158,7 @@ export async function listTransactions(filters?: {
     const diskIDs = readJsonFile<Array<{ id: string; company_id?: string; company_name?: string; id_type?: string; id_number?: string; issue_date?: string; expiry_date?: string; tx_start_date?: string; status?: string; notes?: string; lawyer_id?: string; created_at?: string }>>('company_ids.json', [])
     diskIDs.forEach(idRec => {
       if (deletedTxIds.has(idRec.id)) return
-      if (idRec.company_id && deletedCompanyIds.has(idRec.company_id)) return
+      if (idRec.company_id && (deletedCompanyIds.has(idRec.company_id) || !validCompanyIds.has(idRec.company_id))) return
       if (!map.has(idRec.id)) {
         const comp = idRec.company_id ? compMap.get(idRec.company_id) : null
         const compName = comp?.name || idRec.company_name || 'شركة'
@@ -190,7 +191,7 @@ export async function listTransactions(filters?: {
     const diskTax = readJsonFile<Array<{ id: string; company_id?: string; company_name?: string; year?: number; status?: string; tx_start_date?: string; clearance_date?: string; tax_amount_assessed?: number; lawyer_id?: string; assigned_lawyer_name?: string; created_at?: string }>>('tax_assessments.json', [])
     diskTax.forEach(taxRec => {
       if (deletedTxIds.has(taxRec.id)) return
-      if (taxRec.company_id && deletedCompanyIds.has(taxRec.company_id)) return
+      if (taxRec.company_id && (deletedCompanyIds.has(taxRec.company_id) || !validCompanyIds.has(taxRec.company_id))) return
       if (taxRec.company_id?.startsWith('dup_tax_co_') || taxRec.company_id?.startsWith('test_co_')) return
       if (!map.has(taxRec.id)) {
         const comp = taxRec.company_id ? compMap.get(taxRec.company_id) : null

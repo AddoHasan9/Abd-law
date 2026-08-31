@@ -298,9 +298,11 @@ export async function createCompanyFormationAction(payload: {
       related_link: '/commercial/companies',
     })
 
-    revalidatePath('/commercial/companies')
-    revalidatePath('/commercial')
-    revalidatePath('/dashboard')
+    try {
+      revalidatePath('/commercial/companies')
+      revalidatePath('/commercial')
+      revalidatePath('/dashboard')
+    } catch {}
 
     return { success: true, company }
   } catch (err: unknown) {
@@ -1062,9 +1064,23 @@ export async function deleteCompanyAction(companyId: string) {
       const diskIDs = readJsonFile<Array<Record<string, unknown>>>('company_ids.json', [])
       writeJsonFile('company_ids.json', diskIDs.filter(i => i.company_id !== companyId))
 
-      // Transactions
+      // Transactions & blacklist their IDs
       const diskTxs = readJsonFile<Array<Record<string, unknown>>>('transactions.json', [])
-      writeJsonFile('transactions.json', diskTxs.filter(t => t.company_id !== companyId && t.id !== `tx_${companyId}`))
+      const txsToDelete = diskTxs.filter(t => t.company_id === companyId || t.id === `tx_${companyId}` || t.id === `tx_tasis_${companyId}`)
+      const deletedTxIds = readJsonFile<string[]>('deleted_transaction_ids.json', [])
+      txsToDelete.forEach(t => {
+        if (typeof t.id === 'string' && !deletedTxIds.includes(t.id)) {
+          deletedTxIds.push(t.id)
+        }
+      })
+      if (!deletedTxIds.includes(`tx_${companyId}`)) deletedTxIds.push(`tx_${companyId}`)
+      if (!deletedTxIds.includes(`tx_tasis_${companyId}`)) deletedTxIds.push(`tx_tasis_${companyId}`)
+      writeJsonFile('deleted_transaction_ids.json', deletedTxIds)
+      writeJsonFile('transactions.json', diskTxs.filter(t => t.company_id !== companyId && t.id !== `tx_${companyId}` && t.id !== `tx_tasis_${companyId}`))
+
+      // Tax Assessments
+      const diskTax = readJsonFile<Array<Record<string, unknown>>>('tax_assessments.json', [])
+      writeJsonFile('tax_assessments.json', diskTax.filter(t => t.company_id !== companyId))
 
       // Deposits
       const diskDeposits = readJsonFile<Array<Record<string, unknown>>>('deposits.json', [])
@@ -1074,7 +1090,10 @@ export async function deleteCompanyAction(companyId: string) {
       const diskFS = readJsonFile<Array<Record<string, unknown>>>('financial_statements.json', [])
       writeJsonFile('financial_statements.json', diskFS.filter(f => f.company_id !== companyId))
 
-      // Timeline events
+      // Company Timeline & timeline events
+      const diskCompanyTimeline = readJsonFile<Array<Record<string, unknown>>>('company_timeline.json', [])
+      writeJsonFile('company_timeline.json', diskCompanyTimeline.filter(e => e.company_id !== companyId))
+
       const diskTimeline = readJsonFile<Array<Record<string, unknown>>>('timeline_events.json', [])
       writeJsonFile('timeline_events.json', diskTimeline.filter(e => e.company_id !== companyId))
     } catch (diskErr) {

@@ -61,8 +61,10 @@ export async function createNotificationAction(payload: {
       return { success: false, error: error.message }
     }
 
-    revalidatePath('/commercial')
-    revalidatePath('/dashboard')
+    try {
+      revalidatePath('/commercial')
+      revalidatePath('/dashboard')
+    } catch {}
     return { success: true, data }
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : 'فشل إرسال الإشعار'
