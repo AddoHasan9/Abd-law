@@ -786,13 +786,16 @@ export default function CompanyDetailsModal({ company, isOpen, onClose, onDelete
                       }}
                     >
                       <div className="field" style={{ marginBottom: 0 }}>
-                        <label style={{ fontSize: '11px', color: 'var(--text-3)', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                        <label htmlFor={`edit-sh-name-${sh.id}`} style={{ fontSize: '11px', color: 'var(--text-3)', display: 'flex', alignItems: 'center', gap: '4px' }}>
                           <span className="w-4 h-4 rounded-full bg-[var(--accent-soft)] text-[var(--accent)] text-[9.5px] font-bold inline-flex items-center justify-center">{idx + 1}</span>
                           <span>اسم الشريك / المساهم *</span>
                         </label>
                         <input
+                          id={`edit-sh-name-${sh.id}`}
+                          name={`edit_shareholder_name_${idx}`}
                           type="text"
                           className="input"
+                          autoComplete="name"
                           style={{ padding: '6px 10px', fontSize: '12.5px' }}
                           value={sh.name}
                           onChange={e => updateShareholder(sh.id, 'name', e.target.value)}
@@ -802,12 +805,15 @@ export default function CompanyDetailsModal({ company, isOpen, onClose, onDelete
                       </div>
 
                       <div className="field" style={{ marginBottom: 0 }}>
-                        <label style={{ fontSize: '11px', color: 'var(--text-3)' }}>
+                        <label htmlFor={`edit-sh-phone-${sh.id}`} style={{ fontSize: '11px', color: 'var(--text-3)' }}>
                           رقم الهاتف
                         </label>
                         <input
+                          id={`edit-sh-phone-${sh.id}`}
+                          name={`edit_shareholder_phone_${idx}`}
                           type="text"
                           className="input num"
+                          autoComplete="tel"
                           style={{ padding: '6px 10px', fontSize: '12.5px' }}
                           value={sh.phone}
                           onChange={e => updateShareholder(sh.id, 'phone', e.target.value)}
@@ -816,12 +822,15 @@ export default function CompanyDetailsModal({ company, isOpen, onClose, onDelete
                       </div>
 
                       <div className="field" style={{ marginBottom: 0 }}>
-                        <label style={{ fontSize: '11px', color: 'var(--text-2)', fontWeight: 600 }}>
+                        <label htmlFor={`edit-sh-amount-${sh.id}`} style={{ fontSize: '11px', color: 'var(--text-2)', fontWeight: 600 }}>
                           عدد الأسهم (د.ع)
                         </label>
                         <input
+                          id={`edit-sh-amount-${sh.id}`}
+                          name={`edit_shareholder_amount_${idx}`}
                           type="text"
                           className="input num font-bold"
+                          autoComplete="off"
                           style={{ padding: '6px 10px', fontSize: '12.5px' }}
                           value={sh.share_amount}
                           onChange={e => updateShareholder(sh.id, 'share_amount', e.target.value)}
@@ -830,13 +839,16 @@ export default function CompanyDetailsModal({ company, isOpen, onClose, onDelete
                       </div>
 
                       <div className="field" style={{ marginBottom: 0 }}>
-                        <label style={{ fontSize: '11px', color: 'var(--accent)', fontWeight: 700 }}>
+                        <label htmlFor={`edit-sh-pct-${sh.id}`} style={{ fontSize: '11px', color: 'var(--accent)', fontWeight: 700 }}>
                           النسبة (%)
                         </label>
                         <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
                           <input
+                            id={`edit-sh-pct-${sh.id}`}
+                            name={`edit_shareholder_percentage_${idx}`}
                             type="text"
                             className="input num font-extrabold text-[var(--accent)]"
+                            autoComplete="off"
                             style={{ padding: '6px 20px 6px 8px', fontSize: '12.5px' }}
                             value={sh.share_percentage}
                             onChange={e => updateShareholder(sh.id, 'share_percentage', e.target.value)}

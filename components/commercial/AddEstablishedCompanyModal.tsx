@@ -371,8 +371,10 @@ export default function AddEstablishedCompanyModal({ isOpen, onClose, onSuccess 
                   <label htmlFor="est-co-name">اسم الشركة الكامل *</label>
                   <input
                     id="est-co-name"
+                    name="company_name"
                     type="text"
                     className="input"
+                    autoComplete="organization"
                     value={name}
                     onChange={e => setName(e.target.value)}
                     placeholder="مثال: شركة النور للمقاولات والتجارة العامة محدودة المسؤولية"
@@ -385,8 +387,10 @@ export default function AddEstablishedCompanyModal({ isOpen, onClose, onSuccess 
                     <label htmlFor="est-co-reg-no">رقم الشركة في مسجل الشركات</label>
                     <input
                       id="est-co-reg-no"
+                      name="registrar_no"
                       type="text"
                       className="input num"
+                      autoComplete="off"
                       value={registrarNo}
                       onChange={e => setRegistrarNo(e.target.value)}
                       placeholder="مثال: م.ش / 54201"
@@ -397,8 +401,10 @@ export default function AddEstablishedCompanyModal({ isOpen, onClose, onSuccess 
                     <label htmlFor="est-co-tax-no">رقم الشركة في الهيئة العامة للضرائب</label>
                     <input
                       id="est-co-tax-no"
+                      name="tax_no"
                       type="text"
                       className="input num"
+                      autoComplete="off"
                       value={taxNo}
                       onChange={e => setTaxNo(e.target.value)}
                       placeholder="مثال: 90034182"
@@ -409,6 +415,7 @@ export default function AddEstablishedCompanyModal({ isOpen, onClose, onSuccess 
                     <label htmlFor="est-co-kind">نوع الشركة</label>
                     <select
                       id="est-co-kind"
+                      name="company_kind"
                       className="input"
                       value={kind}
                       onChange={e => setKind(e.target.value)}
@@ -426,8 +433,10 @@ export default function AddEstablishedCompanyModal({ isOpen, onClose, onSuccess 
                     <label htmlFor="est-co-cert-no">رقم شهادة التأسيس</label>
                     <input
                       id="est-co-cert-no"
+                      name="cert_no"
                       type="text"
                       className="input num"
+                      autoComplete="off"
                       value={certNo}
                       onChange={e => setCertNo(e.target.value)}
                       placeholder="مثال: 45290"
@@ -438,8 +447,10 @@ export default function AddEstablishedCompanyModal({ isOpen, onClose, onSuccess 
                     <label htmlFor="est-co-cert-date">تاريخ الشهادة / التأسيس</label>
                     <input
                       id="est-co-cert-date"
+                      name="cert_date"
                       type="date"
                       className="input"
+                      autoComplete="off"
                       value={certDate}
                       onChange={e => setCertDate(e.target.value)}
                     />
@@ -449,8 +460,10 @@ export default function AddEstablishedCompanyModal({ isOpen, onClose, onSuccess 
                     <label htmlFor="est-co-capital">رأس المال (د.ع) *</label>
                     <input
                       id="est-co-capital"
+                      name="capital"
                       type="text"
                       className="input num"
+                      autoComplete="off"
                       value={capital}
                       onChange={e => handleCapitalChange(e.target.value)}
                       placeholder="100,000,000"
@@ -463,8 +476,10 @@ export default function AddEstablishedCompanyModal({ isOpen, onClose, onSuccess 
                     <label htmlFor="est-co-phone">هاتف الشركة</label>
                     <input
                       id="est-co-phone"
+                      name="company_phone"
                       type="text"
                       className="input num"
+                      autoComplete="tel"
                       value={phone}
                       onChange={e => setPhone(e.target.value)}
                       placeholder="0770XXXXXXX"
@@ -475,8 +490,10 @@ export default function AddEstablishedCompanyModal({ isOpen, onClose, onSuccess 
                     <label htmlFor="est-co-address">المقر / العنوان</label>
                     <input
                       id="est-co-address"
+                      name="company_address"
                       type="text"
                       className="input"
+                      autoComplete="street-address"
                       value={address}
                       onChange={e => setAddress(e.target.value)}
                       placeholder="بغداد - المنصور - شارع 14 رمضان"
@@ -490,6 +507,7 @@ export default function AddEstablishedCompanyModal({ isOpen, onClose, onSuccess 
                   </label>
                   <select
                     id="est-co-lawyer"
+                    name="lawyer_id"
                     className="input"
                     value={lawyerId || (lawyers[0]?.id || '')}
                     onChange={e => setLawyerId(e.target.value)}
@@ -516,8 +534,10 @@ export default function AddEstablishedCompanyModal({ isOpen, onClose, onSuccess 
                   <label htmlFor="est-mgr-name">اسم المدير المفوض *</label>
                   <input
                     id="est-mgr-name"
+                    name="manager_name"
                     type="text"
                     className="input"
+                    autoComplete="name"
                     value={manager}
                     onChange={e => setManager(e.target.value)}
                     placeholder="الاسم الثلاثي أو الرباعي للمدير المفوض"
@@ -529,8 +549,10 @@ export default function AddEstablishedCompanyModal({ isOpen, onClose, onSuccess 
                   <label htmlFor="est-mgr-phone">هاتف المدير المفوض</label>
                   <input
                     id="est-mgr-phone"
+                    name="manager_phone"
                     type="text"
                     className="input num"
+                    autoComplete="tel"
                     value={managerPhone}
                     onChange={e => setManagerPhone(e.target.value)}
                     placeholder="0770XXXXXXX"
@@ -576,13 +598,16 @@ export default function AddEstablishedCompanyModal({ isOpen, onClose, onSuccess 
                     }}
                   >
                     <div className="field" style={{ marginBottom: 0 }}>
-                      <label style={{ fontSize: '11px', color: 'var(--text-3)', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                      <label htmlFor={`sh-name-${sh.id}`} style={{ fontSize: '11px', color: 'var(--text-3)', display: 'flex', alignItems: 'center', gap: '4px' }}>
                         <span className="w-4 h-4 rounded-full bg-[var(--accent-soft)] text-[var(--accent)] text-[9.5px] font-bold inline-flex items-center justify-center">{idx + 1}</span>
                         <span>اسم المساهم *</span>
                       </label>
                       <input
+                        id={`sh-name-${sh.id}`}
+                        name={`shareholder_name_${idx}`}
                         type="text"
                         className="input"
+                        autoComplete="name"
                         style={{ padding: '6px 10px', fontSize: '12.5px' }}
                         value={sh.name}
                         onChange={e => updateShareholder(sh.id, 'name', e.target.value)}
@@ -592,12 +617,15 @@ export default function AddEstablishedCompanyModal({ isOpen, onClose, onSuccess 
                     </div>
 
                     <div className="field" style={{ marginBottom: 0 }}>
-                      <label style={{ fontSize: '11px', color: 'var(--text-3)' }}>
+                      <label htmlFor={`sh-phone-${sh.id}`} style={{ fontSize: '11px', color: 'var(--text-3)' }}>
                         هاتف المساهم
                       </label>
                       <input
+                        id={`sh-phone-${sh.id}`}
+                        name={`shareholder_phone_${idx}`}
                         type="text"
                         className="input num"
+                        autoComplete="tel"
                         style={{ padding: '6px 10px', fontSize: '12.5px' }}
                         value={sh.phone}
                         onChange={e => updateShareholder(sh.id, 'phone', e.target.value)}
@@ -606,12 +634,15 @@ export default function AddEstablishedCompanyModal({ isOpen, onClose, onSuccess 
                     </div>
 
                     <div className="field" style={{ marginBottom: 0 }}>
-                      <label style={{ fontSize: '11px', color: 'var(--text-2)', fontWeight: 600 }}>
+                      <label htmlFor={`sh-amount-${sh.id}`} style={{ fontSize: '11px', color: 'var(--text-2)', fontWeight: 600 }}>
                         عدد الأسهم (د.ع)
                       </label>
                       <input
+                        id={`sh-amount-${sh.id}`}
+                        name={`shareholder_amount_${idx}`}
                         type="text"
                         className="input num font-bold"
+                        autoComplete="off"
                         style={{ padding: '6px 10px', fontSize: '12.5px' }}
                         value={sh.share_amount}
                         onChange={e => updateShareholder(sh.id, 'share_amount', e.target.value)}
@@ -620,13 +651,16 @@ export default function AddEstablishedCompanyModal({ isOpen, onClose, onSuccess 
                     </div>
 
                     <div className="field" style={{ marginBottom: 0 }}>
-                      <label style={{ fontSize: '11px', color: 'var(--accent)', fontWeight: 700 }}>
+                      <label htmlFor={`sh-pct-${sh.id}`} style={{ fontSize: '11px', color: 'var(--accent)', fontWeight: 700 }}>
                         النسبة (%)
                       </label>
                       <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
                         <input
+                          id={`sh-pct-${sh.id}`}
+                          name={`shareholder_percentage_${idx}`}
                           type="text"
                           className="input num font-extrabold text-[var(--accent)]"
+                          autoComplete="off"
                           style={{ padding: '6px 20px 6px 8px', fontSize: '12.5px' }}
                           value={sh.share_percentage}
                           onChange={e => updateShareholder(sh.id, 'share_percentage', e.target.value)}
@@ -738,8 +772,10 @@ export default function AddEstablishedCompanyModal({ isOpen, onClose, onSuccess 
                 </h4>
 
                 {/* Toggle switch for commissioning the office */}
-                <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', userSelect: 'none' }}>
+                <label htmlFor="est-co-fs-toggle" style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', userSelect: 'none' }}>
                   <input
+                    id="est-co-fs-toggle"
+                    name="enable_financial_statements"
                     type="checkbox"
                     checked={enableFinancialStatements}
                     onChange={e => {
@@ -786,8 +822,11 @@ export default function AddEstablishedCompanyModal({ isOpen, onClose, onSuccess 
                   {/* Custom Year Adder */}
                   <div style={{ display: 'flex', gap: '8px', maxWidth: '300px' }}>
                     <input
+                      id="est-co-custom-fs-year"
+                      name="custom_fs_year"
                       type="number"
                       className="input num"
+                      autoComplete="off"
                       value={customYearInput}
                       onChange={e => setCustomYearInput(e.target.value)}
                       placeholder="سنة سابقة أخرى (مثال: 2019)"
@@ -829,8 +868,10 @@ export default function AddEstablishedCompanyModal({ isOpen, onClose, onSuccess 
                     }}
                   >
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: idItem.enabled ? '10px' : '0' }}>
-                      <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontWeight: 700, fontSize: '13px', margin: 0 }}>
+                      <label htmlFor={`est-id-toggle-${idItem.id_type}`} style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontWeight: 700, fontSize: '13px', margin: 0 }}>
                         <input
+                          id={`est-id-toggle-${idItem.id_type}`}
+                          name={`id_enabled_${idItem.id_type}`}
                           type="checkbox"
                           checked={idItem.enabled}
                           onChange={e => updateIDItem(idItem.id_type, 'enabled', e.target.checked)}
@@ -848,10 +889,13 @@ export default function AddEstablishedCompanyModal({ isOpen, onClose, onSuccess 
                     {idItem.enabled && (
                       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: '10px', paddingTop: '8px', borderTop: '1px solid var(--line-soft)' }}>
                         <div className="field" style={{ marginBottom: 0 }}>
-                          <label style={{ fontSize: '11px', color: 'var(--text-3)' }}>رقم الوثيقة / الهوية</label>
+                          <label htmlFor={`est-id-num-${idItem.id_type}`} style={{ fontSize: '11px', color: 'var(--text-3)' }}>رقم الوثيقة / الهوية</label>
                           <input
+                            id={`est-id-num-${idItem.id_type}`}
+                            name={`id_number_${idItem.id_type}`}
                             type="text"
                             className="input num"
+                            autoComplete="off"
                             value={idItem.id_number}
                             onChange={e => updateIDItem(idItem.id_type, 'id_number', e.target.value)}
                             placeholder="الرقم الرسمي..."
@@ -859,20 +903,26 @@ export default function AddEstablishedCompanyModal({ isOpen, onClose, onSuccess 
                         </div>
 
                         <div className="field" style={{ marginBottom: 0 }}>
-                          <label style={{ fontSize: '11px', color: 'var(--text-3)' }}>تاريخ الإصدار</label>
+                          <label htmlFor={`est-id-issue-${idItem.id_type}`} style={{ fontSize: '11px', color: 'var(--text-3)' }}>تاريخ الإصدار</label>
                           <input
+                            id={`est-id-issue-${idItem.id_type}`}
+                            name={`id_issue_date_${idItem.id_type}`}
                             type="date"
                             className="input"
+                            autoComplete="off"
                             value={idItem.issue_date}
                             onChange={e => updateIDItem(idItem.id_type, 'issue_date', e.target.value)}
                           />
                         </div>
 
                         <div className="field" style={{ marginBottom: 0 }}>
-                          <label style={{ fontSize: '11px', color: 'var(--text-3)' }}>تاريخ الانتهاء</label>
+                          <label htmlFor={`est-id-expiry-${idItem.id_type}`} style={{ fontSize: '11px', color: 'var(--text-3)' }}>تاريخ الانتهاء</label>
                           <input
+                            id={`est-id-expiry-${idItem.id_type}`}
+                            name={`id_expiry_date_${idItem.id_type}`}
                             type="date"
                             className="input"
+                            autoComplete="off"
                             value={idItem.expiry_date}
                             onChange={e => updateIDItem(idItem.id_type, 'expiry_date', e.target.value)}
                           />
@@ -880,8 +930,10 @@ export default function AddEstablishedCompanyModal({ isOpen, onClose, onSuccess 
 
                         {idItem.id_type === 'chamber_id' && (
                           <div className="field" style={{ marginBottom: 0 }}>
-                            <label style={{ fontSize: '11px', color: 'var(--text-3)' }}>الدرجة</label>
+                            <label htmlFor="est-id-chamber-grade" style={{ fontSize: '11px', color: 'var(--text-3)' }}>الدرجة</label>
                             <select
+                              id="est-id-chamber-grade"
+                              name="chamber_grade"
                               className="input"
                               value={idItem.grade || 'الأولى'}
                               onChange={e => updateIDItem(idItem.id_type, 'grade', e.target.value)}
