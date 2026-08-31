@@ -8,6 +8,7 @@ import type { ProfileWithStats } from '@/lib/data/profiles'
 import RemindersWidget from './RemindersWidget'
 import { WorkflowStatus } from '@/components/ui/WorkflowStatus'
 import { FadeInStagger } from '@/components/ui/FadeInStagger'
+import { RollingNumber } from '@/components/ui/RollingNumber'
 import AnalyticsOverview from './AnalyticsOverview'
 
 interface Props {
@@ -98,7 +99,7 @@ export default function DashboardClient({ stats, profiles = [] }: Props) {
           <div className="flex justify-between items-start gap-2 mb-3 relative z-10">
             <div className="flex flex-col min-w-0">
               <span className="text-[11.5px] font-bold text-[var(--text-3)] mb-1 leading-tight">الشركات المؤسسة</span>
-              <span className="text-[22px] sm:text-3xl font-extrabold text-[var(--text)] leading-none num">{establishedCount}</span>
+              <RollingNumber value={establishedCount} className="text-[22px] sm:text-3xl text-[var(--text)] leading-none" />
             </div>
             <div className="w-10 h-10 shrink-0 rounded-2xl bg-emerald-500/15 border border-emerald-500/25 flex items-center justify-center text-emerald-600 dark:text-emerald-400 group-hover:scale-110 group-hover:rotate-3 transition-transform duration-300 shadow-xs">
               <span className="material-symbols-outlined text-[20px]">domain</span>
@@ -121,7 +122,7 @@ export default function DashboardClient({ stats, profiles = [] }: Props) {
           <div className="flex justify-between items-start gap-2 mb-3 relative z-10">
             <div className="flex flex-col min-w-0">
               <span className="text-[11.5px] font-bold text-[var(--text-3)] mb-1 leading-tight">قيد التأسيس</span>
-              <span className="text-[22px] sm:text-3xl font-extrabold text-[var(--text)] leading-none num">{formingCount}</span>
+              <RollingNumber value={formingCount} className="text-[22px] sm:text-3xl text-[var(--text)] leading-none" />
             </div>
             <div className="w-10 h-10 shrink-0 rounded-2xl bg-amber-500/15 border border-amber-500/25 flex items-center justify-center text-amber-600 dark:text-amber-400 group-hover:scale-110 group-hover:rotate-3 transition-transform duration-300 shadow-xs">
               <span className="material-symbols-outlined text-[20px]">pending_actions</span>
@@ -144,7 +145,7 @@ export default function DashboardClient({ stats, profiles = [] }: Props) {
           <div className="flex justify-between items-start gap-2 mb-3 relative z-10">
             <div className="flex flex-col min-w-0">
               <span className="text-[11.5px] font-bold text-[var(--text-3)] mb-1 leading-tight">إطلاق الوديعة</span>
-              <span className="text-[22px] sm:text-3xl font-extrabold text-[var(--text)] leading-none num">{depositsCount}</span>
+              <RollingNumber value={depositsCount} className="text-[22px] sm:text-3xl text-[var(--text)] leading-none" />
             </div>
             <div className="w-10 h-10 shrink-0 rounded-2xl bg-cyan-500/15 border border-cyan-500/25 flex items-center justify-center text-cyan-600 dark:text-cyan-400 group-hover:scale-110 group-hover:rotate-3 transition-transform duration-300 shadow-xs">
               <span className="material-symbols-outlined text-[20px]">savings</span>
@@ -167,7 +168,7 @@ export default function DashboardClient({ stats, profiles = [] }: Props) {
           <div className="flex justify-between items-start gap-2 mb-3 relative z-10">
             <div className="flex flex-col min-w-0">
               <span className="text-[11.5px] font-bold text-[var(--text-3)] mb-1 leading-tight">قسم المحدودة</span>
-              <span className="text-[22px] sm:text-3xl font-extrabold text-[var(--text)] leading-none num">{llcCount}</span>
+              <RollingNumber value={llcCount} className="text-[22px] sm:text-3xl text-[var(--text)] leading-none" />
             </div>
             <div className="w-10 h-10 shrink-0 rounded-2xl bg-blue-500/15 border border-blue-500/25 flex items-center justify-center text-blue-600 dark:text-blue-400 group-hover:scale-110 group-hover:rotate-3 transition-transform duration-300 shadow-xs">
               <span className="material-symbols-outlined text-[20px]">history_edu</span>
@@ -190,7 +191,7 @@ export default function DashboardClient({ stats, profiles = [] }: Props) {
           <div className="flex justify-between items-start gap-2 mb-3 relative z-10">
             <div className="flex flex-col min-w-0">
               <span className="text-[11.5px] font-bold text-[var(--text-3)] mb-1 leading-tight">قسم الهويات</span>
-              <span className="text-[22px] sm:text-3xl font-extrabold text-[var(--text)] leading-none num">{idsCount}</span>
+              <RollingNumber value={idsCount} className="text-[22px] sm:text-3xl text-[var(--text)] leading-none" />
             </div>
             <div className="w-10 h-10 shrink-0 rounded-2xl bg-indigo-500/15 border border-indigo-500/25 flex items-center justify-center text-indigo-600 dark:text-indigo-400 group-hover:scale-110 group-hover:rotate-3 transition-transform duration-300 shadow-xs">
               <span className="material-symbols-outlined text-[20px]">badge</span>
@@ -213,9 +214,7 @@ export default function DashboardClient({ stats, profiles = [] }: Props) {
           <div className="flex justify-between items-start gap-2 mb-3 relative z-10">
             <div className="flex flex-col min-w-0">
               <span className="text-[11.5px] font-bold text-[var(--text-3)] mb-1 leading-tight">الحسابات الختامية</span>
-              <span className="text-[22px] sm:text-3xl font-extrabold text-[var(--text)] leading-none num">
-                {stats.urgentDeadlines?.length || 0}
-              </span>
+              <RollingNumber value={stats.urgentDeadlines?.length || 0} className="text-[22px] sm:text-3xl text-[var(--text)] leading-none" />
             </div>
             <div className="w-10 h-10 shrink-0 rounded-2xl bg-rose-500/15 border border-rose-500/25 flex items-center justify-center text-rose-600 dark:text-rose-400 group-hover:scale-110 group-hover:rotate-3 transition-transform duration-300 shadow-xs">
               <span className="material-symbols-outlined text-[20px]">receipt_long</span>
