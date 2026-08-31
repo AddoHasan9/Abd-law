@@ -51,7 +51,9 @@ export default function Sidebar({
     })
   }, [])
 
-  const currentRole = profile?.role || 'super_admin'
+  // أقل صلاحية عند غياب الملف الشخصي (fail-closed) — يطابق إنفاذ الخادم.
+  // الأدمن الحقيقي يملك صف profiles فعلي فيمرّ دوره كما هو.
+  const currentRole = profile?.role || 'staff'
 
   const visible = (item: { cap?: string }) => {
     if (!item.cap) return true

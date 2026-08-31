@@ -33,7 +33,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="ar" dir="rtl" data-theme="light" className={`${tajawal.variable} ${cairo.variable}`} suppressHydrationWarning>
+    <html lang="ar" dir="rtl" data-theme="light" data-scroll-behavior="smooth" className={`${tajawal.variable} ${cairo.variable}`} suppressHydrationWarning>
       <head>
         {/* Google Material Symbols & Modern Fonts */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />

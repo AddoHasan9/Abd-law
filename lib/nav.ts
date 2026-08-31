@@ -66,6 +66,7 @@ export const NAV: NavGroup[] = [
     items: [
       { key: 'users',       label: 'المستخدمون',       href: '/settings/users',       icon: 'shield', cap: '*' },
       { key: 'permissions', label: 'الصلاحيات',        href: '/settings/permissions', icon: 'key',    cap: '*' },
+      { key: 'audit',       label: 'سجل التدقيق',      href: '/settings/audit',       icon: 'log',    cap: '*' },
       { key: 'settings',    label: 'الإعدادات العامة', href: '/settings',             icon: 'gear'   },
     ],
   },

@@ -267,7 +267,7 @@ export default function Topbar({ profile, title, subtitle, notifCount = 0, onMen
               </Link>
 
               <Link
-                href="/notifications"
+                href="/reminders"
                 onClick={() => setIsUserMenuOpen(false)}
                 className="flex items-center gap-3 px-4 py-2.5 text-xs font-medium text-[var(--text)] hover:bg-[var(--surface-2)] transition-all duration-150 hover:-translate-x-0.5"
               >
