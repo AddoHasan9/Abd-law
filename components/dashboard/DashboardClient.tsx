@@ -366,7 +366,7 @@ export default function DashboardClient({ stats, profiles = [] }: Props) {
             <div className="pt-3 flex justify-between items-center text-xs text-[var(--text-3)] border-t border-[var(--line-soft)] mt-auto">
               <span>عرض أحدث {Math.min(7, filteredRecentTxs.length)} من أصل {recentTxs.length} معاملة مسجلة</span>
               <Link
-                href="/commercial/llc"
+                href="/commercial"
                 className="font-bold text-[var(--accent)] hover:underline flex items-center gap-1"
               >
                 <span>الانتقال لكافة المعاملات</span>

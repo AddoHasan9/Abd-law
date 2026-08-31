@@ -282,9 +282,19 @@ export async function getDashboardStats(): Promise<DashboardStats> {
           fs: 'حسابات ختامية',
           id: 'إصدار هوية',
           'importer_id': 'هوية مستورد',
+          'importer-id-new': 'إصدار هوية مستورد',
+          'importer-id-renew': 'تجديد هوية مستورد',
           'tax_id': 'هوية ضريبية',
+          'tax-id-new': 'إصدار هوية ضريبية',
+          'tax-id-renew': 'تجديد هوية ضريبية',
           'chamber_id': 'هوية غرفة التجارة',
+          'chamber-new': 'إصدار هوية غرفة',
+          'chamber-renew': 'تجديد هوية غرفة',
           'planning_id': 'هوية تخطيط',
+          'plan-id': 'إصدار هوية تخطيط',
+          'plan-id-renew': 'تجديد هوية تخطيط',
+          'tax-assess': 'تحاسب ضريبي',
+          'tax-clear': 'براءة ذمة ضريبية',
         }
         const foundLabel = typeMap[row.type] || (row.type ? txType(row.type).label : null)
         const typeLabel = (foundLabel && foundLabel !== '—') ? foundLabel : 'معاملة تجارية'

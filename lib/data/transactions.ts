@@ -97,11 +97,12 @@ export async function listTransactions(filters?: {
     }
   })
 
-  // 3. Attach company objects from listCompanies
+  // 3. Attach company objects & synthesize missing module transactions
   try {
     const companies = await listCompanies()
     const compMap = new Map(companies.map(c => [c.id, c]))
 
+    // Attach company object to existing transactions
     for (const [txId, tx] of map.entries()) {
       if (tx.company_id && compMap.has(tx.company_id)) {
         const comp = compMap.get(tx.company_id)!
@@ -111,6 +112,113 @@ export async function listTransactions(filters?: {
         })
       }
     }
+
+    // 4. Synthesize company formation transactions
+    const activeCoIdsWithTasis = new Set<string>()
+    map.forEach(t => {
+      if (t.company_id && (t.type === 'tasis' || t.type === 'formation')) {
+        activeCoIdsWithTasis.add(t.company_id)
+      }
+    })
+
+    companies.forEach(co => {
+      if (deletedCompanyIds.has(co.id)) return
+      if (co.id.startsWith('test_co_') || co.id.startsWith('dup_co_')) return
+      if (!activeCoIdsWithTasis.has(co.id)) {
+        const isEstablished = co.status === 'established' || co.status === 'done' || co.deposit_released
+        const tStatus = isEstablished ? 'done' : (co.status || 'progress')
+        const tId = `tx_tasis_${co.id}`
+        if (!map.has(tId) && !deletedTxIds.has(tId)) {
+          map.set(tId, {
+            id: tId,
+            company_id: co.id,
+            client_id: co.client_id || null,
+            lawyer_id: null,
+            type: 'tasis',
+            status: tStatus as 'progress' | 'done' | 'new' | 'doing' | 'wait' | 'lacks' | 'paused' | 'closed',
+            priority: 'medium',
+            tx_date: co.created_at ? co.created_at.slice(0, 10) : new Date().toISOString().slice(0, 10),
+            due_date: null,
+            description: `تأسيس شركة: ${co.name}`,
+            services: ['tasis'],
+            lacks: co.lacks || null,
+            fee: null,
+            phone: co.phone || null,
+            created_at: co.created_at || new Date().toISOString(),
+            companies: co as unknown as Company,
+            clients: null,
+            profiles: null,
+          })
+        }
+      }
+    })
+
+    // 5. Synthesize Government IDs
+    const diskIDs = readJsonFile<Array<{ id: string; company_id?: string; company_name?: string; id_type?: string; id_number?: string; issue_date?: string; expiry_date?: string; tx_start_date?: string; status?: string; notes?: string; lawyer_id?: string; created_at?: string }>>('company_ids.json', [])
+    diskIDs.forEach(idRec => {
+      if (deletedTxIds.has(idRec.id)) return
+      if (idRec.company_id && deletedCompanyIds.has(idRec.company_id)) return
+      if (!map.has(idRec.id)) {
+        const comp = idRec.company_id ? compMap.get(idRec.company_id) : null
+        const compName = comp?.name || idRec.company_name || 'شركة'
+        const isDone = idRec.status === 'done' || Boolean(idRec.id_number || idRec.issue_date)
+        const idTypeStr = idRec.id_type || 'importer_id'
+        map.set(idRec.id, {
+          id: idRec.id,
+          company_id: idRec.company_id || null,
+          client_id: null,
+          lawyer_id: idRec.lawyer_id || null,
+          type: idTypeStr,
+          status: isDone ? 'done' : 'progress',
+          priority: 'medium',
+          tx_date: idRec.tx_start_date || (idRec.created_at ? idRec.created_at.slice(0, 10) : ''),
+          due_date: idRec.expiry_date || null,
+          description: `إصدار ${idTypeStr}: ${compName}`,
+          services: [idTypeStr],
+          lacks: null,
+          fee: null,
+          phone: null,
+          created_at: idRec.created_at || new Date().toISOString(),
+          companies: comp ? (comp as unknown as Company) : ({ id: idRec.company_id, name: compName } as Company),
+          clients: null,
+          profiles: null,
+        })
+      }
+    })
+
+    // 6. Synthesize Tax Assessments
+    const diskTax = readJsonFile<Array<{ id: string; company_id?: string; company_name?: string; year?: number; status?: string; tx_start_date?: string; clearance_date?: string; tax_amount_assessed?: number; lawyer_id?: string; assigned_lawyer_name?: string; created_at?: string }>>('tax_assessments.json', [])
+    diskTax.forEach(taxRec => {
+      if (deletedTxIds.has(taxRec.id)) return
+      if (taxRec.company_id && deletedCompanyIds.has(taxRec.company_id)) return
+      if (taxRec.company_id?.startsWith('dup_tax_co_') || taxRec.company_id?.startsWith('test_co_')) return
+      if (!map.has(taxRec.id)) {
+        const comp = taxRec.company_id ? compMap.get(taxRec.company_id) : null
+        const compName = comp?.name || taxRec.company_name || 'شركة'
+        const isCleared = taxRec.status === 'tax_cleared'
+        const txTypeStr = isCleared ? 'tax-clear' : 'tax-assess'
+        map.set(taxRec.id, {
+          id: taxRec.id,
+          company_id: taxRec.company_id || null,
+          client_id: null,
+          lawyer_id: taxRec.lawyer_id || null,
+          type: txTypeStr,
+          status: isCleared ? 'done' : 'progress',
+          priority: 'medium',
+          tx_date: taxRec.tx_start_date || (taxRec.created_at ? taxRec.created_at.slice(0, 10) : ''),
+          due_date: taxRec.clearance_date || null,
+          description: `تحاسب ضريبي: ${compName} (${taxRec.year || ''})`,
+          services: [txTypeStr],
+          lacks: null,
+          fee: taxRec.tax_amount_assessed || null,
+          phone: null,
+          created_at: taxRec.created_at || new Date().toISOString(),
+          companies: comp ? (comp as unknown as Company) : ({ id: taxRec.company_id, name: compName } as Company),
+          clients: null,
+          profiles: taxRec.assigned_lawyer_name ? ({ id: taxRec.lawyer_id || '1', name: taxRec.assigned_lawyer_name } as unknown as TransactionFull['profiles']) : null,
+        })
+      }
+    })
   } catch {}
 
   let result = Array.from(map.values())
