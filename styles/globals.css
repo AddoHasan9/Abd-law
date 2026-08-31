@@ -2588,28 +2588,75 @@
       grid-column: span 1 !important;
     }
 
-    /* Prevent mobile form field collision & force clean vertical stacking */
-    .modal-body {
-      padding: 14px 10px !important;
+    /* ---- تحسين النوافذ المنبثقة الشامل للجوال (Mobile Modals System) ---- */
+    #modal-root {
+      padding: 8px !important;
+      align-items: flex-end !important;
+    }
+
+    .modal {
+      width: 100% !important;
+      max-width: 100vw !important;
+      max-height: 92dvh !important;
+      border-radius: 20px 20px 14px 14px !important;
+      margin: 0 !important;
+      border: 1px solid var(--line) !important;
+      box-shadow: 0 -8px 30px rgba(0, 0, 0, 0.25) !important;
     }
 
     .modal-head {
       padding: 12px 14px !important;
+      position: sticky !important;
+      top: 0 !important;
+      z-index: 10 !important;
+      background: var(--surface-2) !important;
+    }
+
+    .modal-head h3 {
+      font-size: 14.5px !important;
+      line-height: 1.35 !important;
+    }
+
+    .modal-body {
+      padding: 14px 12px !important;
+      -webkit-overflow-scrolling: touch !important;
+      overscroll-behavior: contain !important;
     }
 
     .modal-foot {
-      padding: 10px 14px !important;
+      padding: 10px 12px !important;
+      gap: 8px !important;
       flex-wrap: wrap !important;
+      position: sticky !important;
+      bottom: 0 !important;
+      z-index: 10 !important;
+      background: var(--surface-2) !important;
     }
 
     .modal-foot .btn {
       flex: 1 1 auto !important;
       min-width: 110px !important;
+      min-height: 44px !important;
+      font-size: 13.5px !important;
     }
 
+    /* ---- تحسين حقول الإدخال والخطوط لمنع زووم الآيفون التلقائي (Mobile Form Fields) ---- */
     .field {
       width: 100% !important;
-      margin-bottom: 10px !important;
+      margin-bottom: 12px !important;
+      display: flex !important;
+      flex-direction: column !important;
+      align-items: flex-start !important;
+    }
+
+    .field label,
+    label {
+      font-size: 12.5px !important;
+      font-weight: 700 !important;
+      color: var(--text) !important;
+      margin-bottom: 4px !important;
+      text-align: right !important;
+      width: 100% !important;
     }
 
     :where(.input,
@@ -2622,17 +2669,43 @@
       select,
       textarea.input,
       textarea) {
-      font-size: 14px !important; /* Prevents auto-zoom on iOS Safari */
+      font-size: 16px !important; /* 16px يمنع متصفح Safari على iOS من عمل زووم تلقائي غير مرغوب */
+      min-height: 44px !important;
       height: 44px;
+      padding: 9px 12px !important;
+      border-radius: 12px !important;
+      width: 100% !important;
+      max-width: 100% !important;
+      box-sizing: border-box !important;
     }
 
-    /* Transform inline two-column and multi-column grids to fluid stack on phone screens */
+    textarea.input,
+    textarea {
+      height: auto !important;
+      min-height: 85px !important;
+    }
+
+    :where(select.input, select) {
+      padding-left: 32px !important;
+      padding-right: 12px !important;
+    }
+
+    /* تحويل كل الشبكات المزدوجة والمقسومة داخل النوافذ إلى تسلسل عمودي انسيابي */
+    div[style*="gridTemplateColumns"],
+    div[style*="grid-template-columns"],
     div[style*="1fr 1fr"],
     div[style*="1fr 1fr 1fr"],
-    div[style*="gridTemplateColumns"] {
+    div[style*="2fr 1fr"] {
       display: flex !important;
       flex-direction: column !important;
-      gap: 8px !important;
+      gap: 10px !important;
+    }
+
+    /* البطاقات والأقسام الداخلية للنوافذ على الجوال */
+    div[style*="background: var(--surface-2)"],
+    div[style*="background:var(--surface-2)"] {
+      padding: 12px !important;
+      border-radius: 14px !important;
     }
   }
 

@@ -605,7 +605,7 @@ export default function CompanyDetailsModal({ company, isOpen, onClose, onDelete
 
         {/* Content Form Container */}
         <form onSubmit={handleSave} style={{ display: 'flex', flexDirection: 'column', flex: 1, overflow: 'hidden' }}>
-          <div className="modal-body custom-scrollbar" style={{ display: 'flex', flexDirection: 'column', gap: '18px', padding: '22px 26px', flex: 1, overflowY: 'auto' }}>
+          <div className="modal-body custom-scrollbar" style={{ display: 'flex', flexDirection: 'column', gap: '16px', flex: 1, overflowY: 'auto' }}>
             {message && (
               <div style={{ padding: '10px 14px', borderRadius: 'var(--r-md)', background: message.type === 'ok' ? 'var(--ok-soft)' : 'var(--bad-soft)', color: message.type === 'ok' ? 'var(--ok)' : 'var(--bad)', fontSize: '13px', fontWeight: 600 }}>
                 {message.text}
