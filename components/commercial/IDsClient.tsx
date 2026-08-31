@@ -308,14 +308,14 @@ export default function IDsClient({ companies = [], initialCompanyId }: Props) {
       </div>
 
       {/* Table Records */}
-      <div className="glass-card p-0 rounded-[24px] overflow-hidden border border-[var(--glass-border)] bg-[var(--surface)] shadow-xs">
+      <div className="glass-card !p-0 rounded-[22px] border-0 shadow-sm overflow-hidden bg-[var(--surface-glass)]">
         {loading ? (
-          <div style={{ padding: '40px', textAlign: 'center', color: 'var(--text-3)' }}>
-            <div className="skeleton" style={{ width: '120px', height: '16px', margin: '0 auto 12px' }} />
+          <div className="p-10 text-center text-[var(--text-3)]">
+            <div className="skeleton w-28 h-4 mx-auto mb-3" />
             جاري جلب سجلات وتحديثات الهويات...
           </div>
         ) : filteredRecords.length === 0 ? (
-          <div style={{ padding: '50px 20px' }}>
+          <div className="py-12 px-6">
             <Empty
               icon="badge"
               title="لا توجد هويات في هذا القسم"
@@ -324,18 +324,18 @@ export default function IDsClient({ companies = [], initialCompanyId }: Props) {
           </div>
         ) : (
           <div className="overflow-x-auto w-full">
-            <table className="w-full border-collapse text-right text-xs">
+            <table className="w-full border-collapse text-right text-xs table-auto">
               <thead>
-                <tr className="border-b border-[var(--border)] bg-[var(--surface-2)]/80 text-xs text-[var(--text-2)] font-bold">
-                  <th className="py-3.5 px-4 text-right min-w-[220px]">الشركة</th>
-                  <th className="py-3.5 px-3 text-center min-w-[130px]">نوع الهوية</th>
-                  <th className="py-3.5 px-3 text-center min-w-[130px]">المدير المفوض</th>
-                  <th className="py-3.5 px-3 text-center min-w-[100px]">الدرجة</th>
-                  <th className="py-3.5 px-3 text-center min-w-[110px]">بدء المعاملة</th>
-                  <th className="py-3.5 px-3 text-center min-w-[120px]">رقم الهوية</th>
-                  <th className="py-3.5 px-3 text-center min-w-[140px]">الإصدار والانتهاء</th>
-                  <th className="py-3.5 px-3 text-center min-w-[120px]">الحالة</th>
-                  <th className="py-3.5 px-4 text-left min-w-[150px]">إجراءات</th>
+                <tr className="border-b border-[var(--border-soft)] bg-[var(--surface-2)]/80 text-xs text-[var(--text-2)] font-bold">
+                  <th className="py-3 px-3 text-right">الشركة</th>
+                  <th className="py-3 px-2 text-center">نوع الهوية</th>
+                  <th className="py-3 px-2 text-center">المدير المفوض</th>
+                  <th className="py-3 px-2 text-center">الدرجة</th>
+                  <th className="py-3 px-2 text-center">بدء المعاملة</th>
+                  <th className="py-3 px-2 text-center">رقم الهوية</th>
+                  <th className="py-3 px-2 text-center">الإصدار والانتهاء</th>
+                  <th className="py-3 px-2 text-center">الحالة</th>
+                  <th className="py-3 px-3 text-left whitespace-nowrap">إجراءات</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-[var(--border-soft)]">

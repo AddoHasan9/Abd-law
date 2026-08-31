@@ -725,7 +725,7 @@ export default function CompanyDetailsModal({ company, isOpen, onClose, onDelete
                 <input id="modal-name" type="text" className="input" value={name} onChange={e => setName(e.target.value)} required />
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div className="field">
                   <label htmlFor="modal-kind">نوع الشركة</label>
                   <select id="modal-kind" className="input" value={kind} onChange={e => setKind(e.target.value)}>
@@ -774,16 +774,7 @@ export default function CompanyDetailsModal({ company, isOpen, onClose, onDelete
                   {shareholders.map((sh, idx) => (
                     <div
                       key={sh.id}
-                      style={{
-                        display: 'grid',
-                        gridTemplateColumns: 'minmax(130px, 1.4fr) minmax(100px, 1.1fr) minmax(120px, 1.2fr) minmax(85px, 0.8fr) auto',
-                        gap: '8px',
-                        alignItems: 'end',
-                        background: 'var(--surface)',
-                        padding: '10px 12px',
-                        borderRadius: 'var(--r-md)',
-                        border: '1px solid var(--line-soft)',
-                      }}
+                      className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 items-end bg-[var(--surface)] p-2.5 rounded-xl border border-[var(--line-soft)]"
                     >
                       <div className="field" style={{ marginBottom: 0 }}>
                         <label htmlFor={`edit-sh-name-${sh.id}`} style={{ fontSize: '11px', color: 'var(--text-3)', display: 'flex', alignItems: 'center', gap: '4px' }}>
@@ -951,7 +942,7 @@ export default function CompanyDetailsModal({ company, isOpen, onClose, onDelete
                 </div>
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div className="field">
                   <label htmlFor="modal-reg-no">رقم الشركة في مسجل الشركات</label>
                   <input id="modal-reg-no" type="text" className="input num" value={registrarNo} onChange={e => setRegistrarNo(e.target.value)} placeholder="مثال: م.ش / 54201" />
@@ -970,7 +961,7 @@ export default function CompanyDetailsModal({ company, isOpen, onClose, onDelete
                   <span className="text-xs font-bold text-[var(--text)]">بيانات شهادة التأسيس والوديعة الرسمية</span>
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '12px' }}>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                   <div className="field" style={{ marginBottom: 0 }}>
                     <label htmlFor="modal-info-certno">رقم شهادة التأسيس</label>
                     <input
@@ -1007,7 +998,7 @@ export default function CompanyDetailsModal({ company, isOpen, onClose, onDelete
                 </div>
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div className="field">
                   <label htmlFor="modal-mgr">المدير المفوض (سجل company_managers)</label>
                   <input id="modal-mgr" type="text" className="input" value={manager} onChange={e => setManager(e.target.value)} placeholder="أدخل اسم المدير المفوض" />

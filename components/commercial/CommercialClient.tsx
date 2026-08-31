@@ -420,9 +420,9 @@ export default function CommercialClient({ rows = [], companies = [] }: Props) {
       </div>
 
       {/* 2. Main Transactions Interactive Table */}
-      <div className="glass-card !p-0 rounded-[22px] border border-[var(--border)] overflow-hidden shadow-sm">
+      <div className="glass-card !p-0 rounded-[22px] border-0 shadow-sm overflow-hidden bg-[var(--surface-glass)]">
         {/* Table Title Header */}
-        <div className="p-4 sm:p-5 border-b border-[var(--border)] flex items-center justify-between gap-4 bg-[var(--surface-2)]/60 backdrop-blur-md">
+        <div className="p-4 sm:p-5 border-b border-[var(--border-soft)] flex items-center justify-between gap-4 bg-[var(--surface-2)]/60 backdrop-blur-md">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-2xl bg-[var(--accent-soft)] border border-[var(--accent)]/20 text-[var(--accent)] flex items-center justify-center shrink-0 shadow-xs">
               <span className="material-symbols-outlined text-[20px]">table_rows</span>
@@ -449,17 +449,17 @@ export default function CommercialClient({ rows = [], companies = [] }: Props) {
           </div>
         ) : (
           <div className="overflow-x-auto w-full">
-            <table className="w-full border-collapse text-right">
+            <table className="w-full border-collapse text-right text-xs table-auto">
               <thead>
-                <tr className="border-b border-[var(--border)] bg-[var(--surface-2)]/80 text-xs text-[var(--text-2)] font-bold">
-                  <th className="py-3.5 px-4 text-right min-w-[280px]">اسم الشركة</th>
-                  <th className="py-3.5 px-3 text-center min-w-[150px]">نوع الخدمة</th>
-                  <th className="py-3.5 px-3 text-center min-w-[130px]">المحامي المكلف</th>
-                  <th className="py-3.5 px-3 text-center min-w-[150px]">المسؤول عن الشركة</th>
-                  <th className="py-3.5 px-3 text-center min-w-[110px]">الأولوية</th>
-                  <th className="py-3.5 px-3 text-center min-w-[130px]">حالة سير العمل</th>
-                  <th className="py-3.5 px-3 text-center min-w-[120px]">تاريخ المعاملة</th>
-                  <th className="py-3.5 px-4 text-center w-[80px]">الإجراءات</th>
+                <tr className="border-b border-[var(--border-soft)] bg-[var(--surface-2)]/80 text-xs text-[var(--text-2)] font-bold">
+                  <th className="py-3 px-3 text-right">اسم الشركة</th>
+                  <th className="py-3 px-2 text-center">نوع الخدمة</th>
+                  <th className="py-3 px-2 text-center">المحامي المكلف</th>
+                  <th className="py-3 px-2 text-center">المسؤول</th>
+                  <th className="py-3 px-2 text-center">الأولوية</th>
+                  <th className="py-3 px-2 text-center">حالة سير العمل</th>
+                  <th className="py-3 px-2 text-center">تاريخ المعاملة</th>
+                  <th className="py-3 px-2 text-center w-[50px]">الإجراءات</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-[var(--border-soft)]">

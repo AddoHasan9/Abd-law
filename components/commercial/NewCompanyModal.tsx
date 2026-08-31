@@ -431,16 +431,7 @@ export default function NewCompanyModal({ isOpen, onClose }: Props) {
               {shareholders.map((sh, idx) => (
                 <div
                   key={sh.id}
-                  style={{
-                    display: 'grid',
-                    gridTemplateColumns: 'minmax(140px, 1.4fr) minmax(110px, 1.1fr) minmax(130px, 1.2fr) minmax(90px, 0.8fr) auto',
-                    gap: '10px',
-                    alignItems: 'end',
-                    background: 'var(--surface-2)',
-                    padding: '12px 14px',
-                    borderRadius: 'var(--r-md)',
-                    border: '1px solid var(--line-soft)',
-                  }}
+                  className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5 items-end bg-[var(--surface-2)] p-3 rounded-xl border border-[var(--line-soft)]"
                 >
                   <div className="field" style={{ marginBottom: 0 }}>
                     <label style={{ fontSize: '11.5px', color: 'var(--text-3)', display: 'flex', alignItems: 'center', gap: '4px' }}>

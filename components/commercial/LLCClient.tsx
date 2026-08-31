@@ -175,7 +175,7 @@ export default function LLCClient({ transactions = [], companies = [], lawyers =
       </div>
 
       {/* Table of Transactions */}
-      <div className="glass-card !p-0 rounded-[22px] border border-[var(--border)] overflow-hidden shadow-sm">
+      <div className="glass-card !p-0 rounded-[22px] border-0 shadow-sm overflow-hidden bg-[var(--surface-glass)]">
         {filteredTransactions.length === 0 ? (
           <div className="p-8">
             <Empty
@@ -186,17 +186,17 @@ export default function LLCClient({ transactions = [], companies = [], lawyers =
           </div>
         ) : (
           <div className="overflow-x-auto w-full">
-            <table className="w-full border-collapse text-right text-xs">
+            <table className="w-full border-collapse text-right text-xs table-auto">
               <thead>
-                <tr className="border-b border-[var(--border)] bg-[var(--surface-2)]/80 text-xs text-[var(--text-2)] font-bold">
-                  <th className="py-3.5 px-4 text-right min-w-[220px]">الشركة (اضغط للتفاصيل)</th>
-                  <th className="py-3.5 px-3 text-center min-w-[130px]">نوع المعاملة</th>
-                  <th className="py-3.5 px-3 text-center min-w-[130px]">المدير المفوض</th>
-                  <th className="py-3.5 px-3 text-center min-w-[120px]">تاريخ البدء</th>
-                  <th className="py-3.5 px-3 text-right min-w-[220px]">تفاصيل / النواقص</th>
-                  <th className="py-3.5 px-3 text-center min-w-[120px]">الحالة</th>
-                  <th className="py-3.5 px-3 text-center min-w-[110px]">الأتعاب</th>
-                  <th className="py-3.5 px-4 text-left min-w-[150px]">إجراءات</th>
+                <tr className="border-b border-[var(--border-soft)] bg-[var(--surface-2)]/80 text-xs text-[var(--text-2)] font-bold">
+                  <th className="py-3 px-3 text-right">الشركة</th>
+                  <th className="py-3 px-2 text-center">نوع المعاملة</th>
+                  <th className="py-3 px-2 text-center">المدير المفوض</th>
+                  <th className="py-3 px-2 text-center">تاريخ البدء</th>
+                  <th className="py-3 px-2 text-right">تفاصيل / النواقص</th>
+                  <th className="py-3 px-2 text-center">الحالة</th>
+                  <th className="py-3 px-2 text-center">الأتعاب</th>
+                  <th className="py-3 px-3 text-left whitespace-nowrap">إجراءات</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-[var(--border-soft)]">

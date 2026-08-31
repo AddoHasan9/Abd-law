@@ -529,8 +529,8 @@ export default function AddEstablishedCompanyModal({ isOpen, onClose, onSuccess 
                 <span>المدير المفوض للشركة *</span>
               </h4>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '12px' }}>
-                <div className="field">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div className="field sm:col-span-2">
                   <label htmlFor="est-mgr-name">اسم المدير المفوض *</label>
                   <input
                     id="est-mgr-name"
@@ -545,7 +545,7 @@ export default function AddEstablishedCompanyModal({ isOpen, onClose, onSuccess 
                   />
                 </div>
 
-                <div className="field">
+                <div className="field sm:col-span-1">
                   <label htmlFor="est-mgr-phone">هاتف المدير المفوض</label>
                   <input
                     id="est-mgr-phone"
@@ -586,16 +586,7 @@ export default function AddEstablishedCompanyModal({ isOpen, onClose, onSuccess 
                 {shareholders.map((sh, idx) => (
                   <div
                     key={sh.id}
-                    style={{
-                      display: 'grid',
-                      gridTemplateColumns: 'minmax(130px, 1.4fr) minmax(100px, 1.1fr) minmax(120px, 1.2fr) minmax(85px, 0.8fr) auto',
-                      gap: '8px',
-                      alignItems: 'end',
-                      background: 'var(--surface)',
-                      padding: '10px 12px',
-                      borderRadius: 'var(--r-sm)',
-                      border: '1px solid var(--line-soft)',
-                    }}
+                    className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 items-end bg-[var(--surface)] p-2.5 rounded-xl border border-[var(--line-soft)]"
                   >
                     <div className="field" style={{ marginBottom: 0 }}>
                       <label htmlFor={`sh-name-${sh.id}`} style={{ fontSize: '11px', color: 'var(--text-3)', display: 'flex', alignItems: 'center', gap: '4px' }}>
