@@ -118,16 +118,44 @@ export async function listCompanies(): Promise<CompanyWithWorkflow[]> {
       })
     }
 
-    return Array.from(map.values())
+    // Strict deduplication by normalized company name and ID
+    const deduplicatedNameMap = new Map<string, CompanyWithWorkflow>()
+    const sortedAll = Array.from(map.values())
       .filter(c => !deletedIds.has(c.id))
       .sort(
         (a, b) => new Date(b.created_at || '').getTime() - new Date(a.created_at || '').getTime()
       )
+
+    sortedAll.forEach(c => {
+      const normName = c.name?.trim().toLowerCase()
+      if (!normName) {
+        deduplicatedNameMap.set(c.id, c)
+        return
+      }
+      const existing = deduplicatedNameMap.get(normName)
+      if (!existing) {
+        deduplicatedNameMap.set(normName, c)
+      } else {
+        // If duplicate company name exists, prefer the established one or the one with deposit released
+        if ((c.status === 'established' || c.deposit_released) && existing.status !== 'established') {
+          deduplicatedNameMap.set(normName, c)
+        }
+      }
+    })
+
+    return Array.from(deduplicatedNameMap.values()).sort(
+      (a, b) => new Date(b.created_at || '').getTime() - new Date(a.created_at || '').getTime()
+    )
   } catch (e) {
     console.error('Exception in listCompanies:', e)
     const deletedIds = new Set(readJsonFile<string[]>('deleted_company_ids.json', []))
     const diskCompanies = readJsonFile<CompanyWithWorkflow[]>('companies.json', [])
-    return diskCompanies.filter(c => !deletedIds.has(c.id))
+    const dedup = new Map<string, CompanyWithWorkflow>()
+    diskCompanies.filter(c => !deletedIds.has(c.id)).forEach(c => {
+      const norm = c.name?.trim().toLowerCase() || c.id
+      if (!dedup.has(norm)) dedup.set(norm, c)
+    })
+    return Array.from(dedup.values())
   }
 }
 

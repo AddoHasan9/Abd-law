@@ -76,27 +76,28 @@ export default function CompaniesClient({ initialCompanies }: Props) {
   const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1)
   const startOfYear = new Date(now.getFullYear(), 0, 1)
 
-  // شركات قسم التأسيس فقط (استبعاد الشركات المؤسسة أو مكتملة إطلاق الوديعة)
-  const formationList = companiesList.filter(c => c.status !== 'established' && !c.deposit_released && c.deposit_status !== 'released')
+  // شركات مسار التأسيس (الشركات التي تم إنشاؤها عبر قسم التأسيس)
+  // تبقى جميعها في قسم التأسيس وتحدد كـ "مكتملة التأسيس" بعد إطلاق الوديعة
+  const formationList = companiesList.filter(c => !c.external)
 
   // Categorize companies
-  const establishedCompanies = companiesList.filter(c => c.status === 'established' || c.deposit_released)
-  const formingCompanies = formationList.filter(c => !c.cert_date)
-  const depositPhaseCompanies = formationList.filter(c => Boolean(c.cert_date))
+  const establishedCompanies = formationList.filter(c => c.status === 'established' || Boolean(c.deposit_released) || c.deposit_status === 'released')
+  const formingCompanies = formationList.filter(c => c.status !== 'established' && !c.deposit_released && c.deposit_status !== 'released' && !c.cert_date)
+  const depositPhaseCompanies = formationList.filter(c => c.status !== 'established' && !c.deposit_released && c.deposit_status !== 'released' && Boolean(c.cert_date))
 
   // Timeframe stats for established companies
   const thisWeekEstablished = establishedCompanies.filter(c => {
-    const d = c.cert_date || c.establishment_date || c.created_at
+    const d = c.deposit_released_at || c.cert_date || c.establishment_date || c.created_at
     return d && new Date(d) >= startOfWeek
   }).length
 
   const thisMonthEstablished = establishedCompanies.filter(c => {
-    const d = c.cert_date || c.establishment_date || c.created_at
+    const d = c.deposit_released_at || c.cert_date || c.establishment_date || c.created_at
     return d && new Date(d) >= startOfMonth
   }).length
 
   const thisYearEstablished = establishedCompanies.filter(c => {
-    const d = c.cert_date || c.establishment_date || c.created_at
+    const d = c.deposit_released_at || c.cert_date || c.establishment_date || c.created_at
     return d && new Date(d) >= startOfYear
   }).length
 
@@ -111,25 +112,27 @@ export default function CompaniesClient({ initialCompanies }: Props) {
 
     if (!matchSearch) return false
 
+    const isDone = co.status === 'established' || Boolean(co.deposit_released) || co.deposit_status === 'released'
+
     if (activeTab === 'forming') {
-      return !co.deposit_released && !co.cert_date
+      return !isDone && !co.cert_date
     }
     if (activeTab === 'deposit') {
-      return Boolean(co.cert_date) && !co.deposit_released
+      return !isDone && Boolean(co.cert_date)
     }
     if (activeTab === 'established') {
-      if (!co.deposit_released) return false
+      if (!isDone) return false
 
       if (timeFilter === 'week') {
-        const d = co.cert_date || co.establishment_date || co.created_at
+        const d = co.deposit_released_at || co.cert_date || co.establishment_date || co.created_at
         return d && new Date(d) >= startOfWeek
       }
       if (timeFilter === 'month') {
-        const d = co.cert_date || co.establishment_date || co.created_at
+        const d = co.deposit_released_at || co.cert_date || co.establishment_date || co.created_at
         return d && new Date(d) >= startOfMonth
       }
       if (timeFilter === 'year') {
-        const d = co.cert_date || co.establishment_date || co.created_at
+        const d = co.deposit_released_at || co.cert_date || co.establishment_date || co.created_at
         return d && new Date(d) >= startOfYear
       }
       return true

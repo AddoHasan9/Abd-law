@@ -73,6 +73,19 @@ export async function createCompanyFormationAction(payload: {
     }
 
     const name = payload.name.trim()
+
+    // منع تكرار الشركات بالاسم نفسه
+    const inMemoryCompanies = readJsonFile<CompanyWithWorkflow[]>('companies.json', [])
+    const deletedCompanyIds = new Set(readJsonFile<string[]>('deleted_company_ids.json', []))
+    const existingActive = inMemoryCompanies.find(
+      c => !deletedCompanyIds.has(c.id) && c.name?.trim().toLowerCase() === name.toLowerCase()
+    )
+    if (existingActive) {
+      return {
+        success: false,
+        error: `توجد شركة مسجلة مسبقاً بنفس الاسم «${name}». يرجى استخدام اسم مختلف أو تعديل الشركة الحالية.`,
+      }
+    }
     const kind = payload.kind || (payload.shareholders && payload.shareholders.length > 1 ? 'محدودة' : 'فردية')
     const capital = payload.capital || 0
     const manager = payload.manager?.trim() || null

@@ -280,13 +280,14 @@ export async function createCompanyIDAction(payload: {
     // Sync to Commercial Transactions Feed
     const isRenew = Boolean(payload.notes?.includes('تجديد'))
     const txTypeStr = mapIDTypeToTxType(payload.id_type, isRenew)
-    const txStatus = finalStatus === 'done' ? 'completed' : 'in_progress'
+    const txStatus = finalStatus === 'done' ? 'done' : 'in_progress'
+    const lawyerId = payload.lawyer_id?.trim() || null
 
     const txRecord: TransactionFull = {
       id: recordId,
       company_id: targetCompanyId,
       client_id: null,
-      lawyer_id: null,
+      lawyer_id: lawyerId,
       type: txTypeStr,
       status: txStatus,
       priority: 'medium',
@@ -310,6 +311,7 @@ export async function createCompanyIDAction(payload: {
       await supabase.from('transactions').insert({
         id: recordId,
         company_id: targetCompanyId,
+        lawyer_id: lawyerId,
         type: txTypeStr,
         status: txStatus,
         priority: 'medium',
@@ -318,7 +320,9 @@ export async function createCompanyIDAction(payload: {
         description: payload.notes?.trim() || `إصدار ${ID_TYPE_LABELS[payload.id_type] || payload.id_type}`,
         created_at: createdAt,
       })
-    } catch { }
+    } catch (txDbErr) {
+      console.warn('transactions insert for company_ids notice:', txDbErr)
+    }
 
     const diskTxs = readJsonFile<TransactionFull[]>('transactions.json', [])
     diskTxs.unshift(txRecord)
@@ -409,14 +413,14 @@ export async function updateCompanyIDAction(
     const diskTxs = readJsonFile<TransactionFull[]>('transactions.json', [])
     const txIdx = diskTxs.findIndex(t => t.id === id)
     if (txIdx !== -1) {
-      diskTxs[txIdx].status = isDone ? 'completed' : (payload.status === 'lacks' ? 'incomplete' : 'in_progress')
+      diskTxs[txIdx].status = isDone ? 'done' : 'in_progress'
       if (payload.expiry_date) diskTxs[txIdx].due_date = payload.expiry_date
       writeJsonFile('transactions.json', diskTxs)
     }
 
     try {
       await supabase.from('transactions').update({
-        status: isDone ? 'completed' : (payload.status === 'lacks' ? 'incomplete' : 'in_progress'),
+        status: isDone ? 'done' : 'in_progress',
         due_date: payload.expiry_date || null,
       }).eq('id', id)
     } catch { }
