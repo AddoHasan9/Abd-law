@@ -72,6 +72,7 @@ export default function CompanyDetailsModal({ company, isOpen, onClose, onDelete
   const [taxNo, setTaxNo] = useState(company?.tax_no || '')
   const [certNo, setCertNo] = useState(company?.cert_no || '')
   const [certDate, setCertDate] = useState(company?.cert_date || '')
+  const [depositReleasedAt, setDepositReleasedAt] = useState(company?.deposit_released_at || '')
   const [establishmentDate, setEstablishmentDate] = useState(company?.establishment_date || '')
   const [lastCompletedYear, setLastCompletedYear] = useState(company?.last_completed_fs_year?.toString() || '')
   const [fsFirstMethod, setFsFirstMethod] = useState<'standard' | 'merge_next_year'>(company?.fs_first_method || 'standard')
@@ -277,7 +278,7 @@ export default function CompanyDetailsModal({ company, isOpen, onClose, onDelete
     }
   }, [isOpen, company, loadCompanyIDs, loadCompanyTax])
 
-  const isCompanyEstablished = company ? (company.status === 'established' || Boolean(company.deposit_released) || Boolean(company.cert_date)) : false
+  const isCompanyEstablished = company ? (company.status === 'established' || Boolean(company.deposit_released) || Boolean(company.deposit_released_at)) : false
 
   useEffect(() => {
     if (company) {
@@ -294,6 +295,7 @@ export default function CompanyDetailsModal({ company, isOpen, onClose, onDelete
       setTaxNo(company.tax_no || '')
       setCertNo(company.cert_no || '')
       setCertDate(company.cert_date || '')
+      setDepositReleasedAt(company.deposit_released_at || '')
       setEstablishmentDate(company.establishment_date || company.cert_date || '')
       setLastCompletedYear(company.last_completed_fs_year?.toString() || '')
       setFsFirstMethod(company.fs_first_method || 'standard')
@@ -372,6 +374,7 @@ export default function CompanyDetailsModal({ company, isOpen, onClose, onDelete
       reservation_letter_governorate: hasReservationLetter ? reservationGovernorate : undefined,
       cert_no: certNo,
       cert_date: certDate,
+      deposit_released_at: depositReleasedAt || company.deposit_released_at || undefined,
       lacks,
       shareholders: cleanShareholders,
     })
@@ -622,8 +625,20 @@ export default function CompanyDetailsModal({ company, isOpen, onClose, onDelete
                       <div style={{ fontSize: '13.5px', fontWeight: 800, color: 'var(--ok)' }}>
                         تم إطلاق الوديعة واكتمال تأسيس الشركة بنجاح ✓
                       </div>
-                      <div style={{ fontSize: '12px', color: 'var(--text-2)' }}>
-                        تاريخ إطلاق الوديعة: <strong className="num">{company.deposit_released_at ? (company.deposit_released_at.slice(0, 10)) : 'مكتملة'}</strong>
+                      <div className="flex items-center gap-3 text-xs text-[var(--text-2)] mt-0.5 flex-wrap">
+                        {certNo && (
+                          <span>
+                            رقم الشهادة: <strong className="num text-[var(--text)]">{certNo}</strong>
+                          </span>
+                        )}
+                        {certDate && (
+                          <span>
+                            تاريخ الشهادة: <strong className="num text-[var(--text)]">{certDate}</strong>
+                          </span>
+                        )}
+                        <span>
+                          تاريخ إطلاق الوديعة: <strong className="num text-emerald-600 dark:text-emerald-400">{depositReleasedAt ? depositReleasedAt.slice(0, 10) : (company.deposit_released_at ? company.deposit_released_at.slice(0, 10) : 'أُطلقت')}</strong>
+                        </span>
                       </div>
                     </div>
                   </div>
@@ -909,6 +924,50 @@ export default function CompanyDetailsModal({ company, isOpen, onClose, onDelete
                 <div className="field">
                   <label htmlFor="modal-tax-no">رقم الشركة في الهيئة العامة للضرائب</label>
                   <input id="modal-tax-no" type="text" className="input num" value={taxNo} onChange={e => setTaxNo(e.target.value)} placeholder="مثال: 90034182" />
+                </div>
+              </div>
+
+              {/* بيانات شهادة التأسيس والوديعة الرسمية */}
+              <div className="p-3.5 rounded-2xl bg-[var(--surface-2)] border border-[var(--line-soft)] flex flex-col gap-3">
+                <div className="flex items-center gap-2">
+                  <span className="material-symbols-outlined text-[18px] text-[var(--accent)]">workspace_premium</span>
+                  <span className="text-xs font-bold text-[var(--text)]">بيانات شهادة التأسيس والوديعة الرسمية</span>
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '12px' }}>
+                  <div className="field" style={{ marginBottom: 0 }}>
+                    <label htmlFor="modal-info-certno">رقم شهادة التأسيس</label>
+                    <input
+                      id="modal-info-certno"
+                      type="text"
+                      className="input num font-bold"
+                      value={certNo}
+                      onChange={e => setCertNo(e.target.value)}
+                      placeholder="مثال: 2026/5108/ت"
+                    />
+                  </div>
+
+                  <div className="field" style={{ marginBottom: 0 }}>
+                    <label htmlFor="modal-info-certdate">تاريخ شهادة التأسيس</label>
+                    <input
+                      id="modal-info-certdate"
+                      type="date"
+                      className="input num font-bold"
+                      value={certDate}
+                      onChange={e => setCertDate(e.target.value)}
+                    />
+                  </div>
+
+                  <div className="field" style={{ marginBottom: 0 }}>
+                    <label htmlFor="modal-info-deposit-date">تاريخ إطلاق الوديعة</label>
+                    <input
+                      id="modal-info-deposit-date"
+                      type="date"
+                      className="input num font-bold"
+                      value={depositReleasedAt ? depositReleasedAt.slice(0, 10) : ''}
+                      onChange={e => setDepositReleasedAt(e.target.value)}
+                    />
+                  </div>
                 </div>
               </div>
 
@@ -1321,11 +1380,9 @@ export default function CompanyDetailsModal({ company, isOpen, onClose, onDelete
                     <div style={{ fontSize: '13.5px', fontWeight: 800, color: 'var(--ok)' }}>
                       ✓ تم إطلاق الوديعة بنجاح وأصبحت الشركة ضمن الشركات المؤسسة المعتمدة
                     </div>
-                    {company.deposit_released_at && (
-                      <span className="tag tag-ok" style={{ fontSize: '11px', fontWeight: 700 }}>
-                        تاريخ الإطلاق: {company.deposit_released_at.slice(0, 10)}
-                      </span>
-                    )}
+                    <span className="tag tag-ok" style={{ fontSize: '11px', fontWeight: 700 }}>
+                      تاريخ إطلاق الوديعة: {depositReleasedAt ? depositReleasedAt.slice(0, 10) : (company.deposit_released_at ? company.deposit_released_at.slice(0, 10) : 'أُطلقت')}
+                    </span>
                   </div>
                   {company.barcode_url && (
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginTop: '6px', background: 'var(--surface)', padding: '10px 14px', borderRadius: '8px', border: '1px solid var(--line-soft)', flexWrap: 'wrap' }}>

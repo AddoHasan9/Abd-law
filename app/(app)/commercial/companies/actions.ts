@@ -319,6 +319,9 @@ export async function updateCompanyDetailsAction(
     manager?: string
     cert_no?: string
     cert_date?: string
+    deposit_released?: boolean
+    deposit_released_at?: string | null
+    status?: string
     registrar_no?: string
     tax_no?: string
     activity?: string
@@ -355,6 +358,9 @@ export async function updateCompanyDetailsAction(
     if (payload.capital !== undefined) updateData.capital = payload.capital
     if (payload.cert_no !== undefined) updateData.cert_no = payload.cert_no.trim() || null
     if (payload.cert_date !== undefined) updateData.cert_date = payload.cert_date || null
+    if (payload.deposit_released !== undefined) updateData.deposit_released = Boolean(payload.deposit_released)
+    if (payload.deposit_released_at !== undefined) updateData.deposit_released_at = payload.deposit_released_at || null
+    if (payload.status !== undefined) updateData.status = payload.status
     if (payload.registrar_no !== undefined) updateData.registrar_no = payload.registrar_no.trim() || null
     if (payload.tax_no !== undefined) updateData.tax_no = payload.tax_no.trim() || null
     if (payload.activity !== undefined) updateData.activity = payload.activity.trim() || null

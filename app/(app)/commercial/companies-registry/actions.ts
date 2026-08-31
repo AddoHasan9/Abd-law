@@ -106,7 +106,7 @@ export async function createEstablishedCompanyAction(payload: AddEstablishedComp
       status: 'established',
       external: false,
       deposit_released: true,
-      deposit_released_at: certDate || createdAt.slice(0, 10),
+      deposit_released_at: createdAt.slice(0, 10),
       financial_statements_enabled: payload.fs_years.length > 0,
       last_completed_fs_year: latestFsYear,
       establishment_date: certDate || createdAt.slice(0, 10),
