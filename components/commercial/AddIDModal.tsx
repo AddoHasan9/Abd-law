@@ -73,7 +73,7 @@ export default function AddIDModal({
   const [txStartDate, setTxStartDate] = useState(new Date().toISOString().slice(0, 10))
   const [grade, setGrade] = useState('الأولى')
   const [status, setStatus] = useState<CompanyIDStatus>('in_progress')
-  const [lawyerId, setLawyerId] = useState('')
+  const [lawyerId, setLawyerId] = useState('db13125d-3aa1-46ab-9159-8fad18746623')
   const [notes, setNotes] = useState('')
 
   const [lawyers, setLawyers] = useState<Array<{ id: string; name: string }>>([
@@ -88,6 +88,7 @@ export default function AddIDModal({
       const res = await getActiveLawyersAction()
       if (res.success && res.data && res.data.length > 0) {
         setLawyers(res.data)
+        setLawyerId(prev => prev || res.data[0].id)
       }
     }
     loadLawyers()
@@ -160,7 +161,8 @@ export default function AddIDModal({
       return
     }
 
-    if (!lawyerId) {
+    const finalLawyerId = lawyerId.trim() || lawyers[0]?.id || 'db13125d-3aa1-46ab-9159-8fad18746623'
+    if (!finalLawyerId) {
       setError('يرجى اختيار المحامي المسؤول عن المعاملة.')
       return
     }
@@ -196,6 +198,7 @@ export default function AddIDModal({
           id_number: idNumber.trim() || undefined,
           manager_name: managerName.trim() || undefined,
           grade: idType === 'chamber_id' ? grade : undefined,
+          lawyer_id: finalLawyerId,
           issue_date: issueDate || undefined,
           expiry_date: expiryDate || undefined,
           tx_start_date: txStartDate || undefined,
@@ -410,12 +413,11 @@ export default function AddIDModal({
                 </label>
                 <select
                   id="id-lawyer"
-                  value={lawyerId || (lawyers[0]?.id || '')}
+                  value={lawyerId}
                   onChange={e => setLawyerId(e.target.value)}
                   className="flex h-10 w-full rounded-xl bg-surface-2 border border-border px-3.5 text-sm font-semibold text-text focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 cursor-pointer"
                   required
                 >
-                  <option value="" disabled>اختر المحامي المسؤول...</option>
                   {lawyers.map(l => (
                     <option key={l.id} value={l.id}>{l.name}</option>
                   ))}
