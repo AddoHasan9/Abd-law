@@ -7,6 +7,8 @@ import type { DashboardStats } from '@/lib/data/dashboard'
 import type { ProfileWithStats } from '@/lib/data/profiles'
 import RemindersWidget from './RemindersWidget'
 import { WorkflowStatus } from '@/components/ui/WorkflowStatus'
+import { FadeInStagger } from '@/components/ui/FadeInStagger'
+import AnalyticsOverview from './AnalyticsOverview'
 
 interface Props {
   stats: DashboardStats
@@ -83,9 +85,8 @@ export default function DashboardClient({ stats, profiles = [] }: Props) {
         </div>
       </div>
 
-      {/* 2. Executive Metric Pillars (6 Commercial Sub-Departments with Glassmorphic Depth & Subtle Corner Color Accent) */}
-      <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-3.5 w-full">
-        
+      {/* 2. Executive Metric Pillars with GSAP Fade-In Stagger */}
+      <FadeInStagger className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-3.5 w-full">
         {/* Metric 1: Established Companies (الشركات المؤسسة) */}
         <Link
           href="/commercial/companies-registry"
@@ -225,7 +226,10 @@ export default function DashboardClient({ stats, profiles = [] }: Props) {
             <span className="material-symbols-outlined text-[13px] group-hover:-translate-x-0.5 transition-transform">arrow_left</span>
           </div>
         </Link>
-      </div>
+      </FadeInStagger>
+
+      {/* 2.5 Visual Analytics Overview (Recharts Analytics) */}
+      <AnalyticsOverview totalActive={recentTxs.length} />
 
       {/* 3. Central Interactive Bento Section: Active Transactions (8 cols) + Reminders & Deadlines (4 cols) */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 w-full">

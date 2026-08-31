@@ -11,6 +11,7 @@ import type { Profile } from '@/types/database'
 import NotificationCenter from './NotificationCenter'
 import ReminderCenter from './ReminderCenter'
 import UserProfileModal from './UserProfileModal'
+import CommandPalette from './CommandPalette'
 
 interface Props {
   profile?: Profile | null
@@ -47,6 +48,7 @@ export default function Topbar({ profile, title, subtitle, notifCount = 0, onMen
   const [dark, setDark] = useState(false)
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false)
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false)
+  const [isCommandOpen, setIsCommandOpen] = useState(false)
   const [userProfile, setUserProfile] = useState<Profile | null>(profile ?? null)
   const [imgError, setImgError] = useState(false)
   const [loggingOut, setLoggingOut] = useState(false)
@@ -136,7 +138,13 @@ export default function Topbar({ profile, title, subtitle, notifCount = 0, onMen
       <div className="top-spacer" />
 
       {/* Rounded Glass Search Trigger */}
-      <button className="search-trigger group hover:border-[var(--accent)]/40 hover:shadow-md transition-all duration-200" onClick={onSearch}>
+      <button
+        className="search-trigger group hover:border-[var(--accent)]/40 hover:shadow-md transition-all duration-200"
+        onClick={() => {
+          setIsCommandOpen(true)
+          if (onSearch) onSearch()
+        }}
+      >
         <span className="material-symbols-outlined text-[18px] text-[var(--text-3)] group-hover:text-[var(--accent)] transition-colors">search</span>
         <span className="group-hover:text-[var(--text)] transition-colors">البحث في النظام…</span>
         <span className="kbd border border-[var(--glass-border)] bg-[var(--surface-3)]/80 text-[10.5px]">Ctrl K</span>
@@ -314,6 +322,14 @@ export default function Topbar({ profile, title, subtitle, notifCount = 0, onMen
           profile={userProfile}
         />
       </div>
+
+      {/* Global Quick Command Palette (Ctrl+K) */}
+      <CommandPalette
+        open={isCommandOpen}
+        onOpenChange={setIsCommandOpen}
+        onOpenProfile={() => setIsProfileModalOpen(true)}
+        onToggleTheme={toggleTheme}
+      />
     </header>
   )
 }
