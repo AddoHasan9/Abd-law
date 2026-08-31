@@ -93,30 +93,30 @@ export default function LoginForm() {
   // Redirecting Screen
   if (isRedirecting) {
     return (
-      <div className="flex flex-col items-center justify-center h-full w-full max-w-[420px] mx-auto py-12 text-center text-right animate-in fade-in zoom-in-95 duration-300" dir="rtl">
-        <div className="relative w-22 h-22 rounded-3xl bg-blue-500/10 dark:bg-white/[0.08] border border-blue-500/30 dark:border-cyan-500/30 p-3 flex items-center justify-center shadow-2xl shadow-blue-500/20 mb-6 backdrop-blur-2xl animate-pulse">
-          <Image
-            src="/logo.png"
-            alt="شعار المكتب"
-            width={72}
-            height={72}
-            className="object-contain w-full h-full drop-shadow-md"
-            priority
-          />
+      <div className="flex flex-col items-center justify-center h-full w-full max-w-[380px] mx-auto py-8 text-center text-right animate-in fade-in zoom-in-95 duration-300 select-none" dir="rtl">
+        {/* Modern Equalizer Pulse Wave Indicator */}
+        <div className="flex items-center justify-center gap-1.5 h-12 mb-6">
+          <span className="w-1.5 h-6 bg-gradient-to-t from-blue-600 to-cyan-400 rounded-full animate-bounce [animation-delay:-0.3s]" />
+          <span className="w-1.5 h-10 bg-gradient-to-t from-blue-600 to-cyan-400 rounded-full animate-bounce [animation-delay:-0.15s]" />
+          <span className="w-1.5 h-8 bg-gradient-to-t from-blue-600 to-cyan-400 rounded-full animate-bounce [animation-delay:-0.45s]" />
+          <span className="w-1.5 h-11 bg-gradient-to-t from-blue-600 to-cyan-400 rounded-full animate-bounce [animation-delay:-0.2s]" />
+          <span className="w-1.5 h-7 bg-gradient-to-t from-blue-600 to-cyan-400 rounded-full animate-bounce [animation-delay:-0.35s]" />
         </div>
 
         <div className="flex flex-col gap-2 items-center">
-          <div className="flex items-center gap-2 text-emerald-600 dark:text-cyan-400 font-extrabold text-base">
-            <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 dark:bg-cyan-400 animate-ping" />
+          <div className="flex items-center gap-2 text-emerald-600 dark:text-emerald-400 font-extrabold text-sm sm:text-base">
+            <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping" />
             <span>تم التحقق من الحساب بنجاح</span>
           </div>
-          <p className="text-xs text-slate-600 dark:text-slate-300 max-w-xs leading-relaxed mt-1">
+          <p className="text-xs text-slate-500 dark:text-slate-400 max-w-xs leading-relaxed mt-1">
             جارٍ تهيئة الجلسة وتحميل بيانات لوحة التحكم والمعاملات…
           </p>
         </div>
 
-        <div className="w-48 h-1.5 bg-slate-200 dark:bg-white/10 rounded-full overflow-hidden mt-6">
-          <div className="h-full bg-gradient-to-r from-blue-600 via-indigo-600 to-cyan-500 rounded-full animate-progress" />
+        <div className="w-full space-y-2 mt-6 pt-4 border-t border-slate-200/80 dark:border-white/5">
+          <div className="w-full h-1.5 bg-slate-200 dark:bg-white/10 rounded-full overflow-hidden">
+            <div className="h-full bg-gradient-to-r from-blue-600 via-indigo-600 to-cyan-400 rounded-full animate-progress" />
+          </div>
         </div>
       </div>
     )
