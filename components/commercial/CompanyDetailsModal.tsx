@@ -509,38 +509,59 @@ export default function CompanyDetailsModal({ company, isOpen, onClose, onDelete
   return createPortal(
     <div id="modal-root" className="on">
       <div className="modal-veil" onClick={onClose} role="presentation" aria-hidden="true" />
-      <div className="modal" style={{ '--modal-max-w': 'var(--modal-xl, 920px)', display: 'flex', flexDirection: 'column', maxHeight: '92vh' } as React.CSSProperties}>
+      <div
+        className="modal"
+        style={{
+          '--modal-max-w': '1080px',
+          maxWidth: '1080px',
+          width: '95vw',
+          display: 'flex',
+          flexDirection: 'column',
+          maxHeight: '92vh',
+          overflow: 'hidden',
+          borderRadius: '24px',
+          boxShadow: '0 25px 70px rgba(0,0,0,0.35)',
+        } as React.CSSProperties}
+      >
         
         {/* Head */}
-        <div className="modal-head" style={{ padding: '18px 24px' }}>
-          <div className="co-ico" style={{ width: '42px', height: '42px', borderRadius: '14px', background: 'var(--accent-soft)', color: 'var(--accent)', display: 'grid', placeItems: 'center', flexShrink: 0 }}>
-            <Icon name="build" />
+        <div className="modal-head" style={{ padding: '18px 26px', flexShrink: 0, borderBottom: '1px solid var(--line-soft)' }}>
+          <div className="co-ico" style={{ width: '44px', height: '44px', borderRadius: '14px', background: 'var(--accent-soft)', color: 'var(--accent)', display: 'grid', placeItems: 'center', flexShrink: 0 }}>
+            <Icon name="build" style={{ width: '22px', height: '22px' }} />
           </div>
           <div style={{ flex: 1, minWidth: 0 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
-              <h3 style={{ margin: 0, fontSize: '16px', fontWeight: 800 }}>{company.name}</h3>
+              <h3 style={{ margin: 0, fontSize: '17px', fontWeight: 800, color: 'var(--text)' }}>{company.name}</h3>
               <WorkflowStatus status={company.status} entityId={company.id} entityType="company" size="sm" />
             </div>
-            <span style={{ fontSize: '12px', color: 'var(--text-3)', marginTop: '2px', display: 'block' }}>تعديل ومتابعة بيانات الشركة وتحديث المحطات</span>
+            <span style={{ fontSize: '12px', color: 'var(--text-3)', marginTop: '3px', display: 'block' }}>تعديل ومتابعة بيانات الشركة وتحديث المحطات والمستندات</span>
           </div>
           <button type="button" onClick={onClose} className="icon-btn" aria-label="إغلاق">
             ✕
           </button>
         </div>
 
-        {/* Spacious Wide Tabs Bar */}
-        <div style={{
-          display: 'flex',
-          borderBottom: '2px solid var(--line-soft)',
-          padding: '6px 20px 0 20px',
-          gap: '6px',
-          overflowX: 'auto',
-          background: 'var(--surface-2)',
-          alignItems: 'flex-end',
-        }}>
+        {/* Fixed / Sticky Full-Width Tabs Bar (عرض وتثبيت كامل شريط التبويبات) */}
+        <div
+          style={{
+            display: 'flex',
+            borderBottom: '2px solid var(--line-soft)',
+            padding: '8px 24px 0 24px',
+            gap: '8px',
+            overflowX: 'auto',
+            background: 'var(--surface-2)',
+            alignItems: 'flex-end',
+            flexShrink: 0,
+            position: 'sticky',
+            top: 0,
+            zIndex: 30,
+            boxShadow: '0 4px 14px rgba(0,0,0,0.03)',
+          }}
+          className="custom-scrollbar"
+        >
           {[
             { id: 'info', label: 'البيانات الأساسية', icon: 'build' },
-            { id: 'workflow', label: 'سير العمل (8 محطات)', icon: 'steps' },
+            { id: 'workflow', label: 'مخطط سير العمل (8 محطات)', icon: 'steps' },
             { id: 'cert', label: 'الشهادة والوديعة', icon: 'vault' },
             { id: 'tax', label: 'التحاسب الضريبي', icon: 'scale' },
             ...(isCompanyEstablished ? [{ id: 'financial', label: 'الحسابات الختامية', icon: 'doc' }] : []),
@@ -554,25 +575,26 @@ export default function CompanyDetailsModal({ company, isOpen, onClose, onDelete
                 type="button"
                 onClick={() => setActiveTab(tab.id as typeof activeTab)}
                 style={{
-                  padding: '12px 18px',
+                  padding: '13px 22px',
                   border: 'none',
                   background: isActive ? 'var(--surface)' : 'transparent',
                   borderBottom: isActive ? '3px solid var(--accent)' : '3px solid transparent',
                   color: isActive ? 'var(--accent)' : 'var(--text-2)',
                   fontWeight: isActive ? 800 : 600,
-                  fontSize: '13.5px',
+                  fontSize: '14px',
                   cursor: 'pointer',
                   display: 'flex',
                   alignItems: 'center',
                   gap: '8px',
                   whiteSpace: 'nowrap',
                   borderRadius: '12px 12px 0 0',
-                  boxShadow: isActive ? '0 -2px 10px rgba(0,0,0,0.04)' : 'none',
-                  transition: 'all 0.18s ease',
+                  boxShadow: isActive ? '0 -3px 12px rgba(0,0,0,0.06)' : 'none',
+                  transition: 'all 0.18s cubic-bezier(0.4, 0, 0.2, 1)',
                   marginBottom: '-2px',
                 }}
+                className={isActive ? 'font-bold' : 'hover:text-[var(--text)] hover:bg-[var(--surface-3)]'}
               >
-                <Icon name={tab.icon as 'build' | 'steps' | 'vault' | 'doc' | 'badge'} style={{ width: '16px', height: '16px' }} />
+                <Icon name={tab.icon as 'build' | 'steps' | 'vault' | 'doc' | 'badge'} style={{ width: '18px', height: '18px' }} />
                 <span>{tab.label}</span>
               </button>
             )
@@ -581,7 +603,7 @@ export default function CompanyDetailsModal({ company, isOpen, onClose, onDelete
 
         {/* Content Form Container */}
         <form onSubmit={handleSave} style={{ display: 'flex', flexDirection: 'column', flex: 1, overflow: 'hidden' }}>
-          <div className="modal-body" style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+          <div className="modal-body custom-scrollbar" style={{ display: 'flex', flexDirection: 'column', gap: '18px', padding: '22px 26px', flex: 1, overflowY: 'auto' }}>
             {message && (
               <div style={{ padding: '10px 14px', borderRadius: 'var(--r-md)', background: message.type === 'ok' ? 'var(--ok-soft)' : 'var(--bad-soft)', color: message.type === 'ok' ? 'var(--ok)' : 'var(--bad)', fontSize: '13px', fontWeight: 600 }}>
                 {message.text}
