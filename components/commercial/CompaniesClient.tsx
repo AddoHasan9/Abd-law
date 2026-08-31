@@ -587,49 +587,67 @@ export default function CompaniesClient({ initialCompanies }: Props) {
                   </div>
                 )}
 
-                {/* Footer (النسبة المئوية لسير العمل + رابط ملف الشركة الشامل 360) */}
-                <div className="flex items-center justify-between gap-2 pt-3 border-t border-[var(--border-soft)] mt-auto">
-                  <div className="flex items-center gap-2 min-w-0">
-                    <div className="relative w-8 h-8 flex-none flex items-center justify-center">
-                      {pg.current && (
-                        <div className="absolute inset-0 rounded-full bg-amber-500/20 blur-[2px] animate-pulse" />
-                      )}
-                      <svg viewBox="0 0 40 40" className="w-8 h-8 -rotate-90">
-                        <circle className="stroke-[var(--border-soft)]" strokeWidth="4" fill="none" cx="20" cy="20" r="16" />
-                        <circle
-                          className={`${pg.current ? 'stroke-amber-500' : 'stroke-[var(--accent)]'} transition-all duration-500`}
-                          strokeWidth="4"
-                          strokeLinecap="round"
-                          fill="none"
-                          cx="20"
-                          cy="20"
-                          r="16"
-                          strokeDasharray={100.5}
-                          strokeDashoffset={100.5 * (1 - pg.pct / 100)}
-                        />
-                      </svg>
-                      <span className={`absolute inset-0 flex items-center justify-center text-[9px] font-black num ${pg.current ? 'text-amber-500' : 'text-[var(--accent)]'}`}>
-                        {pg.pct}%
-                      </span>
-                    </div>
-
+                {/* Footer (النسبة المئوية لسير العمل + أزرار الإجراءات البارزة) */}
+                <div className="pt-2.5 border-t border-[var(--border-soft)] mt-auto flex flex-col gap-2">
+                  {/* Row 1: Workflow Progress & Status Badge */}
+                  <div className="flex items-center justify-between gap-2 min-w-0">
                     <div className="flex items-center gap-1.5 min-w-0">
-                      <span className={`tag ${calculatedSt.tagClass} !py-0.5 !px-2.5 !text-[10.5px] !font-bold`}>{calculatedSt.label}</span>
+                      <div className="relative w-6 h-6 flex-none flex items-center justify-center">
+                        {pg.current && (
+                          <div className="absolute inset-0 rounded-full bg-amber-500/20 blur-[2px] animate-pulse" />
+                        )}
+                        <svg viewBox="0 0 40 40" className="w-6 h-6 -rotate-90">
+                          <circle className="stroke-[var(--border-soft)]" strokeWidth="4" fill="none" cx="20" cy="20" r="16" />
+                          <circle
+                            className={`${pg.current ? 'stroke-amber-500' : 'stroke-[var(--accent)]'} transition-all duration-500`}
+                            strokeWidth="4"
+                            strokeLinecap="round"
+                            fill="none"
+                            cx="20"
+                            cy="20"
+                            r="16"
+                            strokeDasharray={100.5}
+                            strokeDashoffset={100.5 * (1 - pg.pct / 100)}
+                          />
+                        </svg>
+                        <span className={`absolute inset-0 flex items-center justify-center text-[8px] font-black num ${pg.current ? 'text-amber-500' : 'text-[var(--accent)]'}`}>
+                          {pg.pct}%
+                        </span>
+                      </div>
+
                       <span className="text-[11px] text-[var(--text-3)] font-bold num truncate" title={pg.current ? `المحطة الحالية: ${pg.current.label}` : undefined}>
                         {pg.done}/{pg.total} خطوات
                       </span>
                     </div>
+
+                    <span className={`tag ${calculatedSt.tagClass} !py-0.5 !px-2 !text-[10px] !font-bold shrink-0`}>{calculatedSt.label}</span>
                   </div>
 
-                  <Link
-                    href={`/commercial/companies/${co.id}`}
-                    onClick={e => e.stopPropagation()}
-                    className="text-xs font-extrabold text-[var(--accent)] hover:text-blue-600 hover:translate-x-[-3px] transition-all flex items-center gap-1 shrink-0"
-                    title="عرض ملف الشركة الشامل 360°"
-                  >
-                    <span>ملف 360°</span>
-                    <span className="material-symbols-outlined text-[15px]">arrow_left</span>
-                  </Link>
+                  {/* Row 2: Prominent Action Buttons (تعديل + ملف 360°) */}
+                  <div className="grid grid-cols-2 gap-2 w-full pt-1">
+                    <button
+                      type="button"
+                      onClick={e => {
+                        e.stopPropagation()
+                        handleCardClick(co)
+                      }}
+                      className="btn btn-ghost !py-1.5 !px-2 !text-xs !font-bold !rounded-xl flex items-center justify-center gap-1 border border-[var(--border)] hover:bg-[var(--surface-3)] transition-all"
+                      title="تعديل تفاصيل الشركة أو سير العمل"
+                    >
+                      <Icon name="gear" />
+                      <span>تعديل</span>
+                    </button>
+
+                    <Link
+                      href={`/commercial/companies/${co.id}`}
+                      onClick={e => e.stopPropagation()}
+                      className="btn btn-primary !py-1.5 !px-2.5 !text-xs !font-black !rounded-xl flex items-center justify-center gap-1 shadow-sm hover:shadow-md active:scale-95 transition-all text-white"
+                      title="عرض ملف الشركة الشامل 360°"
+                    >
+                      <span>ملف 360°</span>
+                      <span className="material-symbols-outlined text-[14px]">arrow_left</span>
+                    </Link>
+                  </div>
                 </div>
               </div>
             )

@@ -321,8 +321,16 @@
   html {
     scroll-behavior: smooth;
     color-scheme: light dark;
-    /* تكبير عام خفيف لكل الواجهة — عدّل القيمة (1 = الحجم الأصلي) */
+    /* تكبير عام خفيف للشاشات الكبيرة — عدّل القيمة (1 = الحجم الأصلي) */
     zoom: 1.05;
+  }
+
+  /* على الهاتف: بلا تكبير — المتصفح يتكفّل بحجم الخط، والتكبير يربك
+     حسابات ارتفاع النوافذ (dvh) ويقصّ الأزرار السفلية */
+  @media (max-width: 1024px) {
+    html {
+      zoom: 1;
+    }
   }
 
   .icon {
@@ -1472,11 +1480,15 @@
     bottom: 0 !important;
     width: 100vw !important;
     height: 100vh !important;
+    /* dvh يحسب شريط المتصفح على الهاتف — يمنع قصّ أسفل النافذة */
+    height: 100dvh !important;
     z-index: 999999 !important;
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
     padding: 16px !important;
+    /* احترام الحواف الآمنة (نوتش iPhone وشريط الأدوات السفلي) */
+    padding: max(16px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right)) max(16px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left)) !important;
     overflow: hidden !important;
   }
 
@@ -1488,6 +1500,7 @@
     bottom: 0 !important;
     width: 100vw !important;
     height: 100vh !important;
+    height: 100dvh !important;
     background: rgba(10, 24, 33, 0.65) !important;
     -webkit-backdrop-filter: blur(8px) !important;
     backdrop-filter: blur(8px) !important;
@@ -1505,6 +1518,7 @@
     width: 100% !important;
     max-width: min(var(--modal-max-w, 800px), 92vw) !important;
     max-height: 88vh !important;
+    max-height: 88dvh !important;
     display: flex !important;
     flex-direction: column !important;
     background: var(--surface) !important;
@@ -1551,6 +1565,8 @@
     justify-content: flex-start !important;
     gap: 10px !important;
     padding: 12px 18px !important;
+    /* لا يُقصّ خلف شريط الأدوات السفلي على الهاتف */
+    padding-bottom: max(12px, env(safe-area-inset-bottom)) !important;
     border-top: 1px solid var(--line-soft) !important;
     background: var(--surface-2) !important;
   }
@@ -2541,6 +2557,7 @@
       width: 96vw !important;
       max-width: 96vw !important;
       max-height: 92vh !important;
+      max-height: 92dvh !important;
       margin: 10px auto !important;
     }
 
