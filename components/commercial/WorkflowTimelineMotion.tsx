@@ -3,7 +3,7 @@
 import React, { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import confetti from 'canvas-confetti'
-import { Check, ArrowLeft, Lock, Play, Sparkles, CheckCircle2, Clock, ShieldCheck } from 'lucide-react'
+import { Check, CheckCheck, ArrowLeft, Lock, Sparkles, CheckCircle2, ShieldCheck, User } from 'lucide-react'
 
 export interface WorkflowStepItem {
   id: string
@@ -61,10 +61,10 @@ export default function WorkflowTimelineMotion({
     if (stepOrder >= totalSteps) {
       try {
         confetti({
-          particleCount: 80,
+          particleCount: 85,
           spread: 70,
           origin: { y: 0.6 },
-          colors: ['#10B981', '#3B82F6', '#6366F1', '#F59E0B', '#34D399'],
+          colors: ['#10B981', '#F59E0B', '#3B82F6', '#6366F1', '#34D399'],
           ticks: 250,
           gravity: 1.1,
           scalar: 0.95,
@@ -77,48 +77,47 @@ export default function WorkflowTimelineMotion({
   }
 
   return (
-    <div className="flex flex-col gap-5 w-full">
+    <div className="flex flex-col gap-4 w-full">
       {/* 1. Executive Frosted Header with Dynamic Progress Track */}
-      <div className="glass-card p-5 sm:p-6 rounded-[26px] bg-[var(--surface-glass)] backdrop-blur-[36px] border border-[var(--border)] shadow-xs flex flex-col gap-4 relative overflow-hidden">
+      <div className="glass-card p-4 sm:p-5 rounded-2xl bg-[#0D121D]/90 dark:bg-[#090E17]/90 border border-slate-700/60 shadow-md flex flex-col gap-3 relative overflow-hidden">
         
         {/* Header Title & Live Counter Capsule */}
         <div className="flex items-center justify-between flex-wrap gap-3 relative z-10">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-[var(--accent-soft)] border border-[var(--accent)]/20 text-[var(--accent)] flex items-center justify-center font-black shrink-0 shadow-xs">
+            <div className="w-10 h-10 rounded-xl bg-amber-500/15 border border-amber-500/30 text-amber-400 flex items-center justify-center font-black shrink-0 shadow-xs">
               <Sparkles className="w-5 h-5 animate-pulse" />
             </div>
             <div>
-              <div className="text-xs font-bold text-[var(--text-3)]">مسار تأسيس الشركة المعتمد</div>
-              <h3 className="text-base sm:text-lg font-black text-[var(--text)] font-display m-0 leading-tight">
+              <div className="text-xs font-bold text-slate-400">مسار تأسيس الشركة المعتمد</div>
+              <h3 className="text-base sm:text-lg font-black text-white font-display m-0 leading-tight">
                 مخطط المراحل الإجرائية المتتابعة
               </h3>
             </div>
           </div>
 
           {/* Progress Capsule */}
-          <div className="flex items-center gap-2.5 bg-[var(--surface-2)] px-4 py-1.5 rounded-full border border-[var(--line-soft)] shadow-xs">
+          <div className="flex items-center gap-2.5 bg-[#151D2C] px-3.5 py-1.5 rounded-full border border-slate-700/80 shadow-xs">
             <span className="relative flex h-2.5 w-2.5">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
               <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
             </span>
-            <span className="text-xs font-extrabold text-emerald-600 dark:text-emerald-400 num">
+            <span className="text-xs font-extrabold text-emerald-400 num">
               {pct}% مكتمل
             </span>
-            <span className="text-xs text-[var(--text-3)] font-semibold num border-r border-[var(--line-soft)] pr-2">
+            <span className="text-xs text-slate-400 font-semibold num border-r border-slate-700 pr-2">
               ({doneCount} من {totalSteps} مراحل)
             </span>
           </div>
         </div>
 
-        {/* Shimmering Animated Progress Bar */}
-        <div className="w-full h-3 rounded-full bg-[var(--surface-3)] overflow-hidden p-0.5 border border-[var(--line-soft)] relative">
+        {/* Animated Progress Bar */}
+        <div className="w-full h-2.5 rounded-full bg-slate-800/80 overflow-hidden p-0.5 border border-slate-700/60 relative">
           <motion.div
-            className="h-full rounded-full bg-gradient-to-r from-emerald-500 via-[#3B82F6] to-emerald-400 shadow-sm relative overflow-hidden"
+            className="h-full rounded-full bg-gradient-to-r from-emerald-500 via-amber-400 to-emerald-400 shadow-sm relative overflow-hidden"
             initial={{ width: '0%' }}
             animate={{ width: `${Math.max(pct, 3)}%` }}
             transition={{ type: 'spring', stiffness: 100, damping: 20 }}
           >
-            {/* Shimmer Light Reflection */}
             <motion.div
               className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent"
               animate={{ x: ['-100%', '200%'] }}
@@ -128,14 +127,12 @@ export default function WorkflowTimelineMotion({
         </div>
       </div>
 
-      {/* 2. Connected Liquid Glass Pipeline Timeline */}
-      <div className="relative flex flex-col gap-3 py-1">
+      {/* 2. Step Cards List */}
+      <div className="flex flex-col gap-3 py-1">
         {steps.map((step, idx) => {
           const isDone = step.state === 'done'
           const isDoing = step.state === 'doing'
           const isWait = step.state === 'wait'
-          const isLast = idx === totalSteps - 1
-          const nextStep = steps[idx + 1]
 
           return (
             <motion.div
@@ -145,149 +142,140 @@ export default function WorkflowTimelineMotion({
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.28, delay: idx * 0.03 }}
-              className="relative flex items-stretch gap-3.5 group"
+              className={`rounded-2xl transition-all duration-300 flex items-center justify-between flex-wrap sm:flex-nowrap gap-4 p-4 sm:p-5 relative ${
+                isDoing
+                  ? 'bg-[#0E1522] border-2 border-amber-500 shadow-[0_0_22px_rgba(245,158,11,0.25)] ring-2 ring-amber-500/20'
+                  : isDone
+                  ? 'bg-[#0D121D]/90 border border-emerald-500/40 shadow-[0_0_12px_rgba(16,185,129,0.12)] hover:border-emerald-500/60'
+                  : 'bg-[#0D121D]/50 border border-slate-800/80 opacity-65 hover:opacity-85'
+              }`}
             >
-              {/* Vertical Conduit Spine Node (Right Side) */}
-              <div className="relative flex flex-col items-center flex-none w-11">
-                {/* Node Symbol */}
-                <div className="relative z-10 my-auto">
-                  <AnimatePresence mode="wait">
-                    {isDone ? (
-                      <motion.div
-                        key="done-node"
-                        initial={{ scale: 0.6 }}
-                        animate={{ scale: 1 }}
-                        exit={{ scale: 0.6 }}
-                        transition={{ type: 'spring', stiffness: 400, damping: 22 }}
-                        className="relative w-10 h-10 flex items-center justify-center"
-                      >
-                        <div className="w-9 h-9 rounded-2xl bg-emerald-500 text-white flex items-center justify-center shadow-md shadow-emerald-500/30 ring-2 ring-emerald-500/20">
-                          <Check className="w-5 h-5 stroke-[3]" />
-                        </div>
-                      </motion.div>
-                    ) : isDoing ? (
-                      <motion.div
-                        key="doing-node"
-                        initial={{ scale: 0.7 }}
-                        animate={{ scale: 1 }}
-                        className="relative w-10 h-10 flex items-center justify-center"
-                      >
-                        <div className="absolute inset-0 rounded-2xl bg-blue-500/30 blur-[8px] animate-pulse" />
-                        <div className="relative w-9 h-9 rounded-2xl bg-[#3B82F6] text-white flex items-center justify-center shadow-lg shadow-blue-500/40 ring-4 ring-blue-500/20">
-                          <Play className="w-4 h-4 fill-current ml-0.5" />
-                        </div>
-                      </motion.div>
-                    ) : (
-                      <div className="w-9 h-9 rounded-2xl bg-[var(--surface-2)] border border-[var(--line-soft)] text-[var(--text-3)] flex items-center justify-center font-black text-xs num shadow-xs">
-                        {step.step_order}
-                      </div>
-                    )}
-                  </AnimatePresence>
-                </div>
-
-                {/* Connecting Vertical Track Pipe */}
-                {!isLast && (
-                  <div
-                    className={`w-0.5 grow transition-colors duration-500 my-1 ${
-                      isDone && nextStep?.state === 'done'
-                        ? 'bg-emerald-500/70'
-                        : isDone && nextStep?.state === 'doing'
-                        ? 'bg-gradient-to-b from-emerald-500 to-[#3B82F6]'
-                        : 'bg-[var(--line-soft)]/70'
-                    }`}
-                  />
+              {/* Left Action Control (Emerald Double Checkmark / Revert / Lock) */}
+              <div className="flex items-center gap-2 order-2 sm:order-1 shrink-0">
+                {isDoing ? (
+                  <motion.button
+                    type="button"
+                    whileHover={{ scale: 1.04 }}
+                    whileTap={{ scale: 0.94 }}
+                    onClick={() => handleComplete(step.id, step.step_order)}
+                    disabled={animatingStepId === step.id}
+                    className="px-5 py-2.5 rounded-full font-black text-xs sm:text-sm bg-[#10B981] hover:bg-[#059669] active:bg-[#047857] text-white shadow-[0_0_18px_rgba(16,185,129,0.5)] hover:shadow-[0_0_26px_rgba(16,185,129,0.7)] transition-all flex items-center gap-2 cursor-pointer disabled:opacity-50"
+                  >
+                    <CheckCheck className="w-5 h-5 stroke-[2.5]" />
+                    <span>إكمال الخطوة</span>
+                  </motion.button>
+                ) : isDone ? (
+                  <button
+                    type="button"
+                    onClick={() => onRevertStep(step.id, step.step_order)}
+                    className="px-3.5 py-1.5 rounded-xl text-xs font-bold text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 border border-slate-700/60 hover:border-rose-500/30 transition-all cursor-pointer flex items-center gap-1.5"
+                    title="إعادة هذه الخطوة للتنفيذ"
+                  >
+                    <ArrowLeft className="w-3.5 h-3.5" />
+                    <span>تراجع</span>
+                  </button>
+                ) : (
+                  <span className="text-[11px] font-bold text-slate-400 bg-slate-800/80 px-3 py-1.5 rounded-xl flex items-center gap-1.5 border border-slate-700/60">
+                    <Lock className="w-3.5 h-3.5" />
+                    <span>مغلقة</span>
+                  </span>
                 )}
               </div>
 
-              {/* Integrated Step Glass Card (Left Content Area) */}
-              <motion.div
-                layout
-                className={`flex-1 p-4 sm:p-4.5 rounded-[22px] transition-all duration-300 flex items-center justify-between flex-wrap sm:flex-nowrap gap-3 ${
-                  isDoing
-                    ? 'glass-card bg-white/90 dark:bg-[#161D2B]/90 border-2 border-[#3B82F6] dark:border-[#3B82F6]/90 shadow-[0_10px_30px_rgba(59,130,246,0.12)] ring-4 ring-blue-500/10'
-                    : isDone
-                    ? 'glass-card bg-[var(--surface-glass)]/90 border border-emerald-500/25 hover:border-emerald-500/40 shadow-xs'
-                    : 'bg-[var(--surface-2)]/40 border border-[var(--line-soft)] opacity-70 hover:opacity-90'
-                }`}
-              >
-                {/* Step Info */}
-                <div className="flex flex-col min-w-0 flex-1">
-                  <div className="flex items-center gap-2 flex-wrap mb-1">
-                    <span
-                      className={`text-[11px] font-black px-2 py-0.5 rounded-md num ${
-                        isDoing
-                          ? 'bg-blue-500/15 text-[#3B82F6]'
-                          : isDone
-                          ? 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400'
-                          : 'bg-[var(--surface-3)] text-[var(--text-3)]'
-                      }`}
-                    >
-                      المرحلة {step.step_order}
-                    </span>
+              {/* Right Side: Step Title, Badge, and Circular Spinner Node */}
+              <div className="flex items-center gap-3.5 order-1 sm:order-2 flex-1 justify-end min-w-0">
+                
+                {/* Details (Title, Status Badge, Owner) */}
+                <div className="flex flex-col items-end text-right min-w-0">
+                  <div className="flex items-center gap-2.5 flex-wrap justify-end mb-1">
+                    {/* Status Pill Badge */}
+                    {isDoing && (
+                      <span className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full text-xs font-black bg-amber-500/20 text-amber-400 border border-amber-500/40 shadow-xs">
+                        <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-ping" />
+                        <span>جاري التنفيذ</span>
+                      </span>
+                    )}
+
+                    {isDone && (
+                      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-black bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+                        <CheckCircle2 className="w-3.5 h-3.5" />
+                        <span>مكتملة بنجاح</span>
+                      </span>
+                    )}
+
+                    {/* Step Title */}
                     <h4
-                      className={`font-black text-sm sm:text-base leading-snug ${
+                      className={`font-black text-base sm:text-lg leading-tight ${
                         isDoing
-                          ? 'text-[var(--text)] font-display text-[15px]'
+                          ? 'text-amber-400 font-display'
                           : isDone
-                          ? 'text-[var(--text)] font-extrabold'
-                          : 'text-[var(--text-2)] font-bold'
+                          ? 'text-slate-100'
+                          : 'text-slate-400'
                       }`}
                     >
                       {step.label}
                     </h4>
                   </div>
 
-                  {/* Status Indicator / Timestamps */}
-                  {isDone ? (
-                    <div className="inline-flex items-center gap-1.5 text-[11px] font-bold text-emerald-600 dark:text-emerald-400 mt-0.5">
-                      <CheckCircle2 className="w-3.5 h-3.5" />
-                      <span>{formatArabicDate(step.done_at) || 'مكتملة بنجاح'}</span>
-                    </div>
-                  ) : isDoing ? (
-                    <div className="inline-flex items-center gap-1.5 text-[11px] font-extrabold text-[#3B82F6] mt-0.5">
-                      <span className="w-2 h-2 rounded-full bg-blue-500 animate-ping" />
-                      <span>الخطوة الجارية حالياً — بانتظار الإنجاز</span>
+                  {/* Subtitle / Owner & Timestamp */}
+                  <div className="flex items-center gap-2 text-xs text-slate-400 font-medium">
+                    {isDone && step.done_at && (
+                      <span className="text-[11px] text-emerald-400/90 font-semibold num">
+                        {formatArabicDate(step.done_at)}
+                      </span>
+                    )}
+                    <span className="flex items-center gap-1 text-[11.5px]">
+                      <span>المسؤول: {step.owner_kind || 'المدير المختص'}</span>
+                      <User className="w-3.5 h-3.5 text-slate-400" />
+                    </span>
+                  </div>
+                </div>
+
+                {/* Circular Number / Spinner Medallion */}
+                <div className="relative w-11 h-11 flex items-center justify-center shrink-0">
+                  {isDoing ? (
+                    <>
+                      {/* Rotating Amber Arc Spinner */}
+                      <svg
+                        className="absolute inset-0 w-full h-full animate-spin [animation-duration:2.8s]"
+                        viewBox="0 0 44 44"
+                      >
+                        <circle
+                          cx="22"
+                          cy="22"
+                          r="18"
+                          fill="none"
+                          stroke="rgba(245, 158, 11, 0.25)"
+                          strokeWidth="3"
+                        />
+                        <circle
+                          cx="22"
+                          cy="22"
+                          r="18"
+                          fill="none"
+                          stroke="#F59E0B"
+                          strokeWidth="3"
+                          strokeDasharray="56 56"
+                          strokeLinecap="round"
+                        />
+                      </svg>
+                      {/* Center Static Upright Number */}
+                      <span className="relative z-10 font-black text-sm text-amber-400 num">
+                        {step.step_order}
+                      </span>
+                    </>
+                  ) : isDone ? (
+                    <div className="w-10 h-10 rounded-full bg-emerald-500 text-white flex items-center justify-center shadow-md shadow-emerald-500/40 ring-2 ring-emerald-500/30">
+                      <Check className="w-5 h-5 stroke-[3]" />
                     </div>
                   ) : (
-                    <div className="inline-flex items-center gap-1 text-[11px] font-medium text-[var(--text-3)] mt-0.5">
-                      <Lock className="w-3 h-3" />
-                      <span>في الانتظار (تُفتح تلقائياً بعد إكمال السابقة)</span>
+                    <div className="w-9 h-9 rounded-full bg-slate-800/90 border border-slate-700 text-slate-400 flex items-center justify-center font-black text-xs num shadow-xs">
+                      {step.step_order}
                     </div>
                   )}
                 </div>
 
-                {/* Action Controls */}
-                <div className="flex items-center gap-2 shrink-0">
-                  {isDoing ? (
-                    <motion.button
-                      type="button"
-                      whileHover={{ scale: 1.03 }}
-                      whileTap={{ scale: 0.96 }}
-                      onClick={() => handleComplete(step.id, step.step_order)}
-                      disabled={animatingStepId === step.id}
-                      className="px-5 py-2.5 rounded-xl font-black text-xs bg-[#10B981] hover:bg-emerald-600 active:bg-emerald-700 text-white shadow-md shadow-emerald-500/25 transition-all flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
-                    >
-                      <span>إكمال الخطوة</span>
-                      <Check className="w-4 h-4 stroke-[3]" />
-                    </motion.button>
-                  ) : isDone ? (
-                    <button
-                      type="button"
-                      onClick={() => onRevertStep(step.id, step.step_order)}
-                      className="px-3 py-1.5 rounded-xl text-xs font-bold text-[var(--text-3)] hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-500/10 border border-[var(--line-soft)] hover:border-rose-500/20 transition-all cursor-pointer flex items-center gap-1.5"
-                      title="إعادة هذه الخطوة للتنفيذ"
-                    >
-                      <ArrowLeft className="w-3.5 h-3.5" />
-                      <span>تراجع</span>
-                    </button>
-                  ) : (
-                    <span className="text-[11px] font-bold text-[var(--text-3)] bg-[var(--surface-3)] px-3 py-1.5 rounded-xl flex items-center gap-1 border border-[var(--line-soft)]">
-                      <Lock className="w-3 h-3" />
-                      <span>مغلقة</span>
-                    </span>
-                  )}
-                </div>
-              </motion.div>
+              </div>
             </motion.div>
           )
         })}
@@ -304,7 +292,7 @@ export default function WorkflowTimelineMotion({
           <button
             type="button"
             onClick={onTransferToDeposit}
-            className="w-full py-4 px-6 rounded-2xl font-black text-sm bg-gradient-to-r from-emerald-500 via-[#3B82F6] to-emerald-600 hover:brightness-105 active:scale-98 text-white shadow-lg shadow-blue-500/25 flex items-center justify-center gap-2.5 transition-all cursor-pointer border border-white/20"
+            className="w-full py-4 px-6 rounded-2xl font-black text-sm bg-gradient-to-r from-emerald-500 via-amber-500 to-emerald-600 hover:brightness-105 active:scale-98 text-white shadow-lg shadow-emerald-500/25 flex items-center justify-center gap-2.5 transition-all cursor-pointer border border-white/20"
           >
             <ShieldCheck className="w-5 h-5" />
             <span>اكتمل التأسيس — إدخال بيانات الشهادة والتحويل لمسار إطلاق الوديعة ←</span>
