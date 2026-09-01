@@ -227,9 +227,9 @@ export default function LLCTransactionDetailsModal({
                   href={`/commercial/companies/${transaction.company_id}`}
                   className="btn btn-ghost"
                   style={{ fontSize: '12.5px', padding: '9px 14px', whiteSpace: 'nowrap' }}
-                  title="فتح ملف الشركة الشامل"
+                  title="فتح الملف الشامل للشركة"
                 >
-                  <span>ملف 360°</span>
+                  <span>الملف الشامل</span>
                   <span className="material-symbols-outlined text-[15px]">arrow_left</span>
                 </Link>
               )}

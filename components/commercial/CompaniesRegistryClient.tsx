@@ -295,7 +295,7 @@ export default function CompaniesRegistryClient({ companies = [] }: Props) {
                             onClick={(e) => e.stopPropagation()}
                             className="btn btn-primary !py-1 !px-2.5 !text-xs !font-bold inline-flex items-center gap-0.5"
                           >
-                            <span>ملف 360°</span>
+                            <span>الملف الشامل</span>
                             <span className="material-symbols-outlined text-[13px]">arrow_left</span>
                           </Link>
                         </div>

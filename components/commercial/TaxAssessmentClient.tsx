@@ -457,9 +457,9 @@ export default function TaxAssessmentClient({ assessments = [], companies = [], 
                             <Link
                               href={`/commercial/companies/${item.company_id}`}
                               className="btn btn-primary !py-1 !px-2.5 !text-xs !font-bold !rounded-xl flex items-center gap-1 text-white shadow-xs"
-                              title="الانتقال إلى ملف الشركة الشامل 360°"
+                              title="الانتقال إلى الملف الشامل للشركة"
                             >
-                              <span>ملف 360°</span>
+                              <span>الملف الشامل</span>
                               <span className="material-symbols-outlined text-[13px]">arrow_left</span>
                             </Link>
                           )}

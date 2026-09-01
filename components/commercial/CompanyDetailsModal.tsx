@@ -1116,10 +1116,10 @@ export default function CompanyDetailsModal({ company, isOpen, onClose, onDelete
                 </div>
                 <div>
                   <h4 style={{ fontSize: '14px', fontWeight: 800, margin: '0 0 4px 0', color: 'var(--text)' }}>
-                    الهويات والوثائق تُدار من ملف الشركة الشامل
+                    الهويات والوثائق تُدار من الملف الشامل للشركة
                   </h4>
                   <p style={{ fontSize: '12px', color: 'var(--text-3)', margin: 0, maxWidth: '380px' }}>
-                    لتفادي ازدواج البيانات، عرض وإضافة هويات المستورد والضريبة والغرفة التجارية والتخطيط الحقيقية يتم من ملف الشركة الشامل 360°.
+                    لتفادي ازدواج البيانات، عرض وإضافة هويات المستورد والضريبة والغرفة التجارية والتخطيط الحقيقية يتم من الملف الشامل للشركة.
                   </p>
                 </div>
                 <a
@@ -1127,7 +1127,7 @@ export default function CompanyDetailsModal({ company, isOpen, onClose, onDelete
                   className="btn btn-primary"
                   style={{ padding: '9px 20px', fontSize: '13px', fontWeight: 700, textDecoration: 'none', borderRadius: '12px' }}
                 >
-                  فتح ملف الشركة الشامل 360° ←
+                  فتح الملف الشامل للشركة ←
                 </a>
               </div>
             </div>

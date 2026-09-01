@@ -612,29 +612,17 @@ export default function CompaniesClient({ initialCompanies }: Props) {
                     <span className={`tag ${calculatedSt.tagClass} !py-0.5 !px-2 !text-[10px] !font-bold shrink-0`}>{calculatedSt.label}</span>
                   </div>
 
-                  {/* Row 2: Prominent Action Buttons (تعديل + ملف 360°) */}
-                  <div className="grid grid-cols-2 gap-2 w-full pt-1">
-                    <button
-                      type="button"
-                      onClick={e => {
-                        e.stopPropagation()
-                        handleCardClick(co)
-                      }}
-                      className="btn btn-ghost !py-1.5 !px-2 !text-xs !font-bold !rounded-xl flex items-center justify-center gap-1 border border-[var(--border)] hover:bg-[var(--surface-3)] transition-all"
-                      title="تعديل تفاصيل الشركة أو سير العمل"
-                    >
-                      <Icon name="gear" />
-                      <span>تعديل</span>
-                    </button>
-
+                  {/* Row 2: Action Button (الملف الشامل للشركة) */}
+                  <div className="w-full pt-1">
                     <Link
                       href={`/commercial/companies/${co.id}`}
                       onClick={e => e.stopPropagation()}
-                      className="btn btn-primary !py-1.5 !px-2.5 !text-xs !font-black !rounded-xl flex items-center justify-center gap-1 shadow-sm hover:shadow-md active:scale-95 transition-all text-white"
-                      title="عرض ملف الشركة الشامل 360°"
+                      className="w-full btn btn-primary !py-2 !px-3 !text-xs !font-black !rounded-xl flex items-center justify-center gap-1.5 shadow-sm hover:shadow-md active:scale-98 transition-all text-white"
+                      title="عرض الملف الشامل لبيانات ووثائق وسجلات الشركة"
                     >
-                      <span>ملف 360°</span>
-                      <span className="material-symbols-outlined text-[14px]">arrow_left</span>
+                      <span className="material-symbols-outlined text-[16px]">folder_open</span>
+                      <span>الملف الشامل للشركة</span>
+                      <span className="material-symbols-outlined text-[15px] mr-auto">arrow_left</span>
                     </Link>
                   </div>
                 </div>

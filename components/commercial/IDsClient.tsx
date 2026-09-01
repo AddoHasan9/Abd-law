@@ -473,9 +473,9 @@ export default function IDsClient({ companies = [], initialCompanyId }: Props) {
                             <Link
                               href={`/commercial/companies/${r.company_id}`}
                               className="btn btn-primary !py-1 !px-3 !text-xs !font-bold inline-flex items-center gap-1"
-                              title="فتح ملف الشركة الشامل"
+                              title="فتح الملف الشامل للشركة"
                             >
-                              <span>ملف 360°</span>
+                              <span>الملف الشامل</span>
                               <span className="material-symbols-outlined text-[14px]">arrow_left</span>
                             </Link>
                           )}
