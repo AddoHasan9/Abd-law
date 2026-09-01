@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion } from 'framer-motion'
 import confetti from 'canvas-confetti'
 import { Check, CheckCheck, ArrowLeft, Lock, Sparkles, CheckCircle2, ShieldCheck, User } from 'lucide-react'
 
@@ -78,40 +78,40 @@ export default function WorkflowTimelineMotion({
 
   return (
     <div className="flex flex-col gap-4 w-full">
-      {/* 1. Executive Frosted Header with Dynamic Progress Track */}
-      <div className="glass-card p-4 sm:p-5 rounded-2xl bg-[#0D121D]/90 dark:bg-[#090E17]/90 border border-slate-700/60 shadow-md flex flex-col gap-3 relative overflow-hidden">
+      {/* 1. Header with Dynamic Progress Track (Light & Dark Adaptive) */}
+      <div className="p-4 sm:p-5 rounded-2xl bg-white dark:bg-[#0D121D]/90 border border-slate-200 dark:border-slate-700/60 shadow-sm flex flex-col gap-3 relative overflow-hidden">
         
         {/* Header Title & Live Counter Capsule */}
         <div className="flex items-center justify-between flex-wrap gap-3 relative z-10">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-amber-500/15 border border-amber-500/30 text-amber-400 flex items-center justify-center font-black shrink-0 shadow-xs">
+            <div className="w-10 h-10 rounded-xl bg-amber-500/15 border border-amber-500/30 text-amber-600 dark:text-amber-400 flex items-center justify-center font-black shrink-0 shadow-xs">
               <Sparkles className="w-5 h-5 animate-pulse" />
             </div>
             <div>
-              <div className="text-xs font-bold text-slate-400">مسار تأسيس الشركة المعتمد</div>
-              <h3 className="text-base sm:text-lg font-black text-white font-display m-0 leading-tight">
+              <div className="text-xs font-bold text-slate-500 dark:text-slate-400">مسار تأسيس الشركة المعتمد</div>
+              <h3 className="text-base sm:text-lg font-black text-slate-900 dark:text-white font-display m-0 leading-tight">
                 مخطط المراحل الإجرائية المتتابعة
               </h3>
             </div>
           </div>
 
           {/* Progress Capsule */}
-          <div className="flex items-center gap-2.5 bg-[#151D2C] px-3.5 py-1.5 rounded-full border border-slate-700/80 shadow-xs">
+          <div className="flex items-center gap-2.5 bg-slate-100 dark:bg-[#151D2C] px-3.5 py-1.5 rounded-full border border-slate-200 dark:border-slate-700/80 shadow-xs">
             <span className="relative flex h-2.5 w-2.5">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
               <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
             </span>
-            <span className="text-xs font-extrabold text-emerald-400 num">
+            <span className="text-xs font-extrabold text-emerald-600 dark:text-emerald-400 num">
               {pct}% مكتمل
             </span>
-            <span className="text-xs text-slate-400 font-semibold num border-r border-slate-700 pr-2">
+            <span className="text-xs text-slate-500 dark:text-slate-400 font-semibold num border-r border-slate-200 dark:border-slate-700 pr-2">
               ({doneCount} من {totalSteps} مراحل)
             </span>
           </div>
         </div>
 
         {/* Animated Progress Bar */}
-        <div className="w-full h-2.5 rounded-full bg-slate-800/80 overflow-hidden p-0.5 border border-slate-700/60 relative">
+        <div className="w-full h-2.5 rounded-full bg-slate-100 dark:bg-slate-800/80 overflow-hidden p-0.5 border border-slate-200 dark:border-slate-700/60 relative">
           <motion.div
             className="h-full rounded-full bg-gradient-to-r from-emerald-500 via-amber-400 to-emerald-400 shadow-sm relative overflow-hidden"
             initial={{ width: '0%' }}
@@ -127,7 +127,7 @@ export default function WorkflowTimelineMotion({
         </div>
       </div>
 
-      {/* 2. Step Cards List */}
+      {/* 2. Step Cards List (Strict RTL: Right Side Info, Left Side Action) */}
       <div className="flex flex-col gap-3 py-1">
         {steps.map((step, idx) => {
           const isDone = step.state === 'done'
@@ -144,93 +144,14 @@ export default function WorkflowTimelineMotion({
               transition={{ duration: 0.28, delay: idx * 0.03 }}
               className={`rounded-2xl transition-all duration-300 flex items-center justify-between flex-wrap sm:flex-nowrap gap-4 p-4 sm:p-5 relative ${
                 isDoing
-                  ? 'bg-[#0E1522] border-2 border-amber-500 shadow-[0_0_22px_rgba(245,158,11,0.25)] ring-2 ring-amber-500/20'
+                  ? 'bg-amber-500/[0.05] dark:bg-[#0E1522] border-2 border-amber-500 shadow-[0_0_22px_rgba(245,158,11,0.22)] ring-2 ring-amber-500/20'
                   : isDone
-                  ? 'bg-[#0D121D]/90 border border-emerald-500/40 shadow-[0_0_12px_rgba(16,185,129,0.12)] hover:border-emerald-500/60'
-                  : 'bg-[#0D121D]/50 border border-slate-800/80 opacity-65 hover:opacity-85'
+                  ? 'bg-white/90 dark:bg-[#0D121D]/90 border border-emerald-500/40 shadow-xs hover:border-emerald-500/60'
+                  : 'bg-slate-50/80 dark:bg-[#0D121D]/50 border border-slate-200 dark:border-slate-800/80 opacity-70 hover:opacity-90'
               }`}
             >
-              {/* Left Action Control (Emerald Double Checkmark / Revert / Lock) */}
-              <div className="flex items-center gap-2 order-2 sm:order-1 shrink-0">
-                {isDoing ? (
-                  <motion.button
-                    type="button"
-                    whileHover={{ scale: 1.04 }}
-                    whileTap={{ scale: 0.94 }}
-                    onClick={() => handleComplete(step.id, step.step_order)}
-                    disabled={animatingStepId === step.id}
-                    className="px-5 py-2.5 rounded-full font-black text-xs sm:text-sm bg-[#10B981] hover:bg-[#059669] active:bg-[#047857] text-white shadow-[0_0_18px_rgba(16,185,129,0.5)] hover:shadow-[0_0_26px_rgba(16,185,129,0.7)] transition-all flex items-center gap-2 cursor-pointer disabled:opacity-50"
-                  >
-                    <CheckCheck className="w-5 h-5 stroke-[2.5]" />
-                    <span>إكمال الخطوة</span>
-                  </motion.button>
-                ) : isDone ? (
-                  <button
-                    type="button"
-                    onClick={() => onRevertStep(step.id, step.step_order)}
-                    className="px-3.5 py-1.5 rounded-xl text-xs font-bold text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 border border-slate-700/60 hover:border-rose-500/30 transition-all cursor-pointer flex items-center gap-1.5"
-                    title="إعادة هذه الخطوة للتنفيذ"
-                  >
-                    <ArrowLeft className="w-3.5 h-3.5" />
-                    <span>تراجع</span>
-                  </button>
-                ) : (
-                  <span className="text-[11px] font-bold text-slate-400 bg-slate-800/80 px-3 py-1.5 rounded-xl flex items-center gap-1.5 border border-slate-700/60">
-                    <Lock className="w-3.5 h-3.5" />
-                    <span>مغلقة</span>
-                  </span>
-                )}
-              </div>
-
-              {/* Right Side: Step Title, Badge, and Circular Spinner Node */}
-              <div className="flex items-center gap-3.5 order-1 sm:order-2 flex-1 justify-end min-w-0">
-                
-                {/* Details (Title, Status Badge, Owner) */}
-                <div className="flex flex-col items-end text-right min-w-0">
-                  <div className="flex items-center gap-2.5 flex-wrap justify-end mb-1">
-                    {/* Status Pill Badge */}
-                    {isDoing && (
-                      <span className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full text-xs font-black bg-amber-500/20 text-amber-400 border border-amber-500/40 shadow-xs">
-                        <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-ping" />
-                        <span>جاري التنفيذ</span>
-                      </span>
-                    )}
-
-                    {isDone && (
-                      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-black bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
-                        <CheckCircle2 className="w-3.5 h-3.5" />
-                        <span>مكتملة بنجاح</span>
-                      </span>
-                    )}
-
-                    {/* Step Title */}
-                    <h4
-                      className={`font-black text-base sm:text-lg leading-tight ${
-                        isDoing
-                          ? 'text-amber-400 font-display'
-                          : isDone
-                          ? 'text-slate-100'
-                          : 'text-slate-400'
-                      }`}
-                    >
-                      {step.label}
-                    </h4>
-                  </div>
-
-                  {/* Subtitle / Owner & Timestamp */}
-                  <div className="flex items-center gap-2 text-xs text-slate-400 font-medium">
-                    {isDone && step.done_at && (
-                      <span className="text-[11px] text-emerald-400/90 font-semibold num">
-                        {formatArabicDate(step.done_at)}
-                      </span>
-                    )}
-                    <span className="flex items-center gap-1 text-[11.5px]">
-                      <span>المسؤول: {step.owner_kind || 'المدير المختص'}</span>
-                      <User className="w-3.5 h-3.5 text-slate-400" />
-                    </span>
-                  </div>
-                </div>
-
+              {/* 1. RIGHT SIDE (اليمين): Step Number / Spinner + Title + Badges + Subtitle */}
+              <div className="flex items-center gap-3.5 min-w-0 flex-1">
                 {/* Circular Number / Spinner Medallion */}
                 <div className="relative w-11 h-11 flex items-center justify-center shrink-0">
                   {isDoing ? (
@@ -260,7 +181,7 @@ export default function WorkflowTimelineMotion({
                         />
                       </svg>
                       {/* Center Static Upright Number */}
-                      <span className="relative z-10 font-black text-sm text-amber-400 num">
+                      <span className="relative z-10 font-black text-sm text-amber-600 dark:text-amber-400 num">
                         {step.step_order}
                       </span>
                     </>
@@ -269,12 +190,89 @@ export default function WorkflowTimelineMotion({
                       <Check className="w-5 h-5 stroke-[3]" />
                     </div>
                   ) : (
-                    <div className="w-9 h-9 rounded-full bg-slate-800/90 border border-slate-700 text-slate-400 flex items-center justify-center font-black text-xs num shadow-xs">
+                    <div className="w-9 h-9 rounded-full bg-slate-200 dark:bg-slate-800/90 border border-slate-300 dark:border-slate-700 text-slate-500 dark:text-slate-400 flex items-center justify-center font-black text-xs num shadow-xs">
                       {step.step_order}
                     </div>
                   )}
                 </div>
 
+                {/* Details (Title, Status Badge, Owner) */}
+                <div className="flex flex-col items-start text-right min-w-0">
+                  <div className="flex items-center gap-2.5 flex-wrap mb-1">
+                    {/* Step Title */}
+                    <h4
+                      className={`font-black text-base sm:text-lg leading-tight ${
+                        isDoing
+                          ? 'text-amber-600 dark:text-amber-400 font-display'
+                          : isDone
+                          ? 'text-slate-900 dark:text-slate-100 font-extrabold'
+                          : 'text-slate-600 dark:text-slate-400 font-bold'
+                      }`}
+                    >
+                      {step.label}
+                    </h4>
+
+                    {/* Status Pill Badge */}
+                    {isDoing && (
+                      <span className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full text-xs font-black bg-amber-500/15 text-amber-700 dark:text-amber-400 border border-amber-500/35 shadow-xs">
+                        <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-ping" />
+                        <span>جاري التنفيذ</span>
+                      </span>
+                    )}
+
+                    {isDone && (
+                      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-black bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border border-emerald-500/30">
+                        <CheckCircle2 className="w-3.5 h-3.5" />
+                        <span>مكتملة بنجاح</span>
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Subtitle / Owner & Timestamp */}
+                  <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400 font-medium">
+                    <span className="flex items-center gap-1 text-[11.5px]">
+                      <User className="w-3.5 h-3.5 text-slate-400" />
+                      <span>المسؤول: {step.owner_kind || 'المدير المختص'}</span>
+                    </span>
+                    {isDone && step.done_at && (
+                      <span className="text-[11px] text-emerald-600 dark:text-emerald-400 font-semibold num border-r border-slate-200 dark:border-slate-700 pr-2">
+                        {formatArabicDate(step.done_at)}
+                      </span>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* 2. LEFT SIDE (اليسار): Action Control (Emerald Double Checkmark / Revert / Lock) */}
+              <div className="flex items-center gap-2 shrink-0">
+                {isDoing ? (
+                  <motion.button
+                    type="button"
+                    whileHover={{ scale: 1.04 }}
+                    whileTap={{ scale: 0.94 }}
+                    onClick={() => handleComplete(step.id, step.step_order)}
+                    disabled={animatingStepId === step.id}
+                    className="px-5 py-2.5 rounded-full font-black text-xs sm:text-sm bg-[#10B981] hover:bg-[#059669] active:bg-[#047857] text-white shadow-[0_0_18px_rgba(16,185,129,0.45)] hover:shadow-[0_0_26px_rgba(16,185,129,0.65)] transition-all flex items-center gap-2 cursor-pointer disabled:opacity-50"
+                  >
+                    <span>إكمال الخطوة</span>
+                    <CheckCheck className="w-5 h-5 stroke-[2.5]" />
+                  </motion.button>
+                ) : isDone ? (
+                  <button
+                    type="button"
+                    onClick={() => onRevertStep(step.id, step.step_order)}
+                    className="px-3.5 py-1.5 rounded-xl text-xs font-bold text-slate-600 dark:text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-500/10 border border-slate-300 dark:border-slate-700 hover:border-rose-300 dark:hover:border-rose-500/30 transition-all cursor-pointer flex items-center gap-1.5"
+                    title="إعادة هذه الخطوة للتنفيذ"
+                  >
+                    <ArrowLeft className="w-3.5 h-3.5" />
+                    <span>تراجع</span>
+                  </button>
+                ) : (
+                  <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800/80 px-3 py-1.5 rounded-xl flex items-center gap-1.5 border border-slate-200 dark:border-slate-700/60">
+                    <Lock className="w-3.5 h-3.5" />
+                    <span>مغلقة</span>
+                  </span>
+                )}
               </div>
             </motion.div>
           )
@@ -302,4 +300,5 @@ export default function WorkflowTimelineMotion({
     </div>
   )
 }
+
 
