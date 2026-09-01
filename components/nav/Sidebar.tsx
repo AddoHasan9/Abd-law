@@ -167,21 +167,21 @@ export default function Sidebar({
     <aside id="sidebar" className="transition-all duration-300">
       {/* Brand Header with Refined Luxury Styling */}
       <div className="side-head group cursor-default">
-        <div className="w-[42px] h-[42px] rounded-xl bg-gradient-to-br from-white/10 to-white/[0.03] border border-white/15 p-1 flex items-center justify-center shadow-md shadow-black/10 group-hover:scale-105 group-hover:border-[var(--accent)]/50 transition-all duration-300 flex-none overflow-hidden">
+        <div className="w-[36px] h-[36px] rounded-lg bg-gradient-to-br from-white/10 to-white/[0.03] border border-white/15 p-1 flex items-center justify-center shadow-xs group-hover:scale-105 group-hover:border-[var(--accent)]/50 transition-all duration-300 flex-none overflow-hidden">
           <Image
             src="/logo.png"
             alt="شعار مكتب المحامي عبدالحسن الخزرجي"
-            width={38}
-            height={38}
-            className="w-full h-full object-contain filter drop-shadow-sm"
+            width={30}
+            height={30}
+            className="w-full h-full object-contain filter drop-shadow-xs"
             priority
           />
         </div>
         <div className="flex-1 min-w-0 pr-0.5">
-          <div className="side-name tracking-tight font-black text-[14px] text-[var(--text)] group-hover:text-[var(--accent)] transition-colors leading-tight truncate">
+          <div className="side-name tracking-tight font-black text-[13px] text-[var(--text)] group-hover:text-[var(--accent)] transition-colors leading-tight truncate">
             مكتب المحامي عبدالحسن الخزرجي
           </div>
-          <div className="side-role text-[10.5px] text-[var(--accent)] font-bold mt-0.5 tracking-wide flex items-center gap-1.5 truncate">
+          <div className="side-role text-[9.5px] text-[var(--accent)] font-bold mt-0.5 tracking-wide flex items-center gap-1.5 truncate">
             <span className="w-1.5 h-1.5 rounded-full bg-[var(--accent)] animate-pulse shrink-0" />
             <span className="truncate">للمحاماة والاستشارات القانونية</span>
           </div>

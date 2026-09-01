@@ -53,8 +53,8 @@
     --r-xl: 22px;
     --r-full: 999px;
     --sp: 4px;
-    --sidebar-w: 260px;
-    --topbar-h: 56px;
+    --sidebar-w: 242px;
+    --topbar-h: 48px;
 
     /* مقاييس النوافذ المنبثقة الموحدة (Standard Modal Scale) */
     --modal-sm: 480px;
@@ -792,18 +792,18 @@
   }
 
   .side-head {
-    padding: 13px 14px 12px;
+    padding: 9px 12px 8px;
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 8px;
     flex: none;
     border-bottom: 1px solid var(--line-soft);
   }
 
   .side-mark {
-    width: 42px;
-    height: 42px;
-    border-radius: 12px;
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
     flex: none;
     display: grid;
     place-items: center;
@@ -813,48 +813,48 @@
   }
 
   .side-mark .icon {
-    width: 22px;
-    height: 22px;
+    width: 18px;
+    height: 18px;
   }
 
   .side-name {
     font-family: var(--font-display);
     font-weight: 800;
-    font-size: 13.5px;
-    line-height: 1.3;
+    font-size: 12.5px;
+    line-height: 1.25;
     color: var(--text);
   }
 
   .side-role {
-    font-size: 10.5px;
+    font-size: 9.5px;
     color: var(--text-3);
     font-weight: 600;
-    margin-top: 2px;
+    margin-top: 1px;
   }
 
   .side-nav {
     flex: 1;
     overflow-y: auto;
     min-height: 0;
-    padding: 4px 10px 8px;
+    padding: 2px 6px 4px;
     scrollbar-width: thin;
   }
 
   .nav-group {
-    margin-top: 10px;
+    margin-top: 3px;
   }
 
   .nav-group-head {
     width: 100%;
     display: flex;
     align-items: center;
-    gap: 6px;
-    padding: 6px 10px;
-    margin-bottom: 2px;
-    border-radius: 8px;
-    font-size: 11px;
+    gap: 5px;
+    padding: 3px 7px;
+    margin-bottom: 1px;
+    border-radius: 6px;
+    font-size: 10.5px;
     font-weight: 700;
-    letter-spacing: .04em;
+    letter-spacing: .03em;
     color: var(--text-3);
     transition: color var(--t-fast), background var(--t-fast);
   }
@@ -870,8 +870,8 @@
   }
 
   .chev {
-    width: 14px;
-    height: 14px;
+    width: 13px;
+    height: 13px;
     flex: none;
     transition: transform var(--t-fast);
   }
@@ -906,9 +906,9 @@
   }
 
   .nav-toggle {
-    width: 30px;
-    height: 34px;
-    border-radius: 8px;
+    width: 24px;
+    height: 26px;
+    border-radius: 6px;
     flex: none;
     display: grid;
     place-items: center;
@@ -924,19 +924,20 @@
   /* Tree Navigation Submenu (Reference Architecture) */
   .nav-sub {
     position: relative;
-    margin-inline-start: 18px;
-    margin-top: 2px;
+    margin-inline-start: 13px;
+    margin-top: 1px;
     display: flex;
     flex-direction: column;
+    gap: 1px;
   }
 
   /* The continuous vertical tree trunk line */
   .nav-sub::before {
     content: '';
     position: absolute;
-    inset-inline-start: 11px;
-    top: 4px;
-    bottom: 6px;
+    inset-inline-start: 8px;
+    top: 3px;
+    bottom: 5px;
     width: 1.5px;
     background: var(--line);
     opacity: 0.6;
@@ -948,13 +949,13 @@
     position: relative;
     display: flex;
     align-items: center;
-    gap: 8px;
-    padding: 6px 10px;
-    padding-inline-start: 24px;
-    font-size: 13px;
+    gap: 6px;
+    padding: 3.5px 7px;
+    padding-inline-start: 19px;
+    font-size: 11.5px;
     font-weight: 500;
     color: var(--text-2);
-    border-radius: 8px;
+    border-radius: 6px;
     transition: color var(--t-fast), background var(--t-fast);
   }
 
@@ -972,11 +973,11 @@
   /* The tree node dot sitting directly on the ::before line */
   .nav-tree-node {
     position: absolute;
-    inset-inline-start: 8.75px;
+    inset-inline-start: 6px;
     top: 50%;
     transform: translateY(-50%);
-    width: 6px;
-    height: 6px;
+    width: 5px;
+    height: 5px;
     display: grid;
     place-items: center;
     z-index: 2;
@@ -984,8 +985,8 @@
   }
 
   .nav-tree-dot {
-    width: 5.5px;
-    height: 5.5px;
+    width: 4.5px;
+    height: 4.5px;
     border-radius: 9999px;
     background: var(--surface);
     border: 1.5px solid var(--line);
@@ -1002,14 +1003,14 @@
   .nav-item.sub[aria-current="page"] .nav-tree-dot {
     background: var(--accent);
     border-color: var(--accent);
-    box-shadow: 0 0 8px var(--accent), 0 0 2px var(--accent);
+    box-shadow: 0 0 6px var(--accent), 0 0 2px var(--accent);
     transform: scale(1.3);
   }
 
   .nav-num {
     margin-inline-start: auto;
     font-family: var(--font-display);
-    font-size: 11px;
+    font-size: 10.5px;
     color: var(--text-3);
     font-variant-numeric: tabular-nums;
   }
@@ -1022,15 +1023,15 @@
     width: 100%;
     display: flex;
     align-items: center;
-    gap: 9px;
-    padding: 7px 10px;
-    border-radius: 10px;
+    gap: 7px;
+    padding: 4.5px 7px;
+    border-radius: 8px;
     color: var(--text-2);
-    font-size: 13px;
+    font-size: 12px;
     font-weight: 500;
     position: relative;
     border: 1px solid transparent;
-    transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+    transition: all 0.15s cubic-bezier(0.16, 1, 0.3, 1);
   }
 
   .nav-item:hover {
@@ -1045,13 +1046,15 @@
   }
 
   .nav-item .icon {
+    width: 16px;
+    height: 16px;
     color: var(--text-3);
-    transition: color 0.18s ease, transform 0.18s ease;
+    transition: color 0.15s ease, transform 0.15s ease;
   }
 
   .nav-item:hover .icon {
     color: var(--accent);
-    transform: scale(1.06);
+    transform: scale(1.05);
   }
 
   .nav-item[aria-current="page"] {
@@ -1073,13 +1076,13 @@
 
   .nav-badge {
     margin-inline-start: auto;
-    min-width: 20px;
-    height: 20px;
-    padding: 0 6px;
+    min-width: 18px;
+    height: 18px;
+    padding: 0 5px;
     border-radius: var(--r-full);
     background: var(--bad);
     color: #fff;
-    font-size: 11px;
+    font-size: 10px;
     font-weight: 700;
     display: grid;
     place-items: center;
@@ -1090,11 +1093,11 @@
     display: block;
     text-decoration: none;
     color: inherit;
-    margin: 8px 12px 10px;
-    padding: 14px;
+    margin: 4px 8px 6px;
+    padding: 8px 10px;
     background: var(--surface);
     border: 1px solid var(--line);
-    border-radius: var(--r-lg);
+    border-radius: var(--r-md);
     box-shadow: var(--shadow-1);
     flex: none;
   }
@@ -1112,27 +1115,27 @@
   .dl-top {
     display: flex;
     align-items: center;
-    gap: 6px;
-    font-size: 11.5px;
+    gap: 5px;
+    font-size: 10.5px;
     font-weight: 700;
     color: var(--text-3);
-    margin-bottom: 8px;
+    margin-bottom: 6px;
   }
 
   .dl-top .icon {
-    width: 14px;
-    height: 14px;
+    width: 13px;
+    height: 13px;
   }
 
   .dl-body {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 8px;
   }
 
   .dl-ring {
-    width: 48px;
-    height: 48px;
+    width: 38px;
+    height: 38px;
     flex: none;
     position: relative;
   }
@@ -1143,7 +1146,7 @@
 
   .dl-ring circle {
     fill: none;
-    stroke-width: 5;
+    stroke-width: 4;
     stroke-linecap: round;
   }
 
@@ -1171,7 +1174,7 @@
     place-items: center;
     font-family: var(--font-display);
     font-weight: 800;
-    font-size: 16px;
+    font-size: 13px;
   }
 
   .is-warn .dl-num {
@@ -1187,7 +1190,7 @@
   }
 
   .dl-title {
-    font-size: 13px;
+    font-size: 11.5px;
     font-weight: 700;
     white-space: nowrap;
     overflow: hidden;
@@ -1195,12 +1198,12 @@
   }
 
   .dl-sub {
-    font-size: 11.5px;
+    font-size: 10px;
     color: var(--text-3);
   }
 
   .side-foot {
-    padding: 8px 10px calc(14px + env(safe-area-inset-bottom, 0px));
+    padding: 4px 8px calc(8px + env(safe-area-inset-bottom, 0px));
     flex: none;
     border-top: 1px solid var(--line-soft);
     background: var(--surface-glass, rgba(255, 255, 255, 0.02));
@@ -1211,8 +1214,8 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 8px;
-    padding: 7px 9px;
+    gap: 6px;
+    padding: 5px 7px;
     border-radius: var(--r-md);
     background: var(--surface-2);
     border: 1px solid var(--line-soft);
@@ -1222,15 +1225,15 @@
   .user-chip-card:hover {
     background: var(--surface-3);
     border-color: rgba(59, 130, 246, 0.3);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
   }
 
   .user-chip {
     width: 100%;
     display: flex;
     align-items: center;
-    gap: 8px;
-    padding: 7px 9px;
+    gap: 6px;
+    padding: 5px 7px;
     border-radius: var(--r-md);
     transition: background var(--t-fast);
   }
@@ -1240,8 +1243,8 @@
   }
 
   .avatar {
-    width: 34px;
-    height: 34px;
+    width: 28px;
+    height: 28px;
     border-radius: var(--r-full);
     flex: none;
     display: grid;
@@ -1367,7 +1370,7 @@
   #view-root {
     flex: 1;
     overflow-y: auto;
-    padding: 20px 24px 44px;
+    padding: 14px 18px 36px;
     background: transparent;
     color: var(--text);
   }
