@@ -25,9 +25,7 @@
   vertical-align: middle;
 }
 
-@layer base {
-
-  :root {
+:root {
     --blue-900: #0A3247;
     --blue-800: #0E4363;
     --blue-700: #12557E;
@@ -2983,7 +2981,6 @@
     transform: scale(0.975);
   }
 
-  /* ---- دعم تفضيل تقليل الحركة (Reduced Motion Support) ---- */
   @media (prefers-reduced-motion: reduce) {
     *,
     *::before,
@@ -2994,4 +2991,3 @@
       scroll-behavior: auto !important;
     }
   }
-}
