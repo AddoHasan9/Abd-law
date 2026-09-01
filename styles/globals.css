@@ -78,143 +78,137 @@
     --font-ui: var(--font-cairo), 'Cairo', -apple-system, 'Segoe UI', system-ui, sans-serif;
     --font-display: var(--font-cairo), 'Cairo', var(--font-ui);
 
-    /* ---- Default Tokens (Apple Pure Frosted Slate Design) ---- */
-    --bg-app: #F8FAFC;
-    --bg: #F8FAFC;
-    --canvas-mesh: radial-gradient(1000px 600px at 12% 8%, rgba(99, 102, 241, 0.025) 0px, transparent 60%),
-                   radial-gradient(800px 500px at 88% 92%, rgba(37, 99, 235, 0.02) 0px, transparent 60%),
-                   #F8FAFC;
+    /* ---- Default Tokens (Apple Pure Frosted Slate — Image 5 Spec) ---- */
+    --bg-app: #EEF2F6;
+    --bg: #EEF2F6;
+    --canvas-mesh: #EEF2F6;
     --surface: #FFFFFF;
-    --surface-glass: rgba(255, 255, 255, 0.82);
-    --surface-2: #F1F5F9;
-    --surface-3: #E2E8F0;
-    --input-bg: #FFFFFF;
-    --input-border: #CBD5E1;
-    --input-border-focus: #4F46E5;
-    --side-bg: rgba(255, 255, 255, 0.78);
-    --side-border: rgba(15, 23, 42, 0.07);
-    --border: rgba(15, 23, 42, 0.08);
-    --border-soft: rgba(15, 23, 42, 0.04);
-    --line: rgba(15, 23, 42, 0.08);
+    --surface-glass: rgba(255, 255, 255, 0.68);
+    --surface-2: rgba(255, 255, 255, 0.52);
+    --surface-3: rgba(226, 232, 240, 0.75);
+    --input-bg: rgba(255, 255, 255, 0.85);
+    --input-border: rgba(203, 213, 225, 0.8);
+    --input-border-focus: #3B82F6;
+    --side-bg: rgba(255, 255, 255, 0.58);
+    --side-border: rgba(255, 255, 255, 0.85);
+    --border: rgba(255, 255, 255, 0.85);
+    --border-soft: rgba(15, 23, 42, 0.06);
+    --line: rgba(15, 23, 42, 0.07);
     --line-soft: rgba(15, 23, 42, 0.04);
-    --line-glass: rgba(15, 23, 42, 0.06);
+    --line-glass: rgba(255, 255, 255, 0.85);
     --text: #0F172A;
     --text-1: #0F172A;
     --text-2: #334155;
     --text-3: #64748B;
-    --accent: #4F46E5;
-    --accent-soft: rgba(79, 70, 229, 0.10);
+    --accent: #3B82F6;
+    --accent-soft: rgba(59, 130, 246, 0.12);
     --ok: #10B981;
     --ok-soft: #D1FAE5;
-    --warn: #D97706;
-    --warn-soft: #FFE8D6;
+    --warn: #F59E0B;
+    --warn-soft: #FEF3C7;
     --bad: #EF4444;
     --bad-soft: #FEE2E2;
-    --purple: #6366F1;
-    --purple-soft: #EAE8FE;
-    --glass-bg: rgba(255, 255, 255, 0.78);
+    --purple: #8B5CF6;
+    --purple-soft: #EDE9FE;
+    --glass-bg: rgba(255, 255, 255, 0.68);
     --glass-border: rgba(255, 255, 255, 0.85);
-    --glass-shadow: 0 8px 32px rgba(15, 23, 42, 0.04), 0 1px 2px rgba(15, 23, 42, 0.02);
-    --glass-backdrop: blur(32px) saturate(170%);
+    --glass-shadow: 0 10px 30px rgba(15, 23, 42, 0.04), 0 1px 2px rgba(15, 23, 42, 0.02);
+    --glass-backdrop: blur(36px) saturate(180%);
     --shadow-sm: 0 2px 8px rgba(15, 23, 42, 0.03), 0 1px 2px rgba(15, 23, 42, 0.02);
-    --shadow-md: 0 12px 32px rgba(15, 23, 42, 0.06);
+    --shadow-md: 0 12px 32px rgba(15, 23, 42, 0.05);
     --shadow-1: 0 2px 8px rgba(15, 23, 42, 0.03);
-    --shadow-2: 0 8px 24px -4px rgba(15, 23, 42, 0.06);
-    --shadow-3: 0 16px 40px rgba(15, 23, 42, 0.09);
+    --shadow-2: 0 8px 24px -4px rgba(15, 23, 42, 0.05);
+    --shadow-3: 0 16px 40px rgba(15, 23, 42, 0.08);
   }
 
-  /* ---- الوضع الفاتح (Light Mode — Pure Frosted Slate) ---- */
+  /* ---- الوضع الفاتح (Light Mode — Apple Pure Frosted Slate) ---- */
   html[data-theme="light"] {
     color-scheme: light;
-    --bg-app: #F8FAFC;
-    --bg: #F8FAFC;
-    --canvas-mesh: radial-gradient(1000px 600px at 12% 8%, rgba(99, 102, 241, 0.025) 0px, transparent 60%),
-                   radial-gradient(800px 500px at 88% 92%, rgba(37, 99, 235, 0.02) 0px, transparent 60%),
-                   #F8FAFC;
+    --bg-app: #EEF2F6;
+    --bg: #EEF2F6;
+    --canvas-mesh: #EEF2F6;
     --surface: #FFFFFF;
-    --surface-glass: rgba(255, 255, 255, 0.82);
-    --surface-2: #F1F5F9;
-    --surface-3: #E2E8F0;
-    --input-bg: #FFFFFF;
-    --input-border: #CBD5E1;
-    --input-border-focus: #4F46E5;
-    --side-bg: rgba(255, 255, 255, 0.78);
-    --side-border: rgba(15, 23, 42, 0.07);
-    --border: rgba(15, 23, 42, 0.08);
-    --border-soft: rgba(15, 23, 42, 0.04);
-    --line: rgba(15, 23, 42, 0.08);
+    --surface-glass: rgba(255, 255, 255, 0.68);
+    --surface-2: rgba(255, 255, 255, 0.52);
+    --surface-3: rgba(226, 232, 240, 0.75);
+    --input-bg: rgba(255, 255, 255, 0.85);
+    --input-border: rgba(203, 213, 225, 0.8);
+    --input-border-focus: #3B82F6;
+    --side-bg: rgba(255, 255, 255, 0.58);
+    --side-border: rgba(255, 255, 255, 0.85);
+    --border: rgba(255, 255, 255, 0.85);
+    --border-soft: rgba(15, 23, 42, 0.06);
+    --line: rgba(15, 23, 42, 0.07);
     --line-soft: rgba(15, 23, 42, 0.04);
-    --line-glass: rgba(15, 23, 42, 0.06);
+    --line-glass: rgba(255, 255, 255, 0.85);
     --text: #0F172A;
     --text-1: #0F172A;
     --text-2: #334155;
     --text-3: #64748B;
-    --accent: #4F46E5;
-    --accent-soft: rgba(79, 70, 229, 0.10);
+    --accent: #3B82F6;
+    --accent-soft: rgba(59, 130, 246, 0.12);
     --ok: #10B981;
     --ok-soft: #D1FAE5;
-    --warn: #D97706;
-    --warn-soft: #FFE8D6;
+    --warn: #F59E0B;
+    --warn-soft: #FEF3C7;
     --bad: #EF4444;
     --bad-soft: #FEE2E2;
-    --purple: #6366F1;
-    --purple-soft: #EAE8FE;
-    --glass-bg: rgba(255, 255, 255, 0.78);
+    --purple: #8B5CF6;
+    --purple-soft: #EDE9FE;
+    --glass-bg: rgba(255, 255, 255, 0.68);
     --glass-border: rgba(255, 255, 255, 0.85);
-    --glass-shadow: 0 8px 32px rgba(15, 23, 42, 0.04), 0 1px 2px rgba(15, 23, 42, 0.02);
-    --glass-backdrop: blur(32px) saturate(170%);
+    --glass-shadow: 0 10px 30px rgba(15, 23, 42, 0.04), 0 1px 2px rgba(15, 23, 42, 0.02);
+    --glass-backdrop: blur(36px) saturate(180%);
     --shadow-sm: 0 2px 8px rgba(15, 23, 42, 0.03), 0 1px 2px rgba(15, 23, 42, 0.02);
-    --shadow-md: 0 12px 32px rgba(15, 23, 42, 0.06);
+    --shadow-md: 0 12px 32px rgba(15, 23, 42, 0.05);
     --shadow-1: 0 2px 8px rgba(15, 23, 42, 0.03);
-    --shadow-2: 0 8px 24px -4px rgba(15, 23, 42, 0.06);
-    --shadow-3: 0 16px 40px rgba(15, 23, 42, 0.09);
+    --shadow-2: 0 8px 24px -4px rgba(15, 23, 42, 0.05);
+    --shadow-3: 0 16px 40px rgba(15, 23, 42, 0.08);
   }
 
-  /* ---- الوضع الداكن (Dark Mode — Obsidian Velvet Frosted Dark) ---- */
+  /* ---- الوضع الداكن (Dark Mode — Apple Pure Frosted Slate Dark) ---- */
   html[data-theme="dark"] {
     color-scheme: dark;
-    --bg-app: #090B10;
-    --bg: #090B10;
-    --canvas-mesh: radial-gradient(1100px 700px at 10% 5%, rgba(99, 102, 241, 0.04) 0px, transparent 65%),
-                   radial-gradient(900px 600px at 90% 95%, rgba(139, 92, 246, 0.02) 0px, transparent 65%),
-                   #090B10;
-    --surface: #10141D;
-    --surface-glass: rgba(16, 20, 29, 0.72);
-    --surface-2: #161B26;
-    --surface-3: #1D2433;
-    --input-bg: #10141D;
+    --bg-app: #0F131A;
+    --bg: #0F131A;
+    --canvas-mesh: #0F131A;
+    --surface: #151A24;
+    --surface-glass: rgba(21, 26, 36, 0.68);
+    --surface-2: rgba(28, 34, 48, 0.55);
+    --surface-3: rgba(35, 43, 60, 0.70);
+    --input-bg: #151A24;
     --input-border: rgba(255, 255, 255, 0.12);
-    --input-border-focus: #6366F1;
-    --side-bg: rgba(12, 15, 22, 0.78);
-    --side-border: rgba(255, 255, 255, 0.07);
-    --border: rgba(255, 255, 255, 0.08);
-    --border-soft: rgba(255, 255, 255, 0.04);
+    --input-border-focus: #3B82F6;
+    --side-bg: rgba(18, 23, 33, 0.65);
+    --side-border: rgba(255, 255, 255, 0.08);
+    --border: rgba(255, 255, 255, 0.09);
+    --border-soft: rgba(255, 255, 255, 0.05);
     --line: rgba(255, 255, 255, 0.08);
     --line-soft: rgba(255, 255, 255, 0.04);
     --line-glass: rgba(255, 255, 255, 0.08);
     --text: #F8FAFC;
     --text-1: #FFFFFF;
-    --text-2: #94A3B8;
-    --text-3: #64748B;
-    --accent: #6366F1;
-    --accent-soft: rgba(99, 102, 241, 0.14);
+    --text-2: #CBD5E1;
+    --text-3: #94A3B8;
+    --accent: #3B82F6;
+    --accent-soft: rgba(59, 130, 246, 0.16);
     --ok: #10B981;
     --ok-soft: rgba(16, 185, 129, 0.14);
     --warn: #F59E0B;
     --warn-soft: rgba(245, 158, 11, 0.14);
     --bad: #EF4444;
     --bad-soft: rgba(239, 68, 68, 0.14);
-    --purple: #818CF8;
-    --purple-soft: rgba(129, 140, 248, 0.14);
-    --glass-bg: rgba(16, 20, 29, 0.72);
-    --glass-border: rgba(255, 255, 255, 0.08);
-    --glass-shadow: 0 16px 40px rgba(0, 0, 0, 0.5);
-    --glass-backdrop: blur(34px) saturate(180%);
+    --purple: #8B5CF6;
+    --purple-soft: rgba(139, 92, 246, 0.14);
+    --glass-bg: rgba(21, 26, 36, 0.68);
+    --glass-border: rgba(255, 255, 255, 0.09);
+    --glass-shadow: 0 16px 40px rgba(0, 0, 0, 0.45);
+    --glass-backdrop: blur(36px) saturate(180%);
     --shadow-sm: 0 2px 10px rgba(0, 0, 0, 0.3);
-    --shadow-md: 0 16px 40px rgba(0, 0, 0, 0.45);
+    --shadow-md: 0 16px 40px rgba(0, 0, 0, 0.4);
     --shadow-1: 0 2px 8px rgba(0, 0, 0, 0.3);
-    --shadow-2: 0 8px 24px rgba(0, 0, 0, 0.4);
-    --shadow-3: 0 16px 48px rgba(0, 0, 0, 0.55);
+    --shadow-2: 0 8px 24px rgba(0, 0, 0, 0.35);
+    --shadow-3: 0 16px 48px rgba(0, 0, 0, 0.5);
   }
 
   /* ---- شارات ومربعات الحالة المرجعية (Apple HIG Status Badges & Pills) ---- */
@@ -1312,17 +1306,17 @@
 
   .card, .glass-card {
     background: var(--surface-glass);
-    -webkit-backdrop-filter: blur(18px) saturate(150%);
-    backdrop-filter: blur(18px) saturate(150%);
+    -webkit-backdrop-filter: blur(36px) saturate(180%);
+    backdrop-filter: blur(36px) saturate(180%);
     border: 1px solid var(--border);
     border-radius: var(--r-xl);
     color: var(--text);
-    box-shadow: var(--shadow-sm);
+    box-shadow: var(--glass-shadow);
     transition: background var(--t-fast), border-color var(--t-fast), box-shadow var(--t-fast), transform var(--t-fast);
   }
 
   .card:hover, .glass-card:hover {
-    border-color: rgba(37, 99, 235, 0.3);
+    border-color: rgba(59, 130, 246, 0.35);
     box-shadow: var(--shadow-md);
   }
 
