@@ -10,6 +10,26 @@ import { NextResponse, type NextRequest } from 'next/server'
 const PUBLIC_PATHS = ['/login', '/auth', '/reset-password']
 
 export async function middleware(request: NextRequest) {
+  const path = request.nextUrl.pathname
+  const isPublic = PUBLIC_PATHS.some(p => path.startsWith(p))
+
+  // Fast cookie detection — if no auth tokens exist in cookies, skip network roundtrips
+  const allCookies = request.cookies.getAll()
+  const hasAuthCookie = allCookies.some(c =>
+    c.name.includes('auth-token') ||
+    c.name.startsWith('sb-') ||
+    c.name.includes('supabase')
+  )
+
+  if (!hasAuthCookie) {
+    if (!isPublic) {
+      const url = request.nextUrl.clone()
+      url.pathname = '/login'
+      return NextResponse.redirect(url)
+    }
+    return NextResponse.next({ request })
+  }
+
   let response = NextResponse.next({ request })
 
   const supabase = createServerClient(
@@ -31,11 +51,8 @@ export async function middleware(request: NextRequest) {
     }
   )
 
-  // getUser يتحقّق من الرمز مع الخادم — لا تستبدله بـ getSession
+  // getUser يتحقّق من الرمز مع الخادم
   const { data: { user } } = await supabase.auth.getUser()
-
-  const path = request.nextUrl.pathname
-  const isPublic = PUBLIC_PATHS.some(p => path.startsWith(p))
 
   if (!user && !isPublic) {
     const url = request.nextUrl.clone()

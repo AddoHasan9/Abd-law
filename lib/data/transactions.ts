@@ -24,6 +24,7 @@ export async function listTransactions(filters?: {
   const supabase = await createClient()
 
   let dbTxs: TransactionFull[] = []
+  let querySuccessful = false
 
   try {
     let q = supabase.from('transactions').select(SELECT_PRIMARY)
@@ -33,27 +34,13 @@ export async function listTransactions(filters?: {
     const { data, error } = await q.order('created_at', { ascending: false })
     if (!error && data) {
       dbTxs = data as unknown as TransactionFull[]
+      querySuccessful = true
     }
   } catch (e) {
     console.warn('Primary transactions query failed:', e)
   }
 
-  if (!dbTxs.length) {
-    try {
-      let q = supabase.from('transactions').select(SELECT_WITH_RELATIONS)
-      if (filters?.type)     q = q.eq('type', filters.type)
-      if (filters?.status)   q = q.eq('status', filters.status)
-      if (filters?.lawyerId) q = q.eq('lawyer_id', filters.lawyerId)
-      const { data, error } = await q.order('created_at', { ascending: false })
-      if (!error && data) {
-        dbTxs = data as unknown as TransactionFull[]
-      }
-    } catch {
-      // try fallback
-    }
-  }
-
-  if (!dbTxs.length) {
+  if (!querySuccessful) {
     try {
       let q = supabase.from('transactions').select(SELECT_FALLBACK)
       if (filters?.type)     q = q.eq('type', filters.type)
@@ -62,9 +49,10 @@ export async function listTransactions(filters?: {
       const { data, error } = await q.order('created_at', { ascending: false })
       if (!error && data) {
         dbTxs = data as unknown as TransactionFull[]
+        querySuccessful = true
       }
     } catch {
-      // try fallback
+      // ignore
     }
   }
 
