@@ -9,7 +9,7 @@ import RemindersWidget from './RemindersWidget'
 import { WorkflowStatus } from '@/components/ui/WorkflowStatus'
 import { FadeInStagger } from '@/components/ui/FadeInStagger'
 import { RollingNumber } from '@/components/ui/RollingNumber'
-import AnalyticsOverview from './AnalyticsOverview'
+import LiveOperationsRadar from './LiveOperationsRadar'
 
 interface Props {
   stats: DashboardStats
@@ -209,8 +209,8 @@ export default function DashboardClient({ stats, profiles = [] }: Props) {
         </Link>
       </FadeInStagger>
 
-      {/* 2.5 Visual Analytics Overview (Recharts Analytics) */}
-      <AnalyticsOverview totalActive={recentTxs.length} />
+      {/* 2.5 Live Executive Operations & Workflow Radar (Animated Hub) */}
+      <LiveOperationsRadar stats={stats} />
 
       {/* 3. Central Interactive Bento Section: Active Transactions (8 cols) + Reminders & Deadlines (4 cols) */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 w-full">
