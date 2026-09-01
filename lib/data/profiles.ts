@@ -54,7 +54,7 @@ export async function listProfiles(): Promise<ProfileWithStats[]> {
         name: 'منتظر الخزرجي',
         role: 'super_admin',
         dept: 'الإدارة العامة',
-        title: 'مدير النظام الأعلى (Super Admin)',
+        title: 'مدير النظام الأعلى',
         phone: '07801606600',
         email: 'addo_97@outlook.com',
         active: true,

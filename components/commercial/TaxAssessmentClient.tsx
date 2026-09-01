@@ -314,11 +314,11 @@ export default function TaxAssessmentClient({ assessments = [], companies = [], 
         <button
           type="button"
           onClick={handleExportExcel}
-          className="btn btn-excel flex items-center gap-2 flex-none"
-          title="تصدير جدول التحاسب الضريبي إلى ملف Excel"
+          className="btn btn-excel flex items-center gap-2 flex-none cursor-pointer"
+          title="تصدير جدول التحاسب الضريبي إلى ملف بيانات إكسل"
         >
           <span className="material-symbols-outlined text-[18px]">download</span>
-          <span>تصدير Excel</span>
+          <span>تصدير ملف إكسل</span>
         </button>
       </div>
 

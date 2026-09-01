@@ -10,11 +10,11 @@ import {
 } from '@/app/(app)/settings/users/actions'
 
 const ROLE_NAMES: Record<UserRole, string> = {
-  super_admin: 'Super Admin (مدير النظام الأعلى)',
-  admin: 'Admin (مدير النظام)',
-  manager: 'Manager (مدير)',
-  lawyer: 'Lawyer (محامي)',
-  staff: 'Staff (موظف)',
+  super_admin: 'مدير النظام الأعلى',
+  admin: 'مدير النظام',
+  manager: 'مدير العمليات',
+  lawyer: 'محامي ومستشار',
+  staff: 'موظف إداري',
 }
 
 const CATEGORY_NAMES: Record<keyof RolePermissions, { title: string; desc: string }> = {
@@ -97,10 +97,10 @@ export default function PermissionsClient() {
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '14px' }}>
         <div>
           <h1 style={{ fontSize: '22px', fontWeight: 800, margin: 0, color: 'var(--text)' }}>
-            مصفوفة الصلاحيات والأذونات الخماسية (Role & Permissions Matrix)
+            مصفوفة الصلاحيات والأذونات الخماسية
           </h1>
           <p style={{ fontSize: '13px', color: 'var(--text-3)', margin: '4px 0 0 0' }}>
-            تخصيص وتحديد أذونات الوصول للشركة لكل دور من الأدوار الـ 5 (Super Admin, Admin, Manager, Lawyer, Staff) بشكل ديناميكي ومباشر.
+            تخصيص وتحديد أذونات الوصول لكل دور من الأدوار الـ 5 المعتمدة في النظام بشكل ديناميكي ومباشر.
           </p>
         </div>
 
@@ -158,7 +158,7 @@ export default function PermissionsClient() {
         }}
       >
         أنت تقوم حالياً بتعديل الأذونات الخاصة بـ: <strong style={{ color: 'var(--accent)' }}>{ROLE_NAMES[selectedRole]}</strong>
-        {selectedRole === 'super_admin' && ' (Super Admin يمتلك كافة الأذونات المطلقة بصورة دائمية)'}
+        {selectedRole === 'super_admin' && ' (يمتلك مدير النظام الأعلى كافة الأذونات المطلقة بصورة دائمية)'}
       </div>
 
       {/* Permissions Grid */}

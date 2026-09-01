@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useMemo, useEffect, useRef } from 'react'
+import { createPortal } from 'react-dom'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { TX_TYPES, PRIORITIES, txType, priorityOf, formatDate, formatNumberWithCommas } from '@/lib/constants'
@@ -72,7 +73,8 @@ export default function CommercialClient({ rows = [], companies = [] }: Props) {
   const router = useRouter()
   const [isAddModalOpen, setIsAddModalOpen] = useState(false)
   const [localRows, setLocalRows] = useState<TransactionFull[]>(rows)
-  const [activeMenuTxId, setActiveMenuTxId] = useState<string | null>(null)
+  const [activeMenuTx, setActiveMenuTx] = useState<TransactionFull | null>(null)
+  const [menuCoords, setMenuCoords] = useState<{ top?: number; bottom?: number; right: number } | null>(null)
   const menuRef = useRef<HTMLDivElement>(null)
 
   // Modals state
@@ -88,18 +90,21 @@ export default function CommercialClient({ rows = [], companies = [] }: Props) {
   }, [rows])
 
   useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
-        setActiveMenuTxId(null)
+    function handleScrollOrResize() {
+      if (activeMenuTx) {
+        setActiveMenuTx(null)
+        setMenuCoords(null)
       }
     }
-    if (activeMenuTxId) {
-      document.addEventListener('mousedown', handleClickOutside)
+    if (activeMenuTx) {
+      window.addEventListener('scroll', handleScrollOrResize, true)
+      window.addEventListener('resize', handleScrollOrResize)
     }
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside)
+      window.removeEventListener('scroll', handleScrollOrResize, true)
+      window.removeEventListener('resize', handleScrollOrResize)
     }
-  }, [activeMenuTxId])
+  }, [activeMenuTx])
 
   const triggerToast = (msg: string) => {
     setToastMsg(msg)
@@ -346,77 +351,101 @@ export default function CommercialClient({ rows = [], companies = [] }: Props) {
       )}
 
       {/* Toolbar with Search, Filters & Action Button */}
-      <div className="tools">
-        <input
-          type="text"
-          className="input grow"
-          placeholder="ابحث بالشركة، المحامي، أو الملاحظات..."
-          value={searchQuery}
-          onChange={e => setSearchQuery(e.target.value)}
-        />
+      <div className="bg-[var(--surface-glass)] p-3 sm:p-4 rounded-[20px] border border-[var(--border)] shadow-xs flex flex-col gap-3">
+        {/* Row 1: Search Bar & Primary Actions */}
+        <div className="flex items-center gap-2.5 flex-wrap sm:flex-nowrap">
+          <div className="relative flex-1 min-w-[200px]">
+            <span className="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-[18px] text-[var(--text-3)] pointer-events-none">
+              search
+            </span>
+            <input
+              type="text"
+              className="w-full h-10 pr-9 pl-8 rounded-xl bg-[var(--surface-2)] border border-[var(--line-soft)] focus:border-[var(--accent)] focus:bg-[var(--surface)] text-xs font-medium text-[var(--text)] placeholder:text-[var(--text-3)] transition-all outline-none"
+              placeholder="ابحث بالشركة، المحامي، أو الملاحظات..."
+              value={searchQuery}
+              onChange={e => setSearchQuery(e.target.value)}
+            />
+            {searchQuery && (
+              <button
+                type="button"
+                onClick={() => setSearchQuery('')}
+                className="absolute left-2.5 top-1/2 -translate-y-1/2 w-5 h-5 rounded-full bg-[var(--surface-3)] text-[var(--text-3)] hover:text-[var(--text)] text-[10px] flex items-center justify-center cursor-pointer"
+                title="مسح البحث"
+              >
+                ✕
+              </button>
+            )}
+          </div>
 
-        <select
-          className="sel"
-          value={typeFilter}
-          onChange={e => setTypeFilter(e.target.value)}
-        >
-          <option value="">كل أنواع الخدمات</option>
-          {TX_TYPES.map(t => (
-            <option key={t.id} value={t.id}>{t.label}</option>
-          ))}
-        </select>
+          <button
+            type="button"
+            className="h-10 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 active:scale-[0.98] text-white font-bold text-xs flex items-center justify-center gap-2 transition-all shadow-xs shrink-0 cursor-pointer"
+            onClick={handleExportExcel}
+            title="تصدير جدول المعاملات إلى ملف بيانات إكسل"
+          >
+            <span className="material-symbols-outlined text-[18px]">download</span>
+            <span>تصدير ملف إكسل</span>
+          </button>
 
-        <select
-          className="sel"
-          value={statusFilter}
-          onChange={e => setStatusFilter(e.target.value)}
-        >
-          <option value="">كل الحالات</option>
-          {WORKFLOW_STATUS_LIST.map(s => (
-            <option key={s.key} value={s.key}>{s.label}</option>
-          ))}
-        </select>
+          {(searchQuery || typeFilter || statusFilter || priorityFilter || lawyerFilter) && (
+            <button
+              type="button"
+              onClick={clearFilters}
+              className="h-10 px-3 rounded-xl bg-[var(--surface-2)] hover:bg-[var(--surface-3)] text-[var(--text-3)] hover:text-rose-500 font-bold text-xs flex items-center justify-center gap-1.5 transition-all border border-[var(--line-soft)] shrink-0 cursor-pointer"
+              title="إعادة تعيين جميع الفلاتر"
+            >
+              <span className="material-symbols-outlined text-[16px]">filter_alt_off</span>
+              <span>مسح الفلاتر</span>
+            </button>
+          )}
+        </div>
 
-        <select
-          className="sel"
-          value={priorityFilter}
-          onChange={e => setPriorityFilter(e.target.value)}
-        >
-          <option value="">كل الأولويات</option>
-          {PRIORITIES.map(p => (
-            <option key={p.id} value={p.id}>{p.label}</option>
-          ))}
-        </select>
+        {/* Row 2: Four Filter Select Dropdowns in Responsive Grid */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+          <select
+            className="h-9 px-3 rounded-xl bg-[var(--surface-2)] border border-[var(--line-soft)] text-xs font-semibold text-[var(--text-2)] hover:text-[var(--text)] focus:border-[var(--accent)] transition-all outline-none cursor-pointer"
+            value={typeFilter}
+            onChange={e => setTypeFilter(e.target.value)}
+          >
+            <option value="">كل أنواع الخدمات</option>
+            {TX_TYPES.map(t => (
+              <option key={t.id} value={t.id}>{t.label}</option>
+            ))}
+          </select>
 
-        <select
-          className="sel"
-          value={lawyerFilter}
-          onChange={e => setLawyerFilter(e.target.value)}
-        >
-          <option value="">كل المحامين المكلفين</option>
-          {lawyerList.map(l => (
-            <option key={l.id} value={l.name}>{l.name}</option>
-          ))}
-        </select>
+          <select
+            className="h-9 px-3 rounded-xl bg-[var(--surface-2)] border border-[var(--line-soft)] text-xs font-semibold text-[var(--text-2)] hover:text-[var(--text)] focus:border-[var(--accent)] transition-all outline-none cursor-pointer"
+            value={statusFilter}
+            onChange={e => setStatusFilter(e.target.value)}
+          >
+            <option value="">كل الحالات</option>
+            {WORKFLOW_STATUS_LIST.map(s => (
+              <option key={s.key} value={s.key}>{s.label}</option>
+            ))}
+          </select>
 
-        <button
-          type="button"
-          onClick={clearFilters}
-          className="btn btn-quiet chip-clear"
-        >
-          مسح الفلاتر
-        </button>
+          <select
+            className="h-9 px-3 rounded-xl bg-[var(--surface-2)] border border-[var(--line-soft)] text-xs font-semibold text-[var(--text-2)] hover:text-[var(--text)] focus:border-[var(--accent)] transition-all outline-none cursor-pointer"
+            value={priorityFilter}
+            onChange={e => setPriorityFilter(e.target.value)}
+          >
+            <option value="">كل الأولويات</option>
+            {PRIORITIES.map(p => (
+              <option key={p.id} value={p.id}>{p.label}</option>
+            ))}
+          </select>
 
-        <button
-          type="button"
-          className="btn btn-excel"
-          onClick={handleExportExcel}
-          style={{ marginInlineStart: 'auto' }}
-          title="تصدير جدول المعاملات إلى ملف Excel"
-        >
-          <span className="material-symbols-outlined text-[18px]">download</span>
-          <span>تصدير Excel</span>
-        </button>
+          <select
+            className="h-9 px-3 rounded-xl bg-[var(--surface-2)] border border-[var(--line-soft)] text-xs font-semibold text-[var(--text-2)] hover:text-[var(--text)] focus:border-[var(--accent)] transition-all outline-none cursor-pointer"
+            value={lawyerFilter}
+            onChange={e => setLawyerFilter(e.target.value)}
+          >
+            <option value="">كل المحامين المكلفين</option>
+            {lawyerList.map(l => (
+              <option key={l.id} value={l.name}>{l.name}</option>
+            ))}
+          </select>
+        </div>
       </div>
 
       {/* 2. Main Transactions Interactive Table */}
@@ -472,7 +501,7 @@ export default function CommercialClient({ rows = [], companies = [] }: Props) {
                   const isServiceValid = serviceLabel && serviceLabel !== '—'
                   const lawyerName = t.profiles?.name || (t as unknown as { assigned_lawyer_name?: string }).assigned_lawyer_name || null
                   const isIncompleteRecord = !companyName || !isServiceValid
-                  const isMenuOpen = activeMenuTxId === t.id
+                  const isMenuOpen = activeMenuTx?.id === t.id
                   const stStyle = SERVICE_TYPE_STYLES[t.type]
 
                   return (
@@ -614,15 +643,34 @@ export default function CommercialClient({ rows = [], companies = [] }: Props) {
                       </td>
 
                       {/* 8. Actions Menu (⋮) on Every Row */}
-                      <td className="py-3.5 px-4 text-center align-middle relative">
+                      <td className="py-3.5 px-4 text-center align-middle">
                         <button
                           type="button"
                           onClick={e => {
                             e.stopPropagation()
-                            setActiveMenuTxId(isMenuOpen ? null : t.id)
+                            if (activeMenuTx?.id === t.id) {
+                              setActiveMenuTx(null)
+                              setMenuCoords(null)
+                              return
+                            }
+                            const rect = e.currentTarget.getBoundingClientRect()
+                            const spaceBelow = window.innerHeight - rect.bottom
+                            const menuHeight = 220
+                            if (spaceBelow < menuHeight && rect.top > menuHeight) {
+                              setMenuCoords({
+                                bottom: window.innerHeight - rect.top + 6,
+                                right: window.innerWidth - rect.right,
+                              })
+                            } else {
+                              setMenuCoords({
+                                top: rect.bottom + 6,
+                                right: window.innerWidth - rect.right,
+                              })
+                            }
+                            setActiveMenuTx(t)
                           }}
-                          className={`w-8 h-8 rounded-full border transition-all inline-flex items-center justify-center text-sm font-bold shadow-xs ${
-                            isMenuOpen
+                          className={`w-8 h-8 rounded-full border transition-all inline-flex items-center justify-center text-sm font-bold shadow-xs cursor-pointer ${
+                            activeMenuTx?.id === t.id
                               ? 'bg-[var(--accent)] text-white border-[var(--accent)]'
                               : 'bg-[var(--surface-2)] border-[var(--border)] text-[var(--text-2)] hover:bg-[var(--accent)] hover:text-white hover:border-[var(--accent)]'
                           }`}
@@ -630,168 +678,6 @@ export default function CommercialClient({ rows = [], companies = [] }: Props) {
                         >
                           ⋮
                         </button>
-
-                        {/* Floating Actions Menu — Pure Minimalist Arabic */}
-                        {isMenuOpen && (
-                          <div
-                            ref={menuRef}
-                            style={{
-                              position: 'absolute',
-                              left: 0,
-                              top: 'calc(100% + 4px)',
-                              zIndex: 999,
-                              minWidth: '175px',
-                              background: 'var(--surface)',
-                              border: '1px solid var(--line)',
-                              borderRadius: '12px',
-                              boxShadow: '0 10px 28px rgba(0, 0, 0, 0.12), 0 2px 8px rgba(0, 0, 0, 0.06)',
-                              padding: '5px',
-                              textAlign: 'right',
-                              animation: 'wfFadeScale 140ms ease-out forwards',
-                            }}
-                          >
-                            {/* Open / 360 */}
-                            <button
-                              type="button"
-                              onClick={() => {
-                                setActiveMenuTxId(null)
-                                if (t.company_id) {
-                                  router.push(`/commercial/companies/${t.company_id}`)
-                                } else {
-                                  setEditTx(t)
-                                }
-                              }}
-                              style={{
-                                display: 'block',
-                                width: '100%',
-                                padding: '8px 12px',
-                                border: 'none',
-                                background: 'transparent',
-                                borderRadius: '7px',
-                                textAlign: 'right',
-                                fontSize: '12.5px',
-                                fontWeight: 600,
-                                color: 'var(--text)',
-                                cursor: 'pointer',
-                                transition: 'background 0.12s',
-                              }}
-                              onMouseEnter={e => e.currentTarget.style.background = 'var(--surface-2)'}
-                              onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
-                            >
-                              فتح تفاصيل الشركة
-                            </button>
-
-                            {/* Edit / Fix Record */}
-                            <button
-                              type="button"
-                              onClick={() => {
-                                setActiveMenuTxId(null)
-                                setEditTx(t)
-                              }}
-                              style={{
-                                display: 'block',
-                                width: '100%',
-                                padding: '8px 12px',
-                                border: 'none',
-                                background: 'transparent',
-                                borderRadius: '7px',
-                                textAlign: 'right',
-                                fontSize: '12.5px',
-                                fontWeight: 600,
-                                color: isIncompleteRecord ? 'var(--warn)' : 'var(--text)',
-                                cursor: 'pointer',
-                                transition: 'background 0.12s',
-                              }}
-                              onMouseEnter={e => e.currentTarget.style.background = 'var(--surface-2)'}
-                              onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
-                            >
-                              {isIncompleteRecord ? 'تصحيح وإكمال السجل' : 'تعديل المعاملة'}
-                            </button>
-
-                            {/* Assign Lawyer */}
-                            <button
-                              type="button"
-                              onClick={() => {
-                                setActiveMenuTxId(null)
-                                setAssignLawyerTx(t)
-                              }}
-                              style={{
-                                display: 'block',
-                                width: '100%',
-                                padding: '8px 12px',
-                                border: 'none',
-                                background: 'transparent',
-                                borderRadius: '7px',
-                                textAlign: 'right',
-                                fontSize: '12.5px',
-                                fontWeight: 600,
-                                color: 'var(--text)',
-                                cursor: 'pointer',
-                                transition: 'background 0.12s',
-                              }}
-                              onMouseEnter={e => e.currentTarget.style.background = 'var(--surface-2)'}
-                              onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
-                            >
-                              تعيين المحامي المسؤول
-                            </button>
-
-                            {/* Archive */}
-                            <button
-                              type="button"
-                              onClick={() => {
-                                setActiveMenuTxId(null)
-                                handleArchive(t.id)
-                              }}
-                              style={{
-                                display: 'block',
-                                width: '100%',
-                                padding: '8px 12px',
-                                border: 'none',
-                                background: 'transparent',
-                                borderRadius: '7px',
-                                textAlign: 'right',
-                                fontSize: '12.5px',
-                                fontWeight: 600,
-                                color: 'var(--text-2)',
-                                cursor: 'pointer',
-                                transition: 'background 0.12s',
-                              }}
-                              onMouseEnter={e => e.currentTarget.style.background = 'var(--surface-2)'}
-                              onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
-                            >
-                              أرشفة المعاملة
-                            </button>
-
-                            <hr style={{ border: 'none', borderTop: '1px solid var(--line-soft)', margin: '4px 6px' }} />
-
-                            {/* Delete */}
-                            <button
-                              type="button"
-                              onClick={() => {
-                                setActiveMenuTxId(null)
-                                handleDelete(t.id)
-                              }}
-                              style={{
-                                display: 'block',
-                                width: '100%',
-                                padding: '8px 12px',
-                                border: 'none',
-                                background: 'transparent',
-                                borderRadius: '7px',
-                                textAlign: 'right',
-                                fontSize: '12.5px',
-                                fontWeight: 600,
-                                color: 'var(--bad)',
-                                cursor: 'pointer',
-                                transition: 'background 0.12s',
-                              }}
-                              onMouseEnter={e => e.currentTarget.style.background = 'var(--bad-soft)'}
-                              onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
-                            >
-                              حذف المعاملة
-                            </button>
-                          </div>
-                        )}
                       </td>
                     </tr>
                   )
@@ -801,6 +687,115 @@ export default function CommercialClient({ rows = [], companies = [] }: Props) {
           </div>
         )}
       </div>
+
+      {/* Floating Actions Menu Portal (Floats smoothly above all containers) */}
+      {activeMenuTx && menuCoords && typeof document !== 'undefined' && createPortal(
+        <>
+          {/* Dismiss Backdrop */}
+          <div
+            className="fixed inset-0 z-[999998] bg-black/10 sm:bg-transparent"
+            onClick={() => {
+              setActiveMenuTx(null)
+              setMenuCoords(null)
+            }}
+          />
+
+          {/* Floating Dropdown Card */}
+          <div
+            ref={menuRef}
+            className="fixed z-[999999] min-w-[195px] max-w-[90vw] bg-[var(--surface)] border border-[var(--glass-border)] rounded-2xl shadow-2xl p-1.5 text-right flex flex-col gap-1 backdrop-blur-2xl animate-scale-in"
+            style={{
+              top: menuCoords.top !== undefined ? `${menuCoords.top}px` : 'auto',
+              bottom: menuCoords.bottom !== undefined ? `${menuCoords.bottom}px` : 'auto',
+              right: `${Math.max(12, Math.min(window.innerWidth - 210, menuCoords.right))}px`,
+            }}
+            onClick={e => e.stopPropagation()}
+            dir="rtl"
+          >
+            {/* Open / 360 */}
+            <button
+              type="button"
+              onClick={() => {
+                const cur = activeMenuTx
+                setActiveMenuTx(null)
+                setMenuCoords(null)
+                if (cur.company_id) {
+                  router.push(`/commercial/companies/${cur.company_id}`)
+                } else {
+                  setEditTx(cur)
+                }
+              }}
+              className="flex items-center gap-2.5 w-full px-3 py-2 rounded-xl text-xs font-semibold text-[var(--text)] hover:bg-[var(--surface-2)] transition-colors cursor-pointer text-right"
+            >
+              <span className="material-symbols-outlined text-[16px] text-blue-500">visibility</span>
+              <span>فتح تفاصيل الشركة</span>
+            </button>
+
+            {/* Edit / Fix Record */}
+            <button
+              type="button"
+              onClick={() => {
+                const cur = activeMenuTx
+                setActiveMenuTx(null)
+                setMenuCoords(null)
+                setEditTx(cur)
+              }}
+              className="flex items-center gap-2.5 w-full px-3 py-2 rounded-xl text-xs font-semibold hover:bg-[var(--surface-2)] transition-colors cursor-pointer text-right"
+            >
+              <span className="material-symbols-outlined text-[16px] text-amber-500">edit_note</span>
+              <span>{(!activeMenuTx.company_id || !activeMenuTx.type) ? 'تصحيح وإكمال السجل' : 'تعديل المعاملة'}</span>
+            </button>
+
+            {/* Assign Lawyer */}
+            <button
+              type="button"
+              onClick={() => {
+                const cur = activeMenuTx
+                setActiveMenuTx(null)
+                setMenuCoords(null)
+                setAssignLawyerTx(cur)
+              }}
+              className="flex items-center gap-2.5 w-full px-3 py-2 rounded-xl text-xs font-semibold text-[var(--text)] hover:bg-[var(--surface-2)] transition-colors cursor-pointer text-right"
+            >
+              <span className="material-symbols-outlined text-[16px] text-indigo-500">person_add</span>
+              <span>تعيين المحامي المسؤول</span>
+            </button>
+
+            {/* Archive */}
+            <button
+              type="button"
+              onClick={() => {
+                const id = activeMenuTx.id
+                setActiveMenuTx(null)
+                setMenuCoords(null)
+                handleArchive(id)
+              }}
+              className="flex items-center gap-2.5 w-full px-3 py-2 rounded-xl text-xs font-semibold text-[var(--text-2)] hover:bg-[var(--surface-2)] transition-colors cursor-pointer text-right"
+            >
+              <span className="material-symbols-outlined text-[16px] text-slate-400">archive</span>
+              <span>أرشفة المعاملة</span>
+            </button>
+
+            <div className="h-[1px] bg-[var(--line-soft)] my-0.5" />
+
+            {/* Delete */}
+            <button
+              type="button"
+              onClick={() => {
+                const id = activeMenuTx.id
+                setActiveMenuTx(null)
+                setMenuCoords(null)
+                handleDelete(id)
+              }}
+              className="flex items-center gap-2.5 w-full px-3 py-2 rounded-xl text-xs font-semibold text-rose-500 hover:bg-rose-500/10 transition-colors cursor-pointer text-right"
+            >
+              <span className="material-symbols-outlined text-[16px] text-rose-500">delete</span>
+              <span>حذف المعاملة</span>
+            </button>
+          </div>
+        </>,
+        document.body
+      )}
 
       {/* Add Transaction Modal */}
       <AddTransactionModal

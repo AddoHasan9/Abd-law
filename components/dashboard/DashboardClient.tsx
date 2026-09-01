@@ -46,7 +46,7 @@ export default function DashboardClient({ stats, profiles = [] }: Props) {
           id: 'db13125d-3aa1-46ab-9159-8fad18746623',
           name: 'منتظر الخزرجي',
           role: 'super_admin',
-          title: 'مدير النظام الأعلى (Super Admin)',
+          title: 'مدير النظام الأعلى',
           active_tx_count: 0,
           active: true,
           created_at: '',

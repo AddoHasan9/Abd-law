@@ -2790,12 +2790,10 @@
     .tools {
       flex-direction: column;
       align-items: stretch;
-      gap: 8px;
+      gap: 10px;
     }
 
-    .tools .sel,
-    .tools .input.grow,
-    .tools .btn {
+    .tools > .input.grow {
       width: 100% !important;
       max-width: 100% !important;
     }

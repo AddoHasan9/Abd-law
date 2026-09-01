@@ -269,12 +269,12 @@ export default function FinancialStatementsClient({ companies = [] }: Props) {
           <button
             type="button"
             onClick={handleExportExcel}
-            className="btn btn-excel"
+            className="btn btn-excel cursor-pointer"
             style={{ padding: '8px 16px', fontSize: '13px' }}
-            title="تصدير سجل الحسابات الختامية إلى ملف Excel"
+            title="تصدير سجل الحسابات الختامية إلى ملف بيانات إكسل"
           >
             <span className="material-symbols-outlined" style={{ fontSize: 18 }}>download</span>
-            <span>تصدير Excel</span>
+            <span>تصدير ملف إكسل</span>
           </button>
           {canCreateFS && (
             <button

@@ -15,11 +15,11 @@ interface Props {
 }
 
 const ROLE_AR_LABELS: Record<string, string> = {
-  super_admin: 'مدير النظام الأعلى (Super Admin)',
-  admin: 'مدير النظام (Admin)',
-  manager: 'مدير العمليات (Manager)',
-  lawyer: 'محامي ومستشار قانوني (Lawyer)',
-  staff: 'موظف إداري (Staff)',
+  super_admin: 'مدير النظام الأعلى',
+  admin: 'مدير النظام',
+  manager: 'مدير العمليات',
+  lawyer: 'محامي ومستشار قانوني',
+  staff: 'موظف إداري',
 }
 
 export default function UserProfileModal({ isOpen, onClose, profile }: Props) {

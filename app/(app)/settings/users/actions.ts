@@ -60,7 +60,7 @@ export async function getActiveLawyersAction() {
 
 export async function saveUserAction(
   payload: Partial<ProfileWithStats> & { name: string; role: UserRole },
-  performedBy = 'منتظر الخزرجي (Super Admin)'
+  performedBy = 'منتظر الخزرجي (مدير النظام الأعلى)'
 ) {
   const denied = await requirePermission('users', payload.id ? 'edit_users' : 'create_users')
   if (denied) return denied
@@ -100,7 +100,7 @@ export async function saveUserAction(
   }
 }
 
-export async function toggleUserActiveAction(id: string, performedBy = 'منتظر الخزرجي (Super Admin)') {
+export async function toggleUserActiveAction(id: string, performedBy = 'منتظر الخزرجي (مدير النظام الأعلى)') {
   const denied = await requirePermission('users', 'edit_users')
   if (denied) return denied
 
@@ -134,7 +134,7 @@ export async function toggleUserActiveAction(id: string, performedBy = 'منتظ
   }
 }
 
-export async function deleteUserAction(id: string, performedBy = 'منتظر الخزرجي (Super Admin)') {
+export async function deleteUserAction(id: string, performedBy = 'منتظر الخزرجي (مدير النظام الأعلى)') {
   const denied = await requirePermission('users', 'delete_users')
   if (denied) return denied
 
@@ -145,7 +145,7 @@ export async function deleteUserAction(id: string, performedBy = 'منتظر ا�
     const users = await listProfiles()
     const target = users.find(u => u.id === id)
     if (target?.role === 'super_admin') {
-      return { success: false, error: 'لا يمكن تعطيل أو حذف حساب Super Admin الأصلي' }
+      return { success: false, error: 'لا يمكن تعطيل أو حذف حساب مدير النظام الأعلى الأصلي' }
     }
 
     await deleteProfile(id)
@@ -157,7 +157,7 @@ export async function deleteUserAction(id: string, performedBy = 'منتظر ا�
       targetUserId: id,
       targetUserName: target?.name || 'مستخدم',
       performedBy,
-      action: 'أرشفة وتعطيل ناعم للحساب (Soft Delete)',
+      action: 'أرشفة وتعطيل الحساب',
       details: 'تم حظر الدخول للحساب مع حفظ تاريخ المعاملات وسجل التدقيق والنشاط بالكامل',
       timestamp: new Date().toISOString(),
     })
@@ -172,7 +172,7 @@ export async function deleteUserAction(id: string, performedBy = 'منتظر ا�
   }
 }
 
-export async function permanentDeleteUserAction(id: string, performedBy = 'منتظر الخزرجي (Super Admin)') {
+export async function permanentDeleteUserAction(id: string, performedBy = 'منتظر الخزرجي (مدير النظام الأعلى)') {
   const denied = await requirePermission('users', 'delete_users')
   if (denied) return denied
 
@@ -183,7 +183,7 @@ export async function permanentDeleteUserAction(id: string, performedBy = 'من�
     const users = await listProfiles()
     const target = users.find(u => u.id === id)
     if (target?.role === 'super_admin' || id === 'db13125d-3aa1-46ab-9159-8fad18746623') {
-      return { success: false, error: 'لا يمكن حذف حساب Super Admin الرئيسي نهائياً' }
+      return { success: false, error: 'لا يمكن حذف حساب مدير النظام الأعلى الرئيسي نهائياً' }
     }
 
     await permanentDeleteProfile(id)
@@ -210,7 +210,7 @@ export async function permanentDeleteUserAction(id: string, performedBy = 'من�
   }
 }
 
-export async function resetUserPasswordAction(id: string, email: string, performedBy = 'منتظر الخزرجي (Super Admin)') {
+export async function resetUserPasswordAction(id: string, email: string, performedBy = 'منتظر الخزرجي (مدير النظام الأعلى)') {
   const denied = await requirePermission('users', 'edit_users')
   if (denied) return denied
 

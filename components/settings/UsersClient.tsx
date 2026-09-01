@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useMemo, useEffect } from 'react'
+import { createPortal } from 'react-dom'
 import Link from 'next/link'
 import { formatDate } from '@/lib/constants'
 import { useModalBodyLock } from '@/lib/hooks/useModalBodyLock'
@@ -24,27 +25,27 @@ interface Props {
 
 const ROLE_BADGES: Record<UserRole, { label: string; badgeClass: string; desc: string }> = {
   super_admin: {
-    label: 'Super Admin',
+    label: 'مدير النظام الأعلى',
     badgeClass: 'bg-red-500/15 text-red-500 border border-red-500/30',
     desc: 'تحكم مطلق بإدارة المستخدمين ومنح الأدوار والصلاحيات واستعادة الأرشيف',
   },
   admin: {
-    label: 'Admin',
+    label: 'مدير النظام',
     badgeClass: 'bg-amber-500/15 text-amber-500 border border-amber-500/30',
     desc: 'إدارة تشغيلية شاملة للنظام وحذف وتعديل البيانات المعين بها',
   },
   manager: {
-    label: 'Manager',
+    label: 'مدير العمليات',
     badgeClass: 'bg-blue-500/15 text-blue-500 border border-blue-500/30',
     desc: 'متابعة وإدارة العمليات التجارية والودائع والتقارير',
   },
   lawyer: {
-    label: 'Lawyer',
+    label: 'محامي ومستشار',
     badgeClass: 'bg-emerald-500/15 text-emerald-500 border border-emerald-500/30',
     desc: 'تولّي وتنفيذ المعاملات والمهام الموكلة إليه حصراً',
   },
   staff: {
-    label: 'Staff',
+    label: 'موظف إداري',
     badgeClass: 'bg-slate-500/15 text-slate-400 border border-slate-500/30',
     desc: 'صلاحيات استعراض وإدخال بيانات بيئية مخصصة',
   },
@@ -63,14 +64,32 @@ export default function UsersClient({ initialProfiles }: Props) {
   const [deptFilter, setDeptFilter] = useState<string>('all')
   const [statusFilter, setStatusFilter] = useState<string>('all')
 
-  // Modals & Menu State
-  const [activeMenuId, setActiveMenuId] = useState<string | null>(null)
+  // Modals & Floating Menu State
+  const [activeMenuUser, setActiveMenuUser] = useState<ProfileWithStats | null>(null)
+  const [menuCoords, setMenuCoords] = useState<{ top?: number; bottom?: number; right: number } | null>(null)
   const [viewingUser, setViewingUser] = useState<ProfileWithStats | null>(null)
   const [editingUser, setEditingUser] = useState<ProfileWithStats | null>(null)
   const [resetPassUser, setResetPassUser] = useState<ProfileWithStats | null>(null)
   const [isAddModalOpen, setIsAddModalOpen] = useState(false)
   const [loading, setLoading] = useState(false)
   const [message, setMessage] = useState<{ type: 'ok' | 'err'; text: string } | null>(null)
+
+  useEffect(() => {
+    function handleScrollOrResize() {
+      if (activeMenuUser) {
+        setActiveMenuUser(null)
+        setMenuCoords(null)
+      }
+    }
+    if (activeMenuUser) {
+      window.addEventListener('scroll', handleScrollOrResize, true)
+      window.addEventListener('resize', handleScrollOrResize)
+    }
+    return () => {
+      window.removeEventListener('scroll', handleScrollOrResize, true)
+      window.removeEventListener('resize', handleScrollOrResize)
+    }
+  }, [activeMenuUser])
 
   // Form Fields
   const [formId, setFormId] = useState<string>('')
@@ -89,7 +108,7 @@ export default function UsersClient({ initialProfiles }: Props) {
     setViewingUser(null)
     setIsAddModalOpen(false)
     setResetPassUser(null)
-    setActiveMenuId(null)
+    setActiveMenuUser(null)
   })
 
   useEffect(() => {
@@ -487,110 +506,37 @@ export default function UsersClient({ initialProfiles }: Props) {
                     </td>
 
                     {/* Actions Menu */}
-                    <td className="py-4 px-6 text-center relative">
+                    <td className="py-4 px-6 text-center">
                       <button
                         type="button"
-                        className="w-8 h-8 rounded-xl bg-[var(--surface-2)] border border-[var(--glass-border)] text-[var(--text)] hover:bg-[var(--surface-3)] transition-all flex items-center justify-center mx-auto"
-                        onClick={() => setActiveMenuId(activeMenuId === u.id ? null : u.id)}
+                        className="w-8 h-8 rounded-xl bg-[var(--surface-2)] border border-[var(--glass-border)] text-[var(--text)] hover:bg-[var(--surface-3)] transition-all flex items-center justify-center mx-auto cursor-pointer"
+                        onClick={e => {
+                          e.stopPropagation()
+                          if (activeMenuUser?.id === u.id) {
+                            setActiveMenuUser(null)
+                            setMenuCoords(null)
+                            return
+                          }
+                          const rect = e.currentTarget.getBoundingClientRect()
+                          const spaceBelow = window.innerHeight - rect.bottom
+                          const menuHeight = 240
+                          if (spaceBelow < menuHeight && rect.top > menuHeight) {
+                            setMenuCoords({
+                              bottom: window.innerHeight - rect.top + 6,
+                              right: window.innerWidth - rect.right,
+                            })
+                          } else {
+                            setMenuCoords({
+                              top: rect.bottom + 6,
+                              right: window.innerWidth - rect.right,
+                            })
+                          }
+                          setActiveMenuUser(u)
+                        }}
+                        aria-label="خيارات المستخدم"
                       >
                         <span className="material-symbols-outlined text-[18px]">more_vert</span>
                       </button>
-
-                      {/* Dropdown Popup Menu */}
-                      {activeMenuId === u.id && (
-                        <div
-                          className={`absolute left-6 ${
-                            isBottomRow ? 'bottom-12' : 'top-12'
-                          } z-50 min-w-[190px] bg-[var(--surface-2)] border border-[var(--glass-border)] rounded-2xl shadow-2xl p-2 text-right flex flex-col gap-1 backdrop-blur-2xl`}
-                        >
-                          
-                          {/* View */}
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setActiveMenuId(null)
-                              setViewingUser(u)
-                            }}
-                            className="flex items-center gap-2.5 w-full px-3 py-2 rounded-xl text-xs font-semibold text-[var(--text)] hover:bg-[var(--surface-3)] transition-colors"
-                          >
-                            <span className="material-symbols-outlined text-[16px] text-blue-400">visibility</span>
-                            <span>عرض البيانات الكاملة</span>
-                          </button>
-
-                          {/* Edit */}
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setActiveMenuId(null)
-                              openEditModal(u)
-                            }}
-                            className="flex items-center gap-2.5 w-full px-3 py-2 rounded-xl text-xs font-semibold text-[var(--text)] hover:bg-[var(--surface-3)] transition-colors"
-                          >
-                            <span className="material-symbols-outlined text-[16px] text-amber-400">edit</span>
-                            <span>تعديل البروفايل والدور</span>
-                          </button>
-
-                          {/* Activate / Deactivate */}
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setActiveMenuId(null)
-                              handleToggleActive(u)
-                            }}
-                            className={`flex items-center gap-2.5 w-full px-3 py-2 rounded-xl text-xs font-semibold hover:bg-[var(--surface-3)] transition-colors ${
-                              u.active ? 'text-amber-500' : 'text-emerald-500'
-                            }`}
-                          >
-                            <span className="material-symbols-outlined text-[16px]">
-                              {u.active ? 'block' : 'check_circle'}
-                            </span>
-                            <span>{u.active ? 'تعطيل الحساب' : 'تفعيل الحساب'}</span>
-                          </button>
-
-                          {/* Reset Password */}
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setActiveMenuId(null)
-                              setResetPassUser(u)
-                            }}
-                            className="flex items-center gap-2.5 w-full px-3 py-2 rounded-xl text-xs font-semibold text-[var(--text-2)] hover:bg-[var(--surface-3)] transition-colors"
-                          >
-                            <span className="material-symbols-outlined text-[16px] text-purple-400">lock_reset</span>
-                            <span>إعادة ضبط كلمة المرور</span>
-                          </button>
-
-                          {/* Soft Delete / Archive */}
-                          {isSuperAdmin && u.role !== 'super_admin' && (
-                            <button
-                              type="button"
-                              onClick={() => {
-                                setActiveMenuId(null)
-                                handleSoftDeleteUser(u)
-                              }}
-                              className="flex items-center gap-2.5 w-full px-3 py-2 rounded-xl text-xs font-semibold text-amber-500 hover:bg-amber-500/10 transition-colors"
-                            >
-                              <span className="material-symbols-outlined text-[16px]">archive</span>
-                              <span>أرشفة وتعطيل الحساب</span>
-                            </button>
-                          )}
-
-                          {/* Permanent Delete */}
-                          {isSuperAdmin && u.role !== 'super_admin' && u.id !== 'db13125d-3aa1-46ab-9159-8fad18746623' && (
-                            <button
-                              type="button"
-                              onClick={() => {
-                                setActiveMenuId(null)
-                                handlePermanentDeleteUser(u)
-                              }}
-                              className="flex items-center gap-2.5 w-full px-3 py-2 rounded-xl text-xs font-semibold text-rose-500 hover:bg-rose-500/10 transition-colors"
-                            >
-                              <span className="material-symbols-outlined text-[16px]">delete_forever</span>
-                              <span>حذف المستخدم نهائياً</span>
-                            </button>
-                          )}
-                        </div>
-                      )}
                     </td>
                   </tr>
                 )
@@ -599,6 +545,128 @@ export default function UsersClient({ initialProfiles }: Props) {
           </table>
         </div>
       </div>
+
+      {/* Floating Actions Menu Portal */}
+      {activeMenuUser && menuCoords && typeof document !== 'undefined' && createPortal(
+        <>
+          <div
+            className="fixed inset-0 z-[999998] bg-black/10 sm:bg-transparent"
+            onClick={() => {
+              setActiveMenuUser(null)
+              setMenuCoords(null)
+            }}
+          />
+          <div
+            className="fixed z-[999999] min-w-[200px] max-w-[90vw] bg-[var(--surface)] border border-[var(--glass-border)] rounded-2xl shadow-2xl p-1.5 text-right flex flex-col gap-1 backdrop-blur-2xl animate-scale-in"
+            style={{
+              top: menuCoords.top !== undefined ? `${menuCoords.top}px` : 'auto',
+              bottom: menuCoords.bottom !== undefined ? `${menuCoords.bottom}px` : 'auto',
+              right: `${Math.max(12, Math.min(window.innerWidth - 215, menuCoords.right))}px`,
+            }}
+            onClick={e => e.stopPropagation()}
+            dir="rtl"
+          >
+            {/* View */}
+            <button
+              type="button"
+              onClick={() => {
+                const cur = activeMenuUser
+                setActiveMenuUser(null)
+                setMenuCoords(null)
+                setViewingUser(cur)
+              }}
+              className="flex items-center gap-2.5 w-full px-3 py-2 rounded-xl text-xs font-semibold text-[var(--text)] hover:bg-[var(--surface-2)] transition-colors cursor-pointer text-right"
+            >
+              <span className="material-symbols-outlined text-[16px] text-blue-400">visibility</span>
+              <span>عرض البيانات الكاملة</span>
+            </button>
+
+            {/* Edit */}
+            <button
+              type="button"
+              onClick={() => {
+                const cur = activeMenuUser
+                setActiveMenuUser(null)
+                setMenuCoords(null)
+                openEditModal(cur)
+              }}
+              className="flex items-center gap-2.5 w-full px-3 py-2 rounded-xl text-xs font-semibold text-[var(--text)] hover:bg-[var(--surface-2)] transition-colors cursor-pointer text-right"
+            >
+              <span className="material-symbols-outlined text-[16px] text-amber-400">edit</span>
+              <span>تعديل البروفايل والدور</span>
+            </button>
+
+            {/* Activate / Deactivate */}
+            <button
+              type="button"
+              onClick={() => {
+                const cur = activeMenuUser
+                setActiveMenuUser(null)
+                setMenuCoords(null)
+                handleToggleActive(cur)
+              }}
+              className={`flex items-center gap-2.5 w-full px-3 py-2 rounded-xl text-xs font-semibold hover:bg-[var(--surface-2)] transition-colors cursor-pointer text-right ${
+                activeMenuUser.active ? 'text-amber-500' : 'text-emerald-500'
+              }`}
+            >
+              <span className="material-symbols-outlined text-[16px]">
+                {activeMenuUser.active ? 'block' : 'check_circle'}
+              </span>
+              <span>{activeMenuUser.active ? 'تعطيل الحساب' : 'تفعيل الحساب'}</span>
+            </button>
+
+            {/* Reset Password */}
+            <button
+              type="button"
+              onClick={() => {
+                const cur = activeMenuUser
+                setActiveMenuUser(null)
+                setMenuCoords(null)
+                setResetPassUser(cur)
+              }}
+              className="flex items-center gap-2.5 w-full px-3 py-2 rounded-xl text-xs font-semibold text-[var(--text-2)] hover:bg-[var(--surface-2)] transition-colors cursor-pointer text-right"
+            >
+              <span className="material-symbols-outlined text-[16px] text-purple-400">lock_reset</span>
+              <span>إعادة ضبط كلمة المرور</span>
+            </button>
+
+            {/* Soft Delete / Archive */}
+            {isSuperAdmin && activeMenuUser.role !== 'super_admin' && (
+              <button
+                type="button"
+                onClick={() => {
+                  const cur = activeMenuUser
+                  setActiveMenuUser(null)
+                  setMenuCoords(null)
+                  handleSoftDeleteUser(cur)
+                }}
+                className="flex items-center gap-2.5 w-full px-3 py-2 rounded-xl text-xs font-semibold text-amber-500 hover:bg-amber-500/10 transition-colors cursor-pointer text-right"
+              >
+                <span className="material-symbols-outlined text-[16px]">archive</span>
+                <span>أرشفة وتعطيل الحساب</span>
+              </button>
+            )}
+
+            {/* Permanent Delete */}
+            {isSuperAdmin && activeMenuUser.role !== 'super_admin' && activeMenuUser.id !== 'db13125d-3aa1-46ab-9159-8fad18746623' && (
+              <button
+                type="button"
+                onClick={() => {
+                  const cur = activeMenuUser
+                  setActiveMenuUser(null)
+                  setMenuCoords(null)
+                  handlePermanentDeleteUser(cur)
+                }}
+                className="flex items-center gap-2.5 w-full px-3 py-2 rounded-xl text-xs font-semibold text-rose-500 hover:bg-rose-500/10 transition-colors cursor-pointer text-right"
+              >
+                <span className="material-symbols-outlined text-[16px]">delete_forever</span>
+                <span>حذف المستخدم نهائياً</span>
+              </button>
+            )}
+          </div>
+        </>,
+        document.body
+      )}
 
       {/* MODAL 1: View User Details */}
       {viewingUser && (
