@@ -75,8 +75,8 @@
     --gold-glow: rgba(212, 175, 55, 0.25);
     --gold-border: rgba(212, 175, 55, 0.35);
 
-    --font-ui: var(--font-ibm-plex), 'IBM Plex Sans Arabic', var(--font-tajawal), 'Tajawal', -apple-system, 'Segoe UI', system-ui, sans-serif;
-    --font-display: var(--font-ibm-plex), 'IBM Plex Sans Arabic', var(--font-cairo), 'Cairo', var(--font-ui);
+    --font-ui: var(--font-cairo), 'Cairo', -apple-system, 'Segoe UI', system-ui, sans-serif;
+    --font-display: var(--font-cairo), 'Cairo', var(--font-ui);
 
     /* ---- Default Tokens (Apple HIG Vibrant Glassmorphic Design) ---- */
     --bg-app: #F0F4F8;
