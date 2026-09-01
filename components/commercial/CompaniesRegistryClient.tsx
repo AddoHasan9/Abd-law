@@ -277,24 +277,13 @@ export default function CompaniesRegistryClient({ companies = [] }: Props) {
                       {/* Actions */}
                       <td className="py-2.5 px-3 text-left align-middle whitespace-nowrap">
                         <div className="flex items-center gap-1.5 justify-end">
-                          <button
-                            type="button"
-                            onClick={(e) => {
-                              e.stopPropagation()
-                              openDetails(co)
-                            }}
-                            className="btn btn-ghost !py-1 !px-2 !text-xs !font-bold"
-                            title="تعديل تفاصيل الشركة أو حذفها"
-                          >
-                            <Icon name="gear" />
-                            <span>تعديل</span>
-                          </button>
-
                           <Link
                             href={`/commercial/companies/${co.id}`}
                             onClick={(e) => e.stopPropagation()}
-                            className="btn btn-primary !py-1 !px-2.5 !text-xs !font-bold inline-flex items-center gap-0.5"
+                            className="btn btn-primary !py-1.5 !px-3 !text-xs !font-bold inline-flex items-center gap-1 rounded-xl shadow-xs"
+                            title="عرض الملف الشامل للشركة"
                           >
+                            <span className="material-symbols-outlined text-[15px]">folder_open</span>
                             <span>الملف الشامل</span>
                             <span className="material-symbols-outlined text-[13px]">arrow_left</span>
                           </Link>
