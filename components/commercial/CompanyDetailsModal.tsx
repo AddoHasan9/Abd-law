@@ -1110,20 +1110,22 @@ export default function CompanyDetailsModal({ company, isOpen, onClose, onDelete
           {/* Tab: IDs & Identity Documents — البيانات الحقيقية تُدار من ملف الشركة الشامل 360° لتفادي ازدواج البيانات */}
           {activeTab === 'ids' && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-              <div style={{ padding: '20px', background: 'var(--surface-2)', border: '1px solid var(--line-soft)', borderRadius: 'var(--r-md)', display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', gap: '12px' }}>
-                <Icon name="badge" style={{ width: '28px', height: '28px', color: 'var(--accent)' }} />
+              <div style={{ padding: '20px', background: 'var(--surface-2)', border: '1.5px solid var(--border)', borderRadius: '18px', display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', gap: '12px', boxShadow: 'var(--shadow-sm)' }}>
+                <div style={{ width: '40px', height: '40px', borderRadius: '12px', background: 'var(--accent-soft)', color: 'var(--accent)', display: 'grid', placeItems: 'center' }}>
+                  <Icon name="badge" style={{ width: '22px', height: '22px' }} />
+                </div>
                 <div>
-                  <h4 style={{ fontSize: '13.5px', fontWeight: 700, margin: '0 0 4px 0', color: 'var(--text)' }}>
+                  <h4 style={{ fontSize: '14px', fontWeight: 800, margin: '0 0 4px 0', color: 'var(--text)' }}>
                     الهويات والوثائق تُدار من ملف الشركة الشامل
                   </h4>
-                  <p style={{ fontSize: '12px', color: 'var(--text-3)', margin: 0, maxWidth: '360px' }}>
+                  <p style={{ fontSize: '12px', color: 'var(--text-3)', margin: 0, maxWidth: '380px' }}>
                     لتفادي ازدواج البيانات، عرض وإضافة هويات المستورد والضريبة والغرفة التجارية والتخطيط الحقيقية يتم من ملف الشركة الشامل 360°.
                   </p>
                 </div>
                 <a
                   href={`/commercial/companies/${company.id}`}
                   className="btn btn-primary"
-                  style={{ padding: '8px 18px', fontSize: '13px', fontWeight: 700, textDecoration: 'none' }}
+                  style={{ padding: '9px 20px', fontSize: '13px', fontWeight: 700, textDecoration: 'none', borderRadius: '12px' }}
                 >
                   فتح ملف الشركة الشامل 360° ←
                 </a>
@@ -1566,35 +1568,38 @@ export default function CompanyDetailsModal({ company, isOpen, onClose, onDelete
                       <div
                         key={cat.type}
                         style={{
-                          padding: '14px',
-                          borderRadius: 'var(--r-md)',
+                          padding: '16px',
+                          borderRadius: '18px',
                           background: isDone
-                            ? 'rgba(16, 185, 129, 0.05)'
+                            ? 'rgba(16, 185, 129, 0.06)'
                             : isLacks
-                            ? 'rgba(239, 68, 68, 0.05)'
+                            ? 'rgba(239, 68, 68, 0.06)'
                             : isPaused
-                            ? 'rgba(100, 116, 139, 0.05)'
+                            ? 'rgba(100, 116, 139, 0.06)'
                             : isInProgress
-                            ? 'rgba(245, 158, 11, 0.05)'
+                            ? 'rgba(245, 158, 11, 0.06)'
                             : 'var(--surface-2)',
                           border: isDone
-                            ? '1.5px solid rgba(16, 185, 129, 0.35)'
+                            ? '1.5px solid rgba(16, 185, 129, 0.45)'
                             : isLacks
-                            ? '1.5px solid rgba(239, 68, 68, 0.35)'
+                            ? '1.5px solid rgba(239, 68, 68, 0.45)'
                             : isPaused
-                            ? '1.5px solid rgba(100, 116, 139, 0.35)'
+                            ? '1.5px solid rgba(100, 116, 139, 0.45)'
                             : isInProgress
-                            ? '1.5px solid rgba(245, 158, 11, 0.35)'
-                            : '1px solid var(--line-soft)',
+                            ? '1.5px solid rgba(245, 158, 11, 0.55)'
+                            : '1.5px solid var(--border)',
+                          boxShadow: 'var(--shadow-sm)',
                           display: 'flex',
                           flexDirection: 'column',
-                          gap: '10px',
+                          gap: '12px',
                         }}
                       >
                         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                            <Icon name={cat.icon as 'badge' | 'doc' | 'brief' | 'build'} style={{ width: '16px', height: '16px', color: cat.color }} />
-                            <strong style={{ fontSize: '13.5px', color: 'var(--text)' }}>{cat.title}</strong>
+                            <div style={{ width: '28px', height: '28px', borderRadius: '8px', background: `${cat.color}18`, display: 'grid', placeItems: 'center' }}>
+                              <Icon name={cat.icon as 'badge' | 'doc' | 'brief' | 'build'} style={{ width: '16px', height: '16px', color: cat.color }} />
+                            </div>
+                            <strong style={{ fontSize: '14px', color: 'var(--text)' }}>{cat.title}</strong>
                           </div>
 
                           {isDone ? (
@@ -1604,7 +1609,7 @@ export default function CompanyDetailsModal({ company, isOpen, onClose, onDelete
                           ) : isPaused ? (
                             <span className="tag tag-gray" style={{ fontSize: '11px', fontWeight: 800 }}>⏸️ متوقفة مؤقتاً</span>
                           ) : isInProgress ? (
-                            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-extrabold bg-amber-500/15 text-amber-400 border border-amber-500/30 shadow-[0_0_12px_rgba(245,158,11,0.15)]">
+                            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-extrabold bg-amber-500/15 text-amber-500 border border-amber-500/30 shadow-xs">
                               <span className="w-3.5 h-3.5 border-2 border-amber-400/40 border-t-amber-400 rounded-full animate-spin flex-none" />
                               <span>قيد الإصدار</span>
                             </span>
@@ -1614,7 +1619,7 @@ export default function CompanyDetailsModal({ company, isOpen, onClose, onDelete
                         </div>
 
                         {rec ? (
-                          <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', fontSize: '12.5px', color: 'var(--text-2)' }}>
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: '5px', fontSize: '12.5px', color: 'var(--text-2)', background: 'var(--surface-3)', padding: '10px 12px', borderRadius: '12px', border: '1px solid var(--line-soft)' }}>
                             {rec.id_number ? (
                               <div>رقم الهوية: <strong className="num text-[var(--accent)]">{rec.id_number}</strong></div>
                             ) : null}
@@ -1640,12 +1645,14 @@ export default function CompanyDetailsModal({ company, isOpen, onClose, onDelete
                             </div>
                           </div>
                         ) : (
-                          <p style={{ margin: 0, fontSize: '12px', color: 'var(--text-3)', lineHeight: 1.5 }}>
-                            {cat.desc}
-                          </p>
+                          <div style={{ background: 'var(--surface-3)', padding: '10px 12px', borderRadius: '12px', border: '1px solid var(--line-soft)' }}>
+                            <p style={{ margin: 0, fontSize: '12px', color: 'var(--text-3)', lineHeight: 1.5 }}>
+                              {cat.desc}
+                            </p>
+                          </div>
                         )}
 
-                        <div style={{ marginTop: 'auto', paddingTop: '6px', borderTop: '1px solid var(--line-soft)', display: 'flex', gap: '8px' }}>
+                        <div style={{ marginTop: 'auto', paddingTop: '8px', borderTop: '1px solid var(--line-soft)', display: 'flex', gap: '8px' }}>
                           {rec ? (
                             <>
                               {canRenewIDs && (
@@ -1657,7 +1664,7 @@ export default function CompanyDetailsModal({ company, isOpen, onClose, onDelete
                                     setIsAddIDModalOpen(true)
                                   }}
                                   className={isInProgress ? 'btn btn-go' : 'btn btn-ghost'}
-                                  style={{ flex: 1, fontSize: '12px', padding: '5px' }}
+                                  style={{ flex: 1, fontSize: '12px', padding: '7px 10px', borderRadius: '10px' }}
                                 >
                                   {isInProgress ? 'إكمال وتثبيت الهوية ✓' : 'تعديل / تجديد ✎'}
                                 </button>
@@ -1672,7 +1679,7 @@ export default function CompanyDetailsModal({ company, isOpen, onClose, onDelete
                                     }
                                   }}
                                   className="btn btn-ghost"
-                                  style={{ fontSize: '12px', padding: '5px 8px', color: 'var(--bad)' }}
+                                  style={{ fontSize: '12px', padding: '7px 10px', color: 'var(--bad)', borderRadius: '10px' }}
                                   title="حذف الهوية"
                                 >
                                   ✕
@@ -1689,7 +1696,7 @@ export default function CompanyDetailsModal({ company, isOpen, onClose, onDelete
                                   setIsAddIDModalOpen(true)
                                 }}
                                 className="btn btn-primary"
-                                style={{ flex: 1, fontSize: '12px', padding: '5px' }}
+                                style={{ flex: 1, fontSize: '12.5px', padding: '8px 12px', borderRadius: '10px', fontWeight: 700 }}
                               >
                                 + بدء إصدار الهوية
                               </button>
