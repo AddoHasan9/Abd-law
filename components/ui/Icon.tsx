@@ -67,9 +67,9 @@ interface IconProps extends SVGProps<SVGSVGElement> {
   className?: string
 }
 
-export function Icon({ name, className = 'icon', ...rest }: IconProps) {
+export function Icon({ name, className = 'icon', width = 20, height = 20, ...rest }: IconProps) {
   return (
-    <svg className={className} aria-hidden {...rest}>
+    <svg className={className} width={width} height={height} aria-hidden {...rest}>
       <use href={`#ic-${name}`} />
     </svg>
   )

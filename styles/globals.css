@@ -369,6 +369,71 @@
     }
   }
 
+  /* ============================================================
+     الأيقونات والمؤشرات — حجم وثبات بصري متناسق (Global Icon Scale)
+     ============================================================ */
+  .icon,
+  svg.icon {
+    width: 20px;
+    height: 20px;
+    min-width: 20px;
+    min-height: 20px;
+    max-width: 20px;
+    max-height: 20px;
+    flex: none;
+    display: inline-block;
+    vertical-align: middle;
+    stroke-width: 1.6;
+    transition: transform var(--t-fast);
+  }
+
+  svg.icon use {
+    pointer-events: none;
+  }
+
+  .icon-sm {
+    width: 16px;
+    height: 16px;
+    min-width: 16px;
+    min-height: 16px;
+    max-width: 16px;
+    max-height: 16px;
+  }
+
+  .icon-lg {
+    width: 24px;
+    height: 24px;
+    min-width: 24px;
+    min-height: 24px;
+    max-width: 24px;
+    max-height: 24px;
+  }
+
+  .icon-btn {
+    width: 36px;
+    height: 36px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 10px;
+    color: var(--text-2);
+    background: var(--surface-2);
+    border: 1px solid var(--border-soft);
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: all 0.18s ease;
+  }
+
+  .icon-btn:hover {
+    color: var(--accent);
+    background: var(--surface-3);
+    transform: scale(1.05);
+  }
+
+  .icon-btn:active {
+    transform: scale(0.95);
+  }
+
   body {
     font-family: var(--font-ui);
     background: var(--bg);
