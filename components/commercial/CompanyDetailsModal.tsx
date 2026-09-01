@@ -10,6 +10,7 @@ import { updateCompanyFSSettingsAction } from '@/app/(app)/commercial/financial-
 import { getCompanyIDsAction, deleteCompanyIDAction, type CompanyIDRecord } from '@/app/(app)/commercial/ids/actions'
 import { getTaxAssessmentsAction } from '@/app/(app)/commercial/tax-assessment/actions'
 import AddIDModal from '@/components/commercial/AddIDModal'
+import WorkflowTimelineMotion from '@/components/commercial/WorkflowTimelineMotion'
 import type { CompanyWithWorkflow, TaxAssessment } from '@/types/database'
 import { useModalBodyLock } from '@/lib/hooks/useModalBodyLock'
 import { IRAQ_GOVERNORATES, WORKFLOW, formatNumberWithCommas, sanitizeFormationWorkflowSteps } from '@/lib/constants'
@@ -1081,268 +1082,28 @@ export default function CompanyDetailsModal({ company, isOpen, onClose, onDelete
             </div>
           )}
 
-          {/* Tab 2: Workflow Steps (سير العمل) */}
+          {/* Tab 2: Workflow Steps (سير العمل التفاعلي والأنيميشن الحركي) */}
           {activeTab === 'workflow' && (
-            <div className="flex flex-col gap-5">
-              {/* Header Title & Progress Section */}
-              {(() => {
-                const doneCount = (steps ?? []).filter(s => s.state === 'done').length
-                const totalSteps = steps?.length || 8
-                const pct = Math.round((doneCount / totalSteps) * 100)
-                const isCompanyEstablished =
+            <div className="flex flex-col gap-4">
+              <WorkflowTimelineMotion
+                steps={(steps || []) as any}
+                onCompleteStep={handleStepComplete}
+                onRevertStep={handleStepRevert}
+                onTransferToDeposit={() => {
+                  setActiveTab('cert')
+                  setMessage({
+                    type: 'ok',
+                    text: 'يرجى إدخال رقم وتاريخ شهادة التأسيس لإتمام التحويل وإطلاق مسار الوديعة مباشرة.',
+                  })
+                }}
+                isEstablished={
                   company?.status === 'established' ||
                   company?.status === 'registered' ||
                   company?.status === 'active' ||
                   Boolean(company?.deposit_released) ||
-                  company?.deposit_status === 'released' ||
-                  (steps && steps.length > 0 && steps.every((s: { state: string }) => s.state === 'done'))
-
-                return (
-                  <div className="flex flex-col gap-3 p-4 rounded-2xl bg-gradient-to-r from-[var(--surface-2)] via-[var(--surface)] to-[var(--surface-2)] border border-[var(--line-soft)] shadow-sm">
-                    <div className="flex items-center justify-between flex-wrap gap-3">
-                      <div className="flex items-center gap-3">
-                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-bold shadow-sm ${
-                          isCompanyEstablished
-                            ? 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/25'
-                            : 'bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/25'
-                        }`}>
-                          <span className="material-symbols-outlined text-[22px]">
-                            {isCompanyEstablished ? 'verified' : 'timeline'}
-                          </span>
-                        </div>
-                        <div className="flex flex-col">
-                          <div className="flex items-center gap-2">
-                            <span className="text-sm font-extrabold text-[var(--text)]">مخطط وسير عمل التأسيس</span>
-                            {isCompanyEstablished && (
-                              <span className="px-2 py-0.5 text-[10.5px] font-extrabold rounded-full bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border border-emerald-500/25">
-                                مكتملة التأسيس ✓
-                              </span>
-                            )}
-                          </div>
-                          <span className="text-[11.5px] text-[var(--text-3)] font-medium">
-                            {company?.name || 'متابعة مسار التأسيس خطوة بخطوة حتى صدور الشهادة والوديعة'}
-                          </span>
-                        </div>
-                      </div>
-
-                      <div className="flex items-center gap-2.5 bg-[var(--surface-3)]/80 px-3.5 py-1.5 rounded-full border border-[var(--line-soft)] shadow-xs">
-                        <div className="flex items-center gap-1.5">
-                          <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                          <span className="text-xs font-black text-emerald-600 dark:text-emerald-400 num">{pct}%</span>
-                        </div>
-                        <span className="text-[11px] text-[var(--text-3)] font-bold num">
-                          ({doneCount} من {totalSteps} مكتملة)
-                        </span>
-                      </div>
-                    </div>
-
-                    {/* Visual Progress Track */}
-                    <div className="w-full h-2 rounded-full bg-[var(--surface-3)] overflow-hidden border border-[var(--line-soft)]/50">
-                      <div
-                        className="h-full rounded-full bg-gradient-to-r from-emerald-500 via-teal-400 to-emerald-400 transition-all duration-700 shadow-sm"
-                        style={{ width: `${Math.max(pct, 5)}%` }}
-                      />
-                    </div>
-                  </div>
-                )
-              })()}
-
-              {/* Connected Vertical Timeline Track */}
-              <div className="relative flex flex-col gap-1 pr-1 pl-1 py-1">
-                {(steps ?? []).map((step: { id: string; step_order: number; label: string; state: 'done' | 'wait' | 'doing'; owner_kind?: string | null; step_key?: string; done_at?: string | null }, idx: number) => {
-                  const isDone = step.state === 'done'
-                  const isDoing = step.state === 'doing'
-                  const isWait = step.state === 'wait'
-                  const isLast = idx === ((steps?.length || 8) - 1)
-                  const nextStep = steps?.[idx + 1]
-
-                  return (
-                    <div
-                      key={step.id}
-                      id={`wf-step-${step.step_order}`}
-                      className="relative flex items-start gap-4 transition-all duration-300 group"
-                    >
-                      {/* Left Vertical Line Connector + Circle Node */}
-                      <div className="relative flex flex-col items-center flex-none">
-                        {/* Circle Node Icon */}
-                        <div className="relative z-10">
-                          {isDone ? (
-                            <div className="relative w-10 h-10 flex items-center justify-center group-hover:scale-105 transition-transform duration-300">
-                              <div className="absolute inset-0 rounded-full bg-emerald-500/20 blur-[6px] animate-pulse" />
-                              <div className="wf-node-done relative w-9 h-9 rounded-full bg-gradient-to-tr from-emerald-600 via-emerald-500 to-teal-400 text-white flex items-center justify-center shadow-lg shadow-emerald-500/30 ring-2 ring-emerald-400/40">
-                                <span className="material-symbols-outlined text-[20px] font-black drop-shadow-xs">check</span>
-                              </div>
-                            </div>
-                          ) : isDoing ? (
-                            <div className="relative w-10 h-10 flex items-center justify-center">
-                              <div className="absolute inset-0 rounded-full bg-amber-400/40 blur-[8px] animate-ping" />
-                              <div className="relative w-9 h-9 rounded-full bg-gradient-to-tr from-amber-500 via-amber-400 to-yellow-300 text-slate-950 flex items-center justify-center font-black shadow-lg shadow-amber-500/40 ring-4 ring-amber-400/30 animate-pulse">
-                                <span className="material-symbols-outlined text-[19px] font-black">play_arrow</span>
-                              </div>
-                            </div>
-                          ) : (
-                            <div className="relative w-10 h-10 flex items-center justify-center">
-                              <div className="w-8 h-8 rounded-full bg-[var(--surface-3)] border-2 border-[var(--line-soft)] text-[var(--text-3)] flex items-center justify-center font-black text-xs num shadow-xs">
-                                {step.step_order}
-                              </div>
-                            </div>
-                          )}
-                        </div>
-
-                        {/* Connecting Line to next step below */}
-                        {!isLast && (
-                          <div
-                            className={`my-1 transition-all duration-500 ${
-                              isDone && nextStep?.state === 'doing'
-                                ? 'wf-connector-laser'
-                                : 'w-0.5'
-                            }`}
-                            style={{
-                              height: '42px',
-                              background: isDone && nextStep?.state === 'done'
-                                ? 'linear-gradient(to bottom, #10B981, #10B981)'
-                                : isDone && nextStep?.state === 'doing'
-                                ? undefined
-                                : isDoing
-                                ? 'linear-gradient(to bottom, #F59E0B, var(--line-soft))'
-                                : 'var(--line-soft)',
-                              opacity: isDone || isDoing ? 1 : 0.45,
-                            }}
-                          />
-                        )}
-                      </div>
-
-                      {/* Step Card Box (Label + Date / Action Status) */}
-                      <div
-                        className={`flex items-center justify-between gap-3 min-w-0 flex-1 p-3.5 rounded-2xl transition-all duration-300 ${
-                          isDoing
-                            ? 'wf-card-doing bg-gradient-to-r from-amber-500/15 via-amber-500/5 to-transparent border-2 border-amber-500/50 shadow-md ring-2 ring-amber-500/20'
-                            : isDone
-                            ? 'bg-[var(--surface-2)]/60 hover:bg-emerald-500/[0.04] border border-emerald-500/25 hover:border-emerald-500/45 shadow-xs'
-                            : 'bg-[var(--surface-2)]/30 border border-[var(--line-soft)]/50 opacity-60'
-                        }`}
-                      >
-                        <div className="flex flex-col min-w-0 flex-1">
-                          <div className="flex items-center gap-2 flex-wrap">
-                            <span className="text-[11px] font-extrabold text-[var(--text-3)] num">
-                              المرحلة {step.step_order}
-                            </span>
-                            <h4
-                              className={`font-extrabold text-sm leading-snug transition-colors ${
-                                isDoing
-                                  ? 'text-amber-600 dark:text-amber-400 text-[14.5px]'
-                                  : isDone
-                                  ? 'text-[var(--text)] font-extrabold'
-                                  : 'text-[var(--text-2)]'
-                              }`}
-                            >
-                              {step.label}
-                            </h4>
-                          </div>
-
-                          {/* Completion Date or Status Subtext */}
-                          {isDone ? (
-                            <div className="inline-flex items-center gap-1.5 mt-1 text-[11px] font-bold text-emerald-600 dark:text-emerald-400">
-                              <span className="material-symbols-outlined text-[14px]">check_circle</span>
-                              <span>{formatStepArabicDate(step.done_at) || 'مكتملة بنجاح ✓'}</span>
-                            </div>
-                          ) : isDoing ? (
-                            <div className="inline-flex items-center gap-1.5 mt-1 text-[11px] font-extrabold text-amber-600 dark:text-amber-400">
-                              <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-ping" />
-                              <span>الخطوة الجارية حالياً — بانتظار الإنجاز</span>
-                            </div>
-                          ) : (
-                            <div className="inline-flex items-center gap-1 mt-1 text-[11px] font-medium text-[var(--text-3)]">
-                              <span className="material-symbols-outlined text-[13px]">lock</span>
-                              <span>في الانتظار (تُفتح تلقائياً بعد إكمال السابقة)</span>
-                            </div>
-                          )}
-                        </div>
-
-                        {/* Right Action Buttons */}
-                        <div className="flex items-center gap-2 flex-none">
-                          {isDoing ? (
-                            <button
-                              type="button"
-                              onClick={() => handleStepComplete(step.id, step.step_order)}
-                              className="px-4 py-2 rounded-xl font-black text-xs bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 active:scale-95 text-white shadow-md shadow-emerald-500/30 hover:shadow-emerald-500/50 transition-all flex items-center gap-1.5 cursor-pointer"
-                            >
-                              <span>إكمال الخطوة</span>
-                              <span className="material-symbols-outlined text-[16px]">done_all</span>
-                            </button>
-                          ) : isDone ? (
-                            <button
-                              type="button"
-                              onClick={() => handleStepRevert(step.id, step.step_order)}
-                              className="px-2.5 py-1 rounded-lg text-xs font-bold text-[var(--text-3)] hover:text-rose-500 hover:bg-rose-500/10 border border-transparent hover:border-rose-500/20 transition-all cursor-pointer"
-                              title="إعادة هذه الخطوة للتنفيذ وتجميد الخطوات اللاحقة"
-                            >
-                              تراجع ←
-                            </button>
-                          ) : (
-                            <span className="text-[11px] font-bold text-[var(--text-3)] opacity-60 bg-[var(--surface-3)] px-2.5 py-1 rounded-lg flex items-center gap-1">
-                              <span className="material-symbols-outlined text-[13px]">lock</span>
-                              <span>مغلقة</span>
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  )
-                })}
-              </div>
-
-              {/* Bottom Action Section: Celebratory status if established, or Transfer button if forming */}
-              {(() => {
-                const isCompanyEstablished =
-                  company?.status === 'established' ||
-                  company?.status === 'registered' ||
-                  company?.status === 'active' ||
-                  Boolean(company?.deposit_released) ||
-                  company?.deposit_status === 'released' ||
-                  (steps && steps.length > 0 && steps.every((s: { state: string }) => s.state === 'done'))
-
-                if (isCompanyEstablished) {
-                  return (
-                    <div className="pt-3 border-t border-[var(--line-soft)]">
-                      <div className="p-4 rounded-2xl bg-gradient-to-r from-emerald-500/15 via-emerald-500/10 to-transparent border border-emerald-500/30 flex items-center justify-between gap-3 shadow-xs">
-                        <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-400 to-emerald-600 text-white flex items-center justify-center shadow-md shadow-emerald-500/30 font-black flex-none">
-                            <span className="material-symbols-outlined text-[22px]">verified</span>
-                          </div>
-                          <div>
-                            <div className="text-sm font-extrabold text-emerald-700 dark:text-emerald-300">
-                              اكتملت جميع خطوات التأسيس وأُطلقت الوديعة بنجاح
-                            </div>
-                            <div className="text-[11.5px] text-[var(--text-3)] font-medium mt-0.5">
-                              الشركة مثبتة ومؤسسة رسمياً ومسجلة في دليل وسجل الشركات
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  )
+                  company?.deposit_status === 'released'
                 }
-
-                return (
-                  <div className="pt-3 border-t border-[var(--line-soft)]">
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setActiveTab('cert')
-                        setMessage({
-                          type: 'ok',
-                          text: 'يرجى إدخال رقم وتاريخ شهادة التأسيس لإتمام التحويل وإطلاق مسار الوديعة مباشرة.',
-                        })
-                      }}
-                      className="w-full py-3.5 px-6 rounded-2xl font-black text-sm bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 active:scale-98 text-white shadow-lg shadow-emerald-500/30 flex items-center justify-center gap-2 transition-all cursor-pointer"
-                    >
-                      <span className="material-symbols-outlined text-[20px]">sync</span>
-                      <span>اكتمل التأسيس — إدخال الشهادة والتحويل لإطلاق الوديعة ←</span>
-                    </button>
-                  </div>
-                )
-              })()}
+              />
             </div>
           )}
 
