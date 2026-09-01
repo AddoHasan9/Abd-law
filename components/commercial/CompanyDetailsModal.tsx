@@ -1328,13 +1328,13 @@ export default function CompanyDetailsModal({ company, isOpen, onClose, onDelete
                         setActiveTab('cert')
                         setMessage({
                           type: 'ok',
-                          text: 'يرجى مراجعة وتأكيد بيانات الشهادة والوديعة أدناه لإطلاق مسار الوديعة.',
+                          text: 'يرجى إدخال رقم وتاريخ شهادة التأسيس لإتمام التحويل وإطلاق مسار الوديعة مباشرة.',
                         })
                       }}
                       className="w-full py-3.5 px-6 rounded-2xl font-black text-sm bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 active:scale-98 text-white shadow-lg shadow-emerald-500/30 flex items-center justify-center gap-2 transition-all cursor-pointer"
                     >
                       <span className="material-symbols-outlined text-[20px]">sync</span>
-                      <span>التحويل لإطلاق الوديعة</span>
+                      <span>اكتمل التأسيس — إدخال الشهادة والتحويل لإطلاق الوديعة ←</span>
                     </button>
                   </div>
                 )
@@ -1369,26 +1369,37 @@ export default function CompanyDetailsModal({ company, isOpen, onClose, onDelete
           {/* Tab 3: Certificate & Deposit Launch */}
           {activeTab === 'cert' && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-              <div style={{ background: 'var(--surface-2)', padding: '14px', borderRadius: 'var(--r-md)', border: '1px solid var(--line-soft)', display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                <h4 style={{ fontSize: '13.5px', fontWeight: 700, margin: 0, color: 'var(--accent)' }}>
-                  بيانات شهادة التأسيس (تُدخل بعد اكتمال مرحلة التأسيس)
-                </h4>
+              <div style={{ background: 'var(--surface-2)', padding: '16px', borderRadius: 'var(--r-md)', border: '1px solid var(--line-soft)', display: 'flex', flexDirection: 'column', gap: '14px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <div style={{ width: '34px', height: '34px', borderRadius: '10px', background: 'var(--accent-soft)', color: 'var(--accent)', display: 'grid', placeItems: 'center' }}>
+                    <Icon name="doc" />
+                  </div>
+                  <div>
+                    <h4 style={{ fontSize: '14px', fontWeight: 800, margin: 0, color: 'var(--text)' }}>
+                      بيانات شهادة التأسيس وإطلاق مسار الوديعة
+                    </h4>
+                    <span style={{ fontSize: '11.5px', color: 'var(--text-3)' }}>
+                      أدخل رقم وتاريخ شهادة التأسيس للتحويل المباشر إلى قسم إطلاق الوديعة ومتابعة المحطات
+                    </span>
+                  </div>
+                </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-                  <div className="field">
-                    <label htmlFor="modal-certno">رقم شهادة التأسيس</label>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '14px' }}>
+                  <div className="field" style={{ marginBottom: 0 }}>
+                    <label htmlFor="modal-certno" style={{ fontWeight: 700, color: 'var(--text-2)' }}>رقم شهادة التأسيس</label>
                     <input
                       id="modal-certno"
                       type="text"
                       className="input num"
                       value={certNo}
                       onChange={e => setCertNo(e.target.value)}
-                      placeholder="2026/5108/ت"
+                      placeholder="مثال: 2026/5108/ت"
+                      autoFocus
                     />
                   </div>
 
-                  <div className="field">
-                    <label htmlFor="modal-certdate">تاريخ شهادة التأسيس</label>
+                  <div className="field" style={{ marginBottom: 0 }}>
+                    <label htmlFor="modal-certdate" style={{ fontWeight: 700, color: 'var(--text-2)' }}>تاريخ شهادة التأسيس</label>
                     <input
                       id="modal-certdate"
                       type="date"
@@ -1398,10 +1409,24 @@ export default function CompanyDetailsModal({ company, isOpen, onClose, onDelete
                     />
                   </div>
                 </div>
+
+                {!company.deposit_released && (
+                  <div style={{ paddingTop: '8px' }}>
+                    <button
+                      type="button"
+                      onClick={handleReleaseDeposit}
+                      disabled={loading}
+                      className="w-full py-3.5 px-6 rounded-2xl font-black text-sm bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 active:scale-98 text-white shadow-lg shadow-emerald-500/30 flex items-center justify-center gap-2 transition-all cursor-pointer"
+                    >
+                      <span className="material-symbols-outlined text-[20px]">send</span>
+                      <span>{loading ? 'جاري الحفظ والتحويل...' : 'حفظ بيانات الشهادة والتحويل لإطلاق الوديعة الآن ←'}</span>
+                    </button>
+                  </div>
+                )}
               </div>
 
               {/* حالة الوديعة وإطلاقها */}
-              {company.deposit_released ? (
+              {company.deposit_released && (
                 <div style={{ background: 'var(--ok-soft)', border: '1px solid var(--ok)', padding: '16px', borderRadius: 'var(--r-md)', display: 'flex', flexDirection: 'column', gap: '10px' }}>
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px' }}>
                     <div style={{ fontSize: '13.5px', fontWeight: 800, color: 'var(--ok)' }}>
@@ -1459,26 +1484,6 @@ export default function CompanyDetailsModal({ company, isOpen, onClose, onDelete
                       </div>
                     </div>
                   )}
-                </div>
-              ) : hasCert ? (
-                <div style={{ background: 'var(--ok-soft)', border: '1px solid var(--ok)', padding: '16px', borderRadius: 'var(--r-md)', display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                  <div style={{ fontSize: '13px', fontWeight: 700, color: 'var(--ok)' }}>
-                    ✓ تم تسجيل تاريخ شهادة التأسيس! يمكنك الآن إطلاق مسار الوديعة والمحطات الثلاث.
-                  </div>
-                  <button
-                    type="button"
-                    onClick={handleReleaseDeposit}
-                    disabled={loading}
-                    className="btn btn-go"
-                    style={{ alignSelf: 'flex-start', padding: '8px 18px', fontSize: '13.5px' }}
-                  >
-                    <Icon name="vault" />
-                    <span>إطلاق مسار الوديعة والمحطات الثلاث</span>
-                  </button>
-                </div>
-              ) : (
-                <div style={{ fontSize: '12.5px', color: 'var(--text-3)', background: 'var(--surface-2)', padding: '12px', borderRadius: 'var(--r-md)' }}>
-                  ملاحظة: أدخل تاريخ الشهادة واضغط «حفظ التغييرات» لتفعيل زر إطلاق الوديعة.
                 </div>
               )}
             </div>
