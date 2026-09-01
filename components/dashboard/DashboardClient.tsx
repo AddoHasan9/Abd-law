@@ -91,21 +91,18 @@ export default function DashboardClient({ stats, profiles = [] }: Props) {
         {/* Metric 1: Established Companies (الشركات المؤسسة) */}
         <Link
           href="/commercial/companies-registry"
-          className="glass-card p-4 sm:p-4.5 rounded-[22px] relative overflow-hidden group hover:-translate-y-1.5 hover:shadow-lg hover:border-emerald-500/40 transition-all duration-300 block border border-[var(--glass-border)] bg-[var(--surface)] shadow-xs"
+          className="glass-card p-4 sm:p-4.5 rounded-[22px] relative overflow-hidden group hover:-translate-y-1 hover:shadow-md transition-all duration-300 block border border-[var(--border)] bg-[var(--surface-glass)]"
         >
-          {/* Subtle Corner Ambient Glow */}
-          <div className="absolute -right-6 -top-6 w-24 h-24 bg-emerald-500/15 rounded-full blur-xl group-hover:opacity-100 group-hover:scale-125 transition-all duration-500 pointer-events-none" />
-          
           <div className="flex justify-between items-start gap-2 mb-3 relative z-10">
             <div className="flex flex-col min-w-0">
               <span className="text-[11.5px] font-bold text-[var(--text-3)] mb-1 leading-tight">الشركات المؤسسة</span>
               <RollingNumber value={establishedCount} className="text-[22px] sm:text-3xl text-[var(--text)] leading-none" />
             </div>
-            <div className="w-10 h-10 shrink-0 rounded-2xl bg-emerald-500/15 border border-emerald-500/25 flex items-center justify-center text-emerald-600 dark:text-emerald-400 group-hover:scale-110 group-hover:rotate-3 transition-transform duration-300 shadow-xs">
+            <div className="w-9 h-9 shrink-0 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-600 dark:text-emerald-400 group-hover:scale-105 transition-transform duration-200">
               <span className="material-symbols-outlined text-[20px]">domain</span>
             </div>
           </div>
-          <div className="flex items-center justify-between text-[11px] font-bold text-emerald-700 dark:text-emerald-300 bg-emerald-500/10 px-2.5 py-1 rounded-xl relative z-10 border border-emerald-500/15">
+          <div className="flex items-center justify-between text-[11px] font-bold text-[var(--text-2)] group-hover:text-emerald-600 dark:group-hover:text-emerald-400 bg-[var(--surface-2)] group-hover:bg-[var(--surface-3)] px-2.5 py-1 rounded-xl relative z-10 border border-[var(--line-soft)] transition-colors">
             <span>دليل الشركات</span>
             <span className="material-symbols-outlined text-[13px] group-hover:-translate-x-0.5 transition-transform">arrow_left</span>
           </div>
@@ -114,21 +111,18 @@ export default function DashboardClient({ stats, profiles = [] }: Props) {
         {/* Metric 2: Forming Companies (قيد التأسيس) */}
         <Link
           href="/commercial/companies"
-          className="glass-card p-4 sm:p-4.5 rounded-[22px] relative overflow-hidden group hover:-translate-y-1.5 hover:shadow-lg hover:border-amber-500/40 transition-all duration-300 block border border-[var(--glass-border)] bg-[var(--surface)] shadow-xs"
+          className="glass-card p-4 sm:p-4.5 rounded-[22px] relative overflow-hidden group hover:-translate-y-1 hover:shadow-md transition-all duration-300 block border border-[var(--border)] bg-[var(--surface-glass)]"
         >
-          {/* Subtle Corner Ambient Glow */}
-          <div className="absolute -right-6 -top-6 w-24 h-24 bg-amber-500/15 rounded-full blur-xl group-hover:opacity-100 group-hover:scale-125 transition-all duration-500 pointer-events-none" />
-          
           <div className="flex justify-between items-start gap-2 mb-3 relative z-10">
             <div className="flex flex-col min-w-0">
               <span className="text-[11.5px] font-bold text-[var(--text-3)] mb-1 leading-tight">قيد التأسيس</span>
               <RollingNumber value={formingCount} className="text-[22px] sm:text-3xl text-[var(--text)] leading-none" />
             </div>
-            <div className="w-10 h-10 shrink-0 rounded-2xl bg-amber-500/15 border border-amber-500/25 flex items-center justify-center text-amber-600 dark:text-amber-400 group-hover:scale-110 group-hover:rotate-3 transition-transform duration-300 shadow-xs">
+            <div className="w-9 h-9 shrink-0 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-600 dark:text-amber-400 group-hover:scale-105 transition-transform duration-200">
               <span className="material-symbols-outlined text-[20px]">pending_actions</span>
             </div>
           </div>
-          <div className="flex items-center justify-between text-[11px] font-bold text-amber-700 dark:text-amber-300 bg-amber-500/10 px-2.5 py-1 rounded-xl relative z-10 border border-amber-500/15">
+          <div className="flex items-center justify-between text-[11px] font-bold text-[var(--text-2)] group-hover:text-amber-600 dark:group-hover:text-amber-400 bg-[var(--surface-2)] group-hover:bg-[var(--surface-3)] px-2.5 py-1 rounded-xl relative z-10 border border-[var(--line-soft)] transition-colors">
             <span>مسار التأسيس (8)</span>
             <span className="material-symbols-outlined text-[13px] group-hover:-translate-x-0.5 transition-transform">arrow_left</span>
           </div>
@@ -137,21 +131,18 @@ export default function DashboardClient({ stats, profiles = [] }: Props) {
         {/* Metric 3: Active Deposits (إطلاق الوديعة) */}
         <Link
           href="/commercial/deposits"
-          className="glass-card p-4 sm:p-4.5 rounded-[22px] relative overflow-hidden group hover:-translate-y-1.5 hover:shadow-lg hover:border-cyan-500/40 transition-all duration-300 block border border-[var(--glass-border)] bg-[var(--surface)] shadow-xs"
+          className="glass-card p-4 sm:p-4.5 rounded-[22px] relative overflow-hidden group hover:-translate-y-1 hover:shadow-md transition-all duration-300 block border border-[var(--border)] bg-[var(--surface-glass)]"
         >
-          {/* Subtle Corner Ambient Glow */}
-          <div className="absolute -right-6 -top-6 w-24 h-24 bg-cyan-500/15 rounded-full blur-xl group-hover:opacity-100 group-hover:scale-125 transition-all duration-500 pointer-events-none" />
-          
           <div className="flex justify-between items-start gap-2 mb-3 relative z-10">
             <div className="flex flex-col min-w-0">
               <span className="text-[11.5px] font-bold text-[var(--text-3)] mb-1 leading-tight">إطلاق الوديعة</span>
               <RollingNumber value={depositsCount} className="text-[22px] sm:text-3xl text-[var(--text)] leading-none" />
             </div>
-            <div className="w-10 h-10 shrink-0 rounded-2xl bg-cyan-500/15 border border-cyan-500/25 flex items-center justify-center text-cyan-600 dark:text-cyan-400 group-hover:scale-110 group-hover:rotate-3 transition-transform duration-300 shadow-xs">
+            <div className="w-9 h-9 shrink-0 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-600 dark:text-blue-400 group-hover:scale-105 transition-transform duration-200">
               <span className="material-symbols-outlined text-[20px]">savings</span>
             </div>
           </div>
-          <div className="flex items-center justify-between text-[11px] font-bold text-cyan-700 dark:text-cyan-300 bg-cyan-500/10 px-2.5 py-1 rounded-xl relative z-10 border border-cyan-500/15">
+          <div className="flex items-center justify-between text-[11px] font-bold text-[var(--text-2)] group-hover:text-blue-600 dark:group-hover:text-blue-400 bg-[var(--surface-2)] group-hover:bg-[var(--surface-3)] px-2.5 py-1 rounded-xl relative z-10 border border-[var(--line-soft)] transition-colors">
             <span>مسار الودائع (4)</span>
             <span className="material-symbols-outlined text-[13px] group-hover:-translate-x-0.5 transition-transform">arrow_left</span>
           </div>
@@ -160,21 +151,18 @@ export default function DashboardClient({ stats, profiles = [] }: Props) {
         {/* Metric 4: LLC Transactions (قسم المحدودة) */}
         <Link
           href="/commercial/llc"
-          className="glass-card p-4 sm:p-4.5 rounded-[22px] relative overflow-hidden group hover:-translate-y-1.5 hover:shadow-lg hover:border-blue-500/40 transition-all duration-300 block border border-[var(--glass-border)] bg-[var(--surface)] shadow-xs"
+          className="glass-card p-4 sm:p-4.5 rounded-[22px] relative overflow-hidden group hover:-translate-y-1 hover:shadow-md transition-all duration-300 block border border-[var(--border)] bg-[var(--surface-glass)]"
         >
-          {/* Subtle Corner Ambient Glow */}
-          <div className="absolute -right-6 -top-6 w-24 h-24 bg-blue-500/15 rounded-full blur-xl group-hover:opacity-100 group-hover:scale-125 transition-all duration-500 pointer-events-none" />
-          
           <div className="flex justify-between items-start gap-2 mb-3 relative z-10">
             <div className="flex flex-col min-w-0">
               <span className="text-[11.5px] font-bold text-[var(--text-3)] mb-1 leading-tight">قسم المحدودة</span>
               <RollingNumber value={llcCount} className="text-[22px] sm:text-3xl text-[var(--text)] leading-none" />
             </div>
-            <div className="w-10 h-10 shrink-0 rounded-2xl bg-blue-500/15 border border-blue-500/25 flex items-center justify-center text-blue-600 dark:text-blue-400 group-hover:scale-110 group-hover:rotate-3 transition-transform duration-300 shadow-xs">
+            <div className="w-9 h-9 shrink-0 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-600 dark:text-blue-400 group-hover:scale-105 transition-transform duration-200">
               <span className="material-symbols-outlined text-[20px]">history_edu</span>
             </div>
           </div>
-          <div className="flex items-center justify-between text-[11px] font-bold text-blue-700 dark:text-blue-300 bg-blue-500/10 px-2.5 py-1 rounded-xl relative z-10 border border-blue-500/15">
+          <div className="flex items-center justify-between text-[11px] font-bold text-[var(--text-2)] group-hover:text-blue-600 dark:group-hover:text-blue-400 bg-[var(--surface-2)] group-hover:bg-[var(--surface-3)] px-2.5 py-1 rounded-xl relative z-10 border border-[var(--line-soft)] transition-colors">
             <span>معاملات نشطة</span>
             <span className="material-symbols-outlined text-[13px] group-hover:-translate-x-0.5 transition-transform">arrow_left</span>
           </div>
@@ -183,21 +171,18 @@ export default function DashboardClient({ stats, profiles = [] }: Props) {
         {/* Metric 5: Company IDs (قسم الهويات) */}
         <Link
           href="/commercial/ids"
-          className="glass-card p-4 sm:p-4.5 rounded-[22px] relative overflow-hidden group hover:-translate-y-1.5 hover:shadow-lg hover:border-indigo-500/40 transition-all duration-300 block border border-[var(--glass-border)] bg-[var(--surface)] shadow-xs"
+          className="glass-card p-4 sm:p-4.5 rounded-[22px] relative overflow-hidden group hover:-translate-y-1 hover:shadow-md transition-all duration-300 block border border-[var(--border)] bg-[var(--surface-glass)]"
         >
-          {/* Subtle Corner Ambient Glow */}
-          <div className="absolute -right-6 -top-6 w-24 h-24 bg-indigo-500/15 rounded-full blur-xl group-hover:opacity-100 group-hover:scale-125 transition-all duration-500 pointer-events-none" />
-          
           <div className="flex justify-between items-start gap-2 mb-3 relative z-10">
             <div className="flex flex-col min-w-0">
               <span className="text-[11.5px] font-bold text-[var(--text-3)] mb-1 leading-tight">قسم الهويات</span>
               <RollingNumber value={idsCount} className="text-[22px] sm:text-3xl text-[var(--text)] leading-none" />
             </div>
-            <div className="w-10 h-10 shrink-0 rounded-2xl bg-indigo-500/15 border border-indigo-500/25 flex items-center justify-center text-indigo-600 dark:text-indigo-400 group-hover:scale-110 group-hover:rotate-3 transition-transform duration-300 shadow-xs">
+            <div className="w-9 h-9 shrink-0 rounded-xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-purple-600 dark:text-purple-400 group-hover:scale-105 transition-transform duration-200">
               <span className="material-symbols-outlined text-[20px]">badge</span>
             </div>
           </div>
-          <div className="flex items-center justify-between text-[11px] font-bold text-indigo-700 dark:text-indigo-300 bg-indigo-500/10 px-2.5 py-1 rounded-xl relative z-10 border border-indigo-500/15">
+          <div className="flex items-center justify-between text-[11px] font-bold text-[var(--text-2)] group-hover:text-purple-600 dark:group-hover:text-purple-400 bg-[var(--surface-2)] group-hover:bg-[var(--surface-3)] px-2.5 py-1 rounded-xl relative z-10 border border-[var(--line-soft)] transition-colors">
             <span>مستورد / ضريبة</span>
             <span className="material-symbols-outlined text-[13px] group-hover:-translate-x-0.5 transition-transform">arrow_left</span>
           </div>
@@ -206,21 +191,18 @@ export default function DashboardClient({ stats, profiles = [] }: Props) {
         {/* Metric 6: Financial Statements (الحسابات الختامية) */}
         <Link
           href="/commercial/financial-statements"
-          className="glass-card p-4 sm:p-4.5 rounded-[22px] relative overflow-hidden group hover:-translate-y-1.5 hover:shadow-lg hover:border-rose-500/40 transition-all duration-300 block border border-[var(--glass-border)] bg-[var(--surface)] shadow-xs"
+          className="glass-card p-4 sm:p-4.5 rounded-[22px] relative overflow-hidden group hover:-translate-y-1 hover:shadow-md transition-all duration-300 block border border-[var(--border)] bg-[var(--surface-glass)]"
         >
-          {/* Subtle Corner Ambient Glow */}
-          <div className="absolute -right-6 -top-6 w-24 h-24 bg-rose-500/15 rounded-full blur-xl group-hover:opacity-100 group-hover:scale-125 transition-all duration-500 pointer-events-none" />
-          
           <div className="flex justify-between items-start gap-2 mb-3 relative z-10">
             <div className="flex flex-col min-w-0">
               <span className="text-[11.5px] font-bold text-[var(--text-3)] mb-1 leading-tight">الحسابات الختامية</span>
               <RollingNumber value={stats.urgentDeadlines?.length || 0} className="text-[22px] sm:text-3xl text-[var(--text)] leading-none" />
             </div>
-            <div className="w-10 h-10 shrink-0 rounded-2xl bg-rose-500/15 border border-rose-500/25 flex items-center justify-center text-rose-600 dark:text-rose-400 group-hover:scale-110 group-hover:rotate-3 transition-transform duration-300 shadow-xs">
+            <div className="w-9 h-9 shrink-0 rounded-xl bg-rose-500/10 border border-rose-500/20 flex items-center justify-center text-rose-600 dark:text-rose-400 group-hover:scale-105 transition-transform duration-200">
               <span className="material-symbols-outlined text-[20px]">receipt_long</span>
             </div>
           </div>
-          <div className="flex items-center justify-between text-[11px] font-bold text-rose-700 dark:text-rose-300 bg-rose-500/10 px-2.5 py-1 rounded-xl relative z-10 border border-rose-500/15">
+          <div className="flex items-center justify-between text-[11px] font-bold text-[var(--text-2)] group-hover:text-rose-600 dark:group-hover:text-rose-400 bg-[var(--surface-2)] group-hover:bg-[var(--surface-3)] px-2.5 py-1 rounded-xl relative z-10 border border-[var(--line-soft)] transition-colors">
             <span>مهلة 7/10 السنوية</span>
             <span className="material-symbols-outlined text-[13px] group-hover:-translate-x-0.5 transition-transform">arrow_left</span>
           </div>

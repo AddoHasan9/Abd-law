@@ -201,17 +201,16 @@ export default function CompaniesClient({ initialCompanies }: Props) {
             setActiveTab('established')
             setTimeFilter('all')
           }}
-          className={`glass-card p-4 sm:p-5 rounded-[22px] relative overflow-hidden group hover:-translate-y-1 hover:shadow-lg transition-all duration-200 cursor-pointer ${
+          className={`glass-card p-4 sm:p-5 rounded-[22px] relative overflow-hidden group hover:-translate-y-1 hover:shadow-md transition-all duration-200 cursor-pointer ${
             activeTab === 'established' ? 'ring-2 ring-emerald-500/50 bg-emerald-500/5' : ''
           }`}
         >
-          <div className="absolute -right-6 -top-6 w-24 h-24 bg-emerald-500/10 rounded-full blur-xl group-hover:opacity-80 transition-opacity" />
           <div className="flex justify-between items-start mb-2 relative z-10">
             <div className="flex flex-col">
               <span className="text-[11px] font-bold uppercase tracking-wider text-[var(--text-3)] mb-0.5">الشركات المؤسسة</span>
               <span className="text-3xl font-extrabold text-emerald-600 dark:text-emerald-400 num">{establishedCompanies.length}</span>
             </div>
-            <div className="w-10 h-10 rounded-xl bg-emerald-500/15 border border-emerald-500/20 flex items-center justify-center text-emerald-600 dark:text-emerald-400 group-hover:scale-110 transition-transform">
+            <div className="w-10 h-10 rounded-xl bg-emerald-500/15 border border-emerald-500/20 flex items-center justify-center text-emerald-600 dark:text-emerald-400 group-hover:scale-105 transition-transform">
               <span className="material-symbols-outlined text-[22px]">verified</span>
             </div>
           </div>
@@ -266,17 +265,16 @@ export default function CompaniesClient({ initialCompanies }: Props) {
         {/* KPI 2: Forming Companies */}
         <div
           onClick={() => setActiveTab('forming')}
-          className={`glass-card p-4 sm:p-5 rounded-[22px] relative overflow-hidden group hover:-translate-y-1 hover:shadow-lg transition-all duration-200 cursor-pointer ${
+          className={`glass-card p-4 sm:p-5 rounded-[22px] relative overflow-hidden group hover:-translate-y-1 hover:shadow-md transition-all duration-200 cursor-pointer ${
             activeTab === 'forming' ? 'ring-2 ring-amber-500/50 bg-amber-500/5' : ''
           }`}
         >
-          <div className="absolute -right-6 -top-6 w-24 h-24 bg-amber-500/10 rounded-full blur-xl group-hover:opacity-80 transition-opacity" />
           <div className="flex justify-between items-start mb-3 relative z-10">
             <div className="flex flex-col">
               <span className="text-[11px] font-bold uppercase tracking-wider text-[var(--text-3)] mb-0.5">قيد التأسيس</span>
               <span className="text-3xl font-extrabold text-amber-600 dark:text-amber-400 num">{formingCompanies.length}</span>
             </div>
-            <div className="w-10 h-10 rounded-xl bg-amber-500/15 border border-amber-500/20 flex items-center justify-center text-amber-600 dark:text-amber-400 group-hover:scale-110 transition-transform">
+            <div className="w-10 h-10 rounded-xl bg-amber-500/15 border border-amber-500/20 flex items-center justify-center text-amber-600 dark:text-amber-400 group-hover:scale-105 transition-transform">
               <span className="material-symbols-outlined text-[22px]">pending_actions</span>
             </div>
           </div>
@@ -289,21 +287,20 @@ export default function CompaniesClient({ initialCompanies }: Props) {
         {/* KPI 3: Deposit Release Phase */}
         <div
           onClick={() => setActiveTab('deposit')}
-          className={`glass-card p-4 sm:p-5 rounded-[22px] relative overflow-hidden group hover:-translate-y-1 hover:shadow-lg transition-all duration-200 cursor-pointer ${
-            activeTab === 'deposit' ? 'ring-2 ring-cyan-500/50 bg-cyan-500/5' : ''
+          className={`glass-card p-4 sm:p-5 rounded-[22px] relative overflow-hidden group hover:-translate-y-1 hover:shadow-md transition-all duration-200 cursor-pointer ${
+            activeTab === 'deposit' ? 'ring-2 ring-blue-500/50 bg-blue-500/5' : ''
           }`}
         >
-          <div className="absolute -right-6 -top-6 w-24 h-24 bg-cyan-500/10 rounded-full blur-xl group-hover:opacity-80 transition-opacity" />
           <div className="flex justify-between items-start mb-3 relative z-10">
             <div className="flex flex-col">
               <span className="text-[11px] font-bold uppercase tracking-wider text-[var(--text-3)] mb-0.5">إطلاق الوديعة</span>
-              <span className="text-3xl font-extrabold text-cyan-600 dark:text-cyan-400 num">{depositPhaseCompanies.length}</span>
+              <span className="text-3xl font-extrabold text-blue-600 dark:text-blue-400 num">{depositPhaseCompanies.length}</span>
             </div>
-            <div className="w-10 h-10 rounded-xl bg-cyan-500/15 border border-cyan-500/20 flex items-center justify-center text-cyan-600 dark:text-cyan-400 group-hover:scale-110 transition-transform">
+            <div className="w-10 h-10 rounded-xl bg-blue-500/15 border border-blue-500/20 flex items-center justify-center text-blue-600 dark:text-blue-400 group-hover:scale-105 transition-transform">
               <span className="material-symbols-outlined text-[22px]">account_balance</span>
             </div>
           </div>
-          <div className="flex items-center justify-between text-[11px] font-bold text-cyan-700 dark:text-cyan-300 bg-cyan-500/10 px-2.5 py-1 rounded-full relative z-10">
+          <div className="flex items-center justify-between text-[11px] font-bold text-blue-700 dark:text-blue-300 bg-blue-500/10 px-2.5 py-1 rounded-full relative z-10">
             <span>ودائع قيد الإطلاق (30 يوماً)</span>
             <span className="material-symbols-outlined text-[13px]">arrow_left</span>
           </div>
@@ -312,17 +309,16 @@ export default function CompaniesClient({ initialCompanies }: Props) {
         {/* KPI 4: Total Companies Directory */}
         <div
           onClick={() => setActiveTab('all')}
-          className={`glass-card p-4 sm:p-5 rounded-[22px] relative overflow-hidden group hover:-translate-y-1 hover:shadow-lg transition-all duration-200 cursor-pointer ${
+          className={`glass-card p-4 sm:p-5 rounded-[22px] relative overflow-hidden group hover:-translate-y-1 hover:shadow-md transition-all duration-200 cursor-pointer ${
             activeTab === 'all' ? 'ring-2 ring-[var(--accent)]/50 bg-[var(--accent)]/5' : ''
           }`}
         >
-          <div className="absolute -right-6 -top-6 w-24 h-24 bg-[var(--accent-soft)] rounded-full blur-xl group-hover:opacity-80 transition-opacity" />
           <div className="flex justify-between items-start mb-3 relative z-10">
             <div className="flex flex-col">
               <span className="text-[11px] font-bold uppercase tracking-wider text-[var(--text-3)] mb-0.5">إجمالي شركات التأسيس</span>
               <span className="text-3xl font-extrabold text-[var(--text)] num">{formationList.length}</span>
             </div>
-            <div className="w-10 h-10 rounded-xl bg-[var(--accent-soft)] border border-[var(--accent)]/20 flex items-center justify-center text-[var(--accent)] group-hover:scale-110 transition-transform">
+            <div className="w-10 h-10 rounded-xl bg-[var(--accent-soft)] border border-[var(--accent)]/20 flex items-center justify-center text-[var(--accent)] group-hover:scale-105 transition-transform">
               <span className="material-symbols-outlined text-[22px]">corporate_fare</span>
             </div>
           </div>
