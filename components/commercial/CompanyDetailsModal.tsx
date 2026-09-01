@@ -1168,8 +1168,8 @@ export default function CompanyDetailsModal({ company, isOpen, onClose, onDelete
                         <div className="relative z-10">
                           {isDone ? (
                             <div className="relative w-10 h-10 flex items-center justify-center group-hover:scale-105 transition-transform duration-300">
-                              <div className="absolute inset-0 rounded-full bg-emerald-500/20 blur-[5px] animate-pulse" />
-                              <div className="relative w-9 h-9 rounded-full bg-gradient-to-tr from-emerald-600 via-emerald-500 to-teal-400 text-white flex items-center justify-center shadow-lg shadow-emerald-500/30 ring-2 ring-emerald-400/40">
+                              <div className="absolute inset-0 rounded-full bg-emerald-500/20 blur-[6px] animate-pulse" />
+                              <div className="wf-node-done relative w-9 h-9 rounded-full bg-gradient-to-tr from-emerald-600 via-emerald-500 to-teal-400 text-white flex items-center justify-center shadow-lg shadow-emerald-500/30 ring-2 ring-emerald-400/40">
                                 <span className="material-symbols-outlined text-[20px] font-black drop-shadow-xs">check</span>
                               </div>
                             </div>
@@ -1192,13 +1192,17 @@ export default function CompanyDetailsModal({ company, isOpen, onClose, onDelete
                         {/* Connecting Line to next step below */}
                         {!isLast && (
                           <div
-                            className="w-0.5 my-1 transition-all duration-500"
+                            className={`my-1 transition-all duration-500 ${
+                              isDone && nextStep?.state === 'doing'
+                                ? 'wf-connector-laser'
+                                : 'w-0.5'
+                            }`}
                             style={{
                               height: '42px',
                               background: isDone && nextStep?.state === 'done'
                                 ? 'linear-gradient(to bottom, #10B981, #10B981)'
                                 : isDone && nextStep?.state === 'doing'
-                                ? 'linear-gradient(to bottom, #10B981, #F59E0B)'
+                                ? undefined
                                 : isDoing
                                 ? 'linear-gradient(to bottom, #F59E0B, var(--line-soft))'
                                 : 'var(--line-soft)',
@@ -1212,7 +1216,7 @@ export default function CompanyDetailsModal({ company, isOpen, onClose, onDelete
                       <div
                         className={`flex items-center justify-between gap-3 min-w-0 flex-1 p-3.5 rounded-2xl transition-all duration-300 ${
                           isDoing
-                            ? 'bg-gradient-to-r from-amber-500/15 via-amber-500/5 to-transparent border-2 border-amber-500/50 shadow-md ring-2 ring-amber-500/20'
+                            ? 'wf-card-doing bg-gradient-to-r from-amber-500/15 via-amber-500/5 to-transparent border-2 border-amber-500/50 shadow-md ring-2 ring-amber-500/20'
                             : isDone
                             ? 'bg-[var(--surface-2)]/60 hover:bg-emerald-500/[0.04] border border-emerald-500/25 hover:border-emerald-500/45 shadow-xs'
                             : 'bg-[var(--surface-2)]/30 border border-[var(--line-soft)]/50 opacity-60'
