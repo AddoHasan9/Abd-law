@@ -10,22 +10,22 @@ interface DragScrollOptions {
 
 /**
  * useDragScroll
- * Enables smooth, momentum-based drag-to-scroll on any scrollable container with a mouse.
- * Automatically suppresses accidental clicks when dragging.
+ * Modern Pointer-Events & Kinetic Physics Drag-To-Scroll Hook.
+ * Works seamlessly in both RTL (Arabic) and LTR, with touch, mouse, and trackpad.
+ * Uses pointer capture so clicking on buttons/children smoothly drags without dropping.
  */
 export function useDragScroll<T extends HTMLElement = HTMLDivElement>({
-  speed = 1.3,
-  friction = 0.94,
+  speed = 1.25,
+  friction = 0.92,
   enableWheel = true,
 }: DragScrollOptions = {}) {
   const ref = useRef<T | null>(null)
-  const isDown = useRef(false)
-  const startX = useRef(0)
-  const scrollLeft = useRef(0)
-  const isDragging = useRef(false)
-  const velocity = useRef(0)
+  const isPointerDown = useRef(false)
+  const hasMoved = useRef(false)
   const lastX = useRef(0)
   const lastTime = useRef(0)
+  const velocity = useRef(0)
+  const totalDistance = useRef(0)
   const animationFrameId = useRef<number | null>(null)
 
   const stopMomentum = useCallback(() => {
@@ -40,117 +40,130 @@ export function useDragScroll<T extends HTMLElement = HTMLDivElement>({
     const slider = ref.current
     if (!slider) return
 
-    // Apply smooth grab cursor styling
     slider.style.cursor = 'grab'
     slider.style.userSelect = 'none'
     slider.style.webkitUserSelect = 'none'
+    slider.style.touchAction = 'pan-y'
 
-    const handleMouseDown = (e: MouseEvent) => {
-      // Only drag on primary left click
-      if (e.button !== 0) return
+    const handlePointerDown = (e: PointerEvent) => {
+      // Only drag with primary mouse button (0) or touch/pen
+      if (e.button !== 0 && e.pointerType === 'mouse') return
 
       stopMomentum()
-      isDown.current = true
-      isDragging.current = false
-      startX.current = e.pageX - slider.offsetLeft
-      scrollLeft.current = slider.scrollLeft
-      lastX.current = e.pageX
+      isPointerDown.current = true
+      hasMoved.current = false
+      lastX.current = e.clientX
       lastTime.current = performance.now()
-      slider.style.cursor = 'grabbing'
+      totalDistance.current = 0
+      velocity.current = 0
+
+      try {
+        slider.setPointerCapture(e.pointerId)
+      } catch {}
     }
 
-    const handleMouseMove = (e: MouseEvent) => {
-      if (!isDown.current) return
+    const handlePointerMove = (e: PointerEvent) => {
+      if (!isPointerDown.current) return
 
-      e.preventDefault()
-      const x = e.pageX - slider.offsetLeft
-      const walk = (x - startX.current) * speed
+      const deltaX = e.clientX - lastX.current
       const now = performance.now()
       const dt = Math.max(now - lastTime.current, 1)
-      const dx = e.pageX - lastX.current
 
-      // Calculate instantaneous velocity for smooth inertia
-      velocity.current = (dx / dt) * 16
+      totalDistance.current += Math.abs(deltaX)
 
-      lastX.current = e.pageX
-      lastTime.current = now
-
-      // If user moved more than 5px, flag as active drag (suppress clicks)
-      if (Math.abs(x - startX.current) > 5) {
-        isDragging.current = true
+      if (totalDistance.current > 4) {
+        hasMoved.current = true
+        slider.style.cursor = 'grabbing'
       }
 
-      slider.scrollLeft = scrollLeft.current - walk
+      // Instantaneous velocity (pixels per frame normalized)
+      velocity.current = (deltaX / dt) * 16.67 * speed
+
+      lastX.current = e.clientX
+      lastTime.current = now
+
+      // scrollBy automatically handles RTL and LTR across all browsers
+      slider.scrollBy({ left: -deltaX * speed, behavior: 'instant' as ScrollBehavior })
     }
 
     const startMomentum = () => {
-      if (!slider || Math.abs(velocity.current) < 0.2) {
+      if (!slider || Math.abs(velocity.current) < 0.25) {
         stopMomentum()
+        if (slider) slider.style.cursor = 'grab'
         return
       }
 
-      slider.scrollLeft -= velocity.current
+      slider.scrollBy({ left: -velocity.current, behavior: 'instant' as ScrollBehavior })
       velocity.current *= friction
 
       animationFrameId.current = requestAnimationFrame(startMomentum)
     }
 
-    const handleMouseUp = () => {
-      if (!isDown.current) return
-      isDown.current = false
-      if (slider) {
-        slider.style.cursor = 'grab'
-      }
+    const handlePointerUp = (e: PointerEvent) => {
+      if (!isPointerDown.current) return
+      isPointerDown.current = false
 
-      if (isDragging.current && Math.abs(velocity.current) > 0.5) {
+      try {
+        if (slider.hasPointerCapture(e.pointerId)) {
+          slider.releasePointerCapture(e.pointerId)
+        }
+      } catch {}
+
+      if (slider) slider.style.cursor = 'grab'
+
+      if (hasMoved.current && Math.abs(velocity.current) > 0.6) {
         startMomentum()
       }
     }
 
-    const handleMouseLeave = () => {
-      if (!isDown.current) return
-      isDown.current = false
-      if (slider) {
-        slider.style.cursor = 'grab'
-      }
+    const handlePointerCancel = (e: PointerEvent) => {
+      if (!isPointerDown.current) return
+      isPointerDown.current = false
 
-      if (isDragging.current && Math.abs(velocity.current) > 0.5) {
-        startMomentum()
-      }
+      try {
+        if (slider.hasPointerCapture(e.pointerId)) {
+          slider.releasePointerCapture(e.pointerId)
+        }
+      } catch {}
+
+      if (slider) slider.style.cursor = 'grab'
+      stopMomentum()
     }
 
     // Intercept clicks on child buttons/links if user was dragging
     const handleClickCapture = (e: MouseEvent) => {
-      if (isDragging.current) {
+      if (hasMoved.current) {
         e.preventDefault()
         e.stopPropagation()
-        isDragging.current = false
+        hasMoved.current = false
       }
     }
 
-    // Optional: Vertical wheel converted to horizontal scroll
+    // Mouse wheel horizontal translation in RTL / LTR
     const handleWheel = (e: WheelEvent) => {
       if (!enableWheel || e.shiftKey || Math.abs(e.deltaX) > Math.abs(e.deltaY)) return
 
       if (slider.scrollWidth > slider.clientWidth) {
         e.preventDefault()
-        slider.scrollLeft += e.deltaY * 0.9
+        const isRTL = getComputedStyle(slider).direction === 'rtl'
+        const delta = isRTL ? -e.deltaY : e.deltaY
+        slider.scrollBy({ left: delta * 0.85, behavior: 'smooth' })
       }
     }
 
-    slider.addEventListener('mousedown', handleMouseDown)
-    window.addEventListener('mousemove', handleMouseMove)
-    window.addEventListener('mouseup', handleMouseUp)
-    slider.addEventListener('mouseleave', handleMouseLeave)
+    slider.addEventListener('pointerdown', handlePointerDown)
+    slider.addEventListener('pointermove', handlePointerMove)
+    slider.addEventListener('pointerup', handlePointerUp)
+    slider.addEventListener('pointercancel', handlePointerCancel)
     slider.addEventListener('click', handleClickCapture, true)
     slider.addEventListener('wheel', handleWheel, { passive: false })
 
     return () => {
       stopMomentum()
-      slider.removeEventListener('mousedown', handleMouseDown)
-      window.removeEventListener('mousemove', handleMouseMove)
-      window.removeEventListener('mouseup', handleMouseUp)
-      slider.removeEventListener('mouseleave', handleMouseLeave)
+      slider.removeEventListener('pointerdown', handlePointerDown)
+      slider.removeEventListener('pointermove', handlePointerMove)
+      slider.removeEventListener('pointerup', handlePointerUp)
+      slider.removeEventListener('pointercancel', handlePointerCancel)
       slider.removeEventListener('click', handleClickCapture, true)
       slider.removeEventListener('wheel', handleWheel)
     }

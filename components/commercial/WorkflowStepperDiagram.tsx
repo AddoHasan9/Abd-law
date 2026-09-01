@@ -4,6 +4,7 @@ import React, { useState } from 'react'
 import { WORKFLOW } from '@/lib/constants'
 import type { WorkflowStep, WfState } from '@/types/database'
 import { advanceCompanyStepAction } from '@/app/(app)/commercial/companies/actions'
+import { useDragScroll } from '@/lib/hooks/useDragScroll'
 
 export interface StepItem {
   id: string
@@ -58,6 +59,7 @@ export default function WorkflowStepperDiagram({
 }: Props) {
   const [updatingStepId, setUpdatingStepId] = useState<string | null>(null)
   const [isPaused, setIsPaused] = useState<boolean>(false)
+  const trackScrollRef = useDragScroll<HTMLDivElement>({ speed: 1.3 })
 
   // Map system workflow steps
   const steps: StepItem[] = WORKFLOW.map((w, idx) => {
@@ -250,8 +252,8 @@ export default function WorkflowStepperDiagram({
         </span>
       </div>
 
-      {/* Step Cards Horizontal Track */}
-      <div className="flex items-center gap-4 overflow-x-auto pb-4 pt-2 scrollbar-thin relative z-10">
+      {/* Step Cards Horizontal Track (Drag Scrollable) */}
+      <div ref={trackScrollRef} className="flex items-center gap-4 overflow-x-auto pb-4 pt-2 scrollbar-none select-none relative z-10">
         {steps.map((step, idx) => {
           const isCompleted = step.status === 'completed'
           const isCurrent = step.status === 'current'
