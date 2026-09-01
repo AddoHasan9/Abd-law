@@ -213,7 +213,7 @@ export default function CompaniesRegistryClient({ companies = [] }: Props) {
                           <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[var(--accent-soft)] to-blue-500/10 border border-[var(--accent)]/20 text-[var(--accent)] flex items-center justify-center shrink-0 shadow-xs">
                             <span className="material-symbols-outlined text-[17px]">domain</span>
                           </div>
-                          <span className="font-bold text-[13px] text-[var(--text)] leading-snug truncate max-w-[220px]" title={co.name}>
+                          <span className="font-bold text-[13.5px] text-[var(--text)] leading-snug break-words whitespace-normal" title={co.name}>
                             {co.name}
                           </span>
                         </div>
@@ -227,7 +227,7 @@ export default function CompaniesRegistryClient({ companies = [] }: Props) {
                       </td>
 
                       {/* Manager */}
-                      <td className="py-2.5 px-2 text-center align-middle font-bold text-[12px] text-[var(--text)] truncate max-w-[130px]" title={activeManager}>
+                      <td className="py-2.5 px-2 text-center align-middle font-bold text-[12px] text-[var(--text)] break-words whitespace-normal" title={activeManager}>
                         {activeManager}
                       </td>
 
