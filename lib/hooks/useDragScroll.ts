@@ -20,12 +20,12 @@ export function useDragScroll<T extends HTMLElement = HTMLDivElement>({
   enableWheel = true,
 }: DragScrollOptions = {}) {
   const ref = useRef<T | null>(null)
-  const isPointerDown = useRef(false)
-  const hasMoved = useRef(false)
+  const isDown = useRef(false)
+  const isDragging = useRef(false)
+  const startX = useRef(0)
   const lastX = useRef(0)
   const lastTime = useRef(0)
   const velocity = useRef(0)
-  const totalDistance = useRef(0)
   const animationFrameId = useRef<number | null>(null)
 
   const stopMomentum = useCallback(() => {
@@ -40,43 +40,40 @@ export function useDragScroll<T extends HTMLElement = HTMLDivElement>({
     const slider = ref.current
     if (!slider) return
 
-    slider.style.cursor = 'grab'
     slider.style.userSelect = 'none'
     slider.style.webkitUserSelect = 'none'
-    slider.style.touchAction = 'pan-y'
 
-    const handlePointerDown = (e: PointerEvent) => {
-      // Only drag with primary mouse button (0) or touch/pen
-      if (e.button !== 0 && e.pointerType === 'mouse') return
+    const handleMouseDown = (e: MouseEvent) => {
+      // Only drag on primary left mouse click
+      if (e.button !== 0) return
 
       stopMomentum()
-      isPointerDown.current = true
-      hasMoved.current = false
+      isDown.current = true
+      isDragging.current = false
+      startX.current = e.clientX
       lastX.current = e.clientX
       lastTime.current = performance.now()
-      totalDistance.current = 0
       velocity.current = 0
-
-      try {
-        slider.setPointerCapture(e.pointerId)
-      } catch {}
     }
 
-    const handlePointerMove = (e: PointerEvent) => {
-      if (!isPointerDown.current) return
+    const handleMouseMove = (e: MouseEvent) => {
+      if (!isDown.current) return
+
+      const deltaFromStart = Math.abs(e.clientX - startX.current)
+
+      // Only mark as active drag after user moves > 4px (suppresses drag on pure clicks)
+      if (deltaFromStart > 4) {
+        isDragging.current = true
+        slider.style.cursor = 'grabbing'
+      }
+
+      if (!isDragging.current) return
 
       const deltaX = e.clientX - lastX.current
       const now = performance.now()
       const dt = Math.max(now - lastTime.current, 1)
 
-      totalDistance.current += Math.abs(deltaX)
-
-      if (totalDistance.current > 4) {
-        hasMoved.current = true
-        slider.style.cursor = 'grabbing'
-      }
-
-      // Instantaneous velocity (pixels per frame normalized)
+      // Calculate instantaneous velocity for inertia glide
       velocity.current = (deltaX / dt) * 16.67 * speed
 
       lastX.current = e.clientX
@@ -89,7 +86,7 @@ export function useDragScroll<T extends HTMLElement = HTMLDivElement>({
     const startMomentum = () => {
       if (!slider || Math.abs(velocity.current) < 0.25) {
         stopMomentum()
-        if (slider) slider.style.cursor = 'grab'
+        if (slider) slider.style.cursor = ''
         return
       }
 
@@ -99,43 +96,32 @@ export function useDragScroll<T extends HTMLElement = HTMLDivElement>({
       animationFrameId.current = requestAnimationFrame(startMomentum)
     }
 
-    const handlePointerUp = (e: PointerEvent) => {
-      if (!isPointerDown.current) return
-      isPointerDown.current = false
+    const handleMouseUp = () => {
+      if (!isDown.current) return
+      isDown.current = false
+      if (slider) slider.style.cursor = ''
 
-      try {
-        if (slider.hasPointerCapture(e.pointerId)) {
-          slider.releasePointerCapture(e.pointerId)
-        }
-      } catch {}
-
-      if (slider) slider.style.cursor = 'grab'
-
-      if (hasMoved.current && Math.abs(velocity.current) > 0.6) {
+      if (isDragging.current && Math.abs(velocity.current) > 0.6) {
         startMomentum()
       }
     }
 
-    const handlePointerCancel = (e: PointerEvent) => {
-      if (!isPointerDown.current) return
-      isPointerDown.current = false
+    const handleMouseLeave = () => {
+      if (!isDown.current) return
+      isDown.current = false
+      if (slider) slider.style.cursor = ''
 
-      try {
-        if (slider.hasPointerCapture(e.pointerId)) {
-          slider.releasePointerCapture(e.pointerId)
-        }
-      } catch {}
-
-      if (slider) slider.style.cursor = 'grab'
-      stopMomentum()
+      if (isDragging.current && Math.abs(velocity.current) > 0.6) {
+        startMomentum()
+      }
     }
 
-    // Intercept clicks on child buttons/links if user was dragging
+    // Intercept clicks on child buttons/links ONLY if the user was actually dragging
     const handleClickCapture = (e: MouseEvent) => {
-      if (hasMoved.current) {
+      if (isDragging.current) {
         e.preventDefault()
         e.stopPropagation()
-        hasMoved.current = false
+        isDragging.current = false
       }
     }
 
@@ -151,19 +137,19 @@ export function useDragScroll<T extends HTMLElement = HTMLDivElement>({
       }
     }
 
-    slider.addEventListener('pointerdown', handlePointerDown)
-    slider.addEventListener('pointermove', handlePointerMove)
-    slider.addEventListener('pointerup', handlePointerUp)
-    slider.addEventListener('pointercancel', handlePointerCancel)
+    slider.addEventListener('mousedown', handleMouseDown)
+    window.addEventListener('mousemove', handleMouseMove)
+    window.addEventListener('mouseup', handleMouseUp)
+    slider.addEventListener('mouseleave', handleMouseLeave)
     slider.addEventListener('click', handleClickCapture, true)
     slider.addEventListener('wheel', handleWheel, { passive: false })
 
     return () => {
       stopMomentum()
-      slider.removeEventListener('pointerdown', handlePointerDown)
-      slider.removeEventListener('pointermove', handlePointerMove)
-      slider.removeEventListener('pointerup', handlePointerUp)
-      slider.removeEventListener('pointercancel', handlePointerCancel)
+      slider.removeEventListener('mousedown', handleMouseDown)
+      window.removeEventListener('mousemove', handleMouseMove)
+      window.removeEventListener('mouseup', handleMouseUp)
+      slider.removeEventListener('mouseleave', handleMouseLeave)
       slider.removeEventListener('click', handleClickCapture, true)
       slider.removeEventListener('wheel', handleWheel)
     }

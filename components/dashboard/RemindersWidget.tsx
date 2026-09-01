@@ -18,6 +18,7 @@ interface Props {
 
 export default function RemindersWidget({ companies = [], hideIfEmpty = false }: Props) {
   const [reminders, setReminders] = useState<ReminderItem[]>([])
+  const [pendingCount, setPendingCount] = useState<number | null>(null)
   const [loading, setLoading] = useState(true)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingReminder, setEditingReminder] = useState<ReminderItem | null>(null)
@@ -29,6 +30,9 @@ export default function RemindersWidget({ companies = [], hideIfEmpty = false }:
     setLoading(false)
     if (res.success) {
       setReminders(res.data)
+      if (activeTab === 'pending') {
+        setPendingCount(res.data.filter(r => !r.is_completed).length)
+      }
     }
   }, [activeTab])
 
@@ -136,7 +140,7 @@ export default function RemindersWidget({ companies = [], hideIfEmpty = false }:
             cursor: 'pointer',
           }}
         >
-          المستحقة والقادمة ({reminders.filter(r => !r.is_completed).length})
+          المستحقة والقادمة ({pendingCount !== null ? pendingCount : (activeTab === 'pending' ? reminders.filter(r => !r.is_completed).length : 0)})
         </button>
         <button
           type="button"
