@@ -243,7 +243,7 @@ export default function SettingsClient() {
           onClick={() => setActiveTab('workflows')}
           className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-black text-xs transition-all cursor-pointer ${
             activeTab === 'workflows'
-              ? 'bg-[#38BDF8] text-slate-950 shadow-md shadow-blue-500/20'
+              ? 'bg-[#3B82F6] text-white shadow-md shadow-blue-500/20'
               : 'text-[var(--text-3)] hover:text-[var(--text)]'
           }`}
         >
@@ -256,7 +256,7 @@ export default function SettingsClient() {
           onClick={() => setActiveTab('general')}
           className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-black text-xs transition-all cursor-pointer ${
             activeTab === 'general'
-              ? 'bg-[#38BDF8] text-slate-950 shadow-md shadow-blue-500/20'
+              ? 'bg-[#3B82F6] text-white shadow-md shadow-blue-500/20'
               : 'text-[var(--text-3)] hover:text-[var(--text)]'
           }`}
         >
@@ -270,7 +270,7 @@ export default function SettingsClient() {
         <div className="flex flex-col gap-6">
           
           {/* Top Selection Ribbon for Transaction Types */}
-          <div className="p-5 rounded-3xl bg-[var(--surface)] border border-[#38BDF8]/30 shadow-md flex flex-col gap-4">
+          <div className="glass-card p-5 sm:p-6 rounded-[26px] bg-[var(--surface-glass)] backdrop-blur-[36px] border border-[var(--border)] shadow-xs flex flex-col gap-4">
             <div className="flex items-center justify-between flex-wrap gap-3">
               <div>
                 <h3 className="text-base font-extrabold text-[var(--text)]">اختر نوع المعاملة لتخصيص مسار عملها</h3>
@@ -284,7 +284,7 @@ export default function SettingsClient() {
                   type="button"
                   onClick={handleSaveWorkflows}
                   disabled={saving}
-                  className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-emerald-500 text-white font-black text-xs shadow-lg shadow-emerald-500/25 hover:brightness-110 active:scale-95 transition-all flex items-center gap-2 cursor-pointer disabled:opacity-50"
+                  className="px-6 py-2.5 rounded-xl bg-[#10B981] hover:bg-emerald-600 active:scale-95 text-white font-black text-xs shadow-md shadow-emerald-500/20 transition-all flex items-center gap-2 cursor-pointer disabled:opacity-50"
                 >
                   <span className="material-symbols-outlined text-[18px]">save</span>
                   <span>{saving ? 'جاري الحفظ...' : 'حفظ كافة المسارات'}</span>
@@ -304,8 +304,8 @@ export default function SettingsClient() {
                     onClick={() => setSelectedTxKey(key)}
                     className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl text-xs font-black transition-all flex-none cursor-pointer border ${
                       isSelected
-                        ? 'bg-[#0E2442] border-[#38BDF8] text-[#38BDF8] shadow-[0_0_16px_rgba(56,189,248,0.25)]'
-                        : 'bg-[var(--surface-2)] border-[var(--line-soft)] text-[var(--text-2)] hover:border-[var(--line)]'
+                        ? 'bg-[#3B82F6] border-[#3B82F6] text-white shadow-md shadow-blue-500/25'
+                        : 'bg-[var(--surface-2)] border-[var(--line-soft)] text-[var(--text-2)] hover:text-[var(--text)] hover:bg-[var(--surface-3)]'
                     }`}
                   >
                     <span className="material-symbols-outlined text-[16px]">
@@ -324,7 +324,9 @@ export default function SettingsClient() {
                         : 'task_alt'}
                     </span>
                     <span>{item.txLabel}</span>
-                    <span className="w-5 h-5 rounded-full bg-black/30 flex items-center justify-center text-[10px] num text-slate-300">
+                    <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] num ${
+                      isSelected ? 'bg-white/20 text-white' : 'bg-[var(--surface-3)] text-[var(--text-3)]'
+                    }`}>
                       {item.steps.length}
                     </span>
                   </button>
@@ -335,14 +337,14 @@ export default function SettingsClient() {
 
           {/* Active Workflow Pipeline Editor & Preview */}
           {activeTemplate && (
-            <div className="p-6 rounded-3xl bg-[var(--surface)] border border-[var(--glass-border)] shadow-xl flex flex-col gap-6">
+            <div className="glass-card p-5 sm:p-6 rounded-[26px] bg-[var(--surface-glass)] backdrop-blur-[36px] border border-[var(--border)] shadow-xs flex flex-col gap-6">
               
               {/* Header Info */}
               <div className="flex items-center justify-between border-b border-[var(--line-soft)] pb-4">
                 <div>
                   <div className="flex items-center gap-2.5">
                     <span className="text-base font-black text-[var(--text)]">{activeTemplate.txLabel}</span>
-                    <span className="px-2.5 py-0.5 rounded-md bg-[#38BDF8]/15 text-[#38BDF8] text-[10px] font-bold border border-[#38BDF8]/30">
+                    <span className="px-2.5 py-0.5 rounded-md bg-blue-500/10 text-[#3B82F6] text-[10px] font-bold border border-blue-500/20">
                       {activeTemplate.steps.length} محطات معتمدة
                     </span>
                   </div>
@@ -358,7 +360,7 @@ export default function SettingsClient() {
                   {activeTemplate.steps.map((step, idx) => (
                     <div
                       key={step.id}
-                      className="p-4 rounded-2xl bg-[var(--surface-2)] border border-[var(--line-soft)] hover:border-[#38BDF8]/40 transition-all flex items-center justify-between gap-4 group"
+                      className="p-3.5 sm:p-4 rounded-2xl bg-[var(--surface-2)] border border-[var(--line-soft)] hover:border-[var(--accent)]/40 transition-all flex items-center justify-between gap-4 group"
                     >
                       {editingStepId === step.id ? (
                         <div className="flex-1 flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5">
@@ -405,7 +407,7 @@ export default function SettingsClient() {
                         <>
                           {/* Step Number & Details */}
                           <div className="flex items-center gap-3.5">
-                            <div className="w-10 h-10 rounded-xl bg-emerald-500 text-white flex items-center justify-center font-black text-sm shadow-md shadow-emerald-500/20 flex-none">
+                            <div className="w-9 h-9 rounded-xl bg-emerald-500/15 border border-emerald-500/25 text-emerald-600 dark:text-emerald-400 flex items-center justify-center font-black text-sm flex-none shadow-xs">
                               <span className="num">{idx + 1}</span>
                             </div>
                             <div>
@@ -423,7 +425,7 @@ export default function SettingsClient() {
                               <button
                                 type="button"
                                 onClick={() => handleStartEditStep(step)}
-                                className="w-8 h-8 rounded-lg bg-[var(--surface-3)] text-[var(--text-2)] hover:text-white hover:bg-blue-600 flex items-center justify-center transition-colors cursor-pointer"
+                                className="w-8 h-8 rounded-xl bg-[var(--surface-3)] text-[var(--text-2)] hover:text-[#3B82F6] hover:bg-[var(--surface)] border border-[var(--line-soft)] flex items-center justify-center transition-colors cursor-pointer"
                                 title="تعديل اسم أو مسؤول المحطة"
                               >
                                 <span className="material-symbols-outlined text-[16px]">edit</span>
@@ -432,7 +434,7 @@ export default function SettingsClient() {
                                 type="button"
                                 onClick={() => handleMoveStep(idx, 'up')}
                                 disabled={idx === 0}
-                                className="w-8 h-8 rounded-lg bg-[var(--surface-3)] text-[var(--text-2)] hover:text-white hover:bg-blue-600 disabled:opacity-30 flex items-center justify-center transition-colors cursor-pointer"
+                                className="w-8 h-8 rounded-xl bg-[var(--surface-3)] text-[var(--text-2)] hover:text-[#3B82F6] hover:bg-[var(--surface)] border border-[var(--line-soft)] disabled:opacity-30 flex items-center justify-center transition-colors cursor-pointer"
                                 title="تحريك لأعلى"
                               >
                                 <span className="material-symbols-outlined text-[16px]">arrow_upward</span>
@@ -441,7 +443,7 @@ export default function SettingsClient() {
                                 type="button"
                                 onClick={() => handleMoveStep(idx, 'down')}
                                 disabled={idx === activeTemplate.steps.length - 1}
-                                className="w-8 h-8 rounded-lg bg-[var(--surface-3)] text-[var(--text-2)] hover:text-white hover:bg-blue-600 disabled:opacity-30 flex items-center justify-center transition-colors cursor-pointer"
+                                className="w-8 h-8 rounded-xl bg-[var(--surface-3)] text-[var(--text-2)] hover:text-[#3B82F6] hover:bg-[var(--surface)] border border-[var(--line-soft)] disabled:opacity-30 flex items-center justify-center transition-colors cursor-pointer"
                                 title="تحريك لأسفل"
                               >
                                 <span className="material-symbols-outlined text-[16px]">arrow_downward</span>
@@ -449,7 +451,7 @@ export default function SettingsClient() {
                               <button
                                 type="button"
                                 onClick={() => handleDeleteStep(step.id)}
-                                className="w-8 h-8 rounded-lg bg-red-500/10 text-red-400 hover:bg-red-500 hover:text-white flex items-center justify-center transition-colors cursor-pointer mr-2"
+                                className="w-8 h-8 rounded-xl bg-rose-500/10 text-rose-600 dark:text-rose-400 hover:bg-rose-500 hover:text-white border border-rose-500/20 flex items-center justify-center transition-colors cursor-pointer mr-2"
                                 title="حذف هذه الخطوة"
                               >
                                 <span className="material-symbols-outlined text-[16px]">delete</span>
@@ -465,25 +467,25 @@ export default function SettingsClient() {
 
               {/* Add New Step Box */}
               {canEdit && (
-                <div className="p-4 rounded-2xl bg-[#08121E] border border-dashed border-[#38BDF8]/40 flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+                <div className="p-4 sm:p-4.5 rounded-2xl bg-[var(--surface-2)] border border-dashed border-[var(--border)] flex flex-col sm:flex-row items-stretch sm:items-center gap-3 shadow-xs">
                   <input
                     type="text"
                     placeholder="اسم المحطة الجديدة (مثال: تدقيق المشاور القانوني، كتاب الضرائب...)"
                     value={newStepLabel}
                     onChange={e => setNewStepLabel(e.target.value)}
-                    className="input grow"
+                    className="input grow bg-[var(--surface)] text-[var(--text)] placeholder:text-[var(--text-3)] border border-[var(--border)] focus:border-[#3B82F6] rounded-xl h-11 text-xs px-3.5"
                   />
                   <input
                     type="text"
                     placeholder="الجهة المسؤولة (مثال: الموظف المختص، مدير القسم...)"
                     value={newStepOwner}
                     onChange={e => setNewStepOwner(e.target.value)}
-                    className="input w-full sm:w-56"
+                    className="input w-full sm:w-56 bg-[var(--surface)] text-[var(--text)] placeholder:text-[var(--text-3)] border border-[var(--border)] focus:border-[#3B82F6] rounded-xl h-11 text-xs px-3.5"
                   />
                   <button
                     type="button"
                     onClick={handleAddStep}
-                    className="px-5 py-2.5 rounded-xl bg-blue-600 text-white font-bold text-xs hover:bg-blue-500 active:scale-95 transition-all flex items-center justify-center gap-1.5 flex-none cursor-pointer shadow-md shadow-blue-500/20"
+                    className="px-5 py-2.5 rounded-xl bg-[#3B82F6] hover:bg-blue-600 active:bg-blue-700 text-white font-bold text-xs transition-all flex items-center justify-center gap-1.5 flex-none cursor-pointer shadow-md shadow-blue-500/20"
                   >
                     <span className="material-symbols-outlined text-[18px]">add</span>
                     <span>إضافة محطة</span>
@@ -497,7 +499,7 @@ export default function SettingsClient() {
 
       {/* TAB 2: GENERAL OFFICE SETTINGS */}
       {activeTab === 'general' && (
-        <form onSubmit={handleSaveGeneralSettings} className="p-6 rounded-3xl bg-[var(--surface)] border border-[var(--glass-border)] shadow-xl flex flex-col gap-6">
+        <form onSubmit={handleSaveGeneralSettings} className="glass-card p-5 sm:p-6 rounded-[26px] bg-[var(--surface-glass)] backdrop-blur-[36px] border border-[var(--border)] shadow-xs flex flex-col gap-6">
           <div className="border-b border-[var(--line-soft)] pb-4">
             <h3 className="text-base font-extrabold text-[var(--text)]">هوية المكتب وقواعد الاحتساب</h3>
             <p className="text-xs text-[var(--text-3)] mt-0.5">تعديل الاسم الرسمي المعتمد للمكتب وقواعد غرامات ومهل الوديعة المصرفية</p>
@@ -582,7 +584,7 @@ export default function SettingsClient() {
               <button
                 type="submit"
                 disabled={saving}
-                className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-blue-600 to-[#38BDF8] text-white font-black text-xs shadow-lg shadow-blue-500/25 hover:brightness-110 active:scale-95 transition-all flex items-center gap-2 cursor-pointer disabled:opacity-50"
+                className="px-6 py-2.5 rounded-xl bg-[#3B82F6] hover:bg-blue-600 text-white font-black text-xs shadow-md shadow-blue-500/25 active:scale-95 transition-all flex items-center gap-2 cursor-pointer disabled:opacity-50"
               >
                 <span className="material-symbols-outlined text-[18px]">save</span>
                 <span>{saving ? 'جاري الحفظ...' : 'حفظ التغييرات'}</span>
