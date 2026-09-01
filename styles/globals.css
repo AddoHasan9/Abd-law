@@ -582,6 +582,32 @@
     background-clip: content-box;
   }
 
+  /* Utility: Hide Scrollbar while keeping functionality */
+  .scrollbar-none {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-none::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Utility: Smooth Drag Scrollable Container */
+  .drag-scroll-track {
+    display: flex;
+    overflow-x: auto;
+    cursor: grab;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .drag-scroll-track:active {
+    cursor: grabbing;
+  }
+  .drag-scroll-track::-webkit-scrollbar {
+    display: none;
+  }
+
   /* Glass Card System (Apple HIG Frosted Materials) */
   .glass-card {
     background: var(--glass-bg);

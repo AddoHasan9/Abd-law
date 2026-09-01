@@ -13,6 +13,7 @@ import {
 import type { Settings } from '@/types/database'
 import { formatNumberWithCommas, parseNumberFromCommas } from '@/lib/constants'
 import { usePermissions } from '@/lib/context/UserRoleContext'
+import { useDragScroll } from '@/lib/hooks/useDragScroll'
 
 export default function SettingsClient() {
   const { isSuperAdmin, isAdmin } = usePermissions()
@@ -22,6 +23,7 @@ export default function SettingsClient() {
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [toastMsg, setToastMsg] = useState<{ type: 'ok' | 'err'; text: string } | null>(null)
+  const workflowTabsScrollRef = useDragScroll<HTMLDivElement>({ speed: 1.4 })
 
   // General Settings State
   const [settings, setSettings] = useState<Settings>({
@@ -292,8 +294,8 @@ export default function SettingsClient() {
               )}
             </div>
 
-            {/* Type Selector Pills */}
-            <div className="flex items-center gap-2.5 overflow-x-auto pb-2 scrollbar-thin">
+            {/* Type Selector Pills (Drag Scrollable) */}
+            <div ref={workflowTabsScrollRef} className="flex items-center gap-2.5 overflow-x-auto pb-2 scrollbar-none select-none">
               {Object.keys(templates).map(key => {
                 const item = templates[key]
                 const isSelected = selectedTxKey === key

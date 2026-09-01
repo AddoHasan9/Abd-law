@@ -18,6 +18,8 @@ import {
   TrendingUp,
 } from 'lucide-react'
 
+import { useDragScroll } from '@/lib/hooks/useDragScroll'
+
 interface Props {
   stats: DashboardStats
 }
@@ -44,6 +46,7 @@ const DEPOSIT_STAGES = [
 
 export default function LiveOperationsRadar({ stats }: Props) {
   const [activeTab, setActiveTab] = useState<TabType>('overview')
+  const tabsScrollRef = useDragScroll<HTMLDivElement>({ speed: 1.4 })
 
   const formingCount = stats.formingCompaniesCount || 0
   const establishedCount = stats.establishedCompaniesCount || 0
@@ -94,8 +97,8 @@ export default function LiveOperationsRadar({ stats }: Props) {
         </div>
       </div>
 
-      {/* Interactive Segmented Tabs (Framer Motion spring pills) */}
-      <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none">
+      {/* Interactive Segmented Tabs (Framer Motion spring pills + Mouse Drag-to-Scroll) */}
+      <div ref={tabsScrollRef} className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none select-none">
         {[
           { id: 'overview', label: 'نظرة شاملة', icon: Layers, count: totalOps },
           { id: 'formation', label: 'مسار التأسيس (8 خطوات)', icon: Building2, count: formingCount },

@@ -10,6 +10,7 @@ import { WorkflowStatus } from '@/components/ui/WorkflowStatus'
 import { FadeInStagger } from '@/components/ui/FadeInStagger'
 import { RollingNumber } from '@/components/ui/RollingNumber'
 import LiveOperationsRadar from './LiveOperationsRadar'
+import { useDragScroll } from '@/lib/hooks/useDragScroll'
 
 interface Props {
   stats: DashboardStats
@@ -18,6 +19,7 @@ interface Props {
 
 export default function DashboardClient({ stats, profiles = [] }: Props) {
   const [txFilter, setTxFilter] = useState<'all' | 'progress' | 'new' | 'done'>('all')
+  const txFilterScrollRef = useDragScroll<HTMLDivElement>({ speed: 1.4 })
 
   // Dynamic values mapped from stats store
   const establishedCount = stats.establishedCompaniesCount ?? stats.totalCompaniesCount ?? 0
@@ -231,8 +233,8 @@ export default function DashboardClient({ stats, profiles = [] }: Props) {
                 </div>
               </div>
 
-              {/* Filter Pills with Active Glow */}
-              <div className="flex items-center gap-1.5 bg-[var(--surface-2)] p-1 rounded-xl border border-[var(--glass-border)]">
+              {/* Filter Pills with Active Glow & Drag Scroll */}
+              <div ref={txFilterScrollRef} className="flex items-center gap-1.5 bg-[var(--surface-2)] p-1 rounded-xl border border-[var(--glass-border)] overflow-x-auto scrollbar-none select-none">
                 <button
                   type="button"
                   onClick={() => setTxFilter('all')}

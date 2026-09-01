@@ -14,6 +14,7 @@ import NewCompanyModal from './NewCompanyModal'
 import { usePermissions } from '@/lib/context/UserRoleContext'
 import type { CompanyWithWorkflow } from '@/types/database'
 import { updateCompanyFSSettingsAction, createFinancialStatementAction } from '@/app/(app)/commercial/financial-statements/actions'
+import { useDragScroll } from '@/lib/hooks/useDragScroll'
 
 interface Props {
   initialCompanies: CompanyWithWorkflow[]
@@ -29,6 +30,7 @@ export default function CompaniesClient({ initialCompanies }: Props) {
   const [isNewCompanyOpen, setIsNewCompanyOpen] = useState(false)
   const [notification, setNotification] = useState<string | null>(null)
   const [assigningId, setAssigningId] = useState<string | null>(null)
+  const tabsScrollRef = useDragScroll<HTMLDivElement>({ speed: 1.4 })
 
   useEffect(() => {
     setCompaniesList(initialCompanies)
@@ -347,8 +349,8 @@ export default function CompaniesClient({ initialCompanies }: Props) {
           </span>
         </div>
 
-        {/* Filter Tabs */}
-        <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', alignItems: 'center' }}>
+        {/* Filter Tabs (Drag Scrollable) */}
+        <div ref={tabsScrollRef} style={{ display: 'flex', gap: '6px', overflowX: 'auto', paddingBottom: '2px', alignItems: 'center', userSelect: 'none' }} className="scrollbar-none">
           <button
             type="button"
             onClick={() => {

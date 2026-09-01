@@ -25,6 +25,7 @@ import ReminderModal from '@/components/reminders/ReminderModal'
 import BarcodeUploader from '@/components/commercial/BarcodeUploader'
 import WorkflowStepperDiagram from '@/components/commercial/WorkflowStepperDiagram'
 import { usePermissions } from '@/lib/context/UserRoleContext'
+import { useDragScroll } from '@/lib/hooks/useDragScroll'
 
 interface Props {
   company: CompanyWithWorkflow
@@ -43,12 +44,6 @@ const TIMELINE_EVENT_LABELS: Record<string, string> = {
   company_created: 'تأسيس',
   cert_issued: 'شهادة',
   deposit_started: 'وديعة',
-  deposit_released: 'وديعة',
-  id_issued: 'هويات',
-  fs_assigned: 'حسابات',
-  fs_submitted: 'حسابات',
-  trademark_registered: 'علامات تجارية',
-  manager_changed: 'إدارة',
   note: 'نشاط',
 }
 
@@ -80,6 +75,7 @@ export default function Company360Client({
   const canRenewIDs = can('government_ids', 'renew') || isSuperAdmin || isAdmin
 
   const [activeTab, setActiveTab] = useState<TabType>('all')
+  const navTabsScrollRef = useDragScroll<HTMLDivElement>({ speed: 1.4 })
 
   const [loading, setLoading] = useState(false)
   const [msg, setMsg] = useState<{ type: 'ok' | 'err'; text: string } | null>(null)
@@ -406,8 +402,8 @@ export default function Company360Client({
         </div>
       </div>
 
-      {/* Quick Action Navigation Bar */}
-      <div style={{ display: 'flex', gap: '6px', borderBottom: '1px solid var(--line-soft)', paddingBottom: '8px', overflowX: 'auto' }}>
+      {/* Quick Action Navigation Bar (Drag Scrollable) */}
+      <div ref={navTabsScrollRef} style={{ display: 'flex', gap: '6px', borderBottom: '1px solid var(--line-soft)', paddingBottom: '8px', overflowX: 'auto', userSelect: 'none' }} className="scrollbar-none">
         {([
           { id: 'all', label: 'عرض الكل (360°)' },
           { id: 'workflow', label: '⚡ مخطط سير العمل (Swimlanes)' },

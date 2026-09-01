@@ -15,6 +15,7 @@ import type { CompanyWithWorkflow, TaxAssessment } from '@/types/database'
 import { useModalBodyLock } from '@/lib/hooks/useModalBodyLock'
 import { IRAQ_GOVERNORATES, WORKFLOW, formatNumberWithCommas, sanitizeFormationWorkflowSteps } from '@/lib/constants'
 import { usePermissions } from '@/lib/context/UserRoleContext'
+import { useDragScroll } from '@/lib/hooks/useDragScroll'
 
 interface Props {
   company: CompanyWithWorkflow | null
@@ -43,6 +44,7 @@ export default function CompanyDetailsModal({ company, isOpen, onClose, onDelete
   const router = useRouter()
   const { can, isSuperAdmin, isAdmin } = usePermissions()
   const canDeleteCompany = can('companies', 'delete') || isSuperAdmin || isAdmin
+  const modalTabsScrollRef = useDragScroll<HTMLDivElement>({ speed: 1.4 })
   const canEditCompany = can('companies', 'edit') || isSuperAdmin || isAdmin
   const canManageIDs = can('government_ids', 'create') || isSuperAdmin || isAdmin
   const canDeleteIDs = can('government_ids', 'delete') || isSuperAdmin || isAdmin
@@ -546,6 +548,7 @@ export default function CompanyDetailsModal({ company, isOpen, onClose, onDelete
 
         {/* Fixed / Sticky Full-Width Tabs Bar (عرض وتثبيت كامل شريط التبويبات) */}
         <div
+          ref={modalTabsScrollRef}
           style={{
             display: 'flex',
             borderBottom: '2px solid var(--line-soft)',
@@ -559,8 +562,9 @@ export default function CompanyDetailsModal({ company, isOpen, onClose, onDelete
             top: 0,
             zIndex: 30,
             boxShadow: '0 4px 14px rgba(0,0,0,0.03)',
+            userSelect: 'none',
           }}
-          className="custom-scrollbar"
+          className="scrollbar-none"
         >
           {[
             { id: 'info', label: 'البيانات الأساسية', icon: 'build' },
