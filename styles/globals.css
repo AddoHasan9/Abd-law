@@ -53,7 +53,7 @@
     --r-xl: 22px;
     --r-full: 999px;
     --sp: 4px;
-    --sidebar-w: 264px;
+    --sidebar-w: 260px;
     --topbar-h: 56px;
 
     /* مقاييس النوافذ المنبثقة الموحدة (Standard Modal Scale) */
@@ -790,18 +790,18 @@
   }
 
   .side-head {
-    padding: 20px 18px 18px;
+    padding: 13px 14px 12px;
     display: flex;
     align-items: center;
-    gap: 14px;
+    gap: 10px;
     flex: none;
     border-bottom: 1px solid var(--line-soft);
   }
 
   .side-mark {
-    width: 48px;
-    height: 48px;
-    border-radius: 14px;
+    width: 42px;
+    height: 42px;
+    border-radius: 12px;
     flex: none;
     display: grid;
     place-items: center;
@@ -811,20 +811,20 @@
   }
 
   .side-mark .icon {
-    width: 26px;
-    height: 26px;
+    width: 22px;
+    height: 22px;
   }
 
   .side-name {
     font-family: var(--font-display);
     font-weight: 800;
-    font-size: 15.5px;
-    line-height: 1.35;
+    font-size: 13.5px;
+    line-height: 1.3;
     color: var(--text);
   }
 
   .side-role {
-    font-size: 11.5px;
+    font-size: 10.5px;
     color: var(--text-3);
     font-weight: 600;
     margin-top: 2px;
@@ -834,11 +834,12 @@
     flex: 1;
     overflow-y: auto;
     min-height: 0;
-    padding: 4px 12px 12px;
+    padding: 4px 10px 8px;
+    scrollbar-width: thin;
   }
 
   .nav-group {
-    margin-top: 14px;
+    margin-top: 10px;
   }
 
   .nav-group-head {
@@ -1019,11 +1020,11 @@
     width: 100%;
     display: flex;
     align-items: center;
-    gap: 11px;
-    padding: 8.5px 12px;
-    border-radius: 12px;
+    gap: 9px;
+    padding: 7px 10px;
+    border-radius: 10px;
     color: var(--text-2);
-    font-size: 13.5px;
+    font-size: 13px;
     font-weight: 500;
     position: relative;
     border: 1px solid transparent;
@@ -1197,7 +1198,7 @@
   }
 
   .side-foot {
-    padding: 0 12px 14px;
+    padding: 0 10px 10px;
     flex: none;
   }
 
@@ -1205,8 +1206,8 @@
     width: 100%;
     display: flex;
     align-items: center;
-    gap: 10px;
-    padding: 9px 10px;
+    gap: 8px;
+    padding: 7px 9px;
     border-radius: var(--r-md);
     transition: background var(--t-fast);
   }

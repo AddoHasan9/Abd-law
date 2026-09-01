@@ -88,40 +88,7 @@ export default function DeadlineCard({ deadlines = [], item = null }: Props) {
   }
 
   if (items.length === 0) {
-    return (
-      <div
-        style={{
-          background: 'var(--surface-2)',
-          border: '1px solid var(--line-soft)',
-          padding: '12px 14px',
-          borderRadius: '12px',
-          margin: '8px 12px 10px',
-        }}
-      >
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-            <span className="material-symbols-outlined text-[16px] text-emerald-500">verified</span>
-            <span style={{ fontSize: '12px', fontWeight: 800, color: 'var(--text)' }}>متابعة المهل والاستحقاقات</span>
-          </div>
-          <span
-            style={{
-              fontSize: '10.5px',
-              padding: '2px 8px',
-              fontWeight: 700,
-              borderRadius: '6px',
-              background: 'rgba(16, 185, 129, 0.12)',
-              color: '#10B981',
-              border: '1px solid rgba(16, 185, 129, 0.3)',
-            }}
-          >
-            سجلات منتظمة ✓
-          </span>
-        </div>
-        <div style={{ fontSize: '11.5px', color: 'var(--text-3)', marginTop: '6px', lineHeight: 1.4 }}>
-          ✓ كافة المعاملات والمهل القانونية ضمن المدد المحددة
-        </div>
-      </div>
-    )
+    return null
   }
 
   const current = items[currentIndex] || items[0]
@@ -139,8 +106,9 @@ export default function DeadlineCard({ deadlines = [], item = null }: Props) {
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
       style={{
-        margin: '8px 12px 10px',
+        margin: '4px 10px 6px',
         position: 'relative',
+        flexShrink: 0,
       }}
     >
       <Link
@@ -157,9 +125,9 @@ export default function DeadlineCard({ deadlines = [], item = null }: Props) {
             : warn
             ? '1px solid rgba(245, 158, 11, 0.28)'
             : '1px solid var(--line)',
-          borderRadius: '12px',
-          padding: '12px 14px',
-          boxShadow: '0 4px 16px rgba(0, 0, 0, 0.03)',
+          borderRadius: '10px',
+          padding: '8px 10px',
+          boxShadow: '0 2px 8px rgba(0, 0, 0, 0.02)',
           textDecoration: 'none',
           position: 'relative',
           overflow: 'hidden',

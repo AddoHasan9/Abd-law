@@ -165,25 +165,25 @@ export default function Sidebar({
 
   return (
     <aside id="sidebar" className="transition-all duration-300">
-      {/* Brand Header with Refined Luxury Styling & Official Large Logo */}
+      {/* Brand Header with Refined Luxury Styling */}
       <div className="side-head group cursor-default">
-        <div className="w-[52px] h-[52px] rounded-2xl bg-gradient-to-br from-white/10 to-white/[0.03] border border-white/15 p-1.5 flex items-center justify-center shadow-lg shadow-black/20 group-hover:scale-105 group-hover:border-[var(--accent)]/50 transition-all duration-300 flex-none overflow-hidden">
+        <div className="w-[42px] h-[42px] rounded-xl bg-gradient-to-br from-white/10 to-white/[0.03] border border-white/15 p-1 flex items-center justify-center shadow-md shadow-black/10 group-hover:scale-105 group-hover:border-[var(--accent)]/50 transition-all duration-300 flex-none overflow-hidden">
           <Image
             src="/logo.png"
             alt="شعار مكتب المحامي عبدالحسن الخزرجي"
-            width={48}
-            height={48}
-            className="w-full h-full object-contain filter drop-shadow-md"
+            width={38}
+            height={38}
+            className="w-full h-full object-contain filter drop-shadow-sm"
             priority
           />
         </div>
-        <div className="flex-1 min-w-0 pr-1">
-          <div className="side-name tracking-tight font-black text-[15px] sm:text-[15.5px] text-[var(--text)] group-hover:text-[var(--accent)] transition-colors leading-snug">
+        <div className="flex-1 min-w-0 pr-0.5">
+          <div className="side-name tracking-tight font-black text-[14px] text-[var(--text)] group-hover:text-[var(--accent)] transition-colors leading-tight truncate">
             مكتب المحامي عبدالحسن الخزرجي
           </div>
-          <div className="side-role text-[11.5px] text-[var(--accent)] font-bold mt-0.5 tracking-wide flex items-center gap-1.5">
-            <span className="w-1.5 h-1.5 rounded-full bg-[var(--accent)] animate-pulse" />
-            <span>للمحاماة والاستشارات القانونية</span>
+          <div className="side-role text-[10.5px] text-[var(--accent)] font-bold mt-0.5 tracking-wide flex items-center gap-1.5 truncate">
+            <span className="w-1.5 h-1.5 rounded-full bg-[var(--accent)] animate-pulse shrink-0" />
+            <span className="truncate">للمحاماة والاستشارات القانونية</span>
           </div>
         </div>
       </div>
