@@ -442,20 +442,13 @@ export default function CompaniesClient({ initialCompanies }: Props) {
                     </div>
                     <div className="flex flex-col min-w-0 flex-1">
                       <h3
-                        className="font-display font-extrabold text-[13.5px] sm:text-[14px] text-[var(--text)] transition-colors leading-snug group-hover:text-[var(--accent)]"
-                        style={{
-                          display: '-webkit-box',
-                          WebkitLineClamp: 2,
-                          WebkitBoxOrient: 'vertical',
-                          overflow: 'hidden',
-                          wordBreak: 'break-word',
-                        }}
+                        className="font-display font-black text-[14px] sm:text-[15px] text-[var(--text)] transition-colors leading-snug group-hover:text-[var(--accent)] break-words whitespace-normal"
                         title={co.name}
                       >
                         {co.name}
                       </h3>
-                      <div className="flex items-center gap-1.5 mt-1">
-                        <span className="text-[10px] font-bold text-[var(--text-2)] bg-[var(--surface-2)] px-2.5 py-0.5 rounded-full border border-[var(--border)]">
+                      <div className="flex items-center gap-1.5 mt-1 flex-wrap">
+                        <span className="text-[10.5px] font-bold text-[var(--text-2)] bg-[var(--surface-2)] px-2.5 py-0.5 rounded-full border border-[var(--border)]">
                           {co.kind ?? 'شركة'}
                         </span>
                       </div>

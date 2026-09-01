@@ -326,20 +326,17 @@ export default function DepositsClient({ deposits = [], companyId }: Props) {
                       <div
                         style={{
                           fontWeight: 800,
-                          fontSize: (company?.name && company.name.length > 25) ? '12px' : '13px',
+                          fontSize: '13.5px',
                           color: 'var(--text)',
-                          lineHeight: '1.35',
-                          display: '-webkit-box',
-                          WebkitLineClamp: 2,
-                          WebkitBoxOrient: 'vertical',
-                          overflow: 'hidden',
+                          lineHeight: '1.4',
                           wordBreak: 'break-word',
+                          whiteSpace: 'normal',
                         }}
                         title={company?.name ?? '—'}
                       >
                         {company?.name ?? '—'}
                       </div>
-                      <div style={{ fontSize: '10.5px', color: 'var(--text-3)', marginTop: '2px' }}>
+                      <div style={{ fontSize: '11px', color: 'var(--text-3)', marginTop: '3px' }}>
                         أُطلقت بتاريخ <span className="num">{formatDate(dep.started_at)}</span>
                       </div>
                     </div>
