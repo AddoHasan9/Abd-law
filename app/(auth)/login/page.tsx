@@ -1,7 +1,7 @@
 import Image from 'next/image'
 import LoginForm from './LoginForm'
 import { ThemeToggle } from '@/components/auth/ThemeToggle'
-import { Building2, Receipt, BadgeCheck, ShieldCheck, Scale, Sparkles } from 'lucide-react'
+import { Building2, Receipt, BadgeCheck, ShieldCheck, Sparkles } from 'lucide-react'
 import { FadeInStagger } from '@/components/ui/FadeInStagger'
 
 export const metadata = { title: 'تسجيل الدخول — مكتب المحامي عبدالحسن الخزرجي' }
@@ -19,14 +19,6 @@ export default function LoginPage() {
         
         {/* ============ Brand Presentation Panel (Desktop) ============ */}
         <aside className="hidden lg:flex lg:col-span-5 bg-white/45 dark:bg-white/[0.02] p-8 md:p-10 flex-col justify-between border-l border-white/80 dark:border-white/10 relative overflow-hidden text-right transition-colors duration-500">
-          {/* Subtle Ambient Legal Watermark Icon in background */}
-          <div
-            className="absolute -bottom-10 -left-10 opacity-[0.03] dark:opacity-[0.02] text-slate-900 dark:text-white pointer-events-none select-none transition-opacity"
-            aria-hidden
-          >
-            <Scale className="w-64 h-64" />
-          </div>
-
           <FadeInStagger className="space-y-6 relative z-10">
             {/* Logo Medallion */}
             <div className="flex items-center gap-4">

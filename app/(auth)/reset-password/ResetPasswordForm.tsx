@@ -142,8 +142,8 @@ export default function ResetPasswordForm() {
               placeholder="••••••••"
               value={password}
               onChange={e => setPassword(e.target.value)}
-              className="w-full h-12 pr-11 pl-4 rounded-2xl bg-white dark:bg-[#151A24] border border-slate-300/80 dark:border-white/12 focus:border-[#3B82F6] text-slate-900 dark:text-white placeholder-slate-400 text-sm outline-none transition-all text-right dir-ltr font-medium focus:ring-4 focus:ring-blue-500/15"
-              style={{ direction: 'ltr', textAlign: 'right' }}
+              style={{ paddingRight: '48px', paddingLeft: '16px' }}
+              className="w-full h-12 input-icon-right rounded-2xl bg-white dark:bg-[#151A24] border border-slate-300/80 dark:border-white/12 focus:border-[#3B82F6] text-slate-900 dark:text-white placeholder-slate-400 text-sm outline-none transition-all text-left dir-ltr font-medium focus:ring-4 focus:ring-blue-500/15"
             />
             <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-[#3B82F6] material-symbols-outlined text-[20px] pointer-events-none transition-colors">
               lock
@@ -160,8 +160,8 @@ export default function ResetPasswordForm() {
               placeholder="••••••••"
               value={confirm}
               onChange={e => setConfirm(e.target.value)}
-              className="w-full h-12 pr-11 pl-4 rounded-2xl bg-white dark:bg-[#151A24] border border-slate-300/80 dark:border-white/12 focus:border-[#3B82F6] text-slate-900 dark:text-white placeholder-slate-400 text-sm outline-none transition-all text-right dir-ltr font-medium focus:ring-4 focus:ring-blue-500/15"
-              style={{ direction: 'ltr', textAlign: 'right' }}
+              style={{ paddingRight: '48px', paddingLeft: '16px' }}
+              className="w-full h-12 input-icon-right rounded-2xl bg-white dark:bg-[#151A24] border border-slate-300/80 dark:border-white/12 focus:border-[#3B82F6] text-slate-900 dark:text-white placeholder-slate-400 text-sm outline-none transition-all text-left dir-ltr font-medium focus:ring-4 focus:ring-blue-500/15"
             />
             <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-[#3B82F6] material-symbols-outlined text-[20px] pointer-events-none transition-colors">
               lock_reset

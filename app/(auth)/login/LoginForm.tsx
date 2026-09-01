@@ -172,7 +172,8 @@ export default function LoginForm() {
                 autoComplete="email"
                 placeholder="name@example.com"
                 dir="ltr"
-                className="w-full h-12 pr-11 pl-4 rounded-2xl bg-white dark:bg-[#151A24] hover:bg-slate-50 dark:hover:bg-[#1A202C] focus:bg-white dark:focus:bg-[#151A24] border border-slate-300/80 dark:border-white/12 focus:border-[#3B82F6] dark:focus:border-[#3B82F6] text-slate-900 dark:text-white placeholder-slate-400 text-sm outline-none transition-all duration-300 focus:ring-4 focus:ring-blue-500/15 dark:focus:ring-blue-500/20 text-right backdrop-blur-md shadow-xs font-medium"
+                style={{ paddingRight: '48px', paddingLeft: '16px' }}
+                className="w-full h-12 input-icon-right rounded-2xl bg-white dark:bg-[#151A24] hover:bg-slate-50 dark:hover:bg-[#1A202C] focus:bg-white dark:focus:bg-[#151A24] border border-slate-300/80 dark:border-white/12 focus:border-[#3B82F6] dark:focus:border-[#3B82F6] text-slate-900 dark:text-white placeholder-slate-400 text-sm outline-none transition-all duration-300 focus:ring-4 focus:ring-blue-500/15 dark:focus:ring-blue-500/20 text-left backdrop-blur-md shadow-xs font-medium"
                 {...register('email')}
               />
               <Mail className="absolute right-3.5 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400 group-focus-within:text-[#3B82F6] transition-colors pointer-events-none" />
@@ -204,7 +205,8 @@ export default function LoginForm() {
                 autoComplete="current-password"
                 placeholder="••••••••"
                 dir="ltr"
-                className="w-full h-12 pr-11 pl-11 rounded-2xl bg-white dark:bg-[#151A24] hover:bg-slate-50 dark:hover:bg-[#1A202C] focus:bg-white dark:focus:bg-[#151A24] border border-slate-300/80 dark:border-white/12 focus:border-[#3B82F6] dark:focus:border-[#3B82F6] text-slate-900 dark:text-white placeholder-slate-400 text-sm outline-none transition-all duration-300 focus:ring-4 focus:ring-blue-500/15 dark:focus:ring-blue-500/20 text-right backdrop-blur-md shadow-xs font-medium"
+                style={{ paddingRight: '48px', paddingLeft: '48px' }}
+                className="w-full h-12 input-icon-both rounded-2xl bg-white dark:bg-[#151A24] hover:bg-slate-50 dark:hover:bg-[#1A202C] focus:bg-white dark:focus:bg-[#151A24] border border-slate-300/80 dark:border-white/12 focus:border-[#3B82F6] dark:focus:border-[#3B82F6] text-slate-900 dark:text-white placeholder-slate-400 text-sm outline-none transition-all duration-300 focus:ring-4 focus:ring-blue-500/15 dark:focus:ring-blue-500/20 text-left backdrop-blur-md shadow-xs font-medium"
                 {...register('password')}
               />
               <Lock className="absolute right-3.5 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400 group-focus-within:text-[#3B82F6] transition-colors pointer-events-none" />

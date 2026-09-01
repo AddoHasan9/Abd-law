@@ -473,6 +473,19 @@
     outline: none;
   }
 
+  .input-icon-right {
+    padding-right: 44px !important;
+  }
+
+  .input-icon-left {
+    padding-left: 44px !important;
+  }
+
+  .input-icon-both {
+    padding-right: 44px !important;
+    padding-left: 44px !important;
+  }
+
   input[type="text"]:focus,
   input[type="password"]:focus,
   input[type="email"]:focus,
