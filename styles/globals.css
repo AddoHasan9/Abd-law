@@ -2754,6 +2754,17 @@
       transition: inset-inline-start 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s ease;
       display: flex;
       flex-direction: column;
+      background: rgba(255, 255, 255, 0.94);
+      -webkit-backdrop-filter: blur(40px) saturate(200%);
+      backdrop-filter: blur(40px) saturate(200%);
+      border-inline-end: 1px solid var(--border-soft);
+    }
+
+    html[data-theme="dark"] #sidebar {
+      background: rgba(15, 23, 42, 0.92);
+      -webkit-backdrop-filter: blur(40px) saturate(200%);
+      backdrop-filter: blur(40px) saturate(200%);
+      border-inline-end: 1px solid rgba(255, 255, 255, 0.1);
     }
 
     #sidebar .side-foot {
@@ -2763,16 +2774,16 @@
 
     body.side-open #sidebar {
       inset-inline-start: 0;
-      box-shadow: 0 0 50px rgba(0, 0, 0, 0.8), 0 0 20px rgba(56, 189, 248, 0.25);
+      box-shadow: 0 0 50px rgba(0, 0, 0, 0.35), 0 0 20px rgba(56, 189, 248, 0.2);
     }
 
     body.side-open #side-veil {
       display: block;
       position: fixed;
       inset: 0;
-      background: rgba(0, 0, 0, 0.68);
-      -webkit-backdrop-filter: blur(8px);
-      backdrop-filter: blur(8px);
+      background: rgba(15, 23, 42, 0.40);
+      -webkit-backdrop-filter: blur(5px);
+      backdrop-filter: blur(5px);
       z-index: 99998;
       animation: fade 0.2s ease-out;
     }

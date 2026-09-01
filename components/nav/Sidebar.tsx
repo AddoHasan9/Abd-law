@@ -190,9 +190,10 @@ export default function Sidebar({
 
       <nav className="side-nav" aria-label="أقسام التطبيق">
         {NAV.map(renderGroup)}
+        <div className="pt-3 pb-1">
+          <DeadlineCard deadlines={deadlines} item={deadline} />
+        </div>
       </nav>
-
-      <DeadlineCard deadlines={deadlines} item={deadline} />
 
       <div className="side-foot">
         <UserChip profile={profile} />

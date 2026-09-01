@@ -96,7 +96,7 @@ export default function DeadlineCard({ deadlines = [], item = null }: Props) {
     <div
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
-      className="mx-2.5 my-2 flex-none"
+      className="w-full flex-none mt-2"
     >
       {/* Widget Section Header */}
       <div className="flex items-center justify-between px-1 mb-1.5">
@@ -109,7 +109,7 @@ export default function DeadlineCard({ deadlines = [], item = null }: Props) {
 
         {items.length > 0 ? (
           <span
-            className={`text-[10px] font-bold px-1.5 py-0.5 rounded-md ${
+            className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
               hasLate
                 ? 'bg-rose-500/15 text-rose-500 border border-rose-500/30'
                 : 'bg-amber-500/15 text-amber-500 border border-amber-500/30'
@@ -118,33 +118,33 @@ export default function DeadlineCard({ deadlines = [], item = null }: Props) {
             {items.length} {items.length === 1 ? 'مهلة' : 'مهل'}
           </span>
         ) : (
-          <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-md bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
             منضبط
           </span>
         )}
       </div>
 
       {items.length === 0 ? (
-        /* Empty / All Compliant State */
+        /* Empty / All Compliant State - Richer & Enlarged */
         <Link
           href="/commercial/deposits"
-          className="block p-3 rounded-xl bg-[var(--surface-2)]/80 hover:bg-[var(--surface-2)] border border-[var(--line-soft)] hover:border-[var(--accent)]/40 transition-all group"
+          className="block p-3.5 rounded-2xl bg-[var(--surface-2)]/90 hover:bg-[var(--surface-3)] border border-[var(--line-soft)] hover:border-[var(--accent)]/40 transition-all group shadow-2xs"
         >
-          <div className="flex items-center justify-between mb-1">
+          <div className="flex items-center justify-between mb-1.5">
             <div className="flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400 text-xs font-bold">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
               <span>كافة المهل والودائع سليمة</span>
             </div>
-            <span className="text-[10px] font-bold text-[var(--text-3)] group-hover:text-[var(--accent)] transition-colors">
-              عرض ‹
+            <span className="text-[10.5px] font-bold text-[var(--accent)] group-hover:translate-x-[-2px] transition-transform">
+              عرض السجل ‹
             </span>
           </div>
-          <div className="text-[11px] text-[var(--text-3)] mt-0.5 font-medium leading-relaxed">
-            لا توجد غرامات تأخير أو هويات حكومية منتهية حالياً
+          <div className="text-[11px] text-[var(--text-3)] font-medium leading-relaxed">
+            لا توجد غرامات تأخير أو هويات حكومية منتهية حالياً بالنظام
           </div>
         </Link>
       ) : (
-        /* Active Deadlines Rotating Card */
+        /* Active Deadlines Rotating Card - Rich & Well-proportioned */
         (() => {
           const current = items[currentIndex] || items[0]
           const { daysLeft, total = 30 } = current
@@ -157,18 +157,18 @@ export default function DeadlineCard({ deadlines = [], item = null }: Props) {
           return (
             <Link
               href={current.linkUrl}
-              className={`block rounded-xl p-2.5 transition-all relative overflow-hidden group shadow-2xs ${
+              className={`block rounded-2xl p-3 transition-all relative overflow-hidden group shadow-2xs ${
                 late
                   ? 'bg-gradient-to-b from-rose-500/[0.08] to-rose-500/[0.02] border border-rose-500/30 hover:border-rose-500/50'
                   : warn
                   ? 'bg-gradient-to-b from-amber-500/[0.08] to-amber-500/[0.02] border border-amber-500/30 hover:border-amber-500/50'
-                  : 'bg-[var(--surface-2)] border border-[var(--line)] hover:border-[var(--accent)]/50'
+                  : 'bg-[var(--surface-2)]/90 border border-[var(--line)] hover:border-[var(--accent)]/50'
               }`}
             >
               {/* Top Sub-Header: Category Pill + Micro Controls */}
-              <div className="flex items-center justify-between mb-1.5">
+              <div className="flex items-center justify-between mb-2">
                 <span
-                  className={`text-[10.5px] font-bold px-2 py-0.5 rounded-md ${
+                  className={`text-[10.5px] font-bold px-2 py-0.5 rounded-lg ${
                     late
                       ? 'bg-rose-500/15 text-rose-500 border border-rose-500/30'
                       : warn
@@ -220,7 +220,7 @@ export default function DeadlineCard({ deadlines = [], item = null }: Props) {
                 }}
               >
                 <div
-                  className="text-[12.5px] font-extrabold text-[var(--text)] leading-snug line-clamp-1"
+                  className="text-[13px] font-extrabold text-[var(--text)] leading-snug line-clamp-1"
                   title={companyDisplayName}
                 >
                   {companyDisplayName}
@@ -231,9 +231,9 @@ export default function DeadlineCard({ deadlines = [], item = null }: Props) {
                 </div>
 
                 {/* Timing & Penalty Status Row */}
-                <div className="flex items-center justify-between gap-1.5 pt-1.5 mt-1.5 border-t border-dashed border-[var(--line-soft)]">
+                <div className="flex items-center justify-between gap-1.5 pt-2 mt-2 border-t border-dashed border-[var(--line-soft)]">
                   <span
-                    className={`text-[10.5px] font-bold ${
+                    className={`text-[11px] font-bold ${
                       late ? 'text-rose-500' : warn ? 'text-amber-500' : 'text-[var(--text-2)]'
                     }`}
                   >
@@ -243,14 +243,14 @@ export default function DeadlineCard({ deadlines = [], item = null }: Props) {
                   </span>
 
                   {late && current.amount && current.amount > 0 ? (
-                    <span className="text-[10.5px] font-mono font-extrabold text-rose-500">
+                    <span className="text-[11px] font-mono font-extrabold text-rose-500">
                       {formatMoney(current.amount)}
                     </span>
                   ) : null}
                 </div>
 
                 {/* Progress Bar */}
-                <div className="w-full h-1 rounded-full bg-[var(--surface-3)] mt-2 overflow-hidden">
+                <div className="w-full h-1.5 rounded-full bg-[var(--surface-3)] mt-2.5 overflow-hidden">
                   <div
                     className={`h-full transition-all duration-300 ${
                       late ? 'bg-rose-500' : warn ? 'bg-amber-500' : 'bg-[var(--accent)]'
