@@ -1266,7 +1266,7 @@
     position: sticky;
     top: 0;
     box-sizing: border-box;
-    overflow: hidden;
+    overflow: visible;
   }
 
   #page-title {
