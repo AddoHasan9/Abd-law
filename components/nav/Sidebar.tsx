@@ -9,7 +9,6 @@ import { NAV, txTypeLeaves, type NavGroup, type NavLeaf } from '@/lib/nav'
 import { can } from '@/lib/constants'
 import type { Profile } from '@/types/database'
 import DeadlineCard, { type DeadlineItem } from './DeadlineCard'
-import UserChip from './UserChip'
 
 const STORE_KEY = 'nav-closed'
 
@@ -224,7 +223,6 @@ export default function Sidebar({
 
       <div className="side-foot">
         <DeadlineCard deadlines={deadlines} item={deadline} />
-        <UserChip profile={profile} />
       </div>
     </aside>
   )
