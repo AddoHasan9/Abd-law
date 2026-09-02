@@ -296,20 +296,20 @@ export default function FinancialStatementsClient({ companies = [] }: Props) {
 
       {/* شريط البحث */}
       <div style={{ position: 'relative', maxWidth: '420px' }}>
+        <span
+          className="material-symbols-outlined"
+          style={{ position: 'absolute', right: '14px', top: '50%', transform: 'translateY(-50%)', fontSize: 19, color: 'var(--text-3)', pointerEvents: 'none' }}
+        >
+          search
+        </span>
         <input
           type="text"
           value={searchTerm}
           onChange={e => setSearchTerm(e.target.value)}
           placeholder="ابحث باسم الشركة أو السنة الماليّة..."
-          className="input"
-          style={{ paddingRight: '38px' }}
+          className="input search-input"
+          style={{ paddingRight: '44px', paddingLeft: '14px' }}
         />
-        <span
-          className="material-symbols-outlined"
-          style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', fontSize: 19, color: 'var(--text-3)', pointerEvents: 'none' }}
-        >
-          search
-        </span>
       </div>
 
       {/* Summary KPI Cards */}

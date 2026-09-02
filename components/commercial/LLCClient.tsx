@@ -111,66 +111,20 @@ export default function LLCClient({ transactions = [], companies = [], lawyers =
         </div>
       </div>
 
-      {/* 7 Quick Action Buttons for LLC Transactions */}
-      <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-        {LLC_TX_TYPES.map(t => {
-          const count = llcTransactions.filter(x => x.type === t.id).length
-          return (
-            <button
-              key={t.id}
-              type="button"
-              onClick={() => openAddModal(t.id)}
-              className="btn btn-ghost"
-              style={{ fontSize: '12px', padding: '6px 12px', background: 'var(--surface-2)', border: '1px solid var(--line-soft)' }}
-              title={`إضافة معاملة ${t.label} جديدة`}
-            >
-              <Icon name="plus" />
-              <span>{t.label}</span>
-              <span className="nav-num" style={{ marginRight: '6px', fontSize: '11px' }}>{count}</span>
-            </button>
-          )
-        })}
-      </div>
-
-      {/* Filter Tabs & Search */}
-      <div className="card" style={{ padding: '12px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px' }}>
-        <div style={{ position: 'relative', minWidth: '280px', flex: 1, maxWidth: '400px' }}>
+      {/* Search Bar */}
+      <div className="card" style={{ padding: '12px 16px' }}>
+        <div style={{ position: 'relative', width: '100%', maxWidth: '460px' }}>
+          <span style={{ position: 'absolute', right: '14px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-3)', pointerEvents: 'none', display: 'flex', alignItems: 'center' }}>
+            <Icon name="search" />
+          </span>
           <input
             type="text"
-            className="input"
+            className="input search-input"
             value={searchTerm}
             onChange={e => setSearchTerm(e.target.value)}
             placeholder="ابحث باسم الشركة، الوصف، أو النواقص..."
-            style={{ paddingRight: '36px', fontSize: '13px' }}
+            style={{ paddingRight: '44px', paddingLeft: '14px', fontSize: '13px' }}
           />
-          <span style={{ position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-3)' }}>
-            <Icon name="search" />
-          </span>
-        </div>
-
-        <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
-          <button
-            type="button"
-            onClick={() => setActiveTab('all')}
-            className={`btn ${activeTab === 'all' ? 'btn-primary' : 'btn-ghost'}`}
-            style={{ fontSize: '12px', padding: '6px 12px' }}
-          >
-            الكل ({llcTransactions.length})
-          </button>
-          {LLC_TX_TYPES.map(t => {
-            const count = llcTransactions.filter(x => x.type === t.id).length
-            return (
-              <button
-                key={t.id}
-                type="button"
-                onClick={() => setActiveTab(t.id)}
-                className={`btn ${activeTab === t.id ? 'btn-primary' : 'btn-ghost'}`}
-                style={{ fontSize: '12px', padding: '6px 12px' }}
-              >
-                {t.label} ({count})
-              </button>
-            )
-          })}
         </div>
       </div>
 

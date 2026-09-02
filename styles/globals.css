@@ -880,13 +880,14 @@
     overflow-y: auto;
     overflow-x: hidden;
     min-height: 0;
-    padding: 6px 8px;
+    padding: 6px 8px 60px 8px; /* مسافة أمان سفلية لضمان ظهور كامل عناصر القائمة الأخيرة دائماً */
     scrollbar-width: thin;
-    scrollbar-color: rgba(148, 163, 184, 0.25) transparent;
+    scrollbar-color: rgba(148, 163, 184, 0.35) transparent;
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
     gap: 2px;
+    overscroll-behavior: contain;
   }
 
   .side-nav::-webkit-scrollbar {
@@ -1253,17 +1254,19 @@
     flex: none;
     display: flex;
     align-items: center;
+    flex-wrap: nowrap;
     gap: 12px;
     padding: 0 18px;
     background: var(--side-bg);
     -webkit-backdrop-filter: blur(32px) saturate(190%);
     backdrop-filter: blur(32px) saturate(190%);
     border-bottom: 1px solid var(--border-soft, var(--border));
-    z-index: 20;
+    z-index: 40;
     box-shadow: 0 1px 12px rgba(15, 23, 42, 0.03);
     position: sticky;
     top: 0;
     box-sizing: border-box;
+    overflow: hidden;
   }
 
   #page-title {
@@ -2721,6 +2724,16 @@
     box-sizing: border-box !important;
   }
 
+  /* ضمان عدم تداخل أيقونة البحث مع النص العربي مطلقاً في كافة الأقسام */
+  .search-input,
+  input.search-input,
+  .input.search-input,
+  .input-search-right,
+  .has-search-icon {
+    padding-right: 44px !important;
+    padding-left: 14px !important;
+  }
+
   /* تطبيع حقول التاريخ على Safari و iOS لمنع التمدد أو التضخم */
   input[type="date"] {
     display: inline-flex !important;
@@ -3118,6 +3131,15 @@
       width: 100% !important;
       max-width: 100% !important;
       box-sizing: border-box !important;
+    }
+
+    .search-input,
+    input.search-input,
+    .input.search-input,
+    .input-search-right,
+    .has-search-icon {
+      padding-right: 44px !important;
+      padding-left: 14px !important;
     }
 
     input[type="date"]::-webkit-date-and-time-value {

@@ -316,12 +316,13 @@ export default function CommercialClient({ rows = [], companies = [] }: Props) {
         {/* Row 1: Search Bar & Primary Actions */}
         <div className="flex items-center gap-2.5 flex-wrap sm:flex-nowrap">
           <div className="relative flex-1 min-w-[200px]">
-            <span className="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-[18px] text-[var(--text-3)] pointer-events-none">
+            <span className="material-symbols-outlined absolute right-3.5 top-1/2 -translate-y-1/2 text-[18px] text-[var(--text-3)] pointer-events-none">
               search
             </span>
             <input
               type="text"
-              className="w-full h-10 pr-9 pl-8 rounded-xl bg-[var(--surface-2)] border border-[var(--line-soft)] focus:border-[var(--accent)] focus:bg-[var(--surface)] text-xs font-medium text-[var(--text)] placeholder:text-[var(--text-3)] transition-all outline-none"
+              style={{ paddingRight: '44px', paddingLeft: '36px' }}
+              className="w-full h-10 search-input rounded-xl bg-[var(--surface-2)] border border-[var(--line-soft)] focus:border-[var(--accent)] focus:bg-[var(--surface)] text-xs font-medium text-[var(--text)] placeholder:text-[var(--text-3)] transition-all outline-none"
               placeholder="ابحث بالشركة، المحامي، أو الملاحظات..."
               value={searchQuery}
               onChange={e => setSearchQuery(e.target.value)}

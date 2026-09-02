@@ -219,16 +219,17 @@ export default function TaxAssessmentClient({ assessments = [], companies = [], 
         
         {/* Search Input */}
         <div className="relative flex-1 min-w-[280px]">
+          <span className="material-symbols-outlined absolute right-3.5 top-1/2 -translate-y-1/2 text-[var(--text-3)] pointer-events-none">
+            search
+          </span>
           <input
             type="text"
-            className="input pr-10"
+            style={{ paddingRight: '44px', paddingLeft: '14px' }}
+            className="input search-input"
             value={searchTerm}
             onChange={e => setSearchTerm(e.target.value)}
             placeholder="ابحث بالاسم، المحامي، الفرع الضريبي، رقم الإضبارة، العقود، أو الاستيرادات..."
           />
-          <span className="material-symbols-outlined absolute right-3.5 top-1/2 -translate-y-1/2 text-[var(--text-3)]">
-            search
-          </span>
         </div>
 
         {/* Year Filter Chips */}

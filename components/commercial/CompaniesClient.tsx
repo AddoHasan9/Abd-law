@@ -349,17 +349,17 @@ export default function CompaniesClient({ initialCompanies }: Props) {
       <div className="card" style={{ padding: '12px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px' }}>
         {/* Search */}
         <div style={{ position: 'relative', minWidth: '260px', flex: 1, maxWidth: '380px' }}>
+          <span style={{ position: 'absolute', right: '14px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-3)', pointerEvents: 'none', display: 'flex', alignItems: 'center' }}>
+            <Icon name="search" />
+          </span>
           <input
             type="text"
-            className="input"
+            className="input search-input"
             value={searchTerm}
             onChange={e => setSearchTerm(e.target.value)}
             placeholder="ابحث باسم الشركة، المدير، رقم الشهادة، أو المهمة..."
-            style={{ paddingRight: '36px', fontSize: '13px' }}
+            style={{ paddingRight: '44px', paddingLeft: '14px', fontSize: '13px' }}
           />
-          <span style={{ position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-3)' }}>
-            <Icon name="search" />
-          </span>
         </div>
 
         {/* Filter Tabs (Drag Scrollable) */}

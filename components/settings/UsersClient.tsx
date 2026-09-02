@@ -371,7 +371,8 @@ export default function UsersClient({ initialProfiles }: Props) {
           </span>
           <input
             type="text"
-            className="w-full pr-12 pl-4 py-2.5 rounded-xl bg-[var(--surface-2)] border border-[var(--glass-border)] text-[var(--text)] placeholder:text-[var(--text-3)] text-sm font-medium focus:outline-none focus:border-[var(--accent)] transition-all"
+            style={{ paddingRight: '46px', paddingLeft: '14px' }}
+            className="w-full search-input pr-12 pl-4 py-2.5 rounded-xl bg-[var(--surface-2)] border border-[var(--glass-border)] text-[var(--text)] placeholder:text-[var(--text-3)] text-sm font-medium focus:outline-none focus:border-[var(--accent)] transition-all"
             placeholder="بحث باسم المستخدم، البريد الإلكتروني، الهاتف، القسم..."
             value={searchQuery}
             onChange={e => setSearchQuery(e.target.value)}
