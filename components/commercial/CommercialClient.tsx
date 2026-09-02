@@ -138,6 +138,21 @@ export default function CommercialClient({ rows = [], companies = [] }: Props) {
     }).length
   }, [localRows, companyMap])
 
+  // Auto-close action menu on scroll or resize to prevent floating or jumping
+  useEffect(() => {
+    if (!activeMenuTx) return
+    const handleScrollOrResize = () => {
+      setActiveMenuTx(null)
+      setMenuCoords(null)
+    }
+    window.addEventListener('scroll', handleScrollOrResize, true)
+    window.addEventListener('resize', handleScrollOrResize)
+    return () => {
+      window.removeEventListener('scroll', handleScrollOrResize, true)
+      window.removeEventListener('resize', handleScrollOrResize)
+    }
+  }, [activeMenuTx])
+
   // Filters
   const [searchQuery, setSearchQuery] = useState('')
   const [typeFilter, setTypeFilter] = useState('')
@@ -654,19 +669,14 @@ export default function CommercialClient({ rows = [], companies = [] }: Props) {
                               return
                             }
                             const rect = e.currentTarget.getBoundingClientRect()
-                            const spaceBelow = window.innerHeight - rect.bottom
                             const menuHeight = 220
-                            if (spaceBelow < menuHeight && rect.top > menuHeight) {
-                              setMenuCoords({
-                                bottom: window.innerHeight - rect.top + 6,
-                                right: window.innerWidth - rect.right,
-                              })
-                            } else {
-                              setMenuCoords({
-                                top: rect.bottom + 6,
-                                right: window.innerWidth - rect.right,
-                              })
+                            const menuWidth = 205
+                            let top = rect.bottom + 4
+                            if (top + menuHeight > window.innerHeight - 10) {
+                              top = Math.max(10, rect.top - menuHeight - 4)
                             }
+                            const right = Math.max(12, Math.min(window.innerWidth - menuWidth - 12, window.innerWidth - rect.right))
+                            setMenuCoords({ top, right })
                             setActiveMenuTx(t)
                           }}
                           className={`w-8 h-8 rounded-full border transition-all inline-flex items-center justify-center text-sm font-bold shadow-xs cursor-pointer ${
@@ -705,9 +715,8 @@ export default function CommercialClient({ rows = [], companies = [] }: Props) {
             ref={menuRef}
             className="fixed z-[999999] min-w-[195px] max-w-[90vw] bg-[var(--surface)] border border-[var(--glass-border)] rounded-2xl shadow-2xl p-1.5 text-right flex flex-col gap-1 backdrop-blur-2xl animate-scale-in"
             style={{
-              top: menuCoords.top !== undefined ? `${menuCoords.top}px` : 'auto',
-              bottom: menuCoords.bottom !== undefined ? `${menuCoords.bottom}px` : 'auto',
-              right: `${Math.max(12, Math.min(window.innerWidth - 210, menuCoords.right))}px`,
+              top: `${menuCoords.top}px`,
+              right: `${menuCoords.right}px`,
             }}
             onClick={e => e.stopPropagation()}
             dir="rtl"
