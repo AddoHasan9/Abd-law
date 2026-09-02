@@ -2,7 +2,6 @@
 
 import { useState, useMemo, useEffect, useRef } from 'react'
 import { createPortal } from 'react-dom'
-import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { TX_TYPES, PRIORITIES, txType, priorityOf, formatDate, formatNumberWithCommas } from '@/lib/constants'
 import { WorkflowStatus } from '@/components/ui/WorkflowStatus'
@@ -267,59 +266,6 @@ export default function CommercialClient({ rows = [], companies = [] }: Props) {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-
-      {/* 6 Specialized Commercial Sub-Departments Navigation Bar */}
-      <div className="flex items-center gap-2.5 overflow-x-auto pb-1 scrollbar-thin">
-        <Link
-          href="/commercial/companies-registry"
-          className="flex items-center gap-2 px-4 py-2.5 rounded-2xl text-xs font-bold bg-[var(--surface)] border border-[var(--line-soft)] text-[var(--text-2)] hover:border-[var(--accent)] hover:text-[var(--accent)] hover:bg-[var(--surface-2)] transition-all shadow-xs flex-none"
-        >
-          <span className="material-symbols-outlined text-[17px]">domain</span>
-          <span>الشركات</span>
-        </Link>
-        <Link
-          href="/commercial/companies"
-          className="flex items-center gap-2 px-4 py-2.5 rounded-2xl text-xs font-bold bg-[var(--surface)] border border-[var(--line-soft)] text-[var(--text-2)] hover:border-[var(--accent)] hover:text-[var(--accent)] hover:bg-[var(--surface-2)] transition-all shadow-xs flex-none"
-        >
-          <span className="material-symbols-outlined text-[17px]">corporate_fare</span>
-          <span>الشركات وتأسيسها</span>
-        </Link>
-        <Link
-          href="/commercial/deposits"
-          className="flex items-center gap-2 px-4 py-2.5 rounded-2xl text-xs font-bold bg-[var(--surface)] border border-[var(--line-soft)] text-[var(--text-2)] hover:border-[var(--accent)] hover:text-[var(--accent)] hover:bg-[var(--surface-2)] transition-all shadow-xs flex-none"
-        >
-          <span className="material-symbols-outlined text-[17px]">lock_open</span>
-          <span>إطلاق الوديعة</span>
-        </Link>
-        <Link
-          href="/commercial/llc"
-          className="flex items-center gap-2 px-4 py-2.5 rounded-2xl text-xs font-bold bg-[var(--surface)] border border-[var(--line-soft)] text-[var(--text-2)] hover:border-[var(--accent)] hover:text-[var(--accent)] hover:bg-[var(--surface-2)] transition-all shadow-xs flex-none"
-        >
-          <span className="material-symbols-outlined text-[17px]">badge</span>
-          <span>قسم المحدودة</span>
-        </Link>
-        <Link
-          href="/commercial/ids"
-          className="flex items-center gap-2 px-4 py-2.5 rounded-2xl text-xs font-bold bg-[var(--surface)] border border-[var(--line-soft)] text-[var(--text-2)] hover:border-[var(--accent)] hover:text-[var(--accent)] hover:bg-[var(--surface-2)] transition-all shadow-xs flex-none"
-        >
-          <span className="material-symbols-outlined text-[17px]">badge</span>
-          <span>قسم الهويات</span>
-        </Link>
-        <Link
-          href="/commercial/tax-assessment"
-          className="flex items-center gap-2 px-4 py-2.5 rounded-2xl text-xs font-bold bg-[var(--surface)] border border-[var(--line-soft)] text-[var(--text-2)] hover:border-[var(--accent)] hover:text-[var(--accent)] hover:bg-[var(--surface-2)] transition-all shadow-xs flex-none"
-        >
-          <span className="material-symbols-outlined text-[17px]">receipt_long</span>
-          <span>التحاسب الضريبي</span>
-        </Link>
-        <Link
-          href="/commercial/financial-statements"
-          className="flex items-center gap-2 px-4 py-2.5 rounded-2xl text-xs font-bold bg-[var(--accent-soft)] border border-[var(--accent)] text-[var(--accent)] hover:bg-[var(--accent)] hover:text-white transition-all shadow-xs flex-none"
-        >
-          <span className="material-symbols-outlined text-[17px]">account_balance</span>
-          <span>الحسابات الختامية</span>
-        </Link>
-      </div>
       
       {/* Toast Notification */}
       {toastMsg && (

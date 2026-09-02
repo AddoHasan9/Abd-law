@@ -148,59 +148,6 @@ export default function TaxAssessmentClient({ assessments = [], companies = [], 
         </div>
       )}
 
-      {/* Commercial 7 Sub-Departments Navigation Bar */}
-      <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-thin">
-        <Link
-          href="/commercial/companies-registry"
-          className="flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold bg-[var(--surface)] border border-[var(--border)] text-[var(--text-2)] hover:border-[var(--accent)] hover:text-[var(--accent)] hover:bg-[var(--surface-2)] transition-all shadow-2xs flex-none"
-        >
-          <Icon name="build2" />
-          <span>الشركات</span>
-        </Link>
-        <Link
-          href="/commercial/companies"
-          className="flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold bg-[var(--surface)] border border-[var(--border)] text-[var(--text-2)] hover:border-[var(--accent)] hover:text-[var(--accent)] hover:bg-[var(--surface-2)] transition-all shadow-2xs flex-none"
-        >
-          <Icon name="build" />
-          <span>الشركات وتأسيسها</span>
-        </Link>
-        <Link
-          href="/commercial/deposits"
-          className="flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold bg-[var(--surface)] border border-[var(--border)] text-[var(--text-2)] hover:border-[var(--accent)] hover:text-[var(--accent)] hover:bg-[var(--surface-2)] transition-all shadow-2xs flex-none"
-        >
-          <Icon name="vault" />
-          <span>إطلاق الوديعة</span>
-        </Link>
-        <Link
-          href="/commercial/llc"
-          className="flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold bg-[var(--surface)] border border-[var(--border)] text-[var(--text-2)] hover:border-[var(--accent)] hover:text-[var(--accent)] hover:bg-[var(--surface-2)] transition-all shadow-2xs flex-none"
-        >
-          <Icon name="badge" />
-          <span>قسم المحدودة</span>
-        </Link>
-        <Link
-          href="/commercial/ids"
-          className="flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold bg-[var(--surface)] border border-[var(--border)] text-[var(--text-2)] hover:border-[var(--accent)] hover:text-[var(--accent)] hover:bg-[var(--surface-2)] transition-all shadow-2xs flex-none"
-        >
-          <Icon name="stamp" />
-          <span>قسم الهويات</span>
-        </Link>
-        <Link
-          href="/commercial/tax-assessment"
-          className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-black bg-[var(--accent)] text-white border border-[var(--accent)] shadow-xs flex-none"
-        >
-          <Icon name="scale" />
-          <span>التحاسب الضريبي</span>
-        </Link>
-        <Link
-          href="/commercial/financial-statements"
-          className="flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold bg-[var(--surface)] border border-[var(--border)] text-[var(--text-2)] hover:border-[var(--accent)] hover:text-[var(--accent)] hover:bg-[var(--surface-2)] transition-all shadow-2xs flex-none"
-        >
-          <Icon name="doc" />
-          <span>الحسابات الختامية</span>
-        </Link>
-      </div>
-
       {/* Page Header Banner */}
       <div className="flex items-center justify-between flex-wrap gap-4 pb-2 border-b border-[var(--line-soft)]">
         <div className="flex items-center gap-3.5">
