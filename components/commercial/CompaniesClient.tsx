@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { wfProgress, formatMoney, formatDate, penaltyState } from '@/lib/constants'
 import { calculateFSState } from '@/lib/financial-statements/calc'
 import { calculateCompanyStatus } from '@/lib/status-engine'
@@ -22,6 +22,8 @@ interface Props {
 
 export default function CompaniesClient({ initialCompanies }: Props) {
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const targetId = searchParams.get('id') || searchParams.get('companyId')
   const { can, isSuperAdmin, isAdmin } = usePermissions()
   const canCreateCompany = can('companies', 'create') || isSuperAdmin || isAdmin
   const [companiesList, setCompaniesList] = useState<CompanyWithWorkflow[]>(initialCompanies)
@@ -35,6 +37,17 @@ export default function CompaniesClient({ initialCompanies }: Props) {
   useEffect(() => {
     setCompaniesList(initialCompanies)
   }, [initialCompanies])
+
+  // Automatically open company details modal if URL query param is present
+  useEffect(() => {
+    if (targetId && companiesList.length > 0) {
+      const match = companiesList.find(c => c.id === targetId)
+      if (match) {
+        setSelectedCompany(match)
+        setIsDetailsOpen(true)
+      }
+    }
+  }, [targetId, companiesList])
 
   const handleCardClick = (company: CompanyWithWorkflow) => {
     setSelectedCompany(company)

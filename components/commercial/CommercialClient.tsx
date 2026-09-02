@@ -74,7 +74,7 @@ export default function CommercialClient({ rows = [], companies = [] }: Props) {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false)
   const [localRows, setLocalRows] = useState<TransactionFull[]>(rows)
   const [activeMenuTx, setActiveMenuTx] = useState<TransactionFull | null>(null)
-  const [menuCoords, setMenuCoords] = useState<{ top?: number; bottom?: number; right: number } | null>(null)
+  const [menuCoords, setMenuCoords] = useState<{ top: number; left: number } | null>(null)
   const menuRef = useRef<HTMLDivElement>(null)
 
   // Modals state
@@ -669,14 +669,20 @@ export default function CommercialClient({ rows = [], companies = [] }: Props) {
                               return
                             }
                             const rect = e.currentTarget.getBoundingClientRect()
-                            const menuHeight = 220
-                            const menuWidth = 205
-                            let top = rect.bottom + 4
-                            if (top + menuHeight > window.innerHeight - 10) {
-                              top = Math.max(10, rect.top - menuHeight - 4)
+                            const menuHeight = 240
+                            const menuWidth = 210
+                            let top = rect.bottom + 6
+                            if (top + menuHeight > window.innerHeight - 12) {
+                              top = Math.max(12, rect.top - menuHeight - 6)
                             }
-                            const right = Math.max(12, Math.min(window.innerWidth - menuWidth - 12, window.innerWidth - rect.right))
-                            setMenuCoords({ top, right })
+                            let left = rect.left
+                            if (left + menuWidth > window.innerWidth - 12) {
+                              left = window.innerWidth - menuWidth - 12
+                            }
+                            if (left < 12) {
+                              left = 12
+                            }
+                            setMenuCoords({ top, left })
                             setActiveMenuTx(t)
                           }}
                           className={`w-8 h-8 rounded-full border transition-all inline-flex items-center justify-center text-sm font-bold shadow-xs cursor-pointer ${
@@ -713,10 +719,10 @@ export default function CommercialClient({ rows = [], companies = [] }: Props) {
           {/* Floating Dropdown Card */}
           <div
             ref={menuRef}
-            className="fixed z-[999999] min-w-[195px] max-w-[90vw] bg-[var(--surface)] border border-[var(--glass-border)] rounded-2xl shadow-2xl p-1.5 text-right flex flex-col gap-1 backdrop-blur-2xl animate-scale-in"
+            className="fixed z-[999999] min-w-[200px] max-w-[90vw] bg-[var(--surface)] border border-[var(--glass-border)] rounded-2xl shadow-2xl p-1.5 text-right flex flex-col gap-1 backdrop-blur-2xl animate-scale-in"
             style={{
               top: `${menuCoords.top}px`,
-              right: `${menuCoords.right}px`,
+              left: `${menuCoords.left}px`,
             }}
             onClick={e => e.stopPropagation()}
             dir="rtl"
@@ -728,7 +734,13 @@ export default function CommercialClient({ rows = [], companies = [] }: Props) {
                 const cur = activeMenuTx
                 setActiveMenuTx(null)
                 setMenuCoords(null)
-                if (cur.company_id) {
+                if (cur.type === 'formation' || cur.type === 'tasis') {
+                  if (cur.company_id) {
+                    router.push(`/commercial/companies?id=${cur.company_id}`)
+                  } else {
+                    setEditTx(cur)
+                  }
+                } else if (cur.company_id) {
                   router.push(`/commercial/companies/${cur.company_id}`)
                 } else {
                   setEditTx(cur)
@@ -737,7 +749,7 @@ export default function CommercialClient({ rows = [], companies = [] }: Props) {
               className="flex items-center gap-2.5 w-full px-3 py-2 rounded-xl text-xs font-semibold text-[var(--text)] hover:bg-[var(--surface-2)] transition-colors cursor-pointer text-right"
             >
               <span className="material-symbols-outlined text-[16px] text-blue-500">visibility</span>
-              <span>فتح تفاصيل الشركة</span>
+              <span>{activeMenuTx.type === 'formation' || activeMenuTx.type === 'tasis' ? 'فتح تفاصيل وسير عمل التأسيس' : 'فتح تفاصيل الشركة'}</span>
             </button>
 
             {/* Edit / Fix Record */}

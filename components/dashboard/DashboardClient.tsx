@@ -330,7 +330,13 @@ export default function DashboardClient({ stats, profiles = [], companies = [] }
                         {/* Action Button */}
                         <td className="py-2 px-2.5 text-left whitespace-nowrap">
                           <Link
-                            href={tx.companyId ? `/commercial/companies/${tx.companyId}` : '/commercial/llc'}
+                            href={
+                              tx.companyId
+                                ? (tx.type === 'formation' || tx.typeLabel?.includes('تأسيس')
+                                    ? `/commercial/companies?id=${tx.companyId}`
+                                    : `/commercial/companies/${tx.companyId}`)
+                                : (tx.type === 'llc' ? `/commercial/llc?id=${tx.id}` : '/commercial')
+                            }
                             className="inline-flex items-center justify-center px-2.5 py-0.5 rounded-md text-[11px] font-bold text-[var(--accent)] hover:bg-[var(--accent-soft)] transition-colors border border-[var(--accent)]/20 hover:border-[var(--accent)]/40"
                           >
                             عرض
