@@ -200,116 +200,154 @@ export default function Topbar({ profile, title, subtitle, notifCount = 0, onMen
           />
         </button>
 
-        {/* User Menu Dropdown */}
+        {/* User Menu Dropdown (Apple / Atheros Luxury Design - Solid 100% Opaque) */}
         {isUserMenuOpen && (
           <div
-            className="absolute top-[calc(100%+10px)] left-0 w-64 bg-[var(--glass-bg)] backdrop-blur-[20px] border border-[var(--glass-border)] rounded-2xl shadow-[var(--shadow-3)] z-[99999] overflow-hidden py-2 text-right animate-scale-in"
-            style={{
-              WebkitBackdropFilter: 'var(--glass-backdrop)',
-            }}
+            className="absolute top-[calc(100%+8px)] left-0 w-[290px] bg-white dark:bg-[#0F172A] border border-slate-200/90 dark:border-slate-800 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.18),0_0_1px_1px_rgba(0,0,0,0.06)] dark:shadow-[0_25px_60px_rgba(0,0,0,0.6),0_0_1px_1px_rgba(255,255,255,0.08)] z-[99999] overflow-hidden text-right animate-scale-in"
           >
-            {/* User Header Summary */}
-            <div className="px-4 py-3 border-b border-[var(--line-soft)] bg-[var(--surface-2)]/50">
+            {/* 1. User Header Profile Card */}
+            <div className="p-3.5 border-b border-slate-100 dark:border-slate-800/80 bg-slate-50/70 dark:bg-slate-900/60">
               <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-full bg-gradient-to-tr from-[var(--accent)] to-emerald-500 flex items-center justify-center p-0.5 shadow-sm flex-shrink-0">
-                  {avatarUrl && !imgError ? (
-                    <img
-                      src={avatarUrl}
-                      alt={displayName}
-                      className="w-full h-full rounded-full object-cover"
-                    />
-                  ) : (
-                    <div className="w-full h-full bg-[var(--surface-2)] rounded-full flex items-center justify-center text-[var(--accent)] font-extrabold text-xs">
-                      {initials}
-                    </div>
-                  )}
+                {/* Avatar with Green Online Status Dot */}
+                <div className="relative shrink-0">
+                  <div className="w-11 h-11 rounded-full bg-gradient-to-tr from-[var(--accent)] to-emerald-500 flex items-center justify-center p-0.5 shadow-sm">
+                    {avatarUrl && !imgError ? (
+                      <img
+                        src={avatarUrl}
+                        alt={displayName}
+                        className="w-full h-full rounded-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-full h-full bg-[var(--surface-2)] rounded-full flex items-center justify-center text-[var(--accent)] font-extrabold text-sm">
+                        {initials}
+                      </div>
+                    )}
+                  </div>
+                  {/* Online Green Badge */}
+                  <span className="absolute bottom-0 right-0 w-3 h-3 bg-emerald-500 rounded-full border-2 border-white dark:border-slate-900 shadow-xs" title="متصل الآن" />
                 </div>
+
+                {/* Name, Email, & Role Badge */}
                 <div className="min-w-0 flex-1">
-                  <div className="text-sm font-bold text-[var(--text)] truncate" title={displayName}>
+                  <div className="text-sm font-extrabold text-slate-900 dark:text-white truncate" title={displayName}>
                     {displayName}
                   </div>
                   {userProfile?.email && (
-                    <div className="text-xs text-[var(--text-3)] truncate" title={userProfile.email}>
+                    <div className="text-xs text-slate-500 dark:text-slate-400 truncate mt-0.5" title={userProfile.email}>
                       {userProfile.email}
                     </div>
                   )}
-                  <span className="inline-block mt-1 px-2 py-0.5 text-[10.5px] font-bold rounded-full bg-[var(--accent-soft)] text-[var(--accent)]">
+                  <span className="inline-flex items-center mt-1 px-2 py-0.5 text-[10.5px] font-bold rounded-full bg-blue-50 text-blue-700 dark:bg-blue-950/60 dark:text-blue-300 border border-blue-200/60 dark:border-blue-800/50">
                     {roleLabel}
                   </span>
                 </div>
               </div>
             </div>
 
-            {/* Menu Items */}
-            <div className="py-1">
+            {/* 2. Primary Navigation Actions */}
+            <div className="p-1.5 space-y-0.5">
+              {/* My Profile */}
               <button
                 type="button"
                 onClick={() => {
                   setIsUserMenuOpen(false)
                   setIsProfileModalOpen(true)
                 }}
-                className="w-full flex items-center gap-3 px-4 py-2.5 text-xs font-medium text-[var(--text)] hover:bg-[var(--surface-2)] transition-all duration-150 hover:-translate-x-0.5 text-right cursor-pointer"
+                className="w-full flex items-center justify-between px-3 py-2 text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800/80 rounded-xl transition-colors cursor-pointer group text-right"
               >
-                <Icon name="user" className="w-4 h-4 text-[var(--accent)]" />
-                <span>الملف الشخصي</span>
+                <div className="flex items-center gap-2.5">
+                  <span className="material-symbols-outlined text-[18px] text-slate-500 group-hover:text-[var(--accent)] transition-colors">account_circle</span>
+                  <span>الملف الشخصي</span>
+                </div>
+                <span className="text-[10.5px] font-mono text-slate-400 dark:text-slate-500 px-1.5 py-0.5 rounded border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50">
+                  ⌘ P
+                </span>
               </button>
 
+              {/* Users Management (Super Admin & Admin Only) */}
               {(userProfile?.role === 'super_admin' || userProfile?.role === 'admin') && (
                 <Link
                   href="/settings/users"
                   onClick={() => setIsUserMenuOpen(false)}
-                  className="flex items-center gap-3 px-4 py-2.5 text-xs font-medium text-[var(--text)] hover:bg-[var(--surface-2)] transition-all duration-150 hover:-translate-x-0.5"
+                  className="flex items-center justify-between px-3 py-2 text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800/80 rounded-xl transition-colors group text-right"
                 >
-                  <Icon name="shield" className="w-4 h-4 text-emerald-500" />
-                  <span>إدارة المستخدمين</span>
+                  <div className="flex items-center gap-2.5">
+                    <span className="material-symbols-outlined text-[18px] text-emerald-500 group-hover:scale-105 transition-transform">verified_user</span>
+                    <span>إدارة المستخدمين</span>
+                  </div>
+                  <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/50 border border-emerald-200/60 dark:border-emerald-800/50 px-1.5 py-0.5 rounded-full">
+                    مسؤول
+                  </span>
                 </Link>
               )}
 
+              {/* Account Settings */}
               <Link
                 href="/settings"
                 onClick={() => setIsUserMenuOpen(false)}
-                className="flex items-center gap-3 px-4 py-2.5 text-xs font-medium text-[var(--text)] hover:bg-[var(--surface-2)] transition-all duration-150 hover:-translate-x-0.5"
+                className="flex items-center justify-between px-3 py-2 text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800/80 rounded-xl transition-colors group text-right"
               >
-                <Icon name="gear" className="w-4 h-4 text-[var(--text-3)]" />
-                <span>إعدادات الحساب</span>
+                <div className="flex items-center gap-2.5">
+                  <span className="material-symbols-outlined text-[18px] text-slate-500 group-hover:text-[var(--accent)] transition-colors">settings</span>
+                  <span>إعدادات الحساب</span>
+                </div>
+                <span className="text-[10.5px] font-mono text-slate-400 dark:text-slate-500 px-1.5 py-0.5 rounded border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50">
+                  ⌘ ,
+                </span>
               </Link>
 
+              {/* Reminders & Notifications */}
               <Link
                 href="/reminders"
                 onClick={() => setIsUserMenuOpen(false)}
-                className="flex items-center gap-3 px-4 py-2.5 text-xs font-medium text-[var(--text)] hover:bg-[var(--surface-2)] transition-all duration-150 hover:-translate-x-0.5"
+                className="flex items-center justify-between px-3 py-2 text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800/80 rounded-xl transition-colors group text-right"
               >
-                <Icon name="bell" className="w-4 h-4 text-[var(--text-3)]" />
-                <span>الإشعارات</span>
-              </Link>
-
-              <button
-                type="button"
-                onClick={() => {
-                  toggleTheme()
-                  setIsUserMenuOpen(false)
-                }}
-                className="w-full flex items-center justify-between px-4 py-2.5 text-xs font-medium text-[var(--text)] hover:bg-[var(--surface-2)] transition-all duration-150 hover:-translate-x-0.5 text-right"
-              >
-                <div className="flex items-center gap-3">
-                  <Icon name={dark ? 'sun' : 'moon'} className="w-4 h-4 text-[var(--text-3)]" />
-                  <span>تبديل المظهر</span>
+                <div className="flex items-center gap-2.5">
+                  <span className="material-symbols-outlined text-[18px] text-slate-500 group-hover:text-amber-500 transition-colors">notifications</span>
+                  <span>مركز الإشعارات والتذكيرات</span>
                 </div>
-                <span className="text-[11px] text-[var(--text-3)] font-normal">
-                  {dark ? 'الوضع الفاتح' : 'الوضع الداكن'}
-                </span>
-              </button>
+                {notifCount > 0 && (
+                  <span className="text-[10px] font-bold text-white bg-rose-500 px-1.5 py-0.2 rounded-full num">
+                    {notifCount}
+                  </span>
+                )}
+              </Link>
             </div>
 
-            <div className="border-t border-[var(--line-soft)] pt-1 mt-1">
+            {/* 3. Dark Mode Row with Apple iOS Toggle Switch */}
+            <div className="p-1.5 border-t border-slate-100 dark:border-slate-800">
+              <div
+                onClick={() => toggleTheme()}
+                className="flex items-center justify-between px-3 py-2 text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800/80 rounded-xl transition-colors cursor-pointer select-none"
+              >
+                <div className="flex items-center gap-2.5">
+                  <span className="material-symbols-outlined text-[18px] text-slate-500">
+                    {dark ? 'dark_mode' : 'light_mode'}
+                  </span>
+                  <span>الوضع الداكن</span>
+                </div>
+
+                {/* Apple Style Interactive Toggle Switch */}
+                <div
+                  className={`w-10 h-5.5 rounded-full p-0.5 transition-colors duration-300 ease-in-out flex items-center ${
+                    dark ? 'bg-[var(--accent)] justify-end' : 'bg-slate-300 dark:bg-slate-700 justify-start'
+                  }`}
+                >
+                  <div className="w-4.5 h-4.5 bg-white rounded-full shadow-sm transition-transform" />
+                </div>
+              </div>
+            </div>
+
+            {/* 4. Sign Out Row */}
+            <div className="p-1.5 border-t border-slate-100 dark:border-slate-800">
               <button
                 type="button"
                 disabled={loggingOut}
                 onClick={handleSignout}
-                className="w-full flex items-center gap-3 px-4 py-2.5 text-xs font-bold text-[var(--bad)] hover:bg-[var(--bad-soft)]/20 transition-all duration-150 hover:-translate-x-0.5 disabled:opacity-50 text-right"
+                className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-bold text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 rounded-xl transition-colors disabled:opacity-50 text-right cursor-pointer group"
               >
-                <Icon name="out" className="w-4 h-4 text-[var(--bad)]" />
-                <span>{loggingOut ? 'جارٍ الخروج…' : 'تسجيل الخروج'}</span>
+                <span className="material-symbols-outlined text-[18px] text-rose-500 group-hover:-translate-x-0.5 transition-transform">logout</span>
+                <span>{loggingOut ? 'جارٍ تسجيل الخروج…' : 'تسجيل الخروج'}</span>
               </button>
             </div>
           </div>
