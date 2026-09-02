@@ -20,35 +20,43 @@ export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
   viewportFit: 'cover',
-  themeColor: [
-    { media: '(prefers-color-scheme: light)', color: '#F7F8FA' },
-    { media: '(prefers-color-scheme: dark)', color: '#111317' },
-  ],
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="ar" dir="rtl" data-theme="light" data-scroll-behavior="smooth" className={cairo.variable} suppressHydrationWarning>
       <head>
-        {/* Google Material Symbols & Modern Fonts */}
+        <meta id="theme-color-meta" name="theme-color" content="#FFFFFF" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+
+        {/* Google Material Symbols */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link
           rel="stylesheet"
           href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
         />
-        <link
-          rel="stylesheet"
-          href="https://fonts.googleapis.com/css2?family=Chivo:wght@400;600;700;800;900&family=Inter:wght@400;500;600;700&display=swap"
-        />
-        {/* Theme script to prevent flicker and initialize light mode default */}
+
+        {/* Theme script to prevent flicker, set theme-color for iOS status bar, and initialize theme */}
         <script
           dangerouslySetInnerHTML={{
-            __html: `try{var t=localStorage.getItem('theme')||'light';
-              document.documentElement.dataset.theme=t;
-              if(t==='dark'){document.documentElement.classList.add('dark');}
-              else{document.documentElement.classList.remove('dark');}
-            }catch(e){}`,
+            __html: `try {
+              var t = localStorage.getItem('theme') || 'light';
+              document.documentElement.dataset.theme = t;
+              if (t === 'dark') {
+                document.documentElement.classList.add('dark');
+              } else {
+                document.documentElement.classList.remove('dark');
+              }
+              var color = t === 'dark' ? '#0F131A' : '#FFFFFF';
+              var meta = document.getElementById('theme-color-meta');
+              if (meta) { meta.setAttribute('content', color); }
+              var allMetas = document.querySelectorAll('meta[name="theme-color"]');
+              for (var i = 0; i < allMetas.length; i++) {
+                allMetas[i].setAttribute('content', color);
+              }
+            } catch(e) {}`,
           }}
         />
       </head>

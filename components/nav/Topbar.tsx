@@ -83,7 +83,7 @@ export default function Topbar({ profile, title, subtitle, notifCount = 0, onMen
     loadProfile()
   }, [profile])
 
-  // قراءة تفضيل المظهر وتطبيق كلاس dark المتوافق مع Tailwind والـ CSS
+  // قراءة تفضيل المظهر وتطبيق كلاس dark وتحديث لون شريط متصفح الهاتف (iOS Theme-Color)
   useEffect(() => {
     const savedTheme = localStorage.getItem('theme')
     const currentAttr = document.documentElement.dataset.theme
@@ -95,6 +95,10 @@ export default function Topbar({ profile, title, subtitle, notifCount = 0, onMen
     } else {
       document.documentElement.classList.remove('dark')
     }
+    const color = isDark ? '#0F131A' : '#FFFFFF'
+    const meta = document.getElementById('theme-color-meta') || document.querySelector('meta[name="theme-color"]')
+    if (meta) meta.setAttribute('content', color)
+    document.querySelectorAll('meta[name="theme-color"]').forEach(m => m.setAttribute('content', color))
   }, [])
 
   // إغلاق قائمة المستخدم عند النقر خارجها
@@ -116,6 +120,10 @@ export default function Topbar({ profile, title, subtitle, notifCount = 0, onMen
     } else {
       document.documentElement.classList.remove('dark')
     }
+    const color = next === 'dark' ? '#0F131A' : '#FFFFFF'
+    const meta = document.getElementById('theme-color-meta') || document.querySelector('meta[name="theme-color"]')
+    if (meta) meta.setAttribute('content', color)
+    document.querySelectorAll('meta[name="theme-color"]').forEach(m => m.setAttribute('content', color))
     try { localStorage.setItem('theme', next) } catch { /* تجاهل */ }
     setDark(!dark)
   }

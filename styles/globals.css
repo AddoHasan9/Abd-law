@@ -502,6 +502,26 @@
     box-shadow: 0 0 0 3.5px rgba(59, 130, 246, 0.18), inset 0 1px 2px rgba(15, 23, 42, 0.02);
   }
 
+  html {
+    background-color: var(--bg);
+    color: var(--text);
+  }
+
+  html[data-theme="dark"] {
+    background-color: #0F131A !important;
+  }
+
+  body {
+    background-color: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    min-height: 100dvh;
+  }
+
+  html[data-theme="dark"] body {
+    background-color: #0F131A !important;
+  }
+
   h1,
   h2,
   h3,
@@ -2907,6 +2927,10 @@
     #topbar {
       padding: 0 14px;
       gap: 8px;
+      padding-top: env(safe-area-inset-top);
+      height: calc(var(--topbar-h) + env(safe-area-inset-top));
+      min-height: calc(var(--topbar-h) + env(safe-area-inset-top));
+      max-height: calc(var(--topbar-h) + env(safe-area-inset-top));
     }
 
     .search-trigger {
