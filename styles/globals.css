@@ -759,6 +759,7 @@
     margin: 0;
     padding: 0;
     overflow: hidden;
+    box-sizing: border-box;
   }
 
   body {
@@ -770,24 +771,28 @@
     display: flex;
     height: 100vh;
     height: 100dvh;
-    width: 100vw;
+    width: 100%;
+    max-width: 100vw;
     overflow: hidden;
     position: relative;
     z-index: 1;
     background: transparent;
+    box-sizing: border-box;
   }
 
   /* ---- الشريط الجانبي الفاخر بنمط الزجاج المصنفر (Apple macOS Sidebar Material) ---- */
   #sidebar {
     width: var(--sidebar-w);
-    flex: none;
+    min-width: var(--sidebar-w);
+    max-width: var(--sidebar-w);
+    flex: 0 0 var(--sidebar-w);
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
     background: var(--side-bg);
     -webkit-backdrop-filter: blur(36px) saturate(200%);
     backdrop-filter: blur(36px) saturate(200%);
-    border-left: 1px solid var(--side-border, var(--border));
+    border-inline-end: 1px solid var(--side-border, var(--border));
     z-index: 30;
     height: 100vh;
     height: 100dvh;
@@ -797,6 +802,7 @@
     top: 0;
     box-shadow: -4px 0 28px -4px rgba(15, 23, 42, 0.05);
     overscroll-behavior: none;
+    box-sizing: border-box;
   }
 
   #sidebar > * {
@@ -1205,19 +1211,24 @@
 
   /* ---- المنطقة الرئيسية ---- */
   #main {
-    flex: 1;
+    flex: 1 1 auto;
     display: flex;
     flex-direction: column;
     height: 100vh;
     height: 100dvh;
     min-width: 0;
+    max-width: calc(100% - var(--sidebar-w));
+    width: calc(100% - var(--sidebar-w));
     overflow: hidden;
+    box-sizing: border-box;
   }
 
   #topbar {
     height: var(--topbar-h);
     min-height: var(--topbar-h);
     max-height: var(--topbar-h);
+    width: 100%;
+    max-width: 100%;
     flex: none;
     display: flex;
     align-items: center;
@@ -1312,24 +1323,29 @@
   }
 
   #view-root {
-    flex: 1;
+    flex: 1 1 auto;
+    width: 100%;
+    max-width: 100%;
     height: calc(100vh - var(--topbar-h));
     height: calc(100dvh - var(--topbar-h));
     overflow-y: auto;
     overflow-x: hidden;
-    padding: 10px 14px 24px;
+    padding: 14px 18px 28px;
     background: transparent;
     color: var(--text);
     overscroll-behavior: contain;
     -webkit-overflow-scrolling: touch;
+    box-sizing: border-box;
   }
 
   .view {
-    max-width: 1540px;
-    margin: 0 auto;
+    width: 100%;
+    max-width: 100%;
+    margin: 0;
     background: transparent;
     color: var(--text);
     animation: viewIn var(--t-base) both;
+    box-sizing: border-box;
   }
 
   .card, .glass-card {
