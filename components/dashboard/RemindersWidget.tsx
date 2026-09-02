@@ -73,15 +73,15 @@ export default function RemindersWidget({ companies = [], hideIfEmpty = false }:
   }
 
   return (
-    <div className="glass-card rounded-[28px] p-5 sm:p-6 flex flex-col gap-4 h-full">
+    <div className="glass-card rounded-[22px] p-3.5 sm:p-4.5 flex flex-col gap-3 h-full border border-[var(--glass-border)]">
       {/* Widget Header */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
           <div
             style={{
-              width: '32px',
-              height: '32px',
-              borderRadius: '8px',
+              width: '28px',
+              height: '28px',
+              borderRadius: '7px',
               background: 'var(--accent-soft)',
               color: 'var(--accent)',
               display: 'grid',
@@ -91,10 +91,10 @@ export default function RemindersWidget({ companies = [], hideIfEmpty = false }:
             <Icon name="bell" />
           </div>
           <div>
-            <h3 style={{ fontSize: '15px', fontWeight: 700, margin: 0, color: 'var(--text)' }}>
+            <h3 style={{ fontSize: '14px', fontWeight: 700, margin: 0, color: 'var(--text)' }}>
               التذكيرات الشخصية والمستحقات
             </h3>
-            <span style={{ fontSize: '11.5px', color: 'var(--text-3)' }}>
+            <span style={{ fontSize: '10.5px', color: 'var(--text-3)' }}>
               إدارة المواعيد والتنبيهات المخصصة
             </span>
           </div>
@@ -107,7 +107,7 @@ export default function RemindersWidget({ companies = [], hideIfEmpty = false }:
             setIsModalOpen(true)
           }}
           className="btn btn-primary"
-          style={{ padding: '6px 12px', fontSize: '12.5px' }}
+          style={{ padding: '4px 10px', fontSize: '11.5px', borderRadius: '8px' }}
         >
           <Icon name="plus" />
           <span>إضافة تذكير</span>
@@ -118,9 +118,9 @@ export default function RemindersWidget({ companies = [], hideIfEmpty = false }:
       <div
         style={{
           display: 'flex',
-          gap: '6px',
+          gap: '4px',
           background: 'var(--surface-2)',
-          padding: '4px',
+          padding: '2.5px',
           borderRadius: 'var(--r-md)',
           border: '1px solid var(--line-soft)',
         }}
@@ -130,30 +130,30 @@ export default function RemindersWidget({ companies = [], hideIfEmpty = false }:
           onClick={() => setActiveTab('pending')}
           style={{
             flex: 1,
-            padding: '6px',
+            padding: '4px 6px',
             border: 'none',
             borderRadius: 'var(--r-sm)',
             background: activeTab === 'pending' ? 'var(--surface)' : 'transparent',
             color: activeTab === 'pending' ? 'var(--accent)' : 'var(--text-2)',
             fontWeight: activeTab === 'pending' ? 700 : 500,
-            fontSize: '12px',
+            fontSize: '11px',
             cursor: 'pointer',
           }}
         >
-          المستحقة والقادمة ({pendingCount !== null ? pendingCount : (activeTab === 'pending' ? reminders.filter(r => !r.is_completed).length : 0)})
+          المستحقة ({pendingCount !== null ? pendingCount : (activeTab === 'pending' ? reminders.filter(r => !r.is_completed).length : 0)})
         </button>
         <button
           type="button"
           onClick={() => setActiveTab('completed')}
           style={{
             flex: 1,
-            padding: '6px',
+            padding: '4px 6px',
             border: 'none',
             borderRadius: 'var(--r-sm)',
             background: activeTab === 'completed' ? 'var(--surface)' : 'transparent',
-            color: activeTab === 'completed' ? 'var(--ok)' : 'var(--text-2)',
+            color: activeTab === 'completed' ? 'var(--accent)' : 'var(--text-2)',
             fontWeight: activeTab === 'completed' ? 700 : 500,
-            fontSize: '12px',
+            fontSize: '11px',
             cursor: 'pointer',
           }}
         >
@@ -164,13 +164,13 @@ export default function RemindersWidget({ companies = [], hideIfEmpty = false }:
           onClick={() => setActiveTab('archived')}
           style={{
             flex: 1,
-            padding: '6px',
+            padding: '4px 6px',
             border: 'none',
             borderRadius: 'var(--r-sm)',
             background: activeTab === 'archived' ? 'var(--surface)' : 'transparent',
             color: activeTab === 'archived' ? 'var(--accent)' : 'var(--text-2)',
             fontWeight: activeTab === 'archived' ? 700 : 500,
-            fontSize: '12px',
+            fontSize: '11px',
             cursor: 'pointer',
           }}
         >
