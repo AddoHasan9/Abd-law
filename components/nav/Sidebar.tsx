@@ -30,16 +30,46 @@ export default function Sidebar({
   const params = useSearchParams()
   const typeParam = params.get('type')
 
-  const [closed, setClosed] = useState<Set<string>>(new Set())
+  const [closed, setClosed] = useState<Set<string>>(new Set(['g-sys']))
   const [ready, setReady] = useState(false)
 
   useEffect(() => {
     try {
       const raw = localStorage.getItem(STORE_KEY)
-      if (raw) setClosed(new Set(JSON.parse(raw) as string[]))
-    } catch { }
+      if (raw) {
+        setClosed(new Set(JSON.parse(raw) as string[]))
+      } else {
+        setClosed(new Set(['g-sys']))
+      }
+    } catch {
+      setClosed(new Set(['g-sys']))
+    }
     setReady(true)
   }, [])
+
+  // Auto-expand group if current route belongs to it
+  useEffect(() => {
+    if (pathname.startsWith('/settings')) {
+      setClosed(prev => {
+        if (prev.has('g-sys')) {
+          const next = new Set(prev)
+          next.delete('g-sys')
+          return next
+        }
+        return prev
+      })
+    }
+    if (pathname.startsWith('/commercial')) {
+      setClosed(prev => {
+        if (prev.has('g-com')) {
+          const next = new Set(prev)
+          next.delete('g-com')
+          return next
+        }
+        return prev
+      })
+    }
+  }, [pathname])
 
   const toggle = useCallback((key: string) => {
     setClosed(prev => {
