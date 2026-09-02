@@ -113,7 +113,22 @@ export default function NotificationCenter({ initialCount = 0 }: Props) {
         )}
       </button>
 
-      {/* Flyout Panel */}
+      {/* Click Outside Veil */}
+      {isOpen && (
+        <div
+          onClick={() => setIsOpen(false)}
+          style={{
+            position: 'fixed',
+            inset: 0,
+            zIndex: 99998,
+            background: 'rgba(0, 0, 0, 0.25)',
+            backdropFilter: 'blur(2px)',
+            WebkitBackdropFilter: 'blur(2px)',
+          }}
+        />
+      )}
+
+      {/* Flyout Panel (100% Solid Opaque Background) */}
       {isOpen && (
         <div
           style={{
@@ -122,13 +137,11 @@ export default function NotificationCenter({ initialCount = 0 }: Props) {
             insetInlineEnd: '8px',
             width: 'min(390px, calc(100vw - 16px))',
             maxHeight: 'calc(100dvh - var(--topbar-h, 56px) - 24px)',
-            background: 'var(--glass-bg)',
-            backdropFilter: 'var(--glass-backdrop)',
-            WebkitBackdropFilter: 'var(--glass-backdrop)',
+            background: 'var(--surface)',
             color: 'var(--text)',
-            border: '1px solid var(--glass-border)',
+            border: '1px solid var(--border)',
             borderRadius: 'var(--r-xl, 18px)',
-            boxShadow: 'var(--shadow-3)',
+            boxShadow: '0 20px 50px rgba(0, 0, 0, 0.25), 0 2px 10px rgba(0, 0, 0, 0.1)',
             zIndex: 99999,
             display: 'flex',
             flexDirection: 'column',
@@ -249,13 +262,14 @@ export default function NotificationCenter({ initialCount = 0 }: Props) {
                       padding: '12px 16px',
                       borderBottom: '1px solid var(--line-soft)',
                       borderRight: `4px solid ${borderLeftColor}`,
-                      background: item.is_read ? 'transparent' : 'var(--accent-soft)',
+                      background: item.is_read ? 'var(--surface)' : 'var(--accent-soft)',
                       cursor: 'pointer',
                       display: 'flex',
                       gap: '12px',
                       alignItems: 'flex-start',
                       transition: 'background 0.15s ease',
                     }}
+                    className="hover:bg-[var(--surface-2)]"
                   >
                     <div
                       style={{

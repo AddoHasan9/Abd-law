@@ -97,6 +97,21 @@ export default function ReminderCenter() {
         )}
       </button>
 
+      {/* Click Outside Veil */}
+      {isOpen && (
+        <div
+          onClick={() => setIsOpen(false)}
+          style={{
+            position: 'fixed',
+            inset: 0,
+            zIndex: 99998,
+            background: 'rgba(0, 0, 0, 0.25)',
+            backdropFilter: 'blur(2px)',
+            WebkitBackdropFilter: 'blur(2px)',
+          }}
+        />
+      )}
+
       {/* Flyout Panel */}
       {isOpen && (
         <div
@@ -108,9 +123,9 @@ export default function ReminderCenter() {
             maxHeight: 'calc(100dvh - var(--topbar-h, 56px) - 24px)',
             background: 'var(--surface)',
             color: 'var(--text)',
-            border: '1px solid var(--line)',
+            border: '1px solid var(--border)',
             borderRadius: 'var(--r-lg)',
-            boxShadow: 'var(--shadow-3)',
+            boxShadow: '0 20px 50px rgba(0, 0, 0, 0.25), 0 2px 10px rgba(0, 0, 0, 0.1)',
             zIndex: 99999,
             display: 'flex',
             flexDirection: 'column',
