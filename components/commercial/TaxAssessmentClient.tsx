@@ -463,24 +463,6 @@ export default function TaxAssessmentClient({ assessments = [], companies = [], 
                               <span className="material-symbols-outlined text-[13px]">arrow_left</span>
                             </Link>
                           )}
-                          <button
-                            type="button"
-                            onClick={() => openEditModal(item)}
-                            className="btn btn-ghost px-2 py-1 text-xs font-bold border border-[var(--border)]"
-                            title="تعديل ملف التحاسب الضريبي"
-                          >
-                            ✎ تعديل
-                          </button>
-                          {canDelete && (
-                            <button
-                              type="button"
-                              onClick={() => handleDelete(item.id, coName)}
-                              className="w-7 h-7 rounded-lg bg-red-500/10 text-red-400 hover:bg-red-500 hover:text-white flex items-center justify-center transition-colors cursor-pointer"
-                              title="حذف السجل"
-                            >
-                              ✕
-                            </button>
-                          )}
                         </div>
                       </td>
                     </tr>
