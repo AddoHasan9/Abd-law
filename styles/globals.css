@@ -1386,6 +1386,98 @@
     box-sizing: border-box;
   }
 
+  /* ---- زر القائمة للشاشات الصغيرة والغلاف الجانبي ---- */
+  #menu-btn {
+    display: none;
+  }
+
+  #side-veil {
+    display: none;
+  }
+
+  /* ============================================================
+     التكيف المتكامل مع الجوال والتابلت (Mobile & Tablet Responsive System)
+     ============================================================ */
+  @media (max-width: 1024px) {
+    #menu-btn {
+      display: grid !important;
+    }
+
+    #app {
+      width: 100vw !important;
+      max-width: 100vw !important;
+      overflow-x: hidden !important;
+      position: relative !important;
+    }
+
+    #sidebar {
+      position: fixed !important;
+      top: 0 !important;
+      right: 0 !important;
+      bottom: 0 !important;
+      width: 280px !important;
+      max-width: 85vw !important;
+      height: 100vh !important;
+      height: 100dvh !important;
+      max-height: 100dvh !important;
+      z-index: 1000 !important;
+      transform: translateX(115%) !important;
+      transition: transform 0.28s cubic-bezier(0.32, 0.72, 0, 1), visibility 0.28s, box-shadow 0.28s !important;
+      visibility: hidden !important;
+      box-shadow: none !important;
+      border-inline-end: none !important;
+      border-inline-start: 1px solid var(--side-border, var(--border)) !important;
+    }
+
+    body.side-open #sidebar {
+      transform: translateX(0) !important;
+      visibility: visible !important;
+      box-shadow: -10px 0 45px rgba(0, 0, 0, 0.4) !important;
+    }
+
+    #side-veil {
+      display: block !important;
+      position: fixed !important;
+      inset: 0 !important;
+      background: rgba(15, 23, 42, 0.6) !important;
+      -webkit-backdrop-filter: blur(4px) !important;
+      backdrop-filter: blur(4px) !important;
+      z-index: 999 !important;
+      opacity: 0 !important;
+      visibility: hidden !important;
+      pointer-events: none !important;
+      transition: opacity 0.25s ease, visibility 0.25s ease !important;
+    }
+
+    body.side-open #side-veil {
+      opacity: 1 !important;
+      visibility: visible !important;
+      pointer-events: auto !important;
+    }
+
+    #main {
+      width: 100% !important;
+      max-width: 100% !important;
+      min-width: 0 !important;
+      flex: 1 1 100% !important;
+    }
+
+    #topbar {
+      padding: 0 12px !important;
+      gap: 8px !important;
+    }
+
+    .search-trigger {
+      display: none !important;
+    }
+
+    #view-root {
+      padding: 12px 12px 70px 12px !important;
+      width: 100% !important;
+      max-width: 100% !important;
+    }
+  }
+
   .card:hover, .glass-card:hover {
     border-color: rgba(59, 130, 246, 0.35);
     box-shadow: var(--shadow-md);
