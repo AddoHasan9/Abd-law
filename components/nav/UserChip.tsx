@@ -67,12 +67,12 @@ export default function UserChip({ profile }: { profile: Profile | null }) {
           {/* User Meta Details */}
           <div className="flex flex-col min-w-0 flex-1 text-right">
             <div className="flex items-center gap-1 leading-tight">
-              <span className="font-extrabold text-[11.5px] text-[var(--text)] truncate group-hover:text-[var(--accent)] transition-colors">
+              <span className="font-extrabold text-[12px] text-[var(--text)] truncate group-hover:text-[var(--accent)] transition-colors">
                 {name}
               </span>
             </div>
-            <div className="flex items-center gap-1 mt-0.5">
-              <span className="text-[9.5px] font-bold px-1.5 py-0.2 rounded bg-[var(--accent-soft)] text-[var(--accent)] shrink-0 border border-[var(--accent)]/15">
+            <div className="flex items-center gap-1.5 mt-0.5">
+              <span className="text-[9.5px] font-bold px-1.5 py-0.5 rounded bg-[var(--accent-soft)] text-[var(--accent)] shrink-0 border border-[var(--accent)]/15">
                 {roleLabel}
               </span>
               {email && profile?.name && profile.name !== profile.email && (
@@ -89,11 +89,11 @@ export default function UserChip({ profile }: { profile: Profile | null }) {
           type="button"
           onClick={signout}
           disabled={busy}
-          className="w-6 h-6 shrink-0 rounded-md flex items-center justify-center text-[var(--text-3)] hover:text-rose-500 hover:bg-rose-500/10 border border-transparent hover:border-rose-500/20 transition-all duration-200 cursor-pointer"
+          className="w-6 h-6 shrink-0 rounded-md flex items-center justify-center text-[var(--text-3)] hover:text-rose-500 hover:bg-rose-500/10 border border-transparent hover:border-rose-500/20 transition-all duration-150 cursor-pointer"
           title="تسجيل الخروج"
           aria-label="تسجيل الخروج"
         >
-          <Icon name="out" className="w-3 h-3" />
+          <Icon name="out" className="w-3.5 h-3.5" />
         </button>
       </div>
 

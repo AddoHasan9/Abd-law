@@ -10,6 +10,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import Link from 'next/link'
 import { formatDate, formatMoney } from '@/lib/constants'
+import { Icon } from '@/components/ui/Icon'
 
 export interface DeadlineItem {
   id: string
@@ -96,14 +97,12 @@ export default function DeadlineCard({ deadlines = [], item = null }: Props) {
     <div
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
-      className="w-full flex-none mt-1"
+      className="w-full flex-none mt-2 pt-2 border-t border-[var(--line-soft)]"
     >
       {/* Widget Section Header */}
-      <div className="flex items-center justify-between px-1 mb-1">
-        <div className="flex items-center gap-1 text-[10px] font-bold text-[var(--text-3)]">
-          <span className="material-symbols-outlined text-[13px] text-[var(--accent)]">
-            schedule
-          </span>
+      <div className="flex items-center justify-between px-1 mb-1.5">
+        <div className="flex items-center gap-1.5 text-[10.5px] font-bold text-[var(--text-3)]">
+          <Icon name="clock" className="w-3.5 h-3.5 text-[var(--accent)] shrink-0" />
           <span>متابعة المهل</span>
         </div>
 

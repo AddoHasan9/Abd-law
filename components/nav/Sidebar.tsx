@@ -113,7 +113,7 @@ export default function Sidebar({
         key={leaf.key}
         href={leaf.href}
         onClick={onNavigate}
-        className={`nav-item${sub ? ' sub' : ' hover:-translate-x-0.5'} transition-all duration-200`}
+        className={`nav-item${sub ? ' sub' : ' hover:-translate-x-0.5'} transition-all duration-150`}
         aria-current={active ? 'page' : undefined}
       >
         {sub && (
@@ -121,8 +121,8 @@ export default function Sidebar({
             <span className="nav-tree-dot" />
           </span>
         )}
-        {!sub && leaf.icon && <Icon name={leaf.icon} />}
-        <span className="truncate">{leaf.label}</span>
+        {!sub && leaf.icon && <Icon name={leaf.icon} className="icon shrink-0" />}
+        <span className="truncate flex-1 text-right">{leaf.label}</span>
         {leaf.count !== undefined && (
           <span className={`nav-num transition-colors ${active ? 'font-bold text-[var(--accent)]' : ''}`}>
             {leaf.count}
@@ -156,33 +156,33 @@ export default function Sidebar({
             <Link
               href={g.href}
               onClick={onNavigate}
-              className="nav-item nav-item-head transition-all duration-200 hover:-translate-x-0.5"
+              className="nav-item nav-item-head transition-all duration-150 hover:-translate-x-0.5"
               aria-current={
                 pathname === g.href && !typeParam ? 'page' : undefined
               }
             >
-              {g.icon && <Icon name={g.icon} />}
-              <span>{g.label}</span>
+              {g.icon && <Icon name={g.icon} className="icon shrink-0" />}
+              <span className="truncate flex-1 text-right">{g.label}</span>
             </Link>
             <button
               type="button"
-              className="nav-toggle transition-transform duration-200 hover:scale-110"
+              className="nav-toggle transition-transform duration-150 hover:scale-105 cursor-pointer"
               onClick={() => toggle(g.key)}
               aria-expanded={!shut}
               aria-label={`طيّ ${g.label}`}
             >
-              <Icon name="chev" className={`icon chev transition-transform duration-300 ${shut ? 'rotate-90' : 'rotate-0'}`} />
+              <Icon name="chev" className={`icon chev transition-transform duration-200 ${shut ? 'rotate-90' : 'rotate-0'}`} />
             </button>
           </div>
         ) : (
           <button
             type="button"
-            className="nav-group-head transition-colors duration-200 hover:text-[var(--text)] cursor-pointer"
+            className="nav-group-head transition-colors duration-150 hover:text-[var(--text)] cursor-pointer"
             onClick={() => toggle(g.key)}
             aria-expanded={!shut}
           >
-            <span>{g.label}</span>
-            <Icon name="chev" className={`icon chev transition-transform duration-300 ${shut ? 'rotate-90' : 'rotate-0'}`} />
+            <span className="text-right flex-1">{g.label}</span>
+            <Icon name="chev" className={`icon chev transition-transform duration-200 ${shut ? 'rotate-90' : 'rotate-0'}`} />
           </button>
         )}
 
@@ -197,18 +197,18 @@ export default function Sidebar({
     <aside id="sidebar" className="transition-all duration-300">
       {/* Brand Header with Refined Luxury Styling */}
       <div className="side-head group cursor-default">
-        <div className="w-[36px] h-[36px] rounded-lg bg-gradient-to-br from-white/10 to-white/[0.03] border border-white/15 p-1 flex items-center justify-center shadow-xs group-hover:scale-105 group-hover:border-[var(--accent)]/50 transition-all duration-300 flex-none overflow-hidden">
+        <div className="w-[32px] h-[32px] rounded-lg bg-gradient-to-br from-white/10 to-white/[0.03] border border-white/15 p-1 flex items-center justify-center shadow-2xs group-hover:scale-105 group-hover:border-[var(--accent)]/50 transition-all duration-300 flex-none overflow-hidden">
           <Image
             src="/logo.png"
             alt="شعار مكتب المحامي عبدالحسن الخزرجي"
-            width={30}
-            height={30}
-            className="w-full h-full object-contain filter drop-shadow-xs"
+            width={26}
+            height={26}
+            className="w-full h-full object-contain filter drop-shadow-2xs"
             priority
           />
         </div>
         <div className="flex-1 min-w-0 pr-0.5">
-          <div className="side-name tracking-tight font-black text-[13px] text-[var(--text)] group-hover:text-[var(--accent)] transition-colors leading-tight truncate">
+          <div className="side-name tracking-tight font-black text-[12.5px] text-[var(--text)] group-hover:text-[var(--accent)] transition-colors leading-tight truncate">
             مكتب المحامي عبدالحسن الخزرجي
           </div>
           <div className="side-role text-[9.5px] text-[var(--accent)] font-bold mt-0.5 tracking-wide flex items-center gap-1.5 truncate">
@@ -220,9 +220,7 @@ export default function Sidebar({
 
       <nav className="side-nav" aria-label="أقسام التطبيق">
         {NAV.map(renderGroup)}
-        <div className="mt-1">
-          <DeadlineCard deadlines={deadlines} item={deadline} />
-        </div>
+        <DeadlineCard deadlines={deadlines} item={deadline} />
       </nav>
 
       <div className="side-foot">
