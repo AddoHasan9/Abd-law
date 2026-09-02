@@ -261,7 +261,7 @@ export default function FinancialStatementsClient({ companies = [] }: Props) {
             إدارة الحسابات الختامية للشركات (ERP Engine)
           </h1>
           <p style={{ fontSize: '13px', color: 'var(--text-3)', margin: '4px 0 0 0' }}>
-            تظهر كل شركة مرة واحدة فقط في القائمة الرئيسية مع إمكانية فتح الملف الكامل للحسابات الختامية
+            متابعة ميزانيات وسجلات الحسابات الختامية وضرائب الشركات
           </p>
         </div>
 
@@ -374,12 +374,15 @@ export default function FinancialStatementsClient({ companies = [] }: Props) {
       {/* Tab 1: Grouped Main Table (Strictly ONE Row Per Company) */}
       {activeTab === 'grouped' && (
         <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
-          <div style={{ padding: '14px 18px', background: 'var(--surface-2)', borderBottom: '1px solid var(--line-soft)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <span style={{ fontSize: '13.5px', fontWeight: 700, color: 'var(--text)' }}>
-              قائمة الشركات الحالية (تظهر كل شركة مرة واحدة فقط — اضغط على الاسم للفتح والتعديل)
-            </span>
-            <span style={{ fontSize: '11.5px', color: 'var(--text-3)' }}>
-              إجمالي الشركات: {visibleGrouped.length}{searchTerm.trim() ? ` من ${groupedCompanies.length}` : ''}
+          <div className="p-3.5 px-4 bg-[var(--surface-2)]/60 border-b border-[var(--line-soft)] flex items-center justify-between gap-3">
+            <div className="flex items-center gap-2">
+              <span className="material-symbols-outlined text-[18px] text-[var(--accent)]">account_balance</span>
+              <span className="text-xs sm:text-sm font-extrabold text-[var(--text)]">
+                سجل الشركات والحسابات الختامية
+              </span>
+            </div>
+            <span className="text-xs font-bold text-[var(--accent)] bg-[var(--accent-soft)] border border-[var(--accent)]/20 px-2.5 py-0.5 rounded-full num">
+              {visibleGrouped.length}{searchTerm.trim() ? ` من ${groupedCompanies.length}` : ''} شركة
             </span>
           </div>
 
