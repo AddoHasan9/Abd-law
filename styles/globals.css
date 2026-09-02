@@ -54,7 +54,7 @@
     --r-full: 999px;
     --sp: 4px;
     --sidebar-w: 252px;
-    --topbar-h: 52px;
+    --topbar-h: 58px;
 
     /* مقاييس النوافذ المنبثقة الموحدة (Standard Modal Scale) */
     --modal-sm: 480px;
@@ -805,12 +805,16 @@
   }
 
   .side-head {
-    padding: 12px 14px 11px;
+    height: var(--topbar-h);
+    min-height: var(--topbar-h);
+    max-height: var(--topbar-h);
+    padding: 0 14px;
     display: flex;
     align-items: center;
     gap: 10px;
     flex: none;
     border-bottom: 1px solid var(--line-soft);
+    box-sizing: border-box;
   }
 
   .side-mark {
@@ -1212,10 +1216,12 @@
 
   #topbar {
     height: var(--topbar-h);
+    min-height: var(--topbar-h);
+    max-height: var(--topbar-h);
     flex: none;
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 12px;
     padding: 0 18px;
     background: var(--side-bg);
     -webkit-backdrop-filter: blur(32px) saturate(190%);
@@ -1225,21 +1231,24 @@
     box-shadow: 0 1px 12px rgba(15, 23, 42, 0.03);
     position: sticky;
     top: 0;
+    box-sizing: border-box;
   }
 
   #page-title {
-    font-size: 17px;
+    font-size: 15.5px;
     font-weight: 800;
     white-space: nowrap;
     font-family: var(--font-display);
     color: var(--text);
     line-height: 1.2;
+    display: flex;
+    align-items: center;
   }
 
   #page-sub {
-    font-size: 11px;
+    font-size: 10.5px;
     color: var(--text-3);
-    margin-top: -1px;
+    margin-top: 1px;
     font-weight: 500;
   }
 

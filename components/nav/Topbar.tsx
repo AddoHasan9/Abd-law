@@ -128,7 +128,7 @@ export default function Topbar({ profile, title, subtitle, notifCount = 0, onMen
         <Icon name="menu" />
       </button>
 
-      <div style={{ minWidth: 0 }}>
+      <div className="flex flex-col justify-center min-w-0 flex-shrink-0">
         <Suspense fallback={<div id="page-title">{title}</div>}>
           <PageTitle />
         </Suspense>
@@ -163,7 +163,7 @@ export default function Topbar({ profile, title, subtitle, notifCount = 0, onMen
         <button
           type="button"
           onClick={() => setIsUserMenuOpen(prev => !prev)}
-          className="flex items-center gap-2 pr-2 pl-2 py-1 border-r border-[var(--glass-border)] hover:bg-[var(--surface-2)]/80 rounded-xl transition-all duration-200 cursor-pointer select-none text-right outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]"
+          className="flex items-center gap-2 pr-2.5 pl-2 py-1 border-r border-[var(--border-soft)] hover:bg-[var(--surface-2)]/80 rounded-xl transition-all duration-200 cursor-pointer select-none text-right outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]"
           aria-expanded={isUserMenuOpen}
           aria-haspopup="true"
           title="قائمة المستخدم"
