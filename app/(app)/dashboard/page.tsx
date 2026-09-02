@@ -5,6 +5,7 @@
  */
 import { getDashboardStats } from '@/lib/data/dashboard'
 import { listProfiles } from '@/lib/data/profiles'
+import { listCompanies } from '@/lib/data/companies'
 import { checkAndTriggerCompanyDeadlineNotificationsAction } from '@/lib/data/deadline-notifications'
 import DashboardClient from '@/components/dashboard/DashboardClient'
 
@@ -14,10 +15,11 @@ export const revalidate = 0
 export const metadata = { title: 'لوحة التحكم — مكتب المحامي عبد الحسن الخزرجي' }
 
 export default async function DashboardPage() {
-  const [stats, profiles] = await Promise.all([
+  const [stats, profiles, companies] = await Promise.all([
     getDashboardStats(),
     listProfiles(),
+    listCompanies().catch(() => []),
     checkAndTriggerCompanyDeadlineNotificationsAction(),
   ])
-  return <DashboardClient stats={stats} profiles={profiles} />
+  return <DashboardClient stats={stats} profiles={profiles} companies={companies} />
 }

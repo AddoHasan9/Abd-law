@@ -1129,7 +1129,7 @@ export default function CompanyDetailsModal({ company, isOpen, onClose, onDelete
                 <a
                   href={`/commercial/companies/${company.id}`}
                   className="btn btn-primary"
-                  style={{ padding: '9px 20px', fontSize: '13px', fontWeight: 700, textDecoration: 'none', borderRadius: '12px' }}
+                  style={{ padding: '6px 14px', fontSize: '11.5px', fontWeight: 700, textDecoration: 'none', borderRadius: '8px' }}
                 >
                   فتح الملف الشامل للشركة ←
                 </a>

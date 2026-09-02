@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { formatDate, formatFullDate } from '@/lib/constants'
 import type { DashboardStats } from '@/lib/data/dashboard'
 import type { ProfileWithStats } from '@/lib/data/profiles'
+import type { Company } from '@/types/database'
 import RemindersWidget from './RemindersWidget'
 import { WorkflowStatus } from '@/components/ui/WorkflowStatus'
 import { FadeInStagger } from '@/components/ui/FadeInStagger'
@@ -14,9 +15,10 @@ import { useDragScroll } from '@/lib/hooks/useDragScroll'
 interface Props {
   stats: DashboardStats
   profiles?: ProfileWithStats[]
+  companies?: Company[]
 }
 
-export default function DashboardClient({ stats, profiles = [] }: Props) {
+export default function DashboardClient({ stats, profiles = [], companies = [] }: Props) {
   const [txFilter, setTxFilter] = useState<'all' | 'progress' | 'new' | 'done'>('all')
   const txFilterScrollRef = useDragScroll<HTMLDivElement>({ speed: 1.4 })
 
@@ -357,7 +359,7 @@ export default function DashboardClient({ stats, profiles = [] }: Props) {
 
         {/* Left 4 Cols: Reminders Widget */}
         <div className="lg:col-span-4 flex flex-col gap-4">
-          <RemindersWidget />
+          <RemindersWidget companies={companies} />
         </div>
       </div>
 

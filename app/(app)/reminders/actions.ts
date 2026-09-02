@@ -22,7 +22,19 @@ export async function getRemindersAction(filter?: 'active' | 'completed' | 'arch
       query = query.eq('is_completed', false).eq('is_archived', false)
     }
 
-    const { data, error } = await query
+    const [{ data, error }, compRes] = await Promise.all([
+      query,
+      supabase.from('companies').select('id, name'),
+    ])
+
+    const companies = compRes?.data || []
+
+    const compMap = new Map<string, string>()
+    if (companies) {
+      companies.forEach((c: { id: string; name: string }) => {
+        if (c.id && c.name) compMap.set(c.id, c.name)
+      })
+    }
 
     let items: ReminderItem[] = []
 
@@ -40,6 +52,12 @@ export async function getRemindersAction(filter?: 'active' | 'completed' | 'arch
       const extraMem = inMemoryReminders.filter(r => !dbIds.has(r.id))
       items = [...(data as ReminderItem[]), ...extraMem]
     }
+
+    // Populate company_name for each item from compMap
+    items = items.map(item => ({
+      ...item,
+      company_name: item.company_id ? (compMap.get(item.company_id) || item.company_name || null) : null,
+    }))
 
     // Automatic trigger check for due reminders
     await checkAndTriggerDueRemindersAction(items)

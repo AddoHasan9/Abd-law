@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { createPortal } from 'react-dom'
 import { Icon } from '@/components/ui/Icon'
 import { createReminderAction, updateReminderAction } from '@/app/(app)/reminders/actions'
+import { createClient } from '@/lib/supabase/client'
 import type { Company, ReminderItem, ReminderPriority } from '@/types/database'
 import { useModalBodyLock } from '@/lib/hooks/useModalBodyLock'
 
@@ -19,6 +20,7 @@ export default function ReminderModal({ isOpen, onClose, companies = [], editing
   const [mounted, setMounted] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [companyList, setCompanyList] = useState<Company[]>(companies)
 
   const [title, setTitle] = useState('')
   const [notes, setNotes] = useState('')
@@ -30,6 +32,28 @@ export default function ReminderModal({ isOpen, onClose, companies = [], editing
   useEffect(() => {
     setMounted(true)
   }, [])
+
+  // Auto-fetch companies list if not provided or empty
+  useEffect(() => {
+    if (companies && companies.length > 0) {
+      setCompanyList(companies)
+      return
+    }
+    const loadCompanies = async () => {
+      try {
+        const supabase = createClient()
+        const { data } = await supabase.from('companies').select('id, name, kind, client_name').order('name')
+        if (data && data.length > 0) {
+          setCompanyList(data as unknown as Company[])
+        }
+      } catch (err) {
+        console.warn('Failed to load companies in ReminderModal:', err)
+      }
+    }
+    if (isOpen) {
+      loadCompanies()
+    }
+  }, [companies, isOpen])
 
   useEffect(() => {
     if (editingReminder) {
@@ -176,9 +200,9 @@ export default function ReminderModal({ isOpen, onClose, companies = [], editing
                   onChange={e => setCompanyId(e.target.value)}
                 >
                   <option value="">— غير مرتبطة بشركة —</option>
-                  {companies.map(c => (
+                  {companyList.map(c => (
                     <option key={c.id} value={c.id}>
-                      {c.name}
+                      {c.name} {c.kind ? `(${c.kind})` : ''}
                     </option>
                   ))}
                 </select>

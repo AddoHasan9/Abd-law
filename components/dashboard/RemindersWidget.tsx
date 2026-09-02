@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
+import Link from 'next/link'
 import { Icon } from '@/components/ui/Icon'
 import {
   getRemindersAction,
@@ -8,6 +9,7 @@ import {
   toggleReminderArchiveAction,
   deleteReminderAction
 } from '@/app/(app)/reminders/actions'
+import { createClient } from '@/lib/supabase/client'
 import type { Company, ReminderItem } from '@/types/database'
 import ReminderModal from '@/components/reminders/ReminderModal'
 
@@ -23,6 +25,27 @@ export default function RemindersWidget({ companies = [], hideIfEmpty = false }:
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingReminder, setEditingReminder] = useState<ReminderItem | null>(null)
   const [activeTab, setActiveTab] = useState<'pending' | 'completed' | 'archived'>('pending')
+  const [companyList, setCompanyList] = useState<Company[]>(companies)
+
+  // Auto-fetch companies list if empty
+  useEffect(() => {
+    if (companies && companies.length > 0) {
+      setCompanyList(companies)
+      return
+    }
+    const loadCompanies = async () => {
+      try {
+        const supabase = createClient()
+        const { data } = await supabase.from('companies').select('id, name, kind').order('name')
+        if (data && data.length > 0) {
+          setCompanyList(data as unknown as Company[])
+        }
+      } catch (err) {
+        console.warn('Failed to load companies in RemindersWidget:', err)
+      }
+    }
+    loadCompanies()
+  }, [companies])
 
   const fetchReminders = useCallback(async () => {
     setLoading(true)
@@ -324,7 +347,7 @@ export default function RemindersWidget({ companies = [], hideIfEmpty = false }:
           setIsModalOpen(false)
           fetchReminders()
         }}
-        companies={companies}
+        companies={companyList}
         editingReminder={editingReminder}
       />
     </div>
@@ -394,11 +417,22 @@ function ReminderItemCard({
           </div>
         )}
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginTop: '4px', fontSize: '10.5px', color: 'var(--text-3)' }}>
+        <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '8px', marginTop: '4px', fontSize: '10.5px', color: 'var(--text-3)' }}>
           {item.due_date && (
             <span>📅 {item.due_date} {item.due_time ? `⏰ ${item.due_time}` : ''}</span>
           )}
-          {item.company_name && <span>🏢 {item.company_name}</span>}
+          {item.company_id ? (
+            <Link
+              href={`/commercial/companies/${item.company_id}`}
+              className="inline-flex items-center gap-1 font-bold text-[var(--accent)] hover:underline bg-[var(--accent-soft)]/60 px-1.5 py-0.5 rounded text-[10.5px] transition-colors"
+            >
+              <span>🏢</span>
+              <span>{item.company_name || 'ملف الشركة'}</span>
+              <span>←</span>
+            </Link>
+          ) : item.company_name ? (
+            <span>🏢 {item.company_name}</span>
+          ) : null}
         </div>
       </div>
 

@@ -619,12 +619,12 @@ export default function CompaniesClient({ initialCompanies }: Props) {
                     <Link
                       href={`/commercial/companies/${co.id}`}
                       onClick={e => e.stopPropagation()}
-                      className="w-full btn btn-primary !py-2 !px-3 !text-xs !font-black !rounded-xl flex items-center justify-center gap-1.5 shadow-sm hover:shadow-md active:scale-98 transition-all text-white"
+                      className="w-full py-1.5 px-3 text-[11.5px] font-bold rounded-lg bg-[var(--accent)] hover:bg-[var(--accent)]/90 text-white flex items-center justify-center gap-1.5 shadow-2xs hover:shadow-xs active:scale-98 transition-all"
                       title="عرض الملف الشامل لبيانات ووثائق وسجلات الشركة"
                     >
-                      <span className="material-symbols-outlined text-[16px]">folder_open</span>
+                      <span className="material-symbols-outlined text-[15px]">folder_open</span>
                       <span>الملف الشامل للشركة</span>
-                      <span className="material-symbols-outlined text-[15px] mr-auto">arrow_left</span>
+                      <span className="material-symbols-outlined text-[13px] mr-auto">arrow_left</span>
                     </Link>
                   </div>
                 </div>
