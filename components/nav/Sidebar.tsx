@@ -196,34 +196,30 @@ export default function Sidebar({
     <aside id="sidebar" className="transition-all duration-300">
       {/* Brand Header with Refined Luxury Styling */}
       <div className="side-head group cursor-default">
-        <div className="w-[32px] h-[32px] rounded-lg bg-gradient-to-br from-white/10 to-white/[0.03] border border-white/15 p-1 flex items-center justify-center shadow-2xs group-hover:scale-105 group-hover:border-[var(--accent)]/50 transition-all duration-300 flex-none overflow-hidden">
+        <div className="w-[38px] h-[38px] rounded-xl bg-gradient-to-br from-white/10 to-white/[0.03] border border-white/15 p-1 flex items-center justify-center shadow-2xs group-hover:scale-105 group-hover:border-[var(--accent)]/50 transition-all duration-300 flex-none overflow-hidden">
           <Image
             src="/logo.png"
             alt="شعار مكتب المحامي عبدالحسن الخزرجي"
-            width={26}
-            height={26}
+            width={34}
+            height={34}
             className="w-full h-full object-contain filter drop-shadow-2xs"
             priority
           />
         </div>
         <div className="flex-1 min-w-0 pr-0.5">
-          <div className="side-name tracking-tight font-black text-[12.5px] text-[var(--text)] group-hover:text-[var(--accent)] transition-colors leading-tight truncate">
+          <div className="side-name tracking-tight font-black text-[13.5px] text-[var(--text)] group-hover:text-[var(--accent)] transition-colors leading-snug">
             مكتب المحامي عبدالحسن الخزرجي
           </div>
-          <div className="side-role text-[9.5px] text-[var(--accent)] font-bold mt-0.5 tracking-wide flex items-center gap-1.5 truncate">
-            <span className="w-1.5 h-1.5 rounded-full bg-[var(--accent)] animate-pulse shrink-0" />
-            <span className="truncate">للمحاماة والاستشارات القانونية</span>
+          <div className="side-role text-[10px] text-[var(--text-3)] font-bold mt-0.5 tracking-wide">
+            للمحاماة والاستشارات القانونية
           </div>
         </div>
       </div>
 
       <nav className="side-nav" aria-label="أقسام التطبيق">
         {NAV.map(renderGroup)}
-      </nav>
-
-      <div className="side-foot">
         <DeadlineCard deadlines={deadlines} item={deadline} />
-      </div>
+      </nav>
     </aside>
   )
 }

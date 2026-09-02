@@ -97,7 +97,7 @@ export default function DeadlineCard({ deadlines = [], item = null }: Props) {
     <div
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
-      className="w-full flex-none"
+      className="w-full flex-none mt-2.5 mb-1"
     >
       {items.length === 0 ? (
         /* Empty / All Compliant State - Matches Screenshot Exactly */
