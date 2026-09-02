@@ -9,7 +9,6 @@ import RemindersWidget from './RemindersWidget'
 import { WorkflowStatus } from '@/components/ui/WorkflowStatus'
 import { FadeInStagger } from '@/components/ui/FadeInStagger'
 import { RollingNumber } from '@/components/ui/RollingNumber'
-import LiveOperationsRadar from './LiveOperationsRadar'
 import { useDragScroll } from '@/lib/hooks/useDragScroll'
 
 interface Props {
@@ -210,9 +209,6 @@ export default function DashboardClient({ stats, profiles = [] }: Props) {
           </div>
         </Link>
       </FadeInStagger>
-
-      {/* 2.5 Live Executive Operations & Workflow Radar (Animated Hub) */}
-      <LiveOperationsRadar stats={stats} />
 
       {/* 3. Central Interactive Bento Section: Active Transactions (8 cols) + Reminders & Deadlines (4 cols) */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-3.5 w-full">
