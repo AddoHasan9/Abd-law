@@ -163,21 +163,21 @@ export default function Topbar({ profile, title, subtitle, notifCount = 0, onMen
         <button
           type="button"
           onClick={() => setIsUserMenuOpen(prev => !prev)}
-          className="flex items-center gap-3 pr-2 pl-2 py-1 border-r border-[var(--glass-border)] hover:bg-[var(--surface-2)]/80 rounded-xl transition-all duration-200 cursor-pointer select-none text-right outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]"
+          className="flex items-center gap-2 pr-2 pl-2 py-1 border-r border-[var(--glass-border)] hover:bg-[var(--surface-2)]/80 rounded-xl transition-all duration-200 cursor-pointer select-none text-right outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]"
           aria-expanded={isUserMenuOpen}
           aria-haspopup="true"
           title="قائمة المستخدم"
         >
-          <div className="hidden sm:flex flex-col items-end">
-            <span className="text-sm font-bold text-[var(--text)] max-w-[150px] truncate" title={displayName}>
+          <div className="hidden sm:flex flex-col items-end leading-tight">
+            <span className="text-xs font-bold text-[var(--text)] max-w-[130px] truncate" title={displayName}>
               {displayName}
             </span>
-            <span className="text-xs text-[var(--text-3)] font-medium" title={roleLabel}>
+            <span className="text-[10px] text-[var(--text-3)] font-medium mt-0.5" title={roleLabel}>
               {roleLabel}
             </span>
           </div>
 
-          <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-[var(--accent)] to-emerald-500 flex items-center justify-center p-0.5 shadow-md shadow-blue-500/10 flex-shrink-0 relative hover:scale-105 transition-transform duration-200">
+          <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-[var(--accent)] to-emerald-500 flex items-center justify-center p-0.5 shadow-xs flex-shrink-0 relative hover:scale-105 transition-transform duration-200">
             {avatarUrl && !imgError ? (
               <img
                 src={avatarUrl}
@@ -186,7 +186,7 @@ export default function Topbar({ profile, title, subtitle, notifCount = 0, onMen
                 onError={() => setImgError(true)}
               />
             ) : (
-              <div className="w-full h-full bg-[var(--surface-2)] rounded-full flex items-center justify-center text-[var(--accent)] font-extrabold text-sm">
+              <div className="w-full h-full bg-[var(--surface-2)] rounded-full flex items-center justify-center text-[var(--accent)] font-extrabold text-xs">
                 {initials}
               </div>
             )}
@@ -194,7 +194,7 @@ export default function Topbar({ profile, title, subtitle, notifCount = 0, onMen
 
           <Icon
             name="chev"
-            className={`w-3.5 h-3.5 text-[var(--text-3)] transition-transform duration-300 ${
+            className={`w-3 h-3 text-[var(--text-3)] transition-transform duration-300 ${
               isUserMenuOpen ? 'rotate-180 text-[var(--accent)]' : ''
             }`}
           />
