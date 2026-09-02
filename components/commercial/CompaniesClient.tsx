@@ -15,6 +15,7 @@ import { usePermissions } from '@/lib/context/UserRoleContext'
 import type { CompanyWithWorkflow } from '@/types/database'
 import { updateCompanyFSSettingsAction, createFinancialStatementAction } from '@/app/(app)/commercial/financial-statements/actions'
 import { useDragScroll } from '@/lib/hooks/useDragScroll'
+import { AnimatedTabs } from '@/components/ui/AnimatedTabs'
 
 interface Props {
   initialCompanies: CompanyWithWorkflow[]
@@ -362,50 +363,22 @@ export default function CompaniesClient({ initialCompanies }: Props) {
           />
         </div>
 
-        {/* Filter Tabs (Drag Scrollable) */}
-        <div ref={tabsScrollRef} style={{ display: 'flex', gap: '6px', overflowX: 'auto', paddingBottom: '2px', alignItems: 'center', userSelect: 'none' }} className="scrollbar-none">
-          <button
-            type="button"
-            onClick={() => {
-              setActiveTab('all')
-              setTimeFilter('all')
-            }}
-            className={`btn ${activeTab === 'all' ? 'btn-primary' : 'btn-ghost'}`}
-            style={{ fontSize: '12px', padding: '6px 12px' }}
-          >
-            الكل ({formationList.length})
-          </button>
-
-          <button
-            type="button"
-            onClick={() => setActiveTab('forming')}
-            className={`btn ${activeTab === 'forming' ? 'btn-primary' : 'btn-ghost'}`}
-            style={{ fontSize: '12px', padding: '6px 12px' }}
-          >
-            قيد التأسيس ({formingCompanies.length})
-          </button>
-
-          <button
-            type="button"
-            onClick={() => setActiveTab('deposit')}
-            className={`btn ${activeTab === 'deposit' ? 'btn-primary' : 'btn-ghost'}`}
-            style={{ fontSize: '12px', padding: '6px 12px' }}
-          >
-            إطلاق الوديعة ({depositPhaseCompanies.length})
-          </button>
-
-          <button
-            type="button"
-            onClick={() => {
-              setActiveTab('established')
-              setTimeFilter('all')
-            }}
-            className={`btn ${activeTab === 'established' ? 'btn-primary' : 'btn-ghost'}`}
-            style={{ fontSize: '12px', padding: '6px 12px' }}
-          >
-            المؤسسة ({establishedCompanies.length})
-          </button>
-        </div>
+        {/* Filter Tabs with Fluid Motion & Drag Scroll */}
+        <AnimatedTabs<'all' | 'forming' | 'deposit' | 'established'>
+          layoutId="companies-main-tabs"
+          size="sm"
+          activeTab={activeTab}
+          onChange={(tab) => {
+            setActiveTab(tab)
+            if (tab === 'all' || tab === 'established') setTimeFilter('all')
+          }}
+          tabs={[
+            { id: 'all', label: 'الكل', count: formationList.length },
+            { id: 'forming', label: 'قيد التأسيس', count: formingCompanies.length },
+            { id: 'deposit', label: 'إطلاق الوديعة', count: depositPhaseCompanies.length },
+            { id: 'established', label: 'المؤسسة', count: establishedCompanies.length },
+          ]}
+        />
       </div>
 
       {!filteredCompanies.length ? (

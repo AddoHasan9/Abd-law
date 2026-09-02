@@ -9,9 +9,10 @@ import {
   deleteCompanyIDAction,
   CompanyIDRecord,
 } from '@/app/(app)/commercial/ids/actions'
-import type { Company } from '@/types/database'
 import AddIDModal from '@/components/commercial/AddIDModal'
 import { usePermissions } from '@/lib/context/UserRoleContext'
+import { AnimatedTabs } from '@/components/ui/AnimatedTabs'
+import type { Company } from '@/types/database'
 
 interface Props {
   companies: Company[]
@@ -260,26 +261,19 @@ export default function IDsClient({ companies = [], initialCompanyId }: Props) {
       {/* Filters Bar */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 p-3.5 rounded-2xl bg-[var(--surface)] border border-[var(--glass-border)] shadow-xs">
         
-        {/* Status Tabs */}
-        <div className="flex items-center gap-1.5 bg-[var(--surface-2)] p-1 rounded-xl border border-[var(--line-soft)] flex-wrap">
-          {[
+        {/* Status Tabs with Fluid Motion */}
+        <AnimatedTabs<'all' | 'in_progress' | 'done' | 'expiring'>
+          layoutId="ids-status-tabs"
+          size="sm"
+          activeTab={statusFilter}
+          onChange={setStatusFilter}
+          tabs={[
             { id: 'all', label: 'الكل', count: stats.total },
-            { id: 'in_progress', label: 'قيد الإصدار', count: stats.inProgress, isProgress: true },
+            { id: 'in_progress', label: 'قيد الإصدار', count: stats.inProgress },
             { id: 'done', label: 'المكتملة ✓', count: stats.done },
             { id: 'expiring', label: 'تتطلب تجديداً ⚠️', count: stats.expiring },
-          ].map(tab => (
-            <button
-              key={tab.id}
-              type="button"
-              onClick={() => setStatusFilter(tab.id as typeof statusFilter)}
-              className={`px-3 py-1 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 ${statusFilter === tab.id ? 'bg-[var(--surface)] text-[var(--text)] shadow-xs border border-[var(--glass-border)]' : 'text-[var(--text-3)] hover:text-[var(--text)]'}`}
-            >
-              {tab.isProgress && <span className="w-2.5 h-2.5 border-1.5 border-amber-500/40 border-t-amber-400 rounded-full animate-spin inline-block" />}
-              <span>{tab.label}</span>
-              <span className="mr-1 num text-[11px] opacity-75">({tab.count})</span>
-            </button>
-          ))}
-        </div>
+          ]}
+        />
 
         {/* Type & Search */}
         <div className="flex items-center gap-2.5 flex-wrap w-full sm:w-auto">

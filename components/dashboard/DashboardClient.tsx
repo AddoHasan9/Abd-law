@@ -10,7 +10,7 @@ import RemindersWidget from './RemindersWidget'
 import { WorkflowStatus } from '@/components/ui/WorkflowStatus'
 import { FadeInStagger } from '@/components/ui/FadeInStagger'
 import { RollingNumber } from '@/components/ui/RollingNumber'
-import { useDragScroll } from '@/lib/hooks/useDragScroll'
+import { AnimatedTabs } from '@/components/ui/AnimatedTabs'
 
 interface Props {
   stats: DashboardStats
@@ -20,7 +20,6 @@ interface Props {
 
 export default function DashboardClient({ stats, profiles = [], companies = [] }: Props) {
   const [txFilter, setTxFilter] = useState<'all' | 'progress' | 'new' | 'done'>('all')
-  const txFilterScrollRef = useDragScroll<HTMLDivElement>({ speed: 1.4 })
 
   // Dynamic values mapped from stats store
   const establishedCount = stats.establishedCompaniesCount ?? stats.totalCompaniesCount ?? 0
@@ -231,37 +230,19 @@ export default function DashboardClient({ stats, profiles = [], companies = [] }
                 </div>
               </div>
 
-              {/* Filter Pills with Active Glow & Drag Scroll */}
-              <div ref={txFilterScrollRef} className="flex items-center gap-1 bg-[var(--surface-2)] p-0.5 rounded-lg border border-[var(--glass-border)] overflow-x-auto scrollbar-none select-none">
-                <button
-                  type="button"
-                  onClick={() => setTxFilter('all')}
-                  className={`px-2.5 py-0.5 rounded-md text-[11px] font-bold transition-all ${txFilter === 'all' ? 'bg-[var(--accent)] text-white shadow-2xs' : 'text-[var(--text-3)] hover:text-[var(--text)]'}`}
-                >
-                  الكل ({recentTxs.length})
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setTxFilter('progress')}
-                  className={`px-2.5 py-0.5 rounded-md text-[11px] font-bold transition-all ${txFilter === 'progress' ? 'bg-[var(--accent)] text-white shadow-2xs' : 'text-[var(--text-3)] hover:text-[var(--text)]'}`}
-                >
-                  قيد الإنجاز
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setTxFilter('new')}
-                  className={`px-2.5 py-0.5 rounded-md text-[11px] font-bold transition-all ${txFilter === 'new' ? 'bg-[var(--accent)] text-white shadow-2xs' : 'text-[var(--text-3)] hover:text-[var(--text)]'}`}
-                >
-                  جديدة
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setTxFilter('done')}
-                  className={`px-2.5 py-0.5 rounded-md text-[11px] font-bold transition-all ${txFilter === 'done' ? 'bg-[var(--accent)] text-white shadow-2xs' : 'text-[var(--text-3)] hover:text-[var(--text)]'}`}
-                >
-                  مكتملة
-                </button>
-              </div>
+              {/* Animated Segmented Filter Tabs */}
+              <AnimatedTabs<'all' | 'progress' | 'new' | 'done'>
+                layoutId="dashboard-tx"
+                size="sm"
+                activeTab={txFilter}
+                onChange={setTxFilter}
+                tabs={[
+                  { id: 'all', label: 'الكل', count: recentTxs.length },
+                  { id: 'progress', label: 'قيد الإنجاز' },
+                  { id: 'new', label: 'جديدة' },
+                  { id: 'done', label: 'مكتملة' },
+                ]}
+              />
             </div>
 
             {/* Transactions Responsive Table */}

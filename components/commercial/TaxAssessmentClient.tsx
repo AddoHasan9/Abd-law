@@ -9,6 +9,7 @@ import { formatDate, formatMoney } from '@/lib/constants'
 import { usePermissions } from '@/lib/context/UserRoleContext'
 import AddTaxAssessmentModal from './AddTaxAssessmentModal'
 import { deleteTaxAssessmentAction } from '@/app/(app)/commercial/tax-assessment/actions'
+import { AnimatedTabs } from '@/components/ui/AnimatedTabs'
 import type { TaxAssessment, Company } from '@/types/database'
 
 interface Props {
@@ -232,34 +233,17 @@ export default function TaxAssessmentClient({ assessments = [], companies = [], 
           />
         </div>
 
-        {/* Year Filter Chips */}
-        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-thin">
-          <button
-            type="button"
-            onClick={() => setYearFilter('all')}
-            className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-              yearFilter === 'all'
-                ? 'bg-[#38BDF8] text-slate-950 font-black shadow-sm'
-                : 'bg-[var(--surface-2)] text-[var(--text-3)] hover:text-[var(--text)]'
-            }`}
-          >
-            كل السنوات
-          </button>
-          {availableYears.map(yr => (
-            <button
-              key={yr}
-              type="button"
-              onClick={() => setYearFilter(yr.toString())}
-              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer num ${
-                yearFilter === yr.toString()
-                  ? 'bg-[#38BDF8] text-slate-950 font-black shadow-sm'
-                  : 'bg-[var(--surface-2)] text-[var(--text-3)] hover:text-[var(--text)]'
-              }`}
-            >
-              {yr}
-            </button>
-          ))}
-        </div>
+        {/* Year Filter Chips with Fluid Motion */}
+        <AnimatedTabs
+          layoutId="tax-assessment-years"
+          size="sm"
+          activeTab={yearFilter}
+          onChange={setYearFilter}
+          tabs={[
+            { id: 'all', label: 'كل السنوات' },
+            ...availableYears.map(yr => ({ id: yr.toString(), label: yr.toString() })),
+          ]}
+        />
 
         {/* Excel Export Button */}
         <button
