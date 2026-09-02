@@ -329,10 +329,9 @@ export default function DashboardClient({ stats, profiles = [] }: Props) {
                         <td className="py-2 px-2.5 text-left whitespace-nowrap">
                           <Link
                             href={tx.companyId ? `/commercial/companies/${tx.companyId}` : '/commercial/llc'}
-                            className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-bold text-[var(--accent)] hover:bg-[var(--accent-soft)] transition-colors border border-[var(--accent)]/20"
+                            className="inline-flex items-center justify-center px-2.5 py-0.5 rounded-md text-[11px] font-bold text-[var(--accent)] hover:bg-[var(--accent-soft)] transition-colors border border-[var(--accent)]/20 hover:border-[var(--accent)]/40"
                           >
-                            <span className="material-symbols-outlined text-[13px]">visibility</span>
-                            <span>عرض</span>
+                            عرض
                           </Link>
                         </td>
                       </tr>
