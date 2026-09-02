@@ -67,6 +67,18 @@ export default function AppShell({
     return () => document.body.classList.remove('side-open')
   }, [open])
 
+  // قفل تمرير نافذة المتصفح الرئيسية (Window Scroll Lock) لمنع اختفاء الشريط العلوي أو انزياحه
+  useEffect(() => {
+    const lockWindowScroll = () => {
+      if (window.scrollY !== 0 || window.scrollX !== 0) {
+        window.scrollTo(0, 0)
+      }
+    }
+    window.addEventListener('scroll', lockWindowScroll, { passive: true })
+    lockWindowScroll()
+    return () => window.removeEventListener('scroll', lockWindowScroll)
+  }, [])
+
   return (
     <UserRoleProvider profile={clientProfile}>
       <NavigationProgressBar />
@@ -94,7 +106,7 @@ export default function AppShell({
             onMenu={() => setOpen(v => !v)}
             onSearch={() => { /* البحث الشامل — يُبنى في مرحلة لاحقة */ }}
           />
-          <main id="view-root" tabIndex={-1} className="transition-all duration-300">
+          <main id="view-root" className="transition-all duration-300">
             <div className="view animate-fade-in-up">{children}</div>
           </main>
         </div>
