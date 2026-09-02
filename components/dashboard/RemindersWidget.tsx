@@ -73,7 +73,7 @@ export default function RemindersWidget({ companies = [], hideIfEmpty = false }:
   }
 
   return (
-    <div className="glass-card rounded-[22px] p-3.5 sm:p-4.5 flex flex-col gap-3 h-full border border-[var(--glass-border)]">
+    <div className="glass-card rounded-2xl p-3 sm:p-3.5 flex flex-col gap-2.5 h-full border border-[var(--glass-border)]">
       {/* Widget Header */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>

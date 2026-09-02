@@ -60,22 +60,22 @@ export default function LiveOperationsRadar({ stats }: Props) {
   const completionRate = totalOps > 0 ? Math.min(Math.round(((establishedCount + doneThisMonth) / (totalOps + establishedCount + doneThisMonth)) * 100), 98) : 92
 
   return (
-    <div className="glass-card rounded-[22px] p-3.5 sm:p-4.5 border border-[var(--border)] bg-[var(--surface-glass)] backdrop-blur-[36px] flex flex-col gap-3.5 shadow-2xs relative overflow-hidden">
+    <div className="glass-card rounded-2xl p-3 sm:p-3.5 border border-[var(--border)] bg-[var(--surface-glass)] backdrop-blur-[36px] flex flex-col gap-2.5 shadow-2xs relative overflow-hidden">
       
       {/* Top Header: Live Activity Beacon & Segmented Navigation */}
-      <div className="flex items-center justify-between flex-wrap gap-2.5 pb-2.5 border-b border-[var(--line-soft)]">
+      <div className="flex items-center justify-between flex-wrap gap-2 pb-2 border-b border-[var(--line-soft)]">
         
         {/* Title & Live Pulse Indicator */}
-        <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-xl bg-[var(--accent-soft)] border border-[var(--accent)]/20 flex items-center justify-center text-[var(--accent)] shrink-0 shadow-2xs">
-            <Activity className="w-4 h-4 animate-pulse" />
+        <div className="flex items-center gap-2">
+          <div className="w-7 h-7 rounded-lg bg-[var(--accent-soft)] border border-[var(--accent)]/20 flex items-center justify-center text-[var(--accent)] shrink-0 shadow-2xs">
+            <Activity className="w-3.5 h-3.5 animate-pulse" />
           </div>
           <div>
             <div className="flex items-center gap-1.5">
-              <h3 className="text-sm sm:text-base font-black text-[var(--text)] font-display m-0 leading-tight">
+              <h3 className="text-xs sm:text-sm font-black text-[var(--text)] font-display m-0 leading-tight">
                 محطة العمليات وسير المسارات الحية
               </h3>
-              <span className="inline-flex items-center gap-1 px-2 py-0.2 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+              <span className="inline-flex items-center gap-1 px-1.5 py-0.2 rounded-full text-[9.5px] font-bold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
                 <span className="relative flex h-1.5 w-1.5">
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
                   <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500"></span>
@@ -83,17 +83,17 @@ export default function LiveOperationsRadar({ stats }: Props) {
                 مباشر
               </span>
             </div>
-            <p className="text-[11px] text-[var(--text-3)] font-medium mt-0.5">
+            <p className="text-[10px] text-[var(--text-3)] font-medium mt-0.5">
               متابعة فورية وتفاعلية لخطوط سير الشركات، الودائع، والمهل القانونية
             </p>
           </div>
         </div>
 
         {/* Live Efficiency Gauge */}
-        <div className="flex items-center gap-1.5 bg-[var(--surface-2)] px-2.5 py-1 rounded-xl border border-[var(--line-soft)]">
-          <TrendingUp className="w-3.5 h-3.5 text-[var(--accent)]" />
-          <span className="text-[11px] font-bold text-[var(--text-2)]">معدل الإنجاز العام:</span>
-          <span className="text-xs font-black text-[var(--accent)] font-display">{completionRate}%</span>
+        <div className="flex items-center gap-1.5 bg-[var(--surface-2)] px-2 py-0.5 rounded-lg border border-[var(--line-soft)]">
+          <TrendingUp className="w-3 h-3 text-[var(--accent)]" />
+          <span className="text-[10px] font-bold text-[var(--text-2)]">معدل الإنجاز العام:</span>
+          <span className="text-[11px] font-black text-[var(--accent)] font-display">{completionRate}%</span>
         </div>
       </div>
 
@@ -112,7 +112,7 @@ export default function LiveOperationsRadar({ stats }: Props) {
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id as TabType)}
-              className={`relative px-3 py-1.5 rounded-lg text-[11.5px] font-bold transition-all duration-200 flex items-center gap-1.5 shrink-0 cursor-pointer ${
+              className={`relative px-2.5 py-1 rounded-md text-[11px] font-bold transition-all duration-150 flex items-center gap-1 shrink-0 cursor-pointer ${
                 isActive
                   ? 'text-white'
                   : 'text-[var(--text-2)] hover:text-[var(--text)] hover:bg-[var(--surface-2)]'
@@ -121,16 +121,16 @@ export default function LiveOperationsRadar({ stats }: Props) {
               {isActive && (
                 <motion.div
                   layoutId="radarActiveTab"
-                  className="absolute inset-0 bg-[#3B82F6] rounded-lg shadow-sm shadow-blue-500/20"
+                  className="absolute inset-0 bg-[#3B82F6] rounded-md shadow-sm shadow-blue-500/20"
                   transition={{ type: 'spring', bounce: 0.2, duration: 0.35 }}
                 />
               )}
               <span className="relative z-10 flex items-center gap-1">
-                <Icon className="w-3.5 h-3.5" />
+                <Icon className="w-3 h-3" />
                 <span>{tab.label}</span>
                 {tab.count > 0 && (
                   <span
-                    className={`px-1.5 py-0.2 text-[10px] rounded-full font-extrabold ${
+                    className={`px-1.5 py-0.2 text-[9.5px] rounded-full font-extrabold ${
                       isActive ? 'bg-white/20 text-white' : 'bg-[var(--surface-3)] text-[var(--text-3)]'
                     }`}
                   >
@@ -152,26 +152,26 @@ export default function LiveOperationsRadar({ stats }: Props) {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -6 }}
             transition={{ duration: 0.2 }}
-            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-2.5"
+            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-2"
           >
             {/* 1. Track: Formation */}
-            <div className="p-3 rounded-xl bg-[var(--surface-2)]/60 border border-[var(--line-soft)] hover:border-[var(--accent)]/40 hover:bg-[var(--surface-2)] transition-all flex flex-col justify-between gap-2.5 group">
+            <div className="p-2.5 rounded-xl bg-[var(--surface-2)]/60 border border-[var(--line-soft)] hover:border-[var(--accent)]/40 hover:bg-[var(--surface-2)] transition-all flex flex-col justify-between gap-2 group">
               <div className="flex items-start justify-between">
                 <div>
-                  <span className="text-[10.5px] font-bold text-[var(--text-3)] block mb-0.5">مسار التأسيس الحصري</span>
-                  <div className="flex items-baseline gap-1.5">
-                    <span className="text-xl font-black text-[var(--text)] font-display">{formingCount}</span>
-                    <span className="text-[11px] text-[var(--text-3)] font-medium">شركات قيد العمل</span>
+                  <span className="text-[10px] font-bold text-[var(--text-3)] block mb-0.5">مسار التأسيس الحصري</span>
+                  <div className="flex items-baseline gap-1">
+                    <span className="text-lg font-black text-[var(--text)] font-display">{formingCount}</span>
+                    <span className="text-[10px] text-[var(--text-3)] font-medium">شركات قيد العمل</span>
                   </div>
                 </div>
-                <div className="w-7 h-7 rounded-lg bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 flex items-center justify-center">
-                  <Building2 className="w-3.5 h-3.5" />
+                <div className="w-6 h-6 rounded-lg bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 flex items-center justify-center">
+                  <Building2 className="w-3 h-3" />
                 </div>
               </div>
 
               {/* Mini Step Bar */}
-              <div className="space-y-1">
-                <div className="flex justify-between text-[10px] font-bold text-[var(--text-3)]">
+              <div className="space-y-0.5">
+                <div className="flex justify-between text-[9.5px] font-bold text-[var(--text-3)]">
                   <span>8 خطوات متسلسلة</span>
                   <span className="text-amber-600 dark:text-amber-400">{formingCount > 0 ? 'نشط الآن' : 'جاهز'}</span>
                 </div>
@@ -182,30 +182,30 @@ export default function LiveOperationsRadar({ stats }: Props) {
 
               <Link
                 href="/commercial/companies"
-                className="text-[10.5px] font-bold text-[var(--accent)] hover:underline flex items-center justify-between pt-1 border-t border-[var(--line-soft)]"
+                className="text-[10px] font-bold text-[var(--accent)] hover:underline flex items-center justify-between pt-1 border-t border-[var(--line-soft)]"
               >
                 <span>متابعة خط السير</span>
-                <ArrowLeft className="w-3 h-3 group-hover:-translate-x-0.5 transition-transform" />
+                <ArrowLeft className="w-2.5 h-2.5 group-hover:-translate-x-0.5 transition-transform" />
               </Link>
             </div>
 
             {/* 2. Track: Deposits */}
-            <div className="p-3 rounded-xl bg-[var(--surface-2)]/60 border border-[var(--line-soft)] hover:border-[var(--accent)]/40 hover:bg-[var(--surface-2)] transition-all flex flex-col justify-between gap-2.5 group">
+            <div className="p-2.5 rounded-xl bg-[var(--surface-2)]/60 border border-[var(--line-soft)] hover:border-[var(--accent)]/40 hover:bg-[var(--surface-2)] transition-all flex flex-col justify-between gap-2 group">
               <div className="flex items-start justify-between">
                 <div>
-                  <span className="text-[10.5px] font-bold text-[var(--text-3)] block mb-0.5">إطلاق الودائع المصرفية</span>
-                  <div className="flex items-baseline gap-1.5">
-                    <span className="text-xl font-black text-[var(--text)] font-display">{depositsCount}</span>
-                    <span className="text-[11px] text-[var(--text-3)] font-medium">ودائع قيد المتابعة</span>
+                  <span className="text-[10px] font-bold text-[var(--text-3)] block mb-0.5">إطلاق الودائع المصرفية</span>
+                  <div className="flex items-baseline gap-1">
+                    <span className="text-lg font-black text-[var(--text)] font-display">{depositsCount}</span>
+                    <span className="text-[10px] text-[var(--text-3)] font-medium">ودائع قيد المتابعة</span>
                   </div>
                 </div>
-                <div className="w-7 h-7 rounded-lg bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20 flex items-center justify-center">
-                  <Landmark className="w-3.5 h-3.5" />
+                <div className="w-6 h-6 rounded-lg bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20 flex items-center justify-center">
+                  <Landmark className="w-3 h-3" />
                 </div>
               </div>
 
-              <div className="space-y-1">
-                <div className="flex justify-between text-[10px] font-bold text-[var(--text-3)]">
+              <div className="space-y-0.5">
+                <div className="flex justify-between text-[9.5px] font-bold text-[var(--text-3)]">
                   <span>المهلة القانونية (30 يوماً)</span>
                   <span className="text-blue-600 dark:text-blue-400">4 مراحل</span>
                 </div>
@@ -216,30 +216,30 @@ export default function LiveOperationsRadar({ stats }: Props) {
 
               <Link
                 href="/commercial/deposits"
-                className="text-[10.5px] font-bold text-[var(--accent)] hover:underline flex items-center justify-between pt-1 border-t border-[var(--line-soft)]"
+                className="text-[10px] font-bold text-[var(--accent)] hover:underline flex items-center justify-between pt-1 border-t border-[var(--line-soft)]"
               >
                 <span>استعراض الودائع</span>
-                <ArrowLeft className="w-3.5 h-3.5 group-hover:-translate-x-1 transition-transform" />
+                <ArrowLeft className="w-2.5 h-2.5 group-hover:-translate-x-0.5 transition-transform" />
               </Link>
             </div>
 
             {/* 3. Track: LLC & Resolutions */}
-            <div className="p-3 rounded-xl bg-[var(--surface-2)]/60 border border-[var(--line-soft)] hover:border-[var(--accent)]/40 hover:bg-[var(--surface-2)] transition-all flex flex-col justify-between gap-2.5 group">
+            <div className="p-2.5 rounded-xl bg-[var(--surface-2)]/60 border border-[var(--line-soft)] hover:border-[var(--accent)]/40 hover:bg-[var(--surface-2)] transition-all flex flex-col justify-between gap-2 group">
               <div className="flex items-start justify-between">
                 <div>
-                  <span className="text-[10.5px] font-bold text-[var(--text-3)] block mb-0.5">الشركات المحدودة والقرارات</span>
-                  <div className="flex items-baseline gap-1.5">
-                    <span className="text-xl font-black text-[var(--text)] font-display">{llcCount}</span>
-                    <span className="text-[11px] text-[var(--text-3)] font-medium">معاملة تجارية نشطة</span>
+                  <span className="text-[10px] font-bold text-[var(--text-3)] block mb-0.5">الشركات المحدودة والقرارات</span>
+                  <div className="flex items-baseline gap-1">
+                    <span className="text-lg font-black text-[var(--text)] font-display">{llcCount}</span>
+                    <span className="text-[10px] text-[var(--text-3)] font-medium">معاملة نشطة</span>
                   </div>
                 </div>
-                <div className="w-7 h-7 rounded-lg bg-purple-500/10 text-purple-600 dark:text-purple-400 border border-purple-500/20 flex items-center justify-center">
-                  <FileCheck2 className="w-3.5 h-3.5" />
+                <div className="w-6 h-6 rounded-lg bg-purple-500/10 text-purple-600 dark:text-purple-400 border border-purple-500/20 flex items-center justify-center">
+                  <FileCheck2 className="w-3 h-3" />
                 </div>
               </div>
 
-              <div className="space-y-1">
-                <div className="flex justify-between text-[10px] font-bold text-[var(--text-3)]">
+              <div className="space-y-0.5">
+                <div className="flex justify-between text-[9.5px] font-bold text-[var(--text-3)]">
                   <span>زيادة رأسمال، أسهم، تجديد</span>
                   <span className="text-purple-600 dark:text-purple-400">سارية</span>
                 </div>
@@ -250,30 +250,30 @@ export default function LiveOperationsRadar({ stats }: Props) {
 
               <Link
                 href="/commercial/llc"
-                className="text-[10.5px] font-bold text-[var(--accent)] hover:underline flex items-center justify-between pt-1 border-t border-[var(--line-soft)]"
+                className="text-[10px] font-bold text-[var(--accent)] hover:underline flex items-center justify-between pt-1 border-t border-[var(--line-soft)]"
               >
                 <span>قسم المحدودة</span>
-                <ArrowLeft className="w-3 h-3 group-hover:-translate-x-0.5 transition-transform" />
+                <ArrowLeft className="w-2.5 h-2.5 group-hover:-translate-x-0.5 transition-transform" />
               </Link>
             </div>
 
             {/* 4. Track: Deadlines & Financials */}
-            <div className="p-3 rounded-xl bg-[var(--surface-2)]/60 border border-[var(--line-soft)] hover:border-[var(--accent)]/40 hover:bg-[var(--surface-2)] transition-all flex flex-col justify-between gap-2.5 group">
+            <div className="p-2.5 rounded-xl bg-[var(--surface-2)]/60 border border-[var(--line-soft)] hover:border-[var(--accent)]/40 hover:bg-[var(--surface-2)] transition-all flex flex-col justify-between gap-2 group">
               <div className="flex items-start justify-between">
                 <div>
-                  <span className="text-[10.5px] font-bold text-[var(--text-3)] block mb-0.5">الحسابات والمهل القانونية</span>
-                  <div className="flex items-baseline gap-1.5">
-                    <span className="text-xl font-black text-[var(--text)] font-display">{urgentDeadlines.length}</span>
-                    <span className="text-[11px] text-[var(--text-3)] font-medium">استحقاقات عاجلة</span>
+                  <span className="text-[10px] font-bold text-[var(--text-3)] block mb-0.5">الحسابات والمهل القانونية</span>
+                  <div className="flex items-baseline gap-1">
+                    <span className="text-lg font-black text-[var(--text)] font-display">{urgentDeadlines.length}</span>
+                    <span className="text-[10px] text-[var(--text-3)] font-medium">استحقاقات عاجلة</span>
                   </div>
                 </div>
-                <div className="w-7 h-7 rounded-lg bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20 flex items-center justify-center">
-                  <Clock className="w-3.5 h-3.5" />
+                <div className="w-6 h-6 rounded-lg bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20 flex items-center justify-center">
+                  <Clock className="w-3 h-3" />
                 </div>
               </div>
 
-              <div className="space-y-1">
-                <div className="flex justify-between text-[10px] font-bold text-[var(--text-3)]">
+              <div className="space-y-0.5">
+                <div className="flex justify-between text-[9.5px] font-bold text-[var(--text-3)]">
                   <span>مهل 7/10 ومسجل الشركات</span>
                   <span className="text-rose-600 dark:text-rose-400">{urgentDeadlines.length > 0 ? 'متابعة مطلوبة' : 'سليمة'}</span>
                 </div>
@@ -284,10 +284,10 @@ export default function LiveOperationsRadar({ stats }: Props) {
 
               <Link
                 href="/commercial/financial-statements"
-                className="text-[10.5px] font-bold text-[var(--accent)] hover:underline flex items-center justify-between pt-1 border-t border-[var(--line-soft)]"
+                className="text-[10px] font-bold text-[var(--accent)] hover:underline flex items-center justify-between pt-1 border-t border-[var(--line-soft)]"
               >
                 <span>جدول الحسابات الختامية</span>
-                <ArrowLeft className="w-3 h-3 group-hover:-translate-x-0.5 transition-transform" />
+                <ArrowLeft className="w-2.5 h-2.5 group-hover:-translate-x-0.5 transition-transform" />
               </Link>
             </div>
           </motion.div>
