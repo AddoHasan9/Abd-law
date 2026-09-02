@@ -2734,6 +2734,25 @@
     padding-left: 14px !important;
   }
 
+  /* تثبيت أشرطة التبويب الحركية أفقياً بدقة ومنع أي التفاف رأسي */
+  .animated-tabs-track {
+    display: inline-flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    flex-wrap: nowrap !important;
+    width: fit-content !important;
+    max-width: 100% !important;
+  }
+
+  .animated-tab-btn {
+    display: inline-flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    flex-shrink: 0 !important;
+    white-space: nowrap !important;
+    width: auto !important;
+  }
+
   /* تطبيع حقول التاريخ على Safari و iOS لمنع التمدد أو التضخم */
   input[type="date"] {
     display: inline-flex !important;

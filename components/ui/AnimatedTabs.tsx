@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import React, { useRef } from 'react'
 import { motion } from 'framer-motion'
@@ -46,11 +46,19 @@ export function AnimatedTabs<T extends string = string>({
   return (
     <div
       ref={containerRef}
-      className={`inline-flex items-center gap-1 p-1 rounded-xl bg-[var(--surface-2)] border border-[var(--glass-border)] w-fit max-w-full overflow-x-auto scrollbar-none select-none relative shadow-2xs ${className}`}
       style={{
+        display: 'inline-flex',
+        flexDirection: 'row',
+        alignItems: 'center',
+        flexWrap: 'nowrap',
+        width: 'fit-content',
+        maxWidth: '100%',
+        gap: '4px',
+        padding: '4px',
         WebkitOverflowScrolling: 'touch',
         scrollBehavior: 'smooth',
       }}
+      className={`animated-tabs-track rounded-xl bg-[var(--surface-2)]/90 border border-[var(--glass-border)] overflow-x-auto scrollbar-none select-none relative shadow-2xs ${className}`}
       role="tablist"
     >
       {tabs.map(tab => {
@@ -74,9 +82,17 @@ export function AnimatedTabs<T extends string = string>({
                 inline: 'center',
               })
             }}
-            className={`relative z-10 ${
+            style={{
+              display: 'inline-flex',
+              flexDirection: 'row',
+              alignItems: 'center',
+              flexShrink: 0,
+              whiteSpace: 'nowrap',
+              gap: '6px',
+            }}
+            className={`animated-tab-btn relative z-10 ${
               isSmall ? 'px-2.5 py-1 text-[11px]' : 'px-3 py-1.5 text-xs'
-            } font-bold rounded-lg transition-colors duration-150 flex items-center gap-1.5 whitespace-nowrap cursor-pointer shrink-0 ${
+            } font-bold rounded-lg transition-colors duration-150 whitespace-nowrap cursor-pointer shrink-0 ${
               isActive
                 ? 'text-white'
                 : 'text-[var(--text-3)] hover:text-[var(--text)] hover:bg-[var(--surface-3)]/40'
