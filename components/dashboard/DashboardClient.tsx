@@ -367,68 +367,137 @@ export default function DashboardClient({ stats, profiles = [] }: Props) {
         
         {/* Workload Distribution (Span 6) */}
         <div className="lg:col-span-6 flex flex-col gap-3">
-          <div className="glass-card rounded-2xl p-3.5 sm:p-4 flex flex-col gap-2.5 h-full border border-[var(--glass-border)]">
-            <div className="flex items-center justify-between pb-2 border-b border-[var(--line-soft)]">
-              <h3 className="text-xs sm:text-sm font-bold text-[var(--text)] flex items-center gap-1.5 m-0">
-                <div className="p-1 bg-[var(--accent-soft)] rounded-lg text-[var(--accent)]">
-                  <span className="material-symbols-outlined text-[16px]">group</span>
+          <div className="glass-card rounded-2xl p-3.5 sm:p-4 flex flex-col gap-3 h-full border border-[var(--glass-border)] bg-[var(--surface-glass)] backdrop-blur-[36px]">
+            
+            {/* Header: Title, Total Staff Counter & Direct Link */}
+            <div className="flex items-center justify-between pb-2.5 border-b border-[var(--line-soft)] flex-wrap gap-2">
+              <div className="flex items-center gap-2">
+                <div className="w-7 h-7 rounded-lg bg-[var(--accent-soft)] border border-[var(--accent)]/20 text-[var(--accent)] flex items-center justify-center shadow-2xs shrink-0">
+                  <span className="material-symbols-outlined text-[17px]">group</span>
                 </div>
-                <span>توزيع المهام والمعاملات على الكادر</span>
-              </h3>
+                <div>
+                  <h3 className="text-xs sm:text-sm font-black text-[var(--text)] m-0 leading-tight">
+                    توزيع المهام والمعاملات على الكادر
+                  </h3>
+                  <span className="text-[10px] text-[var(--text-3)] font-medium mt-0.5 block">
+                    متابعة الطاقة الاستيعابية والمهام المسندة للفريق
+                  </span>
+                </div>
+              </div>
 
-              <Link
-                href="/settings/users"
-                className="text-[10.5px] font-semibold text-[var(--text-3)] hover:text-[var(--accent)] transition-colors flex items-center gap-1 bg-[var(--surface-2)] px-2 py-0.5 rounded-full border border-[var(--glass-border)]"
-              >
-                <span>المستخدمون</span>
-                <span className="material-symbols-outlined text-[12px]">chevron_left</span>
-              </Link>
+              <div className="flex items-center gap-2">
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[var(--surface-2)] text-[var(--text-2)] border border-[var(--glass-border)]">
+                  {displayLawyers.length} أعضاء
+                </span>
+                <Link
+                  href="/settings/users"
+                  className="text-[10.5px] font-bold text-[var(--accent)] hover:underline flex items-center gap-0.5 transition-colors"
+                >
+                  <span>إدارة الكادر</span>
+                  <span className="material-symbols-outlined text-[12px]">chevron_left</span>
+                </Link>
+              </div>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 flex-1">
+            {/* Staff Workload Cards Grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 flex-1">
               {displayLawyers.map(lawyer => {
                 const count = lawyer.active_tx_count ?? 0
                 const percent = Math.min(100, Math.round((count / maxWorkload) * 100))
-                const roleLabel = lawyer.title || (lawyer.role === 'super_admin' ? 'مدير النظام' : lawyer.role === 'manager' ? 'مدير عمليات' : 'محامي')
+                const roleLabel = lawyer.title || (lawyer.role === 'super_admin' ? 'مدير النظام الأعلى' : lawyer.role === 'manager' ? 'مدير العمليات' : 'محامي ومستشار')
                 const isFree = count === 0
+                const initial = lawyer.name.trim().slice(0, 1) || '؟'
+
+                // Capacity Color Coding
+                const barGradient = isFree
+                  ? 'from-emerald-500 to-teal-500'
+                  : percent <= 45
+                  ? 'from-emerald-500 to-blue-500'
+                  : percent <= 80
+                  ? 'from-blue-500 to-indigo-600'
+                  : 'from-amber-500 to-rose-500'
+
+                const statusColor = isFree
+                  ? 'text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 border-emerald-500/20'
+                  : percent <= 45
+                  ? 'text-blue-600 dark:text-blue-400 bg-blue-500/10 border-blue-500/20'
+                  : percent <= 80
+                  ? 'text-indigo-600 dark:text-indigo-400 bg-indigo-500/10 border-indigo-500/20'
+                  : 'text-amber-600 dark:text-amber-400 bg-amber-500/10 border-amber-500/20'
 
                 return (
                   <div
                     key={lawyer.id || lawyer.name}
-                    className="flex flex-col gap-1.5 p-2.5 rounded-xl bg-[var(--surface-2)] border border-[var(--glass-border)] justify-between"
+                    className="flex flex-col justify-between gap-2 p-3 rounded-xl bg-[var(--surface-2)]/70 hover:bg-[var(--surface-2)] border border-[var(--glass-border)] hover:border-[var(--accent)]/30 transition-all shadow-2xs group"
                   >
-                    <div className="flex items-center justify-between gap-1.5">
-                      <div className="flex items-center gap-1.5 min-w-0">
-                        <div className="w-6 h-6 rounded-md bg-[var(--accent-soft)] text-[var(--accent)] font-extrabold flex items-center justify-center text-[10.5px] flex-none">
-                          {lawyer.name.trim().slice(0, 1)}
+                    {/* Top Row: Avatar + Name + Task Status Badge */}
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="flex items-center gap-2 min-w-0">
+                        {/* Circular Avatar with Online Indicator */}
+                        <div className="relative shrink-0">
+                          {lawyer.avatar_url ? (
+                            <img
+                              src={lawyer.avatar_url}
+                              alt={lawyer.name}
+                              className="w-8 h-8 rounded-full object-cover border border-white/20 shadow-xs"
+                            />
+                          ) : (
+                            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-600 to-indigo-700 text-white font-black text-xs flex items-center justify-center border border-white/20 shadow-xs">
+                              {initial}
+                            </div>
+                          )}
+                          <span
+                            className="absolute -bottom-0.5 -right-0.5 w-2 h-2 rounded-full bg-emerald-500 border border-[var(--surface-2)]"
+                            title="نشط"
+                          />
                         </div>
+
+                        {/* Staff Name & Role */}
                         <div className="flex flex-col min-w-0">
-                          <span className="text-[11.5px] font-bold text-[var(--text)] truncate">
+                          <span className="text-xs font-black text-[var(--text)] truncate leading-tight group-hover:text-[var(--accent)] transition-colors">
                             {lawyer.name}
                           </span>
-                          <span className="text-[9.5px] text-[var(--text-3)]">
-                            {roleLabel}
+                          <span className="text-[10px] text-[var(--text-3)] font-medium mt-0.5 truncate">
+                            {roleLabel} {lawyer.dept ? `• ${lawyer.dept}` : ''}
                           </span>
                         </div>
                       </div>
 
-                      {isFree ? (
-                        <span className="text-[9.5px] font-semibold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-1.5 py-0.2 rounded-full flex-none">
-                          متاح
-                        </span>
-                      ) : (
-                        <span className="text-[9.5px] font-bold text-[var(--accent)] bg-[var(--accent-soft)] px-1.5 py-0.2 rounded-full num flex-none">
-                          {count} مهام
-                        </span>
-                      )}
+                      {/* Workload Status Tag */}
+                      <span className={`text-[9.5px] font-bold px-2 py-0.5 rounded-full border shrink-0 ${statusColor}`}>
+                        {isFree ? 'متاح للعمل' : `${count} مهام نشطة`}
+                      </span>
                     </div>
 
-                    <div className="w-full h-1 bg-[var(--line-soft)] rounded-full overflow-hidden">
-                      <div
-                        className="h-full rounded-full bg-gradient-to-r from-[var(--accent)] to-blue-500 transition-all duration-500"
-                        style={{ width: `${isFree ? 0 : Math.max(15, percent)}%` }}
-                      />
+                    {/* Middle Section: Task Capacity & Interactive Progress Ratio Bar */}
+                    <div className="space-y-1 pt-1 border-t border-[var(--line-soft)]/50">
+                      <div className="flex items-center justify-between text-[9.5px] font-bold">
+                        <span className="text-[var(--text-3)]">نسبة الإشغال:</span>
+                        <span className={`font-mono ${isFree ? 'text-emerald-600 dark:text-emerald-400' : 'text-[var(--accent)]'}`}>
+                          {isFree ? '0% (طاقة شاغرة)' : `${percent}% من الطاقة الاستيعابية`}
+                        </span>
+                      </div>
+
+                      {/* Animated Task Ratio Progress Bar */}
+                      <div className="w-full h-1.5 bg-[var(--surface-3)] rounded-full overflow-hidden p-[0.5px]">
+                        <div
+                          className={`h-full rounded-full bg-gradient-to-r ${barGradient} transition-all duration-500`}
+                          style={{ width: `${isFree ? 0 : Math.max(12, percent)}%` }}
+                        />
+                      </div>
                     </div>
+
+                    {/* Bottom Micro Details: Direct Contact / Email */}
+                    {(lawyer.email || lawyer.phone) && (
+                      <div className="flex items-center justify-between text-[9px] text-[var(--text-3)] font-mono pt-1 border-t border-[var(--line-soft)]/40 truncate">
+                        <span className="truncate" dir="ltr">
+                          {lawyer.phone || lawyer.email}
+                        </span>
+                        <span className="text-[9px] text-[var(--text-3)] group-hover:text-[var(--accent)] transition-colors shrink-0">
+                          تفاصيل الملف ←
+                        </span>
+                      </div>
+                    )}
                   </div>
                 )
               })}
