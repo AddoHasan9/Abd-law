@@ -13,7 +13,8 @@ import {
   updateCompanyDetailsAction,
   launchDepositWorkflowAction,
   addCompanyDocumentAction,
-  addCompanyAuditLogAction
+  addCompanyAuditLogAction,
+  advanceCompanyStepAction,
 } from '@/app/(app)/commercial/companies/actions'
 import { updateDepositStageStateAction, uploadCompanyBarcodeAction } from '@/app/(app)/commercial/deposits/actions'
 import { updateCompanyFSSettingsAction, createFinancialStatementAction } from '@/app/(app)/commercial/financial-statements/actions'
@@ -23,7 +24,7 @@ import AddFinancialStatementModal from '@/components/financial-statements/AddFin
 import AddIDModal from '@/components/commercial/AddIDModal'
 import ReminderModal from '@/components/reminders/ReminderModal'
 import BarcodeUploader from '@/components/commercial/BarcodeUploader'
-import WorkflowStepperDiagram from '@/components/commercial/WorkflowStepperDiagram'
+import WorkflowTimelineMotion from '@/components/commercial/WorkflowTimelineMotion'
 import { usePermissions } from '@/lib/context/UserRoleContext'
 import { useDragScroll } from '@/lib/hooks/useDragScroll'
 
@@ -210,7 +211,41 @@ export default function Company360Client({
     router.refresh()
   }
 
+  const handleStepComplete = async (stepId: string, stepOrder: number) => {
+    if (!canEdit) return
+    setLoading(true)
+    try {
+      const res = await advanceCompanyStepAction(stepId, 'done')
+      if (res.success) {
+        setMsg({ type: 'ok', text: `تم إكمال الخطوة ${stepOrder} بنجاح!` })
+        router.refresh()
+      } else {
+        setMsg({ type: 'err', text: res.error || 'تعذر تحديث حالة الخطوة' })
+      }
+    } catch (err: any) {
+      setMsg({ type: 'err', text: err.message || 'تعذر تحديث حالة الخطوة' })
+    } finally {
+      setLoading(false)
+    }
+  }
 
+  const handleStepRevert = async (stepId: string, stepOrder: number) => {
+    if (!canEdit) return
+    setLoading(true)
+    try {
+      const res = await advanceCompanyStepAction(stepId, 'doing')
+      if (res.success) {
+        setMsg({ type: 'ok', text: `تمت إعادة فتح الخطوة ${stepOrder} للمتابعة!` })
+        router.refresh()
+      } else {
+        setMsg({ type: 'err', text: res.error || 'تعذر إعادة فتح الخطوة' })
+      }
+    } catch (err: any) {
+      setMsg({ type: 'err', text: err.message || 'تعذر إعادة فتح الخطوة' })
+    } finally {
+      setLoading(false)
+    }
+  }
 
   const handleReleaseDeposit = async () => {
     if (!canCreateDeposit) return
@@ -437,17 +472,20 @@ export default function Company360Client({
         </div>
       )}
 
-      {/* Interactive Workflow Stepper Diagram */}
+      {/* Interactive Workflow Stepper & Execution Engine */}
       {(activeTab === 'all' || activeTab === 'workflow') && (
-        <WorkflowStepperDiagram
-          taskTitle={`مسار تأسيس: ${company.name}`}
-          taskCode={company.task_no || '—'}
-          taskCategory="القسم التجاري - مسار محطات التأسيس الرسمية"
-          companyId={company.id}
+        <WorkflowTimelineMotion
+          steps={(company.workflow_steps || []) as any}
+          onCompleteStep={handleStepComplete}
+          onRevertStep={handleStepRevert}
           isEstablished={company.status === 'established' || Boolean(company.deposit_released) || Boolean(company.cert_date)}
-          rawSteps={company.workflow_steps}
-          canEdit={canEdit}
-          onStepStateChanged={() => router.refresh()}
+          onTransferToDeposit={() => {
+            setActiveTab('deposit')
+            setMsg({
+              type: 'ok',
+              text: 'يرجى مراجعة وتحديث مرحلة إطلاق الوديعة المصرفية.',
+            })
+          }}
         />
       )}
 
