@@ -14,6 +14,7 @@ interface Props {
 }
 
 export default function NewCompanyModal({ isOpen, onClose }: Props) {
+  useModalBodyLock(isOpen)
   const router = useRouter()
   const [mounted, setMounted] = useState(false)
   const [loading, setLoading] = useState(false)
@@ -287,7 +288,7 @@ export default function NewCompanyModal({ isOpen, onClose }: Props) {
             <span style={{ fontSize: '12px', color: 'var(--text-3)' }}>إدخال تفاصيل العميل، الأتعاب، المساهمين، والخدمات المشمولة</span>
           </div>
           <button type="button" onClick={onClose} className="icon-btn" aria-label="إغلاق">
-            ✕
+            <Icon name="x" />
           </button>
         </div>
 

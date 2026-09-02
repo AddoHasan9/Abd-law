@@ -79,7 +79,7 @@ export default function WorkflowTimelineMotion({
   return (
     <div className="flex flex-col gap-4 w-full">
       {/* 1. Header with Dynamic Progress Track (Light & Dark Adaptive) */}
-      <div className="p-4 sm:p-5 rounded-2xl bg-white dark:bg-[#0D121D]/90 border border-slate-200 dark:border-slate-700/60 shadow-sm flex flex-col gap-3 relative overflow-hidden">
+      <div className="p-4 sm:p-5 rounded-2xl bg-[var(--surface)] border border-[var(--line-soft)] shadow-sm flex flex-col gap-3 relative overflow-hidden">
         
         {/* Header Title & Live Counter Capsule */}
         <div className="flex items-center justify-between flex-wrap gap-3 relative z-10">
@@ -88,15 +88,15 @@ export default function WorkflowTimelineMotion({
               <Sparkles className="w-5 h-5 animate-pulse" />
             </div>
             <div>
-              <div className="text-xs font-bold text-slate-500 dark:text-slate-400">مسار تأسيس الشركة المعتمد</div>
-              <h3 className="text-base sm:text-lg font-black text-slate-900 dark:text-white font-display m-0 leading-tight">
+              <div className="text-xs font-bold text-[var(--text-3)]">مسار تأسيس الشركة المعتمد</div>
+              <h3 className="text-base sm:text-lg font-black text-[var(--text)] font-display m-0 leading-tight">
                 مخطط المراحل الإجرائية المتتابعة
               </h3>
             </div>
           </div>
 
           {/* Progress Capsule */}
-          <div className="flex items-center gap-2.5 bg-slate-100 dark:bg-[#151D2C] px-3.5 py-1.5 rounded-full border border-slate-200 dark:border-slate-700/80 shadow-xs">
+          <div className="flex items-center gap-2.5 bg-[var(--surface-2)] px-3.5 py-1.5 rounded-full border border-[var(--line-soft)] shadow-xs">
             <span className="relative flex h-2.5 w-2.5">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
               <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
@@ -104,14 +104,14 @@ export default function WorkflowTimelineMotion({
             <span className="text-xs font-extrabold text-emerald-600 dark:text-emerald-400 num">
               {pct}% مكتمل
             </span>
-            <span className="text-xs text-slate-500 dark:text-slate-400 font-semibold num border-r border-slate-200 dark:border-slate-700 pr-2">
+            <span className="text-xs text-[var(--text-3)] font-semibold num border-s border-[var(--line-soft)] ps-2">
               ({doneCount} من {totalSteps} مراحل)
             </span>
           </div>
         </div>
 
         {/* Animated Progress Bar */}
-        <div className="w-full h-2.5 rounded-full bg-slate-100 dark:bg-slate-800/80 overflow-hidden p-0.5 border border-slate-200 dark:border-slate-700/60 relative">
+        <div className="w-full h-2.5 rounded-full bg-[var(--surface-2)] overflow-hidden p-0.5 border border-[var(--line-soft)] relative">
           <motion.div
             className="h-full rounded-full bg-gradient-to-r from-emerald-500 via-amber-400 to-emerald-400 shadow-sm relative overflow-hidden"
             initial={{ width: '0%' }}
@@ -144,10 +144,10 @@ export default function WorkflowTimelineMotion({
               transition={{ duration: 0.28, delay: idx * 0.03 }}
               className={`rounded-2xl transition-all duration-300 flex items-center justify-between flex-wrap sm:flex-nowrap gap-4 p-4 sm:p-5 relative ${
                 isDoing
-                  ? 'bg-amber-500/[0.05] dark:bg-[#0E1522] border-2 border-amber-500 shadow-[0_0_22px_rgba(245,158,11,0.22)] ring-2 ring-amber-500/20'
+                  ? 'bg-amber-500/[0.05] dark:bg-amber-950/20 border-2 border-amber-500 shadow-[0_0_22px_rgba(245,158,11,0.22)] ring-2 ring-amber-500/20'
                   : isDone
-                  ? 'bg-white/90 dark:bg-[#0D121D]/90 border border-emerald-500/40 shadow-xs hover:border-emerald-500/60'
-                  : 'bg-slate-50/80 dark:bg-[#0D121D]/50 border border-slate-200 dark:border-slate-800/80 opacity-70 hover:opacity-90'
+                  ? 'bg-[var(--surface)] border border-emerald-500/40 shadow-xs hover:border-emerald-500/60'
+                  : 'bg-[var(--surface-2)]/60 border border-[var(--line-soft)] opacity-70 hover:opacity-90'
               }`}
             >
               {/* 1. RIGHT SIDE (اليمين): Step Number / Spinner + Title + Badges + Subtitle */}
@@ -190,7 +190,7 @@ export default function WorkflowTimelineMotion({
                       <Check className="w-5 h-5 stroke-[3]" />
                     </div>
                   ) : (
-                    <div className="w-9 h-9 rounded-full bg-slate-200 dark:bg-slate-800/90 border border-slate-300 dark:border-slate-700 text-slate-500 dark:text-slate-400 flex items-center justify-center font-black text-xs num shadow-xs">
+                    <div className="w-9 h-9 rounded-full bg-[var(--surface-2)] border border-[var(--line-soft)] text-[var(--text-3)] flex items-center justify-center font-black text-xs num shadow-xs">
                       {step.step_order}
                     </div>
                   )}
@@ -205,8 +205,8 @@ export default function WorkflowTimelineMotion({
                         isDoing
                           ? 'text-amber-600 dark:text-amber-400 font-display'
                           : isDone
-                          ? 'text-slate-900 dark:text-slate-100 font-extrabold'
-                          : 'text-slate-600 dark:text-slate-400 font-bold'
+                          ? 'text-[var(--text)] font-extrabold'
+                          : 'text-[var(--text-2)] font-bold'
                       }`}
                     >
                       {step.label}
@@ -229,13 +229,13 @@ export default function WorkflowTimelineMotion({
                   </div>
 
                   {/* Subtitle / Owner & Timestamp */}
-                  <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400 font-medium">
+                  <div className="flex items-center gap-2 text-xs text-[var(--text-3)] font-medium">
                     <span className="flex items-center gap-1 text-[11.5px]">
-                      <User className="w-3.5 h-3.5 text-slate-400" />
+                      <User className="w-3.5 h-3.5 text-[var(--text-3)]" />
                       <span>المسؤول: {step.owner_kind || 'المدير المختص'}</span>
                     </span>
                     {isDone && step.done_at && (
-                      <span className="text-[11px] text-emerald-600 dark:text-emerald-400 font-semibold num border-r border-slate-200 dark:border-slate-700 pr-2">
+                      <span className="text-[11px] text-emerald-600 dark:text-emerald-400 font-semibold num border-s border-[var(--line-soft)] ps-2">
                         {formatArabicDate(step.done_at)}
                       </span>
                     )}

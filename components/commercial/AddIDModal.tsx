@@ -53,6 +53,7 @@ export default function AddIDModal({
   record = null,
   onSaved,
 }: Props) {
+  useModalBodyLock(isOpen)
   const [mounted, setMounted] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -227,7 +228,7 @@ export default function AddIDModal({
     <div
       role="dialog"
       aria-modal="true"
-      className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 sm:p-6 overflow-y-auto animate-fade-in text-right"
+      className="fixed inset-0 z-[99999] bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 sm:p-6 overflow-y-auto animate-fade-in text-right"
       dir="rtl"
     >
       <div className="w-full max-w-2xl bg-surface border border-border-glass rounded-2xl shadow-2xl overflow-hidden flex flex-col my-auto transition-all duration-200 animate-scale-in text-text">
@@ -252,7 +253,7 @@ export default function AddIDModal({
             aria-label="إغلاق"
             className="w-8 h-8 rounded-lg flex items-center justify-center text-text-3 hover:text-text hover:bg-surface-3 transition-colors cursor-pointer"
           >
-            <span className="material-symbols-outlined text-[20px]">close</span>
+            <Icon name="x" />
           </button>
         </div>
 
@@ -491,7 +492,7 @@ export default function AddIDModal({
                   className={cn(
                     'flex items-center justify-center gap-1.5 h-9 px-3 rounded-xl border text-xs font-bold transition-all cursor-pointer',
                     status === 'paused'
-                      ? 'border-slate-500/50 bg-slate-500/15 text-slate-400'
+                      ? 'border-border-soft bg-surface-3 text-text-2'
                       : 'border-border bg-surface-2 text-text-3 hover:text-text'
                   )}
                 >

@@ -17,6 +17,7 @@ interface Props {
 }
 
 export default function AddTransactionModal({ isOpen, onClose, companies, lawyers: initialLawyers }: Props) {
+  useModalBodyLock(isOpen)
   const [mounted, setMounted] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -129,7 +130,7 @@ export default function AddTransactionModal({ isOpen, onClose, companies, lawyer
           </div>
           <h3>أضف معاملة تجارية جديدة</h3>
           <button type="button" onClick={onClose} className="icon-btn" aria-label="إغلاق">
-            ✕
+            <Icon name="x" />
           </button>
         </div>
 

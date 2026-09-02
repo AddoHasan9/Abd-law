@@ -17,6 +17,7 @@ interface Props {
 }
 
 export default function ReminderModal({ isOpen, onClose, companies = [], editingReminder, initialCompanyId }: Props) {
+  useModalBodyLock(isOpen)
   const [mounted, setMounted] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -24,7 +25,7 @@ export default function ReminderModal({ isOpen, onClose, companies = [], editing
 
   const [title, setTitle] = useState('')
   const [notes, setNotes] = useState('')
-  const [companyId, setCompanyId] = useState(initialCompanyId || '')
+  const [companyId, setCompanyId] = useState<string>(initialCompanyId || '')
   const [priority, setPriority] = useState<ReminderPriority>('medium')
   const [dueDate, setDueDate] = useState('')
   const [dueTime, setDueTime] = useState('')
@@ -33,54 +34,40 @@ export default function ReminderModal({ isOpen, onClose, companies = [], editing
     setMounted(true)
   }, [])
 
-  // Auto-fetch companies list if not provided or empty
-  useEffect(() => {
-    if (companies && companies.length > 0) {
-      setCompanyList(companies)
-      return
-    }
-    const loadCompanies = async () => {
-      try {
-        const supabase = createClient()
-        const { data } = await supabase.from('companies').select('id, name, kind, client_name').order('name')
-        if (data && data.length > 0) {
-          setCompanyList(data as unknown as Company[])
-        }
-      } catch (err) {
-        console.warn('Failed to load companies in ReminderModal:', err)
-      }
-    }
-    if (isOpen) {
-      loadCompanies()
-    }
-  }, [companies, isOpen])
-
   useEffect(() => {
     if (editingReminder) {
-      setTitle(editingReminder.title || '')
+      setTitle(editingReminder.title)
       setNotes(editingReminder.notes || '')
       setCompanyId(editingReminder.company_id || '')
       setPriority((editingReminder.priority as ReminderPriority) || 'medium')
-      setDueDate(editingReminder.due_date || '')
+      setDueDate(editingReminder.due_date ? editingReminder.due_date.slice(0, 10) : '')
       setDueTime(editingReminder.due_time || '')
     } else {
       setTitle('')
       setNotes('')
-      setCompanyId('')
+      setCompanyId(initialCompanyId || '')
       setPriority('medium')
-      setDueDate('')
+      setDueDate(new Date().toISOString().slice(0, 10))
       setDueTime('')
     }
-  }, [editingReminder, isOpen])
+    setError(null)
+  }, [editingReminder, initialCompanyId, isOpen])
 
-  useModalBodyLock(isOpen)
+  // Fetch companies if list is empty
+  useEffect(() => {
+    if (companyList.length > 0) return
+    const supabase = createClient()
+    supabase.from('companies').select('id, name, kind, status').order('name').then(({ data }) => {
+      if (data) setCompanyList(data as Company[])
+    })
+  }, [companyList.length])
 
-  if (!mounted || !isOpen) return null
+  if (!isOpen || !mounted) return null
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!title.trim()) {
-      setError('عنوان التذكير مطلوب')
+      setError('يرجى كتابة عنوان التذكير')
       return
     }
 
@@ -92,7 +79,7 @@ export default function ReminderModal({ isOpen, onClose, companies = [], editing
       res = await updateReminderAction(editingReminder.id, {
         title: title.trim(),
         notes: notes.trim(),
-        company_id: companyId,
+        company_id: companyId || undefined,
         priority,
         due_date: dueDate,
         due_time: dueTime,
@@ -101,7 +88,7 @@ export default function ReminderModal({ isOpen, onClose, companies = [], editing
       res = await createReminderAction({
         title: title.trim(),
         notes: notes.trim(),
-        company_id: companyId,
+        company_id: companyId || undefined,
         priority,
         due_date: dueDate,
         due_time: dueTime,
@@ -113,7 +100,7 @@ export default function ReminderModal({ isOpen, onClose, companies = [], editing
     if (res.success) {
       onClose()
     } else {
-      setError(res.error || 'فصل حفظ التذكير الشخصي')
+      setError(res.error || 'فشل حفظ التذكير الشخصي')
     }
   }
 
@@ -138,7 +125,7 @@ export default function ReminderModal({ isOpen, onClose, companies = [], editing
           </div>
           <h3>{editingReminder ? 'تعديل التذكير الشخصي' : 'إضافة تذكير شخصي جديد'}</h3>
           <button type="button" onClick={onClose} className="icon-btn" aria-label="إغلاق">
-            ✕
+            <Icon name="x" />
           </button>
         </div>
 

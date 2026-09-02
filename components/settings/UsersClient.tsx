@@ -3,6 +3,7 @@
 import { useState, useMemo, useEffect } from 'react'
 import { createPortal } from 'react-dom'
 import Link from 'next/link'
+import { Icon } from '@/components/ui/Icon'
 import { formatDate } from '@/lib/constants'
 import { useModalBodyLock } from '@/lib/hooks/useModalBodyLock'
 import { usePermissions } from '@/lib/context/UserRoleContext'
@@ -31,22 +32,22 @@ const ROLE_BADGES: Record<UserRole, { label: string; badgeClass: string; desc: s
   },
   admin: {
     label: 'مدير النظام',
-    badgeClass: 'bg-amber-500/15 text-amber-500 border border-amber-500/30',
-    desc: 'إدارة تشغيلية شاملة للنظام وحذف وتعديل البيانات المعين بها',
+    badgeClass: 'bg-indigo-500/15 text-indigo-500 border border-indigo-500/30',
+    desc: 'إشراف شامل على كافة الأقسام والمستخدمين والعمليات',
   },
   manager: {
     label: 'مدير العمليات',
-    badgeClass: 'bg-blue-500/15 text-blue-500 border border-blue-500/30',
-    desc: 'متابعة وإدارة العمليات التجارية والودائع والتقارير',
+    badgeClass: 'bg-emerald-500/15 text-emerald-500 border border-emerald-500/30',
+    desc: 'إدارة وتوجيه المعاملات وسير العمل وفرق المحامين والموظفين',
   },
   lawyer: {
     label: 'محامي ومستشار',
-    badgeClass: 'bg-emerald-500/15 text-emerald-500 border border-emerald-500/30',
+    badgeClass: 'bg-amber-500/15 text-amber-500 border border-amber-500/30',
     desc: 'تولّي وتنفيذ المعاملات والمهام الموكلة إليه حصراً',
   },
   staff: {
     label: 'موظف إداري',
-    badgeClass: 'bg-slate-500/15 text-slate-400 border border-slate-500/30',
+    badgeClass: 'bg-[var(--surface-3)] text-[var(--text-3)] border border-[var(--line-soft)]',
     desc: 'صلاحيات استعراض وإدخال بيانات بيئية مخصصة',
   },
 }
@@ -73,6 +74,8 @@ export default function UsersClient({ initialProfiles }: Props) {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false)
   const [loading, setLoading] = useState(false)
   const [message, setMessage] = useState<{ type: 'ok' | 'err'; text: string } | null>(null)
+
+  useModalBodyLock(Boolean(viewingUser || editingUser || resetPassUser || isAddModalOpen))
 
   useEffect(() => {
     function handleScrollOrResize() {
@@ -683,18 +686,19 @@ export default function UsersClient({ initialProfiles }: Props) {
           onClick={e => { if (e.target === e.currentTarget) setViewingUser(null) }}
           className="fixed inset-0 bg-black/70 backdrop-blur-md z-[99999] flex items-center justify-center p-4"
         >
-          <div className="glass-card rounded-[28px] max-w-lg w-full p-7 border border-[var(--glass-border)] shadow-2xl bg-[var(--surface)] text-[var(--text)] flex flex-col gap-5">
+          <div className="glass-card rounded-2xl max-w-lg w-full p-6 border border-[var(--glass-border)] shadow-2xl bg-[var(--surface)] text-[var(--text)] flex flex-col gap-5">
             <div className="flex items-center justify-between pb-4 border-b border-[var(--glass-border)]">
-              <h3 className="text-lg font-extrabold text-[var(--text)] flex items-center gap-2">
+              <h3 className="text-base font-extrabold text-[var(--text)] flex items-center gap-2">
                 <span className="material-symbols-outlined text-blue-400">badge</span>
                 <span>بيانات المستخدم: {viewingUser.name}</span>
               </h3>
               <button
                 type="button"
                 onClick={() => setViewingUser(null)}
-                className="w-8 h-8 rounded-full bg-[var(--surface-2)] flex items-center justify-center text-[var(--text-3)] hover:text-[var(--text)] transition-colors"
+                className="w-8 h-8 rounded-lg bg-[var(--surface-2)] flex items-center justify-center text-[var(--text-3)] hover:text-[var(--text)] hover:bg-[var(--surface-3)] transition-colors cursor-pointer"
+                aria-label="إغلاق"
               >
-                ✕
+                <Icon name="x" />
               </button>
             </div>
 
@@ -767,18 +771,19 @@ export default function UsersClient({ initialProfiles }: Props) {
           onClick={e => { if (e.target === e.currentTarget) setIsAddModalOpen(false) }}
           className="fixed inset-0 bg-black/70 backdrop-blur-md z-[99999] flex items-center justify-center p-4"
         >
-          <div className="glass-card rounded-[28px] max-w-lg w-full p-7 border border-[var(--glass-border)] shadow-2xl bg-[var(--surface)] text-[var(--text)] flex flex-col gap-5">
+          <div className="glass-card rounded-2xl max-w-lg w-full p-6 border border-[var(--glass-border)] shadow-2xl bg-[var(--surface)] text-[var(--text)] flex flex-col gap-5">
             <div className="flex items-center justify-between pb-4 border-b border-[var(--glass-border)]">
-              <h3 className="text-lg font-extrabold text-[var(--text)] flex items-center gap-2">
+              <h3 className="text-base font-extrabold text-[var(--text)] flex items-center gap-2">
                 <span className="material-symbols-outlined text-[var(--accent)]">person</span>
                 <span>{editingUser ? 'تعديل بيانات وصلاحيات المستخدم' : 'إضافة مستخدم جديد وتحديد الصلاحيات'}</span>
               </h3>
               <button
                 type="button"
                 onClick={() => setIsAddModalOpen(false)}
-                className="w-8 h-8 rounded-full bg-[var(--surface-2)] flex items-center justify-center text-[var(--text-3)] hover:text-[var(--text)] transition-colors"
+                className="w-8 h-8 rounded-lg bg-[var(--surface-2)] flex items-center justify-center text-[var(--text-3)] hover:text-[var(--text)] hover:bg-[var(--surface-3)] transition-colors cursor-pointer"
+                aria-label="إغلاق"
               >
-                ✕
+                <Icon name="x" />
               </button>
             </div>
 
@@ -904,18 +909,19 @@ export default function UsersClient({ initialProfiles }: Props) {
           onClick={e => { if (e.target === e.currentTarget) setResetPassUser(null) }}
           className="fixed inset-0 bg-black/70 backdrop-blur-md z-[99999] flex items-center justify-center p-4"
         >
-          <div className="glass-card rounded-[28px] max-w-md w-full p-7 border border-[var(--glass-border)] shadow-2xl bg-[var(--surface)] text-[var(--text)] flex flex-col gap-5">
+          <div className="glass-card rounded-2xl max-w-md w-full p-6 border border-[var(--glass-border)] shadow-2xl bg-[var(--surface)] text-[var(--text)] flex flex-col gap-5">
             <div className="flex items-center justify-between pb-4 border-b border-[var(--glass-border)]">
-              <h3 className="text-lg font-extrabold text-[var(--text)] flex items-center gap-2">
+              <h3 className="text-base font-extrabold text-[var(--text)] flex items-center gap-2">
                 <span className="material-symbols-outlined text-purple-400">lock_reset</span>
                 <span>إعادة ضبط كلمة المرور</span>
               </h3>
               <button
                 type="button"
                 onClick={() => setResetPassUser(null)}
-                className="w-8 h-8 rounded-full bg-[var(--surface-2)] flex items-center justify-center text-[var(--text-3)] hover:text-[var(--text)] transition-colors"
+                className="w-8 h-8 rounded-lg bg-[var(--surface-2)] flex items-center justify-center text-[var(--text-3)] hover:text-[var(--text)] hover:bg-[var(--surface-3)] transition-colors cursor-pointer"
+                aria-label="إغلاق"
               >
-                ✕
+                <Icon name="x" />
               </button>
             </div>
 

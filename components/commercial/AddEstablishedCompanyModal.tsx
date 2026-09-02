@@ -50,6 +50,7 @@ const ID_LABELS: Record<string, string> = {
 const CHAMBER_GRADES = ['ممتازة', 'الأولى', 'الثانية', 'الثالثة', 'الرابعة', 'الخامسة']
 
 export default function AddEstablishedCompanyModal({ isOpen, onClose, onSuccess }: Props) {
+  useModalBodyLock(isOpen)
   const [mounted, setMounted] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -341,7 +342,7 @@ export default function AddEstablishedCompanyModal({ isOpen, onClose, onSuccess 
             </span>
           </div>
           <button type="button" onClick={onClose} className="icon-btn" aria-label="إغلاق">
-            ✕
+            <Icon name="x" />
           </button>
         </div>
 

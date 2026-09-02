@@ -31,6 +31,7 @@ export default function LLCTransactionDetailsModal({
   onUpdated,
   onDeleted,
 }: Props) {
+  useModalBodyLock(isOpen)
   const [mounted, setMounted] = useState(false)
   const [loading, setLoading] = useState(false)
   const [deleting, setDeleting] = useState(false)
@@ -186,7 +187,7 @@ export default function LLCTransactionDetailsModal({
             </span>
           </div>
           <button type="button" onClick={onClose} className="icon-btn" aria-label="إغلاق">
-            ✕
+            <Icon name="x" />
           </button>
         </div>
 

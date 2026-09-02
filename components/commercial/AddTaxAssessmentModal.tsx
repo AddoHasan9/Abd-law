@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { createPortal } from 'react-dom'
+import { Icon } from '@/components/ui/Icon'
 import { useModalBodyLock } from '@/lib/hooks/useModalBodyLock'
 import { formatNumberWithCommas } from '@/lib/constants'
 import { createTaxAssessmentAction, updateTaxAssessmentAction } from '@/app/(app)/commercial/tax-assessment/actions'
@@ -32,6 +33,7 @@ export default function AddTaxAssessmentModal({
   editingAssessment,
   onSuccess,
 }: Props) {
+  useModalBodyLock(isOpen)
   const [mounted, setMounted] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -196,16 +198,16 @@ export default function AddTaxAssessmentModal({
       dir="rtl"
     >
       {/* Outer Card with 100% Contained Overflow & Clean Rounded Frame */}
-      <div className="glass-card rounded-[24px] max-w-3xl w-full border border-[var(--border)] shadow-2xl bg-[var(--surface)] text-[var(--text)] flex flex-col max-h-[90vh] overflow-hidden my-auto animate-scale-in">
+      <div className="glass-card rounded-2xl max-w-3xl w-full border border-[var(--border)] shadow-2xl bg-[var(--surface)] text-[var(--text)] flex flex-col max-h-[90vh] overflow-hidden my-auto animate-scale-in">
         
         {/* Fixed Pinned Header */}
-        <div className="flex items-center justify-between p-5 sm:p-6 border-b border-[var(--border-soft)] flex-none bg-[var(--surface-2)]/50">
+        <div className="flex items-center justify-between p-4 sm:p-5 border-b border-[var(--border-soft)] flex-none bg-[var(--surface-2)]/50">
           <div className="flex items-center gap-3">
-            <div className="w-11 h-11 rounded-2xl bg-[var(--accent-soft)] border border-[var(--accent)]/20 text-[var(--accent)] flex items-center justify-center flex-none shadow-xs">
-              <span className="material-symbols-outlined text-[22px]">receipt_long</span>
+            <div className="w-10 h-10 rounded-xl bg-[var(--accent-soft)] border border-[var(--accent)]/20 text-[var(--accent)] flex items-center justify-center flex-none shadow-xs">
+              <span className="material-symbols-outlined text-[20px]">receipt_long</span>
             </div>
             <div>
-              <h3 className="text-base sm:text-lg font-extrabold text-[var(--text)] tracking-tight">
+              <h3 className="text-base font-extrabold text-[var(--text)] tracking-tight">
                 {editingAssessment ? 'تعديل ملف التحاسب الضريبي' : 'فتح وإضافة ملف تحاسب ضريبي جديد'}
               </h3>
               <p className="text-xs text-[var(--text-3)] font-medium mt-0.5">
@@ -216,10 +218,10 @@ export default function AddTaxAssessmentModal({
           <button
             type="button"
             onClick={onClose}
-            className="w-8 h-8 rounded-full bg-[var(--surface-2)] hover:bg-[var(--surface-3)] flex items-center justify-center text-[var(--text-3)] hover:text-[var(--text)] transition-colors cursor-pointer text-sm font-bold flex-none"
+            className="w-8 h-8 rounded-lg flex items-center justify-center text-[var(--text-3)] hover:text-[var(--text)] hover:bg-[var(--surface-3)] transition-colors cursor-pointer flex-none"
             aria-label="إغلاق"
           >
-            ✕
+            <Icon name="x" />
           </button>
         </div>
 

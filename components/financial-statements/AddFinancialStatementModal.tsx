@@ -39,6 +39,7 @@ export default function AddFinancialStatementModal({
   initialCompanyId,
   editingStatement,
 }: Props) {
+  useModalBodyLock(isOpen)
   const router = useRouter()
   const [mounted, setMounted] = useState(false)
   const [loading, setLoading] = useState(false)
@@ -332,7 +333,7 @@ export default function AddFinancialStatementModal({
             </span>
           </div>
           <button type="button" onClick={onClose} className="icon-btn" aria-label="إغلاق">
-            ✕
+            <Icon name="x" />
           </button>
         </div>
 

@@ -41,6 +41,7 @@ function formatStepArabicDate(dateStr?: string | null): string {
 }
 
 export default function CompanyDetailsModal({ company, isOpen, onClose, onDelete, initialTab }: Props) {
+  useModalBodyLock(isOpen)
   const router = useRouter()
   const { can, isSuperAdmin, isAdmin } = usePermissions()
   const canDeleteCompany = can('companies', 'delete') || isSuperAdmin || isAdmin
@@ -542,7 +543,7 @@ export default function CompanyDetailsModal({ company, isOpen, onClose, onDelete
             <span style={{ fontSize: '12px', color: 'var(--text-3)', marginTop: '3px', display: 'block' }}>تعديل ومتابعة بيانات الشركة وتحديث المحطات والمستندات</span>
           </div>
           <button type="button" onClick={onClose} className="icon-btn" aria-label="إغلاق">
-            ✕
+            <Icon name="x" />
           </button>
         </div>
 

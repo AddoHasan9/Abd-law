@@ -83,9 +83,18 @@ export default function Topbar({ profile, title, subtitle, notifCount = 0, onMen
     loadProfile()
   }, [profile])
 
-  // قراءة تفضيل المظهر
+  // قراءة تفضيل المظهر وتطبيق كلاس dark المتوافق مع Tailwind والـ CSS
   useEffect(() => {
-    setDark(document.documentElement.dataset.theme === 'dark')
+    const savedTheme = localStorage.getItem('theme')
+    const currentAttr = document.documentElement.dataset.theme
+    const isDark = savedTheme ? savedTheme === 'dark' : currentAttr === 'dark' || document.documentElement.classList.contains('dark')
+    setDark(isDark)
+    document.documentElement.dataset.theme = isDark ? 'dark' : 'light'
+    if (isDark) {
+      document.documentElement.classList.add('dark')
+    } else {
+      document.documentElement.classList.remove('dark')
+    }
   }, [])
 
   // إغلاق قائمة المستخدم عند النقر خارجها
@@ -102,6 +111,11 @@ export default function Topbar({ profile, title, subtitle, notifCount = 0, onMen
   const toggleTheme = () => {
     const next = dark ? 'light' : 'dark'
     document.documentElement.dataset.theme = next
+    if (next === 'dark') {
+      document.documentElement.classList.add('dark')
+    } else {
+      document.documentElement.classList.remove('dark')
+    }
     try { localStorage.setItem('theme', next) } catch { /* تجاهل */ }
     setDark(!dark)
   }
@@ -163,12 +177,12 @@ export default function Topbar({ profile, title, subtitle, notifCount = 0, onMen
         <button
           type="button"
           onClick={() => setIsUserMenuOpen(prev => !prev)}
-          className="flex items-center gap-2 pr-2.5 pl-2 py-1 border-r border-[var(--border-soft)] hover:bg-[var(--surface-2)]/80 rounded-xl transition-all duration-200 cursor-pointer select-none text-right outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]"
+          className="flex items-center gap-2 px-2.5 py-1 border-s border-[var(--border-soft)] hover:bg-[var(--surface-2)]/80 rounded-xl transition-all duration-200 cursor-pointer select-none text-right outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]"
           aria-expanded={isUserMenuOpen}
           aria-haspopup="true"
           title="قائمة المستخدم"
         >
-          <div className="hidden sm:flex flex-col items-end leading-tight">
+          <div className="hidden sm:flex flex-col items-start leading-tight">
             <span className="text-xs font-bold text-[var(--text)] max-w-[130px] truncate" title={displayName}>
               {displayName}
             </span>

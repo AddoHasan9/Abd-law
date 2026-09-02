@@ -23,6 +23,7 @@ const ROLE_AR_LABELS: Record<string, string> = {
 }
 
 export default function UserProfileModal({ isOpen, onClose, profile }: Props) {
+  useModalBodyLock(isOpen)
   const router = useRouter()
   const [mounted, setMounted] = useState(false)
   const [loading, setLoading] = useState(false)
@@ -154,7 +155,7 @@ export default function UserProfileModal({ isOpen, onClose, profile }: Props) {
             className="icon-btn"
             aria-label="إغلاق"
           >
-            ✕
+            <Icon name="x" />
           </button>
         </div>
 

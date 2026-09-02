@@ -39,6 +39,7 @@ export default function CompanyFSDetailsModal({
   canSubmit = true,
   canDelete = true,
 }: Props) {
+  useModalBodyLock(isOpen)
   const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
@@ -163,7 +164,7 @@ export default function CompanyFSDetailsModal({
             </span>
           </div>
           <button type="button" onClick={onClose} className="icon-btn" aria-label="إغلاق">
-            ✕
+            <Icon name="x" />
           </button>
         </div>
 

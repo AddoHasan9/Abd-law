@@ -1,22 +1,8 @@
 import type { Metadata, Viewport } from 'next'
-import { IBM_Plex_Sans_Arabic, Tajawal, Cairo } from 'next/font/google'
+import { Cairo } from 'next/font/google'
 import { Toaster } from '@/components/ui/Toaster'
 import { QueryProvider } from '@/components/providers/QueryProvider'
 import '@/styles/globals.css'
-
-const ibmPlex = IBM_Plex_Sans_Arabic({
-  subsets: ['arabic'],
-  weight: ['400', '500', '600', '700'],
-  variable: '--font-ibm-plex',
-  display: 'swap',
-})
-
-const tajawal = Tajawal({
-  subsets: ['arabic'],
-  weight: ['400', '500', '700'],
-  variable: '--font-tajawal',
-  display: 'swap',
-})
 
 const cairo = Cairo({
   subsets: ['arabic'],
@@ -42,7 +28,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="ar" dir="rtl" data-theme="light" data-scroll-behavior="smooth" className={`${ibmPlex.variable} ${tajawal.variable} ${cairo.variable}`} suppressHydrationWarning>
+    <html lang="ar" dir="rtl" data-theme="light" data-scroll-behavior="smooth" className={cairo.variable} suppressHydrationWarning>
       <head>
         {/* Google Material Symbols & Modern Fonts */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />

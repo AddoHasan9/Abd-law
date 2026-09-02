@@ -1232,7 +1232,9 @@ export default function Company360Client({
           <div className="modal" style={{ '--modal-max-w': 'var(--modal-sm, 480px)' } as React.CSSProperties}>
             <div className="modal-head">
               <h3>رفع مستند جديد للشركة</h3>
-              <button type="button" onClick={() => setIsUploadModalOpen(false)} className="icon-btn" aria-label="إغلاق">✕</button>
+              <button type="button" onClick={() => setIsUploadModalOpen(false)} className="icon-btn" aria-label="إغلاق">
+                <Icon name="x" />
+              </button>
             </div>
             <form onSubmit={handleUploadDoc} style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: '14px' }}>
               <div className="field">

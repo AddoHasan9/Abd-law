@@ -536,7 +536,7 @@ export default function CompaniesClient({ initialCompanies }: Props) {
                   </div>
 
                   {/* FS status or Quick Assign Button */}
-                  <div className="flex flex-col gap-1 min-w-0 border-r border-[var(--border-soft)] pr-2">
+                  <div className="flex flex-col gap-1 min-w-0 border-s border-[var(--border-soft)] ps-2">
                     <span className="text-[10px] font-bold text-[var(--text-3)]">الحسابات الختامية</span>
                     <div className="truncate">
                       {(() => {

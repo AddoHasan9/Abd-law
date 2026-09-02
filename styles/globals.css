@@ -1687,7 +1687,7 @@
 
   /* ============================================================
      صفحات الدخول والمصادقة الحديثة (Modern Luxury Glassmorphism)
-   }
+     ============================================================ */
   .login-mark .icon { width: 26px; height: 26px; }
   .login-card h1 { font-size: 18px; font-weight: 800; text-align: center; color: var(--lx-text); margin-bottom: 6px; }
   .login-card .sub { font-size: 13px; color: var(--lx-text-3); text-align: center; margin-bottom: 22px; line-height: 1.6; }
@@ -1844,15 +1844,15 @@
     position: relative !important;
     z-index: 2 !important;
     width: 100% !important;
-    max-width: min(var(--modal-max-w, 800px), 92vw) !important;
-    max-height: 88vh !important;
-    max-height: 88dvh !important;
+    max-width: min(var(--modal-max-w, 800px), 94vw) !important;
+    max-height: 90vh !important;
+    max-height: 90dvh !important;
     display: flex !important;
     flex-direction: column !important;
     background: var(--surface) !important;
     color: var(--text) !important;
-    border: 1px solid var(--line) !important;
-    border-radius: var(--r-lg) !important;
+    border: 1px solid var(--glass-border) !important;
+    border-radius: 20px !important;
     box-shadow: var(--shadow-3) !important;
     animation: rise var(--t-base) both;
     overflow: hidden !important;
@@ -1865,7 +1865,7 @@
     align-items: center !important;
     justify-content: space-between !important;
     gap: 12px !important;
-    padding: 14px 18px !important;
+    padding: 14px 20px !important;
     border-bottom: 1px solid var(--line-soft) !important;
     background: var(--surface-2) !important;
   }
@@ -1873,26 +1873,58 @@
   .modal-head h3 {
     flex: 1 !important;
     font-size: 16px !important;
-    font-weight: 700 !important;
+    font-weight: 800 !important;
     color: var(--text) !important;
     margin: 0 !important;
+  }
+
+  .modal-head .icon-btn {
+    width: 32px;
+    height: 32px;
+    border-radius: 9px;
+    display: grid;
+    place-items: center;
+    background: transparent;
+    border: 1px solid transparent;
+    color: var(--text-3);
+    cursor: pointer;
+    transition: all var(--t-fast);
+    font-size: 16px;
+    flex-shrink: 0;
+  }
+
+  .modal-head .icon-btn:hover {
+    background: var(--surface-3);
+    color: var(--text);
+    border-color: var(--line-soft);
   }
 
   .modal-body {
     flex: 1 1 auto !important;
     overflow-y: auto !important;
-    padding: 18px !important;
+    padding: 20px !important;
     background: var(--surface) !important;
     color: var(--text) !important;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(148, 163, 184, 0.25) transparent;
+  }
+
+  .modal-body::-webkit-scrollbar {
+    width: 4px;
+  }
+
+  .modal-body::-webkit-scrollbar-thumb {
+    background: rgba(148, 163, 184, 0.3);
+    border-radius: 999px;
   }
 
   .modal-foot {
     flex: none !important;
     display: flex !important;
     align-items: center !important;
-    justify-content: flex-start !important;
+    justify-content: flex-end !important;
     gap: 10px !important;
-    padding: 12px 18px !important;
+    padding: 12px 20px !important;
     /* لا يُقصّ خلف شريط الأدوات السفلي على الهاتف */
     padding-bottom: max(12px, env(safe-area-inset-bottom)) !important;
     border-top: 1px solid var(--line-soft) !important;
@@ -2625,8 +2657,8 @@
     width: 100%;
   }
 
-  .field label,
-  label {
+  .field > label,
+  .form-label {
     font-size: 13px;
     font-weight: 700;
     color: var(--text);
@@ -2996,8 +3028,8 @@
       align-items: flex-start !important;
     }
 
-    .field label,
-    label {
+    .field > label,
+    .form-label {
       font-size: 12.5px !important;
       font-weight: 700 !important;
       color: var(--text) !important;
