@@ -97,46 +97,33 @@ export default function DeadlineCard({ deadlines = [], item = null }: Props) {
     <div
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
-      className="w-full flex-none mt-2 pt-2 border-t border-[var(--line-soft)]"
+      className="w-full flex-none mt-3"
     >
-      {/* Widget Section Header */}
-      <div className="flex items-center justify-between px-1 mb-1.5">
-        <div className="flex items-center gap-1.5 text-[10.5px] font-bold text-[var(--text-3)]">
-          <Icon name="clock" className="w-3.5 h-3.5 text-[var(--accent)] shrink-0" />
-          <span>متابعة المهل</span>
-        </div>
-
-        {items.length > 0 ? (
-          <span
-            className={`text-[9.5px] font-bold px-1.5 py-0.2 rounded-full ${
-              hasLate
-                ? 'bg-rose-500/15 text-rose-500 border border-rose-500/30'
-                : 'bg-amber-500/15 text-amber-500 border border-amber-500/30'
-            }`}
-          >
-            {items.length} {items.length === 1 ? 'مهلة' : 'مهل'}
-          </span>
-        ) : (
-          <span className="text-[9.5px] font-bold px-1.5 py-0.2 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
-            منتظم ✓
-          </span>
-        )}
-      </div>
-
       {items.length === 0 ? (
-        /* Empty / All Compliant State - Ultra Compact */
+        /* Empty / All Compliant State - Matches Screenshot Exactly */
         <Link
           href="/commercial/deposits"
-          className="block px-2.5 py-1.5 rounded-xl bg-[var(--surface-2)] hover:bg-[var(--surface-3)] border border-[var(--line-soft)] hover:border-[var(--accent)]/40 transition-all group shadow-2xs"
+          className="block rounded-2xl bg-[var(--surface-2)] hover:bg-[var(--surface-3)] p-3 border border-[var(--line-soft)] hover:border-[var(--accent)]/40 transition-all group shadow-2xs"
         >
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400 text-[10.5px] font-bold">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse shrink-0" />
-              <span className="truncate">كافة المهل والودائع سليمة</span>
+          <div className="flex items-center justify-between gap-2">
+            <div className="flex items-center gap-2">
+              <div className="w-7 h-7 rounded-full bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-emerald-500 dark:text-emerald-400 shrink-0">
+                <span className="material-symbols-outlined text-[18px]">verified</span>
+              </div>
+              <div className="flex flex-col text-right leading-tight">
+                <span className="text-[12px] font-black text-[var(--text)]">متابعة المهل</span>
+                <span className="text-[12px] font-black text-[var(--text)]">والاستحقاقات</span>
+              </div>
             </div>
-            <span className="text-[10px] font-bold text-[var(--accent)] shrink-0 group-hover:translate-x-[-2px] transition-transform">
-              ‹
-            </span>
+
+            <div className="bg-emerald-500/15 border border-emerald-500/30 text-emerald-600 dark:text-emerald-400 px-2 py-0.5 rounded-lg text-[9.5px] font-black flex flex-col items-center justify-center leading-tight shrink-0">
+              <span>سجلات</span>
+              <span>منتظمة ✓</span>
+            </div>
+          </div>
+
+          <div className="text-[9.5px] text-[var(--text-3)] font-medium mt-2 pt-1.5 border-t border-[var(--line-soft)]/60 flex items-center gap-1">
+            <span>✓ كافة المعاملات والمهل القانونية ضمن المدد المحددة</span>
           </div>
         </Link>
       ) : (
