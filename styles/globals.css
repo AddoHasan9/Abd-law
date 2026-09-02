@@ -753,6 +753,14 @@
   /* ============================================================
      الهيكل والشبكة العامة — Apple HIG Translucent Architecture
      ============================================================ */
+  html, body {
+    height: 100%;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+  }
+
   body {
     background: var(--canvas-mesh, var(--bg));
     color: var(--text);
@@ -761,6 +769,8 @@
   #app {
     display: flex;
     height: 100vh;
+    height: 100dvh;
+    width: 100vw;
     overflow: hidden;
     position: relative;
     z-index: 1;
@@ -783,8 +793,10 @@
     height: 100dvh;
     max-height: 100dvh;
     overflow: hidden;
-    position: relative;
+    position: sticky;
+    top: 0;
     box-shadow: -4px 0 28px -4px rgba(15, 23, 42, 0.05);
+    overscroll-behavior: none;
   }
 
   #sidebar > * {
@@ -1192,7 +1204,10 @@
     flex: 1;
     display: flex;
     flex-direction: column;
+    height: 100vh;
+    height: 100dvh;
     min-width: 0;
+    overflow: hidden;
   }
 
   #topbar {
@@ -1208,6 +1223,8 @@
     border-bottom: 1px solid var(--border-soft, var(--border));
     z-index: 20;
     box-shadow: 0 1px 12px rgba(15, 23, 42, 0.03);
+    position: sticky;
+    top: 0;
   }
 
   #page-title {
@@ -1287,10 +1304,15 @@
 
   #view-root {
     flex: 1;
+    height: calc(100vh - var(--topbar-h));
+    height: calc(100dvh - var(--topbar-h));
     overflow-y: auto;
+    overflow-x: hidden;
     padding: 10px 14px 24px;
     background: transparent;
     color: var(--text);
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
   }
 
   .view {
