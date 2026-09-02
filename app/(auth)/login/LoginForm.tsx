@@ -123,46 +123,50 @@ export default function LoginForm() {
   }
 
   return (
-    <div className="flex flex-col justify-center h-full w-full max-w-[420px] mx-auto py-2">
-      {/* Mobile Top Brand Header */}
-      <div className="lg:hidden flex items-center gap-3.5 mb-6 pb-4 border-b border-slate-200/80 dark:border-white/10 text-right">
-        <div className="w-12 h-12 rounded-2xl bg-white dark:bg-white/[0.08] border border-blue-500/30 p-1.5 flex items-center justify-center shadow-lg shadow-black/5 backdrop-blur-md shrink-0">
+    <div className="flex flex-col justify-center h-full w-full max-w-[430px] mx-auto py-1">
+      {/* Mobile Prominent Royal Emblem & Identity Header */}
+      <div className="lg:hidden flex flex-col items-center text-center mb-6 pb-5 border-b border-slate-200/80 dark:border-white/10">
+        {/* Centered Luxury Emblem Medallion */}
+        <div className="w-20 h-20 rounded-2xl bg-gradient-to-b from-white to-slate-50 dark:from-white/10 dark:to-white/[0.02] border border-amber-500/35 dark:border-amber-400/30 p-2.5 flex items-center justify-center shadow-xl shadow-blue-500/10 dark:shadow-black/50 backdrop-blur-xl mb-3 relative group">
           <Image
             src="/logo.png"
-            alt="شعار المكتب"
-            width={48}
-            height={48}
-            className="object-contain w-full h-full"
+            alt="شعار مكتب المحامي عبدالحسن الخزرجي"
+            width={72}
+            height={72}
+            className="object-contain w-full h-full drop-shadow-md"
             priority
           />
         </div>
-        <div className="min-w-0 flex-1">
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10.5px] font-bold bg-blue-500/10 border border-blue-500/20 text-blue-700 dark:text-blue-400">
-            <Sparkles className="w-3 h-3 text-blue-600 dark:text-blue-400 animate-pulse" />
-            منظومة العمل القانوني
-          </span>
-          <h2 className="text-sm font-extrabold text-slate-900 dark:text-white mt-1 truncate">
-            مكتب المحامي عبدالحسن الخزرجي
-          </h2>
-        </div>
+
+        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-extrabold bg-amber-500/10 dark:bg-amber-400/15 border border-amber-500/25 dark:border-amber-400/30 text-amber-700 dark:text-amber-300 mb-2">
+          <Sparkles className="w-3.5 h-3.5 text-amber-500" />
+          منظومة العمل القانوني والشركات
+        </span>
+
+        <h2 className="text-lg font-black text-slate-900 dark:text-white tracking-tight leading-snug">
+          مكتب المحامي عبدالحسن الخزرجي
+        </h2>
+        <p className="text-xs text-slate-500 dark:text-slate-400 font-bold mt-0.5">
+          للمحاماة والاستشارات القانونية وتأسيس الشركات
+        </p>
       </div>
 
       {/* Form Content with GSAP Stagger Entrance */}
-      <FadeInStagger className="space-y-6">
+      <FadeInStagger className="space-y-5">
         <div className="text-right">
-          <h1 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight font-display transition-colors">
-            تسجيل الدخول
+          <h1 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white tracking-tight font-display">
+            تسجيل الدخول إلى حسابك
           </h1>
-          <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 mt-1.5 leading-relaxed font-medium transition-colors">
-            أهلاً بك مجدداً، أدخل بياناتك للوصول إلى لوحة العمل وإدارة المعاملات.
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 leading-relaxed font-medium">
+            أدخل بيانات الاعتماد للمتابعة والوصول إلى لوحة العمل وإدارة المعاملات.
           </p>
         </div>
 
         {/* Login Form */}
-        <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-4.5">
+        <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-4">
           {/* Email Field */}
           <div className="space-y-1.5 text-right">
-            <label htmlFor="login-email" className="block text-xs font-bold text-slate-800 dark:text-slate-200 transition-colors">
+            <label htmlFor="login-email" className="block text-xs font-bold text-slate-800 dark:text-slate-200">
               البريد الإلكتروني
             </label>
             <div className="relative group">
@@ -173,7 +177,7 @@ export default function LoginForm() {
                 placeholder="name@example.com"
                 dir="ltr"
                 style={{ paddingRight: '48px', paddingLeft: '16px' }}
-                className="w-full h-12 input-icon-right rounded-2xl bg-white dark:bg-[#151A24] hover:bg-slate-50 dark:hover:bg-[#1A202C] focus:bg-white dark:focus:bg-[#151A24] border border-slate-300/80 dark:border-white/12 focus:border-[#3B82F6] dark:focus:border-[#3B82F6] text-slate-900 dark:text-white placeholder-slate-400 text-sm outline-none transition-all duration-300 focus:ring-4 focus:ring-blue-500/15 dark:focus:ring-blue-500/20 text-left backdrop-blur-md shadow-xs font-medium"
+                className="w-full h-12 rounded-2xl bg-white dark:bg-[#151A24] hover:bg-slate-50 dark:hover:bg-[#1A202C] focus:bg-white dark:focus:bg-[#151A24] border border-slate-300/80 dark:border-white/12 focus:border-[#3B82F6] dark:focus:border-[#3B82F6] text-slate-900 dark:text-white placeholder-slate-400 text-sm outline-none transition-all duration-300 focus:ring-4 focus:ring-blue-500/15 dark:focus:ring-blue-500/20 text-left backdrop-blur-md shadow-2xs font-medium"
                 {...register('email')}
               />
               <Mail className="absolute right-3.5 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400 group-focus-within:text-[#3B82F6] transition-colors pointer-events-none" />
@@ -187,17 +191,9 @@ export default function LoginForm() {
 
           {/* Password Field */}
           <div className="space-y-1.5 text-right">
-            <div className="flex items-center justify-between">
-              <label htmlFor="login-password" className="block text-xs font-bold text-slate-800 dark:text-slate-200 transition-colors">
-                كلمة المرور
-              </label>
-              <Link
-                href="/reset-password"
-                className="text-[11.5px] text-blue-600 dark:text-blue-400 hover:underline font-semibold transition-colors"
-              >
-                نسيت كلمة المرور؟
-              </Link>
-            </div>
+            <label htmlFor="login-password" className="block text-xs font-bold text-slate-800 dark:text-slate-200">
+              كلمة المرور
+            </label>
             <div className="relative group">
               <input
                 id="login-password"
@@ -206,7 +202,7 @@ export default function LoginForm() {
                 placeholder="••••••••"
                 dir="ltr"
                 style={{ paddingRight: '48px', paddingLeft: '48px' }}
-                className="w-full h-12 input-icon-both rounded-2xl bg-white dark:bg-[#151A24] hover:bg-slate-50 dark:hover:bg-[#1A202C] focus:bg-white dark:focus:bg-[#151A24] border border-slate-300/80 dark:border-white/12 focus:border-[#3B82F6] dark:focus:border-[#3B82F6] text-slate-900 dark:text-white placeholder-slate-400 text-sm outline-none transition-all duration-300 focus:ring-4 focus:ring-blue-500/15 dark:focus:ring-blue-500/20 text-left backdrop-blur-md shadow-xs font-medium"
+                className="w-full h-12 rounded-2xl bg-white dark:bg-[#151A24] hover:bg-slate-50 dark:hover:bg-[#1A202C] focus:bg-white dark:focus:bg-[#151A24] border border-slate-300/80 dark:border-white/12 focus:border-[#3B82F6] dark:focus:border-[#3B82F6] text-slate-900 dark:text-white placeholder-slate-400 text-sm outline-none transition-all duration-300 focus:ring-4 focus:ring-blue-500/15 dark:focus:ring-blue-500/20 text-left backdrop-blur-md shadow-2xs font-medium"
                 {...register('password')}
               />
               <Lock className="absolute right-3.5 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400 group-focus-within:text-[#3B82F6] transition-colors pointer-events-none" />
@@ -231,28 +227,37 @@ export default function LoginForm() {
             )}
           </div>
 
-          {/* Remember me */}
-          <div className="flex items-center gap-2.5 pt-1 text-xs text-slate-700 dark:text-slate-300">
-            <input
-              id="remember-me"
-              type="checkbox"
-              checked={rememberMe}
-              onChange={e => setValue('rememberMe', e.target.checked)}
-              className="w-4 h-4 rounded-md border-slate-300 dark:border-white/20 bg-white dark:bg-white/10 text-[#3B82F6] focus:ring-0 cursor-pointer accent-[#3B82F6]"
-            />
-            <label
-              htmlFor="remember-me"
-              className="text-xs text-slate-700 dark:text-slate-300 hover:text-slate-950 dark:hover:text-white font-medium cursor-pointer transition-colors"
+          {/* Remember me & Forgot Password Row */}
+          <div className="flex items-center justify-between pt-1 text-xs">
+            <div className="flex items-center gap-2">
+              <input
+                id="remember-me"
+                type="checkbox"
+                checked={rememberMe}
+                onChange={e => setValue('rememberMe', e.target.checked)}
+                className="w-4 h-4 rounded-md border-slate-300 dark:border-white/20 bg-white dark:bg-white/10 text-blue-600 focus:ring-0 cursor-pointer accent-blue-600"
+              />
+              <label
+                htmlFor="remember-me"
+                className="text-xs text-slate-700 dark:text-slate-300 hover:text-slate-950 dark:hover:text-white font-medium cursor-pointer transition-colors"
+              >
+                تذكر تسجيل الدخول
+              </label>
+            </div>
+
+            <Link
+              href="/reset-password"
+              className="text-xs text-blue-600 dark:text-blue-400 hover:underline font-bold transition-colors"
             >
-              تذكر تسجيل الدخول على هذا المتصفح
-            </label>
+              نسيت كلمة المرور؟
+            </Link>
           </div>
 
           {/* Submit Button */}
           <button
             type="submit"
             disabled={isSubmitting}
-            className="w-full h-12 mt-2 rounded-2xl bg-[#3B82F6] hover:bg-[#2563EB] active:bg-[#1D4ED8] text-white font-extrabold text-sm flex items-center justify-center gap-2.5 shadow-lg shadow-blue-500/20 hover:shadow-blue-500/35 hover:scale-[1.01] active:scale-[0.99] transition-all duration-300 disabled:opacity-60 disabled:pointer-events-none cursor-pointer border border-white/15"
+            className="w-full h-12 mt-2 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 active:from-blue-800 active:to-indigo-800 text-white font-black text-sm flex items-center justify-center gap-2.5 shadow-lg shadow-blue-600/25 hover:shadow-blue-600/35 hover:scale-[1.01] active:scale-[0.99] transition-all duration-300 disabled:opacity-60 disabled:pointer-events-none cursor-pointer border border-white/15"
           >
             {isSubmitting ? (
               <div className="flex items-center gap-2">
@@ -268,10 +273,10 @@ export default function LoginForm() {
           </button>
         </form>
 
-        {/* Security Trust Pill */}
-        <div className="flex items-center justify-center gap-2 text-[11.5px] text-slate-500 dark:text-slate-400 select-none pt-1 transition-colors">
+        {/* Security Trust Badge */}
+        <div className="flex items-center justify-center gap-2 text-[11px] text-slate-500 dark:text-slate-400 select-none pt-2">
           <ShieldCheck className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
-          <span>النظام متصل ومشفر بمعيار الأمان 256-bit</span>
+          <span>نظام مشفر ومحمي بمعيار الأمان 256-bit SSL • إدارة المكتب</span>
         </div>
       </FadeInStagger>
     </div>

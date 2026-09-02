@@ -149,52 +149,52 @@ export default function TaxAssessmentClient({ assessments = [], companies = [], 
       )}
 
       {/* Commercial 7 Sub-Departments Navigation Bar */}
-      <div className="flex items-center gap-2.5 overflow-x-auto pb-1 scrollbar-thin">
+      <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-thin">
         <Link
           href="/commercial/companies-registry"
-          className="flex items-center gap-2 px-4 py-2 rounded-2xl text-xs font-bold bg-[var(--surface-2)] border border-[var(--line-soft)] text-[var(--text-3)] hover:text-[var(--text)] transition-all flex-none"
+          className="flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold bg-[var(--surface)] border border-[var(--border)] text-[var(--text-2)] hover:border-[var(--accent)] hover:text-[var(--accent)] hover:bg-[var(--surface-2)] transition-all shadow-2xs flex-none"
         >
           <Icon name="build2" />
           <span>الشركات</span>
         </Link>
         <Link
           href="/commercial/companies"
-          className="flex items-center gap-2 px-4 py-2 rounded-2xl text-xs font-bold bg-[var(--surface-2)] border border-[var(--line-soft)] text-[var(--text-3)] hover:text-[var(--text)] transition-all flex-none"
+          className="flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold bg-[var(--surface)] border border-[var(--border)] text-[var(--text-2)] hover:border-[var(--accent)] hover:text-[var(--accent)] hover:bg-[var(--surface-2)] transition-all shadow-2xs flex-none"
         >
           <Icon name="build" />
           <span>الشركات وتأسيسها</span>
         </Link>
         <Link
           href="/commercial/deposits"
-          className="flex items-center gap-2 px-4 py-2 rounded-2xl text-xs font-bold bg-[var(--surface-2)] border border-[var(--line-soft)] text-[var(--text-3)] hover:text-[var(--text)] transition-all flex-none"
+          className="flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold bg-[var(--surface)] border border-[var(--border)] text-[var(--text-2)] hover:border-[var(--accent)] hover:text-[var(--accent)] hover:bg-[var(--surface-2)] transition-all shadow-2xs flex-none"
         >
           <Icon name="vault" />
           <span>إطلاق الوديعة</span>
         </Link>
         <Link
           href="/commercial/llc"
-          className="flex items-center gap-2 px-4 py-2 rounded-2xl text-xs font-bold bg-[var(--surface-2)] border border-[var(--line-soft)] text-[var(--text-3)] hover:text-[var(--text)] transition-all flex-none"
+          className="flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold bg-[var(--surface)] border border-[var(--border)] text-[var(--text-2)] hover:border-[var(--accent)] hover:text-[var(--accent)] hover:bg-[var(--surface-2)] transition-all shadow-2xs flex-none"
         >
           <Icon name="badge" />
           <span>قسم المحدودة</span>
         </Link>
         <Link
           href="/commercial/ids"
-          className="flex items-center gap-2 px-4 py-2 rounded-2xl text-xs font-bold bg-[var(--surface-2)] border border-[var(--line-soft)] text-[var(--text-3)] hover:text-[var(--text)] transition-all flex-none"
+          className="flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold bg-[var(--surface)] border border-[var(--border)] text-[var(--text-2)] hover:border-[var(--accent)] hover:text-[var(--accent)] hover:bg-[var(--surface-2)] transition-all shadow-2xs flex-none"
         >
           <Icon name="stamp" />
           <span>قسم الهويات</span>
         </Link>
         <Link
           href="/commercial/tax-assessment"
-          className="flex items-center gap-2 px-4 py-2 rounded-2xl text-xs font-black bg-[#0E2442] border border-[#38BDF8] text-[#38BDF8] shadow-[0_0_16px_rgba(56,189,248,0.25)] flex-none"
+          className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-black bg-[var(--accent)] text-white border border-[var(--accent)] shadow-xs flex-none"
         >
           <Icon name="scale" />
           <span>التحاسب الضريبي</span>
         </Link>
         <Link
           href="/commercial/financial-statements"
-          className="flex items-center gap-2 px-4 py-2 rounded-2xl text-xs font-bold bg-[var(--surface-2)] border border-[var(--line-soft)] text-[var(--text-3)] hover:text-[var(--text)] transition-all flex-none"
+          className="flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold bg-[var(--surface)] border border-[var(--border)] text-[var(--text-2)] hover:border-[var(--accent)] hover:text-[var(--accent)] hover:bg-[var(--surface-2)] transition-all shadow-2xs flex-none"
         >
           <Icon name="doc" />
           <span>الحسابات الختامية</span>
@@ -204,8 +204,8 @@ export default function TaxAssessmentClient({ assessments = [], companies = [], 
       {/* Page Header Banner */}
       <div className="flex items-center justify-between flex-wrap gap-4 pb-2 border-b border-[var(--line-soft)]">
         <div className="flex items-center gap-3.5">
-          <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-amber-600 to-amber-400 flex items-center justify-center text-slate-950 shadow-lg shadow-amber-500/20 flex-none">
-            <span className="material-symbols-outlined text-[28px]">receipt_long</span>
+          <div className="w-11 h-11 rounded-xl bg-[var(--accent-soft)] border border-[var(--accent)]/20 flex items-center justify-center text-[var(--accent)] shadow-xs flex-none">
+            <span className="material-symbols-outlined text-[24px]">receipt_long</span>
           </div>
           <div>
             <h1 className="text-xl font-black text-[var(--text)] tracking-tight">قسم التحاسب الضريبي</h1>
@@ -220,7 +220,7 @@ export default function TaxAssessmentClient({ assessments = [], companies = [], 
             <button
               type="button"
               onClick={openAddModal}
-              className="btn btn-primary shadow-lg flex items-center gap-2"
+              className="btn btn-primary shadow-xs flex items-center gap-2"
             >
               <Icon name="plus" />
               <span>إضافة تحاسب ضريبي</span>
@@ -233,39 +233,42 @@ export default function TaxAssessmentClient({ assessments = [], companies = [], 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3.5 w-full">
         <div
           onClick={() => setStatusFilter('all')}
-          className={`glass-card p-4 rounded-[20px] cursor-pointer transition-all duration-200 block border ${statusFilter === 'all' ? 'border-[var(--accent)] shadow-md bg-[var(--surface-2)]' : 'border-[var(--glass-border)] bg-[var(--surface)] hover:-translate-y-0.5'}`}
+          className={`p-4 rounded-2xl cursor-pointer transition-all duration-200 block border ${statusFilter === 'all' ? 'border-[var(--accent)] shadow-xs bg-[var(--surface-2)] ring-2 ring-[var(--accent)]/15' : 'border-[var(--border)] bg-[var(--surface)] hover:-translate-y-0.5 shadow-2xs'}`}
         >
           <div className="text-[11.5px] font-bold text-[var(--text-3)] mb-1">إجمالي ملفات التحاسب</div>
-          <div className="text-2xl sm:text-3xl font-extrabold text-[var(--text)] num">{stats.total}</div>
+          <div className="text-2xl sm:text-3xl font-black text-[var(--text)] num">{stats.total}</div>
         </div>
 
         <div
           onClick={() => setStatusFilter('in_progress')}
-          className={`glass-card p-4 rounded-[20px] cursor-pointer transition-all duration-200 block border ${statusFilter === 'in_progress' ? 'border-amber-500 shadow-md bg-amber-500/10' : 'border-[var(--glass-border)] bg-[var(--surface)] hover:-translate-y-0.5'}`}
+          className={`p-4 rounded-2xl cursor-pointer transition-all duration-200 block border ${statusFilter === 'in_progress' ? 'border-amber-500 shadow-xs bg-amber-500/10 ring-2 ring-amber-500/15' : 'border-[var(--border)] bg-[var(--surface)] hover:-translate-y-0.5 shadow-2xs'}`}
         >
           <div className="text-[11.5px] font-bold text-amber-600 dark:text-amber-400 mb-1 flex items-center gap-1.5">
-            <span className="w-3 h-3 border-2 border-amber-500/40 border-t-amber-400 rounded-full animate-spin inline-block" />
+            <span className="w-2.5 h-2.5 border-2 border-amber-500/40 border-t-amber-500 rounded-full animate-spin inline-block" />
             <span>قيد المراجعة والإجراء</span>
           </div>
-          <div className="text-2xl sm:text-3xl font-extrabold text-amber-600 dark:text-amber-400 num">{stats.inProgress}</div>
+          <div className="text-2xl sm:text-3xl font-black text-amber-600 dark:text-amber-400 num">{stats.inProgress}</div>
         </div>
 
         <div
           onClick={() => setStatusFilter('tax_cleared')}
-          className={`glass-card p-4 rounded-[20px] cursor-pointer transition-all duration-200 block border ${statusFilter === 'tax_cleared' ? 'border-emerald-500 shadow-md bg-emerald-500/10' : 'border-[var(--glass-border)] bg-[var(--surface)] hover:-translate-y-0.5'}`}
+          className={`p-4 rounded-2xl cursor-pointer transition-all duration-200 block border ${statusFilter === 'tax_cleared' ? 'border-emerald-500 shadow-xs bg-emerald-500/10 ring-2 ring-emerald-500/15' : 'border-[var(--border)] bg-[var(--surface)] hover:-translate-y-0.5 shadow-2xs'}`}
         >
-          <div className="text-[11.5px] font-bold text-emerald-600 dark:text-emerald-400 mb-1">براءة ذمة صادرة ✓</div>
-          <div className="text-2xl sm:text-3xl font-extrabold text-emerald-600 dark:text-emerald-400 num">{stats.cleared}</div>
+          <div className="text-[11.5px] font-bold text-emerald-600 dark:text-emerald-400 mb-1 flex items-center gap-1">
+            <Icon name="check" style={{ width: '14px', height: '14px' }} />
+            <span>براءة ذمة صادرة</span>
+          </div>
+          <div className="text-2xl sm:text-3xl font-black text-emerald-600 dark:text-emerald-400 num">{stats.cleared}</div>
         </div>
 
-        <div className="glass-card p-4 rounded-[20px] border border-[var(--glass-border)] bg-[var(--surface)]">
-          <div className="text-[11.5px] font-bold text-blue-400 mb-1">إجمالي الضرائب المقدرة</div>
-          <div className="text-xl sm:text-2xl font-extrabold text-blue-400 num">{formatMoney(stats.totalTaxAmount)}</div>
+        <div className="p-4 rounded-2xl border border-[var(--border)] bg-[var(--surface)] shadow-2xs">
+          <div className="text-[11.5px] font-bold text-[var(--accent)] mb-1">إجمالي الضرائب المقدرة</div>
+          <div className="text-xl sm:text-2xl font-black text-[var(--accent)] num">{formatMoney(stats.totalTaxAmount)}</div>
         </div>
       </div>
 
       {/* Search & Filter Toolbar */}
-      <div className="p-4 rounded-3xl bg-[var(--surface)] border border-[var(--glass-border)] shadow-md flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3.5">
+      <div className="p-3.5 rounded-2xl bg-[var(--surface)] border border-[var(--border)] shadow-2xs flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
         
         {/* Search Input */}
         <div className="relative flex-1 min-w-[280px]">

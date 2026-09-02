@@ -15,6 +15,10 @@ export function ThemeToggle() {
     } else {
       document.documentElement.classList.remove('dark')
     }
+    const color = isDark ? '#0F131A' : '#FFFFFF'
+    const meta = document.getElementById('theme-color-meta') || document.querySelector('meta[name="theme-color"]')
+    if (meta) meta.setAttribute('content', color)
+    document.querySelectorAll('meta[name="theme-color"]').forEach(m => m.setAttribute('content', color))
     try {
       localStorage.setItem('theme', themeStr)
     } catch {}
@@ -24,7 +28,7 @@ export function ThemeToggle() {
     setMounted(true)
     const savedTheme = localStorage.getItem('theme')
     const currentAttr = document.documentElement.dataset.theme
-    const isDark = savedTheme ? savedTheme === 'dark' : currentAttr === 'dark'
+    const isDark = savedTheme ? savedTheme === 'dark' : currentAttr === 'dark' || document.documentElement.classList.contains('dark')
     setDark(isDark)
     applyTheme(isDark)
   }, [])
@@ -37,7 +41,7 @@ export function ThemeToggle() {
 
   if (!mounted) {
     return (
-      <div className="w-28 h-10 rounded-2xl bg-white/10 dark:bg-slate-900/60 border border-slate-300 dark:border-white/10 animate-pulse" />
+      <div className="w-24 h-9 rounded-full bg-white/20 dark:bg-white/5 border border-slate-200 dark:border-white/10 animate-pulse" />
     )
   }
 
@@ -45,19 +49,19 @@ export function ThemeToggle() {
     <button
       type="button"
       onClick={toggle}
-      className="flex items-center gap-2 px-3.5 py-2 rounded-2xl bg-white/80 dark:bg-slate-900/70 hover:bg-white dark:hover:bg-slate-800 border border-slate-300/80 dark:border-white/15 backdrop-blur-xl shadow-md dark:shadow-black/30 text-slate-800 dark:text-slate-100 transition-all duration-300 hover:scale-105 active:scale-95 cursor-pointer text-xs font-bold"
+      className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/85 dark:bg-[#151A24]/85 hover:bg-white dark:hover:bg-[#1D2433] border border-slate-200/90 dark:border-white/15 backdrop-blur-xl shadow-md text-slate-800 dark:text-slate-100 transition-all duration-300 hover:scale-105 active:scale-95 cursor-pointer text-xs font-bold select-none"
       title={dark ? 'التبديل إلى الوضع النهاري' : 'التبديل إلى الوضع الليلي'}
       aria-label={dark ? 'التبديل إلى الوضع النهاري' : 'التبديل إلى الوضع الليلي'}
     >
       {dark ? (
         <>
-          <Sun className="h-4 w-4 text-amber-500 animate-in spin-in-180 duration-300" />
-          <span className="text-amber-500 font-extrabold">الوضع النهاري</span>
+          <Sun className="h-3.5 w-3.5 text-amber-400" />
+          <span className="text-[11px] font-bold text-amber-400">نهاري</span>
         </>
       ) : (
         <>
-          <Moon className="h-4 w-4 text-blue-600 animate-in spin-in-180 duration-300" />
-          <span className="text-blue-700 font-extrabold">الوضع الليلي</span>
+          <Moon className="h-3.5 w-3.5 text-blue-600" />
+          <span className="text-[11px] font-bold text-slate-700">ليلي</span>
         </>
       )}
     </button>

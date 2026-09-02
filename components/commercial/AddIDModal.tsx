@@ -225,43 +225,43 @@ export default function AddIDModal({
   }
 
   return createPortal(
-    <div
-      role="dialog"
-      aria-modal="true"
-      className="fixed inset-0 z-[99999] bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 sm:p-6 overflow-y-auto animate-fade-in text-right"
-      dir="rtl"
-    >
-      <div className="w-full max-w-2xl bg-surface border border-border-glass rounded-2xl shadow-2xl overflow-hidden flex flex-col my-auto transition-all duration-200 animate-scale-in text-text">
+    <div id="modal-root" className="on">
+      <div className="modal-veil" onClick={onClose} role="presentation" aria-hidden="true" />
+      <div className="modal" style={{ '--modal-max-w': 'var(--modal-lg, 780px)' } as React.CSSProperties}>
         {/* Header */}
-        <div className="px-6 py-4 border-b border-border-soft flex items-center justify-between gap-4 bg-surface-2/40">
-          <div className="flex items-center gap-3 min-w-0">
-            <div className="w-9 h-9 rounded-xl bg-primary-soft text-primary flex items-center justify-center flex-none">
-              <span className="material-symbols-outlined text-[20px]">badge</span>
-            </div>
-            <div>
-              <h3 className="text-base font-bold text-text truncate">
-                {isEditMode ? `تعديل بيانات ${ID_TYPE_LABELS[idType]}` : `إضافة معاملة ${ID_TYPE_LABELS[idType]}`}
-              </h3>
-              <p className="text-xs text-text-3 mt-0.5">
-                {isEditMode ? 'تحديث وتثبيت وثيقة الهوية المسجلة' : 'تسجيل معاملة إصدار أو تجديد هوية وترخيص مهني'}
-              </p>
-            </div>
-          </div>
-          <button
-            type="button"
-            onClick={onClose}
-            aria-label="إغلاق"
-            className="w-8 h-8 rounded-lg flex items-center justify-center text-text-3 hover:text-text hover:bg-surface-3 transition-colors cursor-pointer"
+        <div className="modal-head">
+          <div
+            style={{
+              width: '38px',
+              height: '38px',
+              borderRadius: '12px',
+              background: 'var(--accent-soft)',
+              color: 'var(--accent)',
+              display: 'grid',
+              placeItems: 'center',
+              flexShrink: 0,
+            }}
           >
+            <Icon name="stamp" />
+          </div>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <h3 style={{ margin: 0, fontSize: '16px', fontWeight: 800 }}>
+              {isEditMode ? `تعديل بيانات ${ID_TYPE_LABELS[idType]}` : `إضافة معاملة ${ID_TYPE_LABELS[idType]}`}
+            </h3>
+            <span style={{ fontSize: '12px', color: 'var(--text-3)' }}>
+              {isEditMode ? 'تحديث وتثبيت وثيقة الهوية المسجلة' : 'تسجيل معاملة إصدار أو تجديد هوية وترخيص مهني'}
+            </span>
+          </div>
+          <button type="button" onClick={onClose} className="icon-btn" aria-label="إغلاق">
             <Icon name="x" />
           </button>
         </div>
 
         {/* Form Body */}
-        <form onSubmit={handleSubmit} className="flex flex-col flex-1">
-          <div className="p-6 overflow-y-auto max-h-[75vh] flex-1 flex flex-col gap-4">
+        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', flex: 1, overflow: 'hidden' }}>
+          <div className="modal-body" style={{ display: 'flex', flexDirection: 'column', gap: '16px', padding: '20px' }}>
             {error && (
-              <div className="p-3.5 rounded-xl bg-destructive/10 border border-destructive/30 text-destructive text-xs font-bold animate-shake">
+              <div className="login-err" style={{ marginBottom: 0 }}>
                 {error}
               </div>
             )}
@@ -568,19 +568,19 @@ export default function AddIDModal({
           </div>
 
           {/* Footer */}
-          <div className="px-6 py-4 border-t border-border-soft bg-surface-2/30 flex items-center justify-end gap-3">
+          <div className="modal-foot">
             <button
               type="button"
               onClick={onClose}
               disabled={loading}
-              className="h-10 px-4 rounded-xl text-xs font-bold text-text-2 hover:bg-surface-2 transition-colors cursor-pointer"
+              className="btn btn-ghost"
             >
               إلغاء
             </button>
             <button
               type="submit"
               disabled={loading}
-              className="h-10 px-5 rounded-xl bg-primary text-white text-xs font-bold shadow-sm hover:bg-primary/90 transition-all cursor-pointer disabled:opacity-50"
+              className="btn btn-primary"
             >
               {loading
                 ? 'جارٍ الحفظ…'
