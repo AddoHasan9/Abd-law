@@ -20,6 +20,9 @@ const ID_TYPE_LABELS: Record<string, string> = {
   chamber_id: 'هوية الغرفة التجارية',
 }
 
+let lastCheckTimestamp = 0
+const CHECK_COOLDOWN_MS = 10 * 60 * 1000 // 10 minutes cooldown
+
 /** ينشئ تنبيهاً واحداً فقط لكل (شركة + نوع) طالما لا يزال هناك تنبيه سابق غير مقروء من نفس النوع */
 async function notifyOnceIfUnread(
   supabase: ReturnType<typeof createAdminClient>,
@@ -45,6 +48,12 @@ async function notifyOnceIfUnread(
 }
 
 export async function checkAndTriggerCompanyDeadlineNotificationsAction() {
+  const now = Date.now()
+  if (now - lastCheckTimestamp < CHECK_COOLDOWN_MS) {
+    return // تم الفحص مسبقاً خلال الـ 10 دقائق الأخيرة — تجنّب تكرار الاستعلامات
+  }
+  lastCheckTimestamp = now
+
   try {
     const supabase = createAdminClient()
 

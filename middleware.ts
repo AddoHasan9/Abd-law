@@ -30,6 +30,11 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next({ request })
   }
 
+  // إذا كان الطلب لصفحة تسجيل الدخول، نمرره فوراً دون انتظار خادم المصادقة لتسريع التحميل
+  if (isPublic && path === '/login') {
+    return NextResponse.next({ request })
+  }
+
   let response = NextResponse.next({ request })
 
   const supabase = createServerClient(
@@ -51,8 +56,12 @@ export async function middleware(request: NextRequest) {
     }
   )
 
-  // getUser يتحقّق من الرمز مع الخادم
-  const { data: { user } } = await supabase.auth.getUser()
+  // getUser يتحقّق من الرمز مع الخادم مع مهلة سريعة (2500ms) لمنع تعليق المتصفح
+  const userPromise = supabase.auth.getUser()
+  const timeoutPromise = new Promise<{ data: { user: null }; error: unknown }>((resolve) =>
+    setTimeout(() => resolve({ data: { user: null }, error: new Error('timeout') }), 2500)
+  )
+  const { data: { user } } = await Promise.race([userPromise, timeoutPromise])
 
   if (!user && !isPublic) {
     const url = request.nextUrl.clone()

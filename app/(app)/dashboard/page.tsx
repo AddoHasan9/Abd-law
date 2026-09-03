@@ -19,7 +19,10 @@ export default async function DashboardPage() {
     getDashboardStats(),
     listProfiles(),
     listCompanies().catch(() => []),
-    checkAndTriggerCompanyDeadlineNotificationsAction(),
   ])
+
+  // تنفيذ فحص إشعارات المواعيد في الخلفية دون تعطيل أو تأخير استجابة لوحة التحكم
+  checkAndTriggerCompanyDeadlineNotificationsAction().catch(() => {})
+
   return <DashboardClient stats={stats} profiles={profiles} companies={companies} />
 }
