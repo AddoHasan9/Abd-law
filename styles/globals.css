@@ -1354,11 +1354,11 @@
     width: 100%;
     max-width: 100%;
     min-width: 0;
-    height: calc(100vh - var(--topbar-h));
-    height: calc(100dvh - var(--topbar-h));
+    height: auto;
+    min-height: 0; /* يترك الـ flex يحسب الارتفاع الفعلي تحت الشريط العلوي مهما كان طوله */
     overflow-y: auto;
     overflow-x: hidden;
-    padding: 14px 18px 28px;
+    padding: 14px 18px calc(96px + env(safe-area-inset-bottom)); /* مسافة تكفي زر المساعدة العائم */
     background: transparent;
     color: var(--text);
     overscroll-behavior: contain;
@@ -1498,7 +1498,7 @@
     }
 
     #view-root {
-      padding: 12px 12px 70px 12px !important;
+      padding: 12px 12px calc(96px + env(safe-area-inset-bottom)) 12px !important;
       width: 100% !important;
       max-width: 100% !important;
     }
@@ -3010,7 +3010,7 @@
     }
 
     #view-root {
-      padding: 12px 12px 28px;
+      padding: 12px 12px calc(96px + env(safe-area-inset-bottom));
     }
 
     .tools {
@@ -3211,7 +3211,7 @@
 
   @media (max-width: 1366px) {
     #view-root {
-      padding: 14px 16px 28px;
+      padding: 14px 16px calc(96px + env(safe-area-inset-bottom));
     }
 
     .tools {
