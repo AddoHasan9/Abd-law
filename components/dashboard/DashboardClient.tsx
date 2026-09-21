@@ -452,14 +452,14 @@ export default function DashboardClient({ stats, profiles = [], companies = [] }
                       </div>
 
                       {/* Workload Status Tag */}
-                      <span className={`text-[9.5px] font-bold px-2 py-0.5 rounded-full border shrink-0 ${statusColor}`}>
+                      <span className={`text-[10.5px] font-bold px-2 py-0.5 rounded-full border shrink-0 ${statusColor}`}>
                         {isFree ? 'متاح للعمل' : `${count} مهام نشطة`}
                       </span>
                     </div>
 
                     {/* Middle Section: Task Capacity & Interactive Progress Ratio Bar */}
                     <div className="space-y-1 pt-1 border-t border-[var(--line-soft)]/50">
-                      <div className="flex items-center justify-between text-[9.5px] font-bold">
+                      <div className="flex items-center justify-between text-[10.5px] font-bold">
                         <span className="text-[var(--text-3)]">نسبة الإشغال:</span>
                         <span className={`font-mono ${isFree ? 'text-emerald-600 dark:text-emerald-400' : 'text-[var(--accent)]'}`}>
                           {isFree ? '0% (طاقة شاغرة)' : `${percent}% من الطاقة الاستيعابية`}
@@ -477,11 +477,11 @@ export default function DashboardClient({ stats, profiles = [], companies = [] }
 
                     {/* Bottom Micro Details: Direct Contact / Email */}
                     {(lawyer.email || lawyer.phone) && (
-                      <div className="flex items-center justify-between text-[9px] text-[var(--text-3)] font-mono pt-1 border-t border-[var(--line-soft)]/40 truncate">
+                      <div className="flex items-center justify-between text-[10.5px] text-[var(--text-3)] font-mono pt-1 border-t border-[var(--line-soft)]/40 truncate">
                         <span className="truncate" dir="ltr">
                           {lawyer.phone || lawyer.email}
                         </span>
-                        <span className="text-[9px] text-[var(--text-3)] group-hover:text-[var(--accent)] transition-colors shrink-0">
+                        <span className="text-[10.5px] text-[var(--text-3)] group-hover:text-[var(--accent)] transition-colors shrink-0">
                           تفاصيل الملف ←
                         </span>
                       </div>
@@ -526,7 +526,7 @@ export default function DashboardClient({ stats, profiles = [], companies = [] }
                     <span className="text-lg font-black num" style={{ color: st.text || 'var(--text)' }}>
                       {st.count}
                     </span>
-                    <span className="text-[9.5px] text-[var(--text-3)] font-semibold">معاملة</span>
+                    <span className="text-[10.5px] text-[var(--text-3)] font-semibold">معاملة</span>
                   </div>
                 </div>
               ))}

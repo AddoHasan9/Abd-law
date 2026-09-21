@@ -595,7 +595,7 @@ export default function AddEstablishedCompanyModal({ isOpen, onClose, onSuccess 
                   >
                     <div className="field" style={{ marginBottom: 0 }}>
                       <label htmlFor={`sh-name-${sh.id}`} style={{ fontSize: '11px', color: 'var(--text-3)', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                        <span className="w-4 h-4 rounded-full bg-[var(--accent-soft)] text-[var(--accent)] text-[9.5px] font-bold inline-flex items-center justify-center">{idx + 1}</span>
+                        <span className="w-4 h-4 rounded-full bg-[var(--accent-soft)] text-[var(--accent)] text-[10.5px] font-bold inline-flex items-center justify-center">{idx + 1}</span>
                         <span>اسم المساهم *</span>
                       </label>
                       <input

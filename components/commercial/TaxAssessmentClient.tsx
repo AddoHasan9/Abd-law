@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import Link from 'next/link'
+import CompanyFileLink from '@/components/commercial/CompanyFileLink'
 import { useRouter } from 'next/navigation'
 import { Icon } from '@/components/ui/Icon'
 import { Empty } from '@/components/ui/Empty'
@@ -389,14 +389,7 @@ export default function TaxAssessmentClient({ assessments = [], companies = [], 
                       <td className="p-3.5 text-left whitespace-nowrap">
                         <div className="flex items-center gap-2">
                           {item.company_id && (
-                            <Link
-                              href={`/commercial/companies/${item.company_id}`}
-                              className="btn btn-primary !py-1 !px-2.5 !text-xs !font-bold !rounded-xl flex items-center gap-1 text-white shadow-xs"
-                              title="الانتقال إلى الملف الشامل للشركة"
-                            >
-                              <span>الملف الشامل</span>
-                              <span className="material-symbols-outlined text-[13px]">arrow_left</span>
-                            </Link>
+                            <CompanyFileLink companyId={item.company_id} />
                           )}
                         </div>
                       </td>

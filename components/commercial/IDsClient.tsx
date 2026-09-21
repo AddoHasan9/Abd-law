@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback, useMemo } from 'react'
-import Link from 'next/link'
+import CompanyFileLink from '@/components/commercial/CompanyFileLink'
 import { Icon } from '@/components/ui/Icon'
 import { Empty } from '@/components/ui/Empty'
 import {
@@ -464,14 +464,7 @@ export default function IDsClient({ companies = [], initialCompanyId }: Props) {
                           </button>
 
                           {r.company_id && (
-                            <Link
-                              href={`/commercial/companies/${r.company_id}`}
-                              className="btn btn-primary !py-1 !px-3 !text-xs !font-bold inline-flex items-center gap-1"
-                              title="فتح الملف الشامل للشركة"
-                            >
-                              <span>الملف الشامل</span>
-                              <span className="material-symbols-outlined text-[14px]">arrow_left</span>
-                            </Link>
+                            <CompanyFileLink companyId={r.company_id} />
                           )}
 
                           {canDeleteID && (

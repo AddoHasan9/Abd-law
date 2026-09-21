@@ -1,8 +1,8 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import CompanyFileLink from '@/components/commercial/CompanyFileLink'
 import { createPortal } from 'react-dom'
-import Link from 'next/link'
 import { Icon } from '@/components/ui/Icon'
 import { useModalBodyLock } from '@/lib/hooks/useModalBodyLock'
 import { formatNumberWithCommas } from '@/lib/constants'
@@ -224,15 +224,7 @@ export default function LLCTransactionDetailsModal({
               </div>
 
               {transaction.company_id && (
-                <Link
-                  href={`/commercial/companies/${transaction.company_id}`}
-                  className="btn btn-ghost"
-                  style={{ fontSize: '12.5px', padding: '9px 14px', whiteSpace: 'nowrap' }}
-                  title="فتح الملف الشامل للشركة"
-                >
-                  <span>الملف الشامل</span>
-                  <span className="material-symbols-outlined text-[15px]">arrow_left</span>
-                </Link>
+                <CompanyFileLink companyId={transaction.company_id} />
               )}
             </div>
 

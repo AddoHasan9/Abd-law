@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import Link from 'next/link'
+import CompanyFileLink from '@/components/commercial/CompanyFileLink'
 import { useRouter } from 'next/navigation'
 import { Icon } from '@/components/ui/Icon'
 import { Empty } from '@/components/ui/Empty'
@@ -277,16 +277,7 @@ export default function CompaniesRegistryClient({ companies = [] }: Props) {
                       {/* Actions */}
                       <td className="py-2.5 px-3 text-left align-middle whitespace-nowrap">
                         <div className="flex items-center gap-1.5 justify-end">
-                          <Link
-                            href={`/commercial/companies/${co.id}`}
-                            onClick={(e) => e.stopPropagation()}
-                            className="btn btn-primary !py-1.5 !px-3 !text-xs !font-bold inline-flex items-center gap-1 rounded-xl shadow-xs"
-                            title="عرض الملف الشامل للشركة"
-                          >
-                            <span className="material-symbols-outlined text-[15px]">folder_open</span>
-                            <span>الملف الشامل</span>
-                            <span className="material-symbols-outlined text-[13px]">arrow_left</span>
-                          </Link>
+                          <CompanyFileLink companyId={co.id} stopPropagation />
                         </div>
                       </td>
                     </tr>

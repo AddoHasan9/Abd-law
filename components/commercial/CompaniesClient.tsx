@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import Link from 'next/link'
+import CompanyFileLink from '@/components/commercial/CompanyFileLink'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { wfProgress, formatMoney, formatDate, penaltyState } from '@/lib/constants'
 import { calculateFSState } from '@/lib/financial-statements/calc'
@@ -587,7 +587,7 @@ export default function CompaniesClient({ initialCompanies }: Props) {
                             strokeDashoffset={100.5 * (1 - pg.pct / 100)}
                           />
                         </svg>
-                        <span className={`absolute inset-0 flex items-center justify-center text-[8px] font-black num ${pg.current ? 'text-amber-500' : 'text-[var(--accent)]'}`}>
+                        <span className={`absolute inset-0 flex items-center justify-center text-[10.5px] font-black num ${pg.current ? 'text-amber-500' : 'text-[var(--accent)]'}`}>
                           {pg.pct}%
                         </span>
                       </div>
@@ -601,17 +601,8 @@ export default function CompaniesClient({ initialCompanies }: Props) {
                   </div>
 
                   {/* Row 2: Action Button (الملف الشامل للشركة) */}
-                  <div className="w-full pt-1">
-                    <Link
-                      href={`/commercial/companies/${co.id}`}
-                      onClick={e => e.stopPropagation()}
-                      className="w-full py-1.5 px-3 text-[11.5px] font-bold rounded-lg bg-[var(--accent)] hover:bg-[var(--accent)]/90 text-white flex items-center justify-center gap-1.5 shadow-2xs hover:shadow-xs active:scale-98 transition-all"
-                      title="عرض الملف الشامل لبيانات ووثائق وسجلات الشركة"
-                    >
-                      <span className="material-symbols-outlined text-[15px]">folder_open</span>
-                      <span>الملف الشامل للشركة</span>
-                      <span className="material-symbols-outlined text-[13px] mr-auto">arrow_left</span>
-                    </Link>
+                  <div className="flex justify-end pt-1">
+                    <CompanyFileLink companyId={co.id} stopPropagation />
                   </div>
                 </div>
               </div>

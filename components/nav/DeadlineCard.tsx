@@ -116,13 +116,13 @@ export default function DeadlineCard({ deadlines = [], item = null }: Props) {
               </div>
             </div>
 
-            <div className="bg-emerald-500/15 border border-emerald-500/30 text-emerald-600 dark:text-emerald-400 px-2 py-0.5 rounded-lg text-[9.5px] font-black flex flex-col items-center justify-center leading-tight shrink-0">
+            <div className="bg-emerald-500/15 border border-emerald-500/30 text-emerald-600 dark:text-emerald-400 px-2 py-0.5 rounded-lg text-[10.5px] font-black flex flex-col items-center justify-center leading-tight shrink-0">
               <span>سجلات</span>
               <span>منتظمة ✓</span>
             </div>
           </div>
 
-          <div className="text-[9.5px] text-[var(--text-3)] font-medium mt-2 pt-1.5 border-t border-[var(--line-soft)]/60 flex items-center gap-1">
+          <div className="text-[10.5px] text-[var(--text-3)] font-medium mt-2 pt-1.5 border-t border-[var(--line-soft)]/60 flex items-center gap-1">
             <span>✓ كافة المعاملات والمهل القانونية ضمن المدد المحددة</span>
           </div>
         </Link>
@@ -151,7 +151,7 @@ export default function DeadlineCard({ deadlines = [], item = null }: Props) {
               {/* Top Sub-Header: Category Pill + Micro Controls */}
               <div className="flex items-center justify-between mb-1">
                 <span
-                  className={`text-[9.5px] font-bold px-1.5 py-0.2 rounded-md ${
+                  className={`text-[10.5px] font-bold px-1.5 py-0.2 rounded-md ${
                     late
                       ? 'bg-rose-500/15 text-rose-500 border border-rose-500/30'
                       : warn
@@ -179,7 +179,7 @@ export default function DeadlineCard({ deadlines = [], item = null }: Props) {
                     >
                       ›
                     </button>
-                    <span className="text-[9px] font-mono font-bold text-[var(--text-3)] px-0.5">
+                    <span className="text-[10.5px] font-mono font-bold text-[var(--text-3)] px-0.5">
                       {currentIndex + 1}/{items.length}
                     </span>
                     <button

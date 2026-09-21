@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
+import CompanyFileLink from '@/components/commercial/CompanyFileLink'
 import { useRouter } from 'next/navigation'
 import { createPortal } from 'react-dom'
 import { Icon } from '@/components/ui/Icon'
@@ -784,7 +785,7 @@ export default function CompanyDetailsModal({ company, isOpen, onClose, onDelete
                     >
                       <div className="field" style={{ marginBottom: 0 }}>
                         <label htmlFor={`edit-sh-name-${sh.id}`} style={{ fontSize: '11px', color: 'var(--text-3)', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                          <span className="w-4 h-4 rounded-full bg-[var(--accent-soft)] text-[var(--accent)] text-[9.5px] font-bold inline-flex items-center justify-center">{idx + 1}</span>
+                          <span className="w-4 h-4 rounded-full bg-[var(--accent-soft)] text-[var(--accent)] text-[10.5px] font-bold inline-flex items-center justify-center">{idx + 1}</span>
                           <span>اسم الشريك / المساهم *</span>
                         </label>
                         <input
@@ -1127,13 +1128,7 @@ export default function CompanyDetailsModal({ company, isOpen, onClose, onDelete
                     لتفادي ازدواج البيانات، عرض وإضافة هويات المستورد والضريبة والغرفة التجارية والتخطيط الحقيقية يتم من الملف الشامل للشركة.
                   </p>
                 </div>
-                <a
-                  href={`/commercial/companies/${company.id}`}
-                  className="btn btn-primary"
-                  style={{ padding: '6px 14px', fontSize: '11.5px', fontWeight: 700, textDecoration: 'none', borderRadius: '8px' }}
-                >
-                  فتح الملف الشامل للشركة ←
-                </a>
+                <CompanyFileLink companyId={company.id} label="فتح الملف الشامل" />
               </div>
             </div>
           )}

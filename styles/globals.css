@@ -6,23 +6,26 @@
 @tailwind components;
 @tailwind utilities;
 
-.material-symbols-outlined {
-  font-family: 'Material Symbols Outlined' !important;
-  font-weight: normal;
-  font-style: normal;
-  font-size: 20px;
-  line-height: 1;
-  letter-spacing: normal;
-  text-transform: none;
-  display: inline-block;
-  white-space: nowrap;
-  word-wrap: normal;
-  direction: ltr;
-  -webkit-font-feature-settings: 'liga';
-  -webkit-font-smoothing: antialiased;
-  font-feature-settings: 'liga';
-  user-select: none;
-  vertical-align: middle;
+/* داخل طبقة base حتى تتغلّب عليه أصناف الحجم مثل text-[14px] — سابقاً كان يلغيها ويجعل كل الأيقونات 20px */
+@layer base {
+  .material-symbols-outlined {
+    font-family: 'Material Symbols Outlined' !important;
+    font-weight: normal;
+    font-style: normal;
+    font-size: 20px;
+    line-height: 1;
+    letter-spacing: normal;
+    text-transform: none;
+    display: inline-block;
+    white-space: nowrap;
+    word-wrap: normal;
+    direction: ltr;
+    -webkit-font-feature-settings: 'liga';
+    -webkit-font-smoothing: antialiased;
+    font-feature-settings: 'liga';
+    user-select: none;
+    vertical-align: middle;
+  }
 }
 
 :root {
@@ -409,31 +412,6 @@
     max-height: 24px;
   }
 
-  .icon-btn {
-    width: 36px;
-    height: 36px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 10px;
-    color: var(--text-2);
-    background: var(--surface-2);
-    border: 1px solid var(--border-soft);
-    cursor: pointer;
-    flex-shrink: 0;
-    transition: all 0.18s ease;
-  }
-
-  .icon-btn:hover {
-    color: var(--accent);
-    background: var(--surface-3);
-    transform: scale(1.05);
-  }
-
-  .icon-btn:active {
-    transform: scale(0.95);
-  }
-
   body {
     font-family: var(--font-ui);
     background: var(--bg);
@@ -645,8 +623,15 @@
 
   /* Mobile Touch Target 44px standard (Apple HIG) */
   @media (pointer: coarse) {
-    .btn, button, input[type="button"], input[type="submit"], a.btn {
+    .btn:not(.btn-sm), input[type="button"], input[type="submit"] {
       min-height: 44px;
+    }
+    .btn.btn-sm {
+      min-height: 36px;
+    }
+    .icon-btn {
+      width: 40px !important;
+      height: 40px !important;
     }
   }
 
@@ -674,6 +659,15 @@
   .btn .icon {
     width: 18px;
     height: 18px;
+    min-width: 18px;
+    min-height: 18px;
+    max-width: 18px;
+    max-height: 18px;
+  }
+
+  /* حجم افتراضي لأيقونات Material داخل الأزرار؛ :where يُبقي الأولوية منخفضة فيتغلب عليه text-[Npx] */
+  :where(.btn) .material-symbols-outlined {
+    font-size: 18px;
   }
 
   .btn-primary,
@@ -762,6 +756,36 @@
 
   .btn-block {
     width: 100%;
+  }
+
+  /* زر صغير موحّد لصفوف الجداول والبطاقات — بدل !py-1 !px-3 !text-xs المتكررة */
+  .btn.btn-sm {
+    height: 32px;
+    padding: 0 12px;
+    gap: 6px;
+    font-size: 12px;
+    border-radius: 10px;
+  }
+
+  .btn.btn-sm .icon {
+    width: 16px; height: 16px; min-width: 16px; min-height: 16px; max-width: 16px; max-height: 16px;
+  }
+
+  :where(.btn-sm) .material-symbols-outlined {
+    font-size: 16px;
+  }
+
+  /* رابط الملف الشامل: تنقّل ⇒ أزرق هادئ، لا زر أساسي صارخ في كل صف */
+  .btn-soft {
+    background: var(--accent-soft);
+    color: var(--accent);
+    border-color: transparent;
+    font-weight: 700;
+  }
+
+  .btn-soft:hover {
+    background: var(--accent);
+    color: #fff;
   }
 
   .btn:disabled {
@@ -3029,8 +3053,8 @@
     }
 
     .modal {
-      width: 96vw !important;
-      max-width: 96vw !important;
+      width: 100% !important;
+      max-width: min(var(--modal-max-w, 800px), 96vw) !important;
       max-height: 92vh !important;
       max-height: 92dvh !important;
       margin: 10px auto !important;
