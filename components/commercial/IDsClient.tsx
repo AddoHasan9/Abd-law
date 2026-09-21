@@ -359,7 +359,7 @@ export default function IDsClient({ companies = [], initialCompanyId }: Props) {
 
                       {/* ID Type */}
                       <td className="py-3.5 px-3 text-center align-middle">
-                        <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-blue-500/10 text-blue-700 dark:text-blue-300 border border-blue-500/20">
+                        <span className="inline-flex items-center whitespace-nowrap px-3 py-1 rounded-full text-xs font-bold bg-blue-500/10 text-blue-700 dark:text-blue-300 border border-blue-500/20">
                           {typeMeta.label}
                         </span>
                       </td>
@@ -372,14 +372,14 @@ export default function IDsClient({ companies = [], initialCompanyId }: Props) {
                       {/* Chamber Grade */}
                       <td className="py-3.5 px-3 text-center align-middle">
                         {r.id_type === 'chamber_id' && r.grade ? (
-                          <span className="font-extrabold text-[var(--accent)] text-xs bg-[var(--accent-soft)] px-2.5 py-0.5 rounded-full border border-[var(--accent)]/20">درجة {r.grade}</span>
+                          <span className="inline-flex items-center whitespace-nowrap px-3 py-1 rounded-full text-xs font-bold bg-blue-500/10 text-blue-700 dark:text-blue-300 border border-blue-500/20">درجة {r.grade}</span>
                         ) : (
                           <span className="text-[var(--text-3)]">—</span>
                         )}
                       </td>
 
                       {/* Start Date */}
-                      <td className="py-3.5 px-3 text-center align-middle text-xs font-semibold text-[var(--text-2)] num">
+                      <td className="py-3.5 px-3 text-center align-middle text-xs font-semibold text-[var(--text-2)] num whitespace-nowrap">
                         {r.tx_start_date || r.created_at.slice(0, 10)}
                       </td>
 
@@ -390,7 +390,7 @@ export default function IDsClient({ companies = [], initialCompanyId }: Props) {
                             {r.id_number}
                           </span>
                         ) : (
-                          <span className="text-[var(--text-3)] text-xs font-medium">قيد الإجراء</span>
+                          <span className="text-[var(--text-3)] text-xs font-medium whitespace-nowrap">قيد الإجراء</span>
                         )}
                       </td>
 
@@ -406,35 +406,35 @@ export default function IDsClient({ companies = [], initialCompanyId }: Props) {
                             )}
                           </div>
                         ) : (
-                          <span className="text-[var(--text-3)] text-xs font-medium">قيد الإجراء</span>
+                          <span className="text-[var(--text-3)] text-xs font-medium whitespace-nowrap">قيد الإجراء</span>
                         )}
                       </td>
 
                       {/* Status Badge */}
                       <td className="py-3.5 px-3 text-center align-middle">
                         {r.status === 'lacks' ? (
-                          <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-rose-500/10 text-rose-600 border border-rose-500/20">
+                          <span className="inline-flex items-center whitespace-nowrap px-2.5 py-1 rounded-full text-xs font-bold bg-rose-500/10 text-rose-600 border border-rose-500/20">
                             ⚠️ بها نواقص
                           </span>
                         ) : r.status === 'paused' ? (
-                          <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-amber-500/10 text-amber-700 border border-amber-500/20">
+                          <span className="inline-flex items-center whitespace-nowrap px-2.5 py-1 rounded-full text-xs font-bold bg-amber-500/10 text-amber-700 border border-amber-500/20">
                             ⏸️ متوقفة مؤقتاً
                           </span>
                         ) : !isDone || r.status === 'in_progress' ? (
-                          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-500/30">
+                          <span className="inline-flex items-center gap-1.5 whitespace-nowrap px-2.5 py-1 rounded-full text-xs font-bold bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-500/30">
                             <span className="w-2.5 h-2.5 border-2 border-amber-500 border-t-transparent rounded-full animate-spin flex-none" />
                             <span>قيد الإصدار</span>
                           </span>
                         ) : isExpired ? (
-                          <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-rose-500/15 text-rose-600 border border-rose-500/30">
+                          <span className="inline-flex items-center whitespace-nowrap px-2.5 py-1 rounded-full text-xs font-bold bg-rose-500/15 text-rose-600 border border-rose-500/30">
                             منتهية الصلاحية
                           </span>
                         ) : isExpiringSoon ? (
-                          <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-500/30">
+                          <span className="inline-flex items-center whitespace-nowrap px-2.5 py-1 rounded-full text-xs font-bold bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-500/30">
                             توشك على الانتهاء
                           </span>
                         ) : (
-                          <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border border-emerald-500/20">
+                          <span className="inline-flex items-center whitespace-nowrap px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border border-emerald-500/20">
                             سارية المفعول
                           </span>
                         )}
