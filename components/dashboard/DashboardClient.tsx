@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { DataPanel } from '@/components/ui/DataPanel'
 import Link from 'next/link'
 import { formatDate, formatFullDate } from '@/lib/constants'
 import type { DashboardStats } from '@/lib/data/dashboard'
@@ -216,21 +217,7 @@ export default function DashboardClient({ stats, profiles = [], companies = [] }
         
         {/* Right 8 Cols: Recent Active Transactions Workspace */}
         <div className="lg:col-span-8 flex flex-col gap-3">
-          <div className="glass-card rounded-[22px] p-3.5 sm:p-4.5 flex flex-col gap-3 h-full border border-[var(--glass-border)]">
-            
-            {/* Header & Filter Tabs */}
-            <div className="flex items-center justify-between flex-wrap gap-2 pb-2.5 border-b border-[var(--line-soft)]">
-              <div className="flex items-center gap-2">
-                <div className="p-1.5 bg-[var(--accent-soft)] rounded-lg border border-[color:color-mix(in_srgb,var(--accent)_20%,transparent)] text-[var(--accent)]">
-                  <span className="material-symbols-outlined text-[17px]">assignment</span>
-                </div>
-                <div>
-                  <h3 className="text-sm font-bold text-[var(--text)] m-0">أحدث المعاملات وسير العمل</h3>
-                  <span className="text-[10.5px] text-[var(--text-3)]">متابعة وتحديث حالة سير العمل اليومية مباشرة</span>
-                </div>
-              </div>
-
-              {/* Animated Segmented Filter Tabs */}
+          <DataPanel className="h-full flex flex-col" icon="assignment" title="أحدث المعاملات وسير العمل" subtitle="متابعة وتحديث حالة سير العمل اليومية مباشرة" actions={
               <AnimatedTabs<'all' | 'progress' | 'new' | 'done'>
                 layoutId="dashboard-tx"
                 size="sm"
@@ -243,7 +230,11 @@ export default function DashboardClient({ stats, profiles = [], companies = [] }
                   { id: 'done', label: 'مكتملة' },
                 ]}
               />
-            </div>
+
+            }>
+            <div className="p-3 sm:p-4 flex flex-col gap-3 flex-1">
+            
+            
 
             {/* Transactions Responsive Table */}
             {filteredRecentTxs.length === 0 ? (
@@ -342,6 +333,7 @@ export default function DashboardClient({ stats, profiles = [], companies = [] }
               </Link>
             </div>
           </div>
+          </DataPanel>
         </div>
 
         {/* Left 4 Cols: Reminders Widget */}
@@ -355,37 +347,12 @@ export default function DashboardClient({ stats, profiles = [], companies = [] }
         
         {/* Workload Distribution (Span 6) */}
         <div className="lg:col-span-6 flex flex-col gap-3">
-          <div className="glass-card rounded-2xl p-3.5 sm:p-4 flex flex-col gap-3 h-full border border-[var(--glass-border)] bg-[var(--surface-glass)] backdrop-blur-[36px]">
+          <DataPanel className="h-full flex flex-col" icon="group" title="توزيع المهام والمعاملات على الكادر" subtitle="متابعة الطاقة الاستيعابية والمهام المسندة للفريق" count={displayLawyers.length} unit="أعضاء" actions={
+              <Link href="/settings/users" className="btn btn-sm btn-soft">إدارة الكادر</Link>
+            }>
+            <div className="p-3 sm:p-4 flex flex-col gap-3 flex-1">
             
-            {/* Header: Title, Total Staff Counter & Direct Link */}
-            <div className="flex items-center justify-between pb-2.5 border-b border-[var(--line-soft)] flex-wrap gap-2">
-              <div className="flex items-center gap-2">
-                <div className="w-7 h-7 rounded-lg bg-[var(--accent-soft)] border border-[color:color-mix(in_srgb,var(--accent)_20%,transparent)] text-[var(--accent)] flex items-center justify-center shadow-2xs shrink-0">
-                  <span className="material-symbols-outlined text-[17px]">group</span>
-                </div>
-                <div>
-                  <h3 className="text-xs sm:text-sm font-black text-[var(--text)] m-0 leading-tight">
-                    توزيع المهام والمعاملات على الكادر
-                  </h3>
-                  <span className="text-[10px] text-[var(--text-3)] font-medium mt-0.5 block">
-                    متابعة الطاقة الاستيعابية والمهام المسندة للفريق
-                  </span>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-2">
-                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[var(--surface-2)] text-[var(--text-2)] border border-[var(--glass-border)]">
-                  {displayLawyers.length} أعضاء
-                </span>
-                <Link
-                  href="/settings/users"
-                  className="text-[10.5px] font-bold text-[var(--accent)] hover:underline flex items-center gap-0.5 transition-colors"
-                >
-                  <span>إدارة الكادر</span>
-                  <span className="material-symbols-outlined text-[12px]">chevron_left</span>
-                </Link>
-              </div>
-            </div>
+            
 
             {/* Staff Workload Cards Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 flex-1">
@@ -491,23 +458,14 @@ export default function DashboardClient({ stats, profiles = [], companies = [] }
               })}
             </div>
           </div>
+          </DataPanel>
         </div>
 
         {/* Workflow Status Distribution (Span 6) */}
         <div className="lg:col-span-6 flex flex-col gap-3">
-          <div className="glass-card rounded-2xl p-3.5 sm:p-4 flex flex-col gap-2.5 h-full border border-[var(--glass-border)]">
-            <div className="flex items-center justify-between pb-2 border-b border-[var(--line-soft)]">
-              <h3 className="text-xs sm:text-sm font-bold text-[var(--text)] flex items-center gap-1.5 m-0">
-                <div className="p-1 bg-blue-500/10 rounded-lg text-blue-600 dark:text-blue-400">
-                  <span className="material-symbols-outlined text-[16px]">pie_chart</span>
-                </div>
-                <span>حالات سير العمل في النظام</span>
-              </h3>
-
-              <span className="text-[10.5px] text-[var(--text-3)] font-semibold">
-                إجمالي {stats.totalCompaniesCount + stats.activeTxCount} بند
-              </span>
-            </div>
+          <DataPanel className="h-full flex flex-col" icon="pie_chart" title="حالات سير العمل في النظام" subtitle="توزيع الشركات والمعاملات حسب المرحلة" count={stats.totalCompaniesCount + stats.activeTxCount} unit="بند">
+            <div className="p-3 sm:p-4 flex flex-col gap-3 flex-1">
+            
 
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 flex-1">
               {stats.statusDistribution.slice(0, 6).map(st => (
@@ -532,6 +490,7 @@ export default function DashboardClient({ stats, profiles = [], companies = [] }
               ))}
             </div>
           </div>
+          </DataPanel>
         </div>
 
       </div>

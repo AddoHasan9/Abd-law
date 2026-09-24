@@ -38,7 +38,7 @@ export function DataPanel({
           </div>
         </div>
         {(showCount || actions) && (
-          <div className="flex items-center gap-2 shrink-0">
+          <div className={`flex items-center gap-2 shrink-0 ${actions ? 'data-panel-actions' : ''}`}>
             {actions}
             {showCount && (
               <span className="data-panel-count num">

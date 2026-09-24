@@ -2631,3 +2631,10 @@ input.auth-input {
   margin-inline-end: .3em;
 }
 .mi:only-child { margin: 0; }
+
+/* رأس القائمة مع أدوات (تبويبات/أزرار): يلتفّ للسطر التالي عند ضيق المساحة */
+.data-panel-head { flex-wrap: wrap; }
+@media (max-width: 640px) {
+  .data-panel-actions { width: 100%; justify-content: space-between; }
+  .data-panel-actions > :only-child { flex: 1; }
+}
