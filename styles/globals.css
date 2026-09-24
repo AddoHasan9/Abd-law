@@ -2739,7 +2739,11 @@
     min-height: 40px !important;
     max-height: 40px !important;
     line-height: 38px !important;
-    padding: 0 12px !important;
+    /* الحشوة الأفقية بدون !important حتى تعمل حشوة الحقول التي فيها أيقونة (كانت الأيقونة تغطي النص) */
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+    padding-left: 12px;
+    padding-right: 12px;
     border-radius: 10px !important;
     background: var(--input-bg, #FFFFFF);
     border: 1.5px solid var(--input-border, #CBD5E1);
@@ -3172,7 +3176,10 @@
       min-height: 40px !important;
       max-height: 40px !important;
       line-height: 38px !important;
-      padding: 0 12px !important;
+      padding-top: 0 !important;
+      padding-bottom: 0 !important;
+      padding-left: 12px;
+      padding-right: 12px;
       border-radius: 10px !important;
       width: 100% !important;
       max-width: 100% !important;
@@ -3407,3 +3414,33 @@
       scroll-behavior: auto !important;
     }
   }
+/* ظهور متتابع (FadeInStagger) — CSS فقط بدون وميض بعد التحميل */
+@keyframes fadeStaggerIn {
+  from { opacity: 0; transform: translateY(var(--fs-y, 16px)); }
+  to { opacity: 1; transform: none; }
+}
+.fade-stagger > * {
+  animation: fadeStaggerIn var(--fs-dur, .45s) cubic-bezier(.22, 1, .36, 1) both;
+}
+@media (prefers-reduced-motion: reduce) {
+  .fade-stagger > * { animation: none; }
+}
+
+/* على شاشات اللمس: حجم خط الحقول 16px حتى لا يكبّر iPhone الصفحة تلقائياً عند الكتابة
+   (هذا ما كان يدفع لمنع التكبير بالأصابع في الـ viewport) */
+@media (pointer: coarse) {
+  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
+  select,
+  textarea {
+    font-size: 16px !important;
+  }
+}
+
+/* حقول صفحات الدخول: أكبر وأوضح من حقول النماذج الداخلية */
+input.auth-input {
+  height: 48px !important;
+  min-height: 48px !important;
+  max-height: 48px !important;
+  line-height: 46px !important;
+  border-radius: 14px !important;
+}

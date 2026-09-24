@@ -15,7 +15,7 @@ export function ThemeToggle() {
     } else {
       document.documentElement.classList.remove('dark')
     }
-    const color = isDark ? '#0F131A' : '#FFFFFF'
+    const color = isDark ? '#0B0E14' : '#EEF2F6' // نفس خلفية صفحة الدخول
     const meta = document.getElementById('theme-color-meta') || document.querySelector('meta[name="theme-color"]')
     if (meta) meta.setAttribute('content', color)
     document.querySelectorAll('meta[name="theme-color"]').forEach(m => m.setAttribute('content', color))

@@ -19,7 +19,6 @@ const loginSchema = z.object({
   password: z
     .string()
     .min(1, 'يرجى إدخال كلمة المرور'),
-  rememberMe: z.boolean(),
 })
 
 type LoginValues = z.infer<typeof loginSchema>
@@ -27,23 +26,19 @@ type LoginValues = z.infer<typeof loginSchema>
 export default function LoginForm() {
   const [showPassword, setShowPassword] = useState(false)
   const [isRedirecting, setIsRedirecting] = useState(false)
+  const [capsLock, setCapsLock] = useState(false)
 
   const {
     register,
     handleSubmit,
-    setValue,
-    watch,
     formState: { errors, isSubmitting },
   } = useForm<LoginValues>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
       email: '',
       password: '',
-      rememberMe: true,
     },
   })
-
-  const rememberMe = watch('rememberMe')
 
   async function onSubmit(data: LoginValues) {
     try {
@@ -102,18 +97,11 @@ export default function LoginForm() {
   if (isRedirecting) {
     return (
       <div className="flex flex-col items-center justify-center h-full w-full max-w-[380px] mx-auto py-8 text-center text-right animate-in fade-in zoom-in-95 duration-300 select-none" dir="rtl">
-        {/* Modern Equalizer Pulse Wave Indicator */}
-        <div className="flex items-center justify-center gap-1.5 h-12 mb-6">
-          <span className="w-1.5 h-6 bg-[#3B82F6] rounded-full animate-bounce [animation-delay:-0.3s]" />
-          <span className="w-1.5 h-10 bg-[#3B82F6] rounded-full animate-bounce [animation-delay:-0.15s]" />
-          <span className="w-1.5 h-8 bg-[#3B82F6] rounded-full animate-bounce [animation-delay:-0.45s]" />
-          <span className="w-1.5 h-11 bg-[#3B82F6] rounded-full animate-bounce [animation-delay:-0.2s]" />
-          <span className="w-1.5 h-7 bg-[#3B82F6] rounded-full animate-bounce [animation-delay:-0.35s]" />
-        </div>
+        <span className="w-9 h-9 mb-5 rounded-full border-[3px] border-blue-500/20 border-t-blue-600 animate-spin" aria-hidden />
 
         <div className="flex flex-col gap-2 items-center">
           <div className="flex items-center gap-2 text-emerald-600 dark:text-emerald-400 font-extrabold text-sm sm:text-base">
-            <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping" />
+            <span className="w-2 h-2 rounded-full bg-emerald-500" />
             <span>تم التحقق من الحساب بنجاح</span>
           </div>
           <p className="text-xs text-slate-500 dark:text-slate-400 max-w-xs leading-relaxed mt-1">
@@ -121,11 +109,6 @@ export default function LoginForm() {
           </p>
         </div>
 
-        <div className="w-full space-y-2 mt-6 pt-4 border-t border-slate-200/80 dark:border-white/5">
-          <div className="w-full h-1.5 bg-slate-200 dark:bg-white/10 rounded-full overflow-hidden">
-            <div className="h-full bg-[#3B82F6] rounded-full animate-progress" />
-          </div>
-        </div>
       </div>
     )
   }
@@ -151,9 +134,9 @@ export default function LoginForm() {
           منظومة العمل القانوني والشركات
         </span>
 
-        <h2 className="text-lg font-black text-slate-900 dark:text-white tracking-tight leading-snug">
+        <p className="text-lg font-black text-slate-900 dark:text-white tracking-tight leading-snug">
           مكتب المحامي عبدالحسن الخزرجي
-        </h2>
+        </p>
         <p className="text-xs text-slate-500 dark:text-slate-400 font-bold mt-0.5">
           للمحاماة والاستشارات القانونية وتأسيس الشركات
         </p>
@@ -182,16 +165,21 @@ export default function LoginForm() {
                 id="login-email"
                 type="email"
                 autoComplete="email"
+                inputMode="email"
+                autoCapitalize="none"
+                spellCheck={false}
                 placeholder="name@example.com"
+                aria-invalid={!!errors.email}
+                aria-describedby={errors.email ? 'login-email-error' : undefined}
                 dir="ltr"
                 style={{ paddingRight: '48px', paddingLeft: '16px' }}
-                className="w-full h-12 rounded-2xl bg-white dark:bg-[#151A24] hover:bg-slate-50 dark:hover:bg-[#1A202C] focus:bg-white dark:focus:bg-[#151A24] border border-slate-300/80 dark:border-white/12 focus:border-[#3B82F6] dark:focus:border-[#3B82F6] text-slate-900 dark:text-white placeholder-slate-400 text-sm outline-none transition-all duration-300 focus:ring-4 focus:ring-blue-500/15 dark:focus:ring-blue-500/20 text-left backdrop-blur-md shadow-2xs font-medium"
+                className="auth-input w-full h-12 rounded-2xl bg-white dark:bg-[#151A24] hover:bg-slate-50 dark:hover:bg-[#1A202C] focus:bg-white dark:focus:bg-[#151A24] border border-slate-300/80 dark:border-white/12 focus:border-[#3B82F6] dark:focus:border-[#3B82F6] text-slate-900 dark:text-white placeholder-slate-400 text-base sm:text-sm outline-none transition-[border-color,box-shadow,background-color] duration-200 focus:ring-4 focus:ring-blue-500/15 dark:focus:ring-blue-500/20 text-left shadow-2xs font-medium aria-[invalid=true]:border-rose-500 aria-[invalid=true]:focus:ring-rose-500/15"
                 {...register('email')}
               />
-              <Mail className="absolute right-3.5 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400 group-focus-within:text-[#3B82F6] transition-colors pointer-events-none" />
+              <Mail aria-hidden className="absolute right-4 top-1/2 -translate-y-1/2 h-[18px] w-[18px] text-slate-400 group-focus-within:text-[#3B82F6] transition-colors pointer-events-none" />
             </div>
             {errors.email && (
-              <p className="text-[11.5px] font-bold text-rose-600 dark:text-rose-400 animate-in fade-in duration-200">
+              <p id="login-email-error" role="alert" className="text-xs font-bold text-rose-600 dark:text-rose-400 animate-in fade-in duration-200">
                 {errors.email.message}
               </p>
             )}
@@ -208,54 +196,45 @@ export default function LoginForm() {
                 type={showPassword ? 'text' : 'password'}
                 autoComplete="current-password"
                 placeholder="••••••••"
+                aria-invalid={!!errors.password}
+                aria-describedby={errors.password ? 'login-password-error' : capsLock ? 'login-caps' : undefined}
+                onKeyUp={e => setCapsLock(e.getModifierState('CapsLock'))}
+                onKeyDown={e => setCapsLock(e.getModifierState('CapsLock'))}
                 dir="ltr"
                 style={{ paddingRight: '48px', paddingLeft: '48px' }}
-                className="w-full h-12 rounded-2xl bg-white dark:bg-[#151A24] hover:bg-slate-50 dark:hover:bg-[#1A202C] focus:bg-white dark:focus:bg-[#151A24] border border-slate-300/80 dark:border-white/12 focus:border-[#3B82F6] dark:focus:border-[#3B82F6] text-slate-900 dark:text-white placeholder-slate-400 text-sm outline-none transition-all duration-300 focus:ring-4 focus:ring-blue-500/15 dark:focus:ring-blue-500/20 text-left backdrop-blur-md shadow-2xs font-medium"
+                className="auth-input w-full h-12 rounded-2xl bg-white dark:bg-[#151A24] hover:bg-slate-50 dark:hover:bg-[#1A202C] focus:bg-white dark:focus:bg-[#151A24] border border-slate-300/80 dark:border-white/12 focus:border-[#3B82F6] dark:focus:border-[#3B82F6] text-slate-900 dark:text-white placeholder-slate-400 text-base sm:text-sm outline-none transition-[border-color,box-shadow,background-color] duration-200 focus:ring-4 focus:ring-blue-500/15 dark:focus:ring-blue-500/20 text-left shadow-2xs font-medium aria-[invalid=true]:border-rose-500 aria-[invalid=true]:focus:ring-rose-500/15"
                 {...register('password')}
               />
-              <Lock className="absolute right-3.5 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400 group-focus-within:text-[#3B82F6] transition-colors pointer-events-none" />
+              <Lock aria-hidden className="absolute right-4 top-1/2 -translate-y-1/2 h-[18px] w-[18px] text-slate-400 group-focus-within:text-[#3B82F6] transition-colors pointer-events-none" />
               <button
                 type="button"
                 onClick={() => setShowPassword(v => !v)}
-                tabIndex={-1}
-                className="absolute left-3 top-1/2 -translate-y-1/2 w-8 h-8 rounded-xl flex items-center justify-center text-slate-400 hover:text-slate-700 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/10 transition-colors cursor-pointer"
+                aria-pressed={showPassword}
+                className="absolute left-1.5 top-1/2 -translate-y-1/2 w-9 h-9 rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 flex items-center justify-center text-slate-400 hover:text-slate-700 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/10 transition-colors cursor-pointer"
                 aria-label={showPassword ? 'إخفاء كلمة المرور' : 'إظهار كلمة المرور'}
               >
                 {showPassword ? (
-                  <EyeOff className="h-4 w-4" />
+                  <EyeOff aria-hidden className="h-[18px] w-[18px]" />
                 ) : (
-                  <Eye className="h-4 w-4" />
+                  <Eye aria-hidden className="h-[18px] w-[18px]" />
                 )}
               </button>
             </div>
-            {errors.password && (
-              <p className="text-[11.5px] font-bold text-rose-600 dark:text-rose-400 animate-in fade-in duration-200">
+            {errors.password ? (
+              <p id="login-password-error" role="alert" className="text-xs font-bold text-rose-600 dark:text-rose-400 animate-in fade-in duration-200">
                 {errors.password.message}
               </p>
-            )}
+            ) : capsLock ? (
+              <p id="login-caps" className="text-xs font-bold text-amber-600 dark:text-amber-400">
+                زر الأحرف الكبيرة (Caps Lock) مفعّل
+              </p>
+            ) : null}
           </div>
 
-          {/* Remember me & Forgot Password Row */}
-          <div className="flex items-center justify-between pt-1 text-xs">
-            <div className="flex items-center gap-2">
-              <input
-                id="remember-me"
-                type="checkbox"
-                checked={rememberMe}
-                onChange={e => setValue('rememberMe', e.target.checked)}
-                className="w-4 h-4 rounded-md border-slate-300 dark:border-white/20 bg-white dark:bg-white/10 text-blue-600 focus:ring-0 cursor-pointer accent-blue-600"
-              />
-              <label
-                htmlFor="remember-me"
-                className="text-xs text-slate-700 dark:text-slate-300 hover:text-slate-950 dark:hover:text-white font-medium cursor-pointer transition-colors"
-              >
-                تذكر تسجيل الدخول
-              </label>
-            </div>
-
+          <div className="flex justify-end -mt-1">
             <Link
               href="/reset-password"
-              className="text-xs text-blue-600 dark:text-blue-400 hover:underline font-bold transition-colors"
+              className="text-xs text-blue-600 dark:text-blue-400 hover:underline font-bold py-1"
             >
               نسيت كلمة المرور؟
             </Link>
@@ -265,7 +244,7 @@ export default function LoginForm() {
           <button
             type="submit"
             disabled={isSubmitting}
-            className="w-full h-12 mt-2 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 active:from-blue-800 active:to-indigo-800 text-white font-black text-sm flex items-center justify-center gap-2.5 shadow-lg shadow-blue-600/25 hover:shadow-blue-600/35 hover:scale-[1.01] active:scale-[0.99] transition-all duration-300 disabled:opacity-60 disabled:pointer-events-none cursor-pointer border border-white/15"
+            className="group w-full h-12 mt-1 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 active:from-blue-800 active:to-indigo-800 text-white font-black text-sm flex items-center justify-center gap-2.5 shadow-lg shadow-blue-600/25 hover:shadow-blue-600/35 active:scale-[0.99] transition-[background-color,box-shadow,transform] duration-200 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-blue-500/30 disabled:opacity-60 disabled:pointer-events-none cursor-pointer border border-white/15"
           >
             {isSubmitting ? (
               <div className="flex items-center gap-2">
@@ -275,14 +254,14 @@ export default function LoginForm() {
             ) : (
               <div className="flex items-center gap-2">
                 <span>دخول إلى المنظومة</span>
-                <ArrowLeft className="h-4 w-4 transition-transform group-hover:-translate-x-1" />
+                <ArrowLeft aria-hidden className="h-[18px] w-[18px] transition-transform group-hover:-translate-x-1" />
               </div>
             )}
           </button>
         </form>
 
         {/* Security Trust Badge */}
-        <div className="flex items-center justify-center gap-2 text-[11px] text-slate-500 dark:text-slate-400 select-none pt-2">
+        <div className="lg:hidden flex items-center justify-center gap-2 text-[11px] text-slate-500 dark:text-slate-400 select-none pt-2">
           <ShieldCheck className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
           <span>نظام مشفر ومحمي بمعيار الأمان 256-bit SSL • إدارة المكتب</span>
         </div>

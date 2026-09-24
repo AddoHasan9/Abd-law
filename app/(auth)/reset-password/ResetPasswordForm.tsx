@@ -92,7 +92,7 @@ export default function ResetPasswordForm() {
         </p>
         <Link
           href="/login"
-          className="w-full h-12 mt-4 rounded-2xl bg-[#3B82F6] hover:bg-[#2563EB] text-white font-extrabold text-sm flex items-center justify-center gap-2 shadow-lg shadow-blue-500/20 hover:scale-[1.01] transition-all border border-white/15"
+          className="w-full h-12 mt-4 rounded-2xl bg-[#3B82F6] hover:bg-[#2563EB] text-white font-extrabold text-sm flex items-center justify-center gap-2 shadow-lg shadow-blue-500/20 transition-all border border-white/15"
         >
           <span>الذهاب لتسجيل الدخول</span>
           <span className="material-symbols-outlined text-[18px] rotate-180">arrow_right_alt</span>
@@ -134,36 +134,38 @@ export default function ResetPasswordForm() {
 
       <form onSubmit={handleSubmit} className="space-y-4 text-right">
         <div className="space-y-1.5">
-          <label className="block text-xs font-bold text-slate-800 dark:text-slate-200">كلمة المرور الجديدة</label>
+          <label htmlFor="new-password" className="block text-xs font-bold text-slate-800 dark:text-slate-200">كلمة المرور الجديدة</label>
           <div className="relative group">
             <input
               type="password"
               autoComplete="new-password"
               placeholder="••••••••"
+              id="new-password"
               value={password}
               onChange={e => setPassword(e.target.value)}
               style={{ paddingRight: '48px', paddingLeft: '16px' }}
-              className="w-full h-12 input-icon-right rounded-2xl bg-white dark:bg-[#151A24] border border-slate-300/80 dark:border-white/12 focus:border-[#3B82F6] text-slate-900 dark:text-white placeholder-slate-400 text-sm outline-none transition-all text-left dir-ltr font-medium focus:ring-4 focus:ring-blue-500/15"
+              className="auth-input w-full h-12 input-icon-right rounded-2xl bg-white dark:bg-[#151A24] border border-slate-300/80 dark:border-white/12 focus:border-[#3B82F6] text-slate-900 dark:text-white placeholder-slate-400 text-base sm:text-sm outline-none transition-all text-left dir-ltr font-medium focus:ring-4 focus:ring-blue-500/15"
             />
-            <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-[#3B82F6] material-symbols-outlined text-[20px] pointer-events-none transition-colors">
+            <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-[#3B82F6] material-symbols-outlined text-[18px] pointer-events-none transition-colors">
               lock
             </span>
           </div>
         </div>
 
         <div className="space-y-1.5">
-          <label className="block text-xs font-bold text-slate-800 dark:text-slate-200">تأكيد كلمة المرور</label>
+          <label htmlFor="confirm-password" className="block text-xs font-bold text-slate-800 dark:text-slate-200">تأكيد كلمة المرور</label>
           <div className="relative group">
             <input
               type="password"
               autoComplete="new-password"
               placeholder="••••••••"
+              id="confirm-password"
               value={confirm}
               onChange={e => setConfirm(e.target.value)}
               style={{ paddingRight: '48px', paddingLeft: '16px' }}
-              className="w-full h-12 input-icon-right rounded-2xl bg-white dark:bg-[#151A24] border border-slate-300/80 dark:border-white/12 focus:border-[#3B82F6] text-slate-900 dark:text-white placeholder-slate-400 text-sm outline-none transition-all text-left dir-ltr font-medium focus:ring-4 focus:ring-blue-500/15"
+              className="auth-input w-full h-12 input-icon-right rounded-2xl bg-white dark:bg-[#151A24] border border-slate-300/80 dark:border-white/12 focus:border-[#3B82F6] text-slate-900 dark:text-white placeholder-slate-400 text-base sm:text-sm outline-none transition-all text-left dir-ltr font-medium focus:ring-4 focus:ring-blue-500/15"
             />
-            <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-[#3B82F6] material-symbols-outlined text-[20px] pointer-events-none transition-colors">
+            <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-[#3B82F6] material-symbols-outlined text-[18px] pointer-events-none transition-colors">
               lock_reset
             </span>
           </div>
@@ -172,7 +174,7 @@ export default function ResetPasswordForm() {
         <button
           type="submit"
           disabled={loading}
-          className="w-full h-12 mt-2 rounded-2xl bg-[#3B82F6] hover:bg-[#2563EB] active:bg-[#1D4ED8] text-white font-extrabold text-sm flex items-center justify-center gap-2 shadow-lg shadow-blue-500/20 hover:shadow-blue-500/35 hover:scale-[1.01] transition-all cursor-pointer border border-white/15 disabled:opacity-60"
+          className="w-full h-12 mt-2 rounded-2xl bg-[#3B82F6] hover:bg-[#2563EB] active:bg-[#1D4ED8] text-white font-extrabold text-sm flex items-center justify-center gap-2 shadow-lg shadow-blue-500/20 hover:shadow-blue-500/35 transition-all cursor-pointer border border-white/15 disabled:opacity-60"
         >
           {loading ? (
             <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />

@@ -8,7 +8,7 @@ export const metadata = { title: 'تسجيل الدخول — مكتب المح�
 
 export default function LoginPage() {
   return (
-    <main className="relative min-h-screen w-full flex items-center justify-center p-3 sm:p-6 md:p-10 bg-[#EEF2F6] dark:bg-[#0B0E14] text-slate-900 dark:text-white overflow-hidden transition-colors duration-500 selection:bg-blue-600 selection:text-white">
+    <main className="relative min-h-[100dvh] w-full flex items-center justify-center p-3 sm:p-6 md:p-10 bg-[#EEF2F6] dark:bg-[#0B0E14] text-slate-900 dark:text-white overflow-hidden transition-colors duration-500 selection:bg-blue-600 selection:text-white">
       
       {/* Ambient Atmospheric Glow Orbs */}
       <div className="pointer-events-none absolute -top-44 -right-44 w-[500px] h-[500px] bg-blue-500/10 dark:bg-blue-600/15 rounded-full blur-[120px]" />
@@ -44,9 +44,9 @@ export default function LoginPage() {
                   <Sparkles className="w-3.5 h-3.5 text-amber-500" />
                   منظومة العمل القانوني والشركات
                 </span>
-                <h2 className="text-xl font-black text-slate-900 dark:text-white mt-2 font-display tracking-tight leading-snug">
+                <p className="text-xl font-black text-slate-900 dark:text-white mt-2 font-display tracking-tight leading-snug">
                   مكتب المحامي عبدالحسن الخزرجي
-                </h2>
+                </p>
                 <p className="text-xs text-slate-500 dark:text-slate-400 font-bold mt-0.5">
                   للمحاماة والاستشارات القانونية وتأسيس الشركات
                 </p>
