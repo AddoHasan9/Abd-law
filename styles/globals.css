@@ -2582,7 +2582,8 @@ input.auth-input {
 .confirm-veil {
   position: fixed;
   inset: 0;
-  z-index: 100000;
+  /* فوق كل النوافذ (طبقة النوافذ 999999) — نافذة التأكيد تُفتح دائماً من داخل نافذة أخرى */
+  z-index: 2147483000;
   display: grid;
   place-items: center;
   padding: 16px;
