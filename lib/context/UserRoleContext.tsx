@@ -8,7 +8,7 @@
  */
 import React, { createContext, useContext } from 'react'
 import type { Profile, UserRole } from '@/types/database'
-import { hasPermission } from '@/lib/permissions'
+import { hasPermission, emptyPermissionsMatrix, type PermissionsMatrix } from '@/lib/permissions'
 import type { RolePermissions } from '@/app/(app)/settings/users/actions'
 
 export interface UserRoleContextValue {
@@ -36,14 +36,16 @@ const UserRoleContext = createContext<UserRoleContextValue>({
 export function UserRoleProvider({
   profile,
   children,
+  permissions,
 }: {
   profile: Profile | null
+  permissions: PermissionsMatrix
   children: React.ReactNode
 }) {
   const role: UserRole = (profile?.role as UserRole) || 'staff'
 
   const can = (category: keyof RolePermissions, action: string) => {
-    return hasPermission(role, category, action)
+    return profile?.active === true && hasPermission(role, category, action, permissions || emptyPermissionsMatrix())
   }
 
   const value: UserRoleContextValue = {

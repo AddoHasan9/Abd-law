@@ -1,7 +1,9 @@
 'use server'
 
+import { readAuthorizedJsonFile } from '@/lib/auth/scoped-store'
+import { requireRecordAccess } from '@/lib/auth/record-access'
 import { revalidatePath } from 'next/cache'
-import { createAdminClient } from '@/lib/supabase/server'
+import { createAdminClient, createClient } from '@/lib/supabase/server'
 import { logTimelineEvent } from '@/lib/data/timeline'
 import { readJsonFile, writeJsonFile } from '@/lib/data/fs-store'
 import { listCompanies } from '@/lib/data/companies'
@@ -41,14 +43,17 @@ export interface CreateTaxAssessmentPayload {
 }
 
 export async function getTaxAssessmentsAction(companyId?: string): Promise<{ success: boolean; data?: TaxAssessment[]; error?: string }> {
+  const accessDenied = await requirePermission('companies', 'view')
+  if (accessDenied) return accessDenied
+
   try {
     const allCompanies = await listCompanies()
     const compMap = new Map<string, string>(allCompanies.map(c => [c.id, c.name]))
-    const diskAssessments = readJsonFile<TaxAssessment[]>('tax_assessments.json', [])
+    const diskAssessments = await readAuthorizedJsonFile<TaxAssessment[]>('tax_assessments.json', [])
 
     let dbItems: TaxAssessment[] = []
     try {
-      const supabase = createAdminClient()
+      const supabase = await createClient()
       let q = supabase.from('tax_assessments').select('*, companies(name)').order('year', { ascending: false })
       if (companyId) q = q.eq('company_id', companyId)
       const { data, error } = await q
@@ -90,13 +95,18 @@ export async function getTaxAssessmentsAction(companyId?: string): Promise<{ suc
     return { success: true, data: list }
   } catch (err: unknown) {
     console.error('getTaxAssessmentsAction exception, using disk store:', err)
-    const diskAssessments = readJsonFile<TaxAssessment[]>('tax_assessments.json', [])
+    const diskAssessments = await readAuthorizedJsonFile<TaxAssessment[]>('tax_assessments.json', [])
     const list = companyId ? diskAssessments.filter(x => x.company_id === companyId) : diskAssessments
     return { success: true, data: list }
   }
 }
 
 export async function createTaxAssessmentAction(payload: CreateTaxAssessmentPayload): Promise<{ success: boolean; data?: TaxAssessment; error?: string }> {
+  if (payload.company_id) {
+    const access = await requireRecordAccess('companies', payload.company_id)
+    if (access) return access
+  }
+
   const denied = await requirePermission('companies', 'create')
   if (denied) return denied
 
@@ -279,6 +289,9 @@ export async function updateTaxAssessmentAction(
   id: string,
   payload: Partial<CreateTaxAssessmentPayload>
 ): Promise<{ success: boolean; data?: TaxAssessment; error?: string }> {
+  const rowDenied = await requireRecordAccess('tax_assessments', id)
+  if (rowDenied) return rowDenied
+
   const denied = await requirePermission('companies', 'edit')
   if (denied) return denied
 
@@ -364,6 +377,9 @@ export async function updateTaxAssessmentAction(
 }
 
 export async function deleteTaxAssessmentAction(id: string): Promise<{ success: boolean; error?: string }> {
+  const rowDenied = await requireRecordAccess('tax_assessments', id)
+  if (rowDenied) return rowDenied
+
   const denied = await requirePermission('companies', 'delete')
   if (denied) return denied
 

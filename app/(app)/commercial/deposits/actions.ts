@@ -3,6 +3,7 @@
  */
 'use server'
 
+import { requireRecordAccess } from '@/lib/auth/record-access'
 import { revalidatePath } from 'next/cache'
 import { createAdminClient } from '@/lib/supabase/server'
 import { logTimelineEvent } from '@/lib/data/timeline'
@@ -43,6 +44,9 @@ const STANDARD_STAGES_CONFIG = [
 ]
 
 export async function confirmDepositSubmissionAction(depositId: string) {
+  const rowDenied = await requireRecordAccess('deposits', depositId)
+  if (rowDenied) return rowDenied
+
   const denied = await requirePermission('deposits', 'create')
   if (denied) return denied
 
@@ -92,6 +96,19 @@ export async function updateDepositStageStateAction(
   depositId?: string,
   companyId?: string
 ) {
+  if (companyId) {
+    const access = await requireRecordAccess('companies', companyId)
+    if (access) return access
+  }
+
+  if (depositId) {
+    const access = await requireRecordAccess('deposits', depositId)
+    if (access) return access
+  }
+
+  const rowDenied = await requireRecordAccess('deposit_stages', stageId)
+  if (rowDenied) return rowDenied
+
   const denied = await requirePermission('deposits', 'release')
   if (denied) return denied
 
@@ -259,6 +276,14 @@ export async function updateDepositStageStateAction(
 }
 
 export async function uploadCompanyBarcodeAction(stageId: string, companyId: string, barcodeDataUrl: string) {
+  if (stageId) {
+    const access = await requireRecordAccess('deposit_stages', stageId)
+    if (access) return access
+  }
+
+  const rowDenied = await requireRecordAccess('companies', companyId)
+  if (rowDenied) return rowDenied
+
   const denied = await requirePermission('deposits', 'release')
   if (denied) return denied
 

@@ -1,5 +1,6 @@
 'use server'
 
+import { requireRecordAccess } from '@/lib/auth/record-access'
 import { revalidatePath } from 'next/cache'
 import { createAdminClient } from '@/lib/supabase/server'
 import { readJsonFile, writeJsonFile } from '@/lib/data/fs-store'
@@ -37,6 +38,11 @@ export interface CreateLLCTransactionPayload {
 }
 
 export async function createLLCTransactionAction(payload: CreateLLCTransactionPayload) {
+  if (payload.company_id) {
+    const access = await requireRecordAccess('companies', payload.company_id)
+    if (access) return access
+  }
+
   const denied = await requirePermission('transactions', 'create')
   if (denied) return denied
 
@@ -239,6 +245,11 @@ export interface UpdateLLCTransactionPayload {
 }
 
 export async function updateLLCTransactionAction(payload: UpdateLLCTransactionPayload) {
+  if (payload.id) {
+    const access = await requireRecordAccess('transactions', payload.id)
+    if (access) return access
+  }
+
   const denied = await requirePermission('transactions', 'edit')
   if (denied) return denied
 

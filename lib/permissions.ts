@@ -2,7 +2,7 @@
  * نظام تحقق إنفاذ الصلاحيات والأذونات الخماسي (5-Level Role & Permissions Enforcement)
  * ------------------------------------------------------------
  * يغطي الأدوار الـ 5: Super Admin, Admin, Manager, Lawyer, Staff
- * يقرأ مصفوفة الصلاحيات المخصصة في role_permissions.json
+ * يقيّم مصفوفة الصلاحيات الموثوقة القادمة من الخادم
  */
 import type { UserRole } from '@/types/database'
 
@@ -70,24 +70,53 @@ export const DEFAULT_ROLE_PERMISSIONS: Record<UserRole, RolePermissions> = {
   },
 }
 
-export function getRolePermissionsMatrix(): Record<UserRole, RolePermissions> {
-  return DEFAULT_ROLE_PERMISSIONS
+export type PermissionsMatrix = Record<UserRole, RolePermissions>
+export const USER_ROLES = ['super_admin', 'admin', 'manager', 'lawyer', 'staff'] as const
+
+export function isUserRole(value: unknown): value is UserRole {
+  return typeof value === 'string' && USER_ROLES.some(role => role === value)
 }
 
+/** Unknown roles/actions fail closed; super admin retains every known permission. */
 export function hasPermission(
   role: UserRole | undefined | null,
   category: keyof RolePermissions,
-  action: string
+  action: string,
+  matrix: PermissionsMatrix = DEFAULT_ROLE_PERMISSIONS,
 ): boolean {
-  if (!role) return false
+  if (!isUserRole(role)) return false
+  const actions = DEFAULT_ROLE_PERMISSIONS.super_admin[category]
+  if (!actions || !Object.hasOwn(actions, action)) return false
   if (role === 'super_admin') return true
+  const permissions = matrix[role]?.[category] as Record<string, boolean> | undefined
+  return permissions?.[action] === true
+}
 
-  const matrix = getRolePermissionsMatrix()
-  const rolePerms = matrix[role] || DEFAULT_ROLE_PERMISSIONS[role]
-  if (!rolePerms) return false
+/** Validate every field; never merge missing fields with permissive defaults. */
+export function parsePermissionsMatrix(input: unknown): PermissionsMatrix {
+  if (!input || typeof input !== 'object' || Array.isArray(input)) throw new Error('مصفوفة الصلاحيات غير صالحة')
+  const source = input as Record<string, unknown>
+  const result = structuredClone(DEFAULT_ROLE_PERMISSIONS)
+  for (const role of USER_ROLES) {
+    const roleData = source[role] as Record<string, unknown> | undefined
+    if (!roleData || typeof roleData !== 'object') throw new Error('دور مفقود في مصفوفة الصلاحيات')
+    for (const category of Object.keys(result[role]) as Array<keyof RolePermissions>) {
+      const fields = roleData[category] as Record<string, unknown> | undefined
+      if (!fields || typeof fields !== 'object') throw new Error('قسم مفقود في مصفوفة الصلاحيات')
+      for (const action of Object.keys(result[role][category])) {
+        if (typeof fields[action] !== 'boolean') throw new Error('قيمة الصلاحية يجب أن تكون نعم أو لا')
+        // Super-admin privileges cannot be revoked through the editor or a forged request.
+        ;(result[role][category] as Record<string, boolean>)[action] = role === 'super_admin' || fields[action] === true
+      }
+    }
+  }
+  return result
+}
 
-  const catObj = rolePerms[category] as Record<string, boolean> | undefined
-  if (!catObj) return false
-
-  return Boolean(catObj[action])
+export function emptyPermissionsMatrix(): PermissionsMatrix {
+  const result = structuredClone(DEFAULT_ROLE_PERMISSIONS)
+  for (const role of USER_ROLES) for (const actions of Object.values(result[role])) {
+    for (const key of Object.keys(actions)) (actions as Record<string, boolean>)[key] = role === 'super_admin'
+  }
+  return result
 }

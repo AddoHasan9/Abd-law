@@ -4,9 +4,10 @@
  * ملاحظة أمنية: لا حاجة لتصفية معاملات المحامي يدوياً —
  * سياسة RLS تتكفّل بذلك على مستوى القاعدة.
  */
+import { readAuthorizedJsonFile } from '@/lib/auth/scoped-store'
+import { requirePermission } from '@/lib/auth/require-permission'
 import { createClient } from '@/lib/supabase/server'
 import type { TransactionFull, Company } from '@/types/database'
-import { readJsonFile } from '@/lib/data/fs-store'
 import { listCompanies } from '@/lib/data/companies'
 
 const SELECT_PRIMARY = '*'
@@ -18,9 +19,12 @@ export async function listTransactions(filters?: {
   status?: string
   lawyerId?: string
 }): Promise<TransactionFull[]> {
-  const diskTxs = readJsonFile<TransactionFull[]>('transactions.json', [])
-  const deletedTxIds = new Set(readJsonFile<string[]>('deleted_transaction_ids.json', []))
-  const deletedCompanyIds = new Set(readJsonFile<string[]>('deleted_company_ids.json', []))
+  const accessDenied = await requirePermission('transactions', 'view')
+  if (accessDenied) return []
+
+  const diskTxs = await readAuthorizedJsonFile<TransactionFull[]>('transactions.json', [])
+  const deletedTxIds = new Set(await readAuthorizedJsonFile<string[]>('deleted_transaction_ids.json', []))
+  const deletedCompanyIds = new Set(await readAuthorizedJsonFile<string[]>('deleted_company_ids.json', []))
   const supabase = await createClient()
 
   let dbTxs: TransactionFull[] = []
@@ -143,7 +147,7 @@ export async function listTransactions(filters?: {
     })
 
     // 5. Synthesize Government IDs
-    const diskIDs = readJsonFile<Array<{ id: string; company_id?: string; company_name?: string; id_type?: string; id_number?: string; issue_date?: string; expiry_date?: string; tx_start_date?: string; status?: string; notes?: string; lawyer_id?: string; created_at?: string }>>('company_ids.json', [])
+    const diskIDs = await readAuthorizedJsonFile<Array<{ id: string; company_id?: string; company_name?: string; id_type?: string; id_number?: string; issue_date?: string; expiry_date?: string; tx_start_date?: string; status?: string; notes?: string; lawyer_id?: string; created_at?: string }>>('company_ids.json', [])
     diskIDs.forEach(idRec => {
       if (deletedTxIds.has(idRec.id)) return
       if (idRec.company_id && (deletedCompanyIds.has(idRec.company_id) || !validCompanyIds.has(idRec.company_id))) return
@@ -176,7 +180,7 @@ export async function listTransactions(filters?: {
     })
 
     // 6. Synthesize Tax Assessments
-    const diskTax = readJsonFile<Array<{ id: string; company_id?: string; company_name?: string; year?: number; status?: string; tx_start_date?: string; clearance_date?: string; tax_amount_assessed?: number; lawyer_id?: string; assigned_lawyer_name?: string; created_at?: string }>>('tax_assessments.json', [])
+    const diskTax = await readAuthorizedJsonFile<Array<{ id: string; company_id?: string; company_name?: string; year?: number; status?: string; tx_start_date?: string; clearance_date?: string; tax_amount_assessed?: number; lawyer_id?: string; assigned_lawyer_name?: string; created_at?: string }>>('tax_assessments.json', [])
     diskTax.forEach(taxRec => {
       if (deletedTxIds.has(taxRec.id)) return
       if (taxRec.company_id && (deletedCompanyIds.has(taxRec.company_id) || !validCompanyIds.has(taxRec.company_id))) return
@@ -251,7 +255,10 @@ export async function listTransactions(filters?: {
 }
 
 export async function getTransaction(id: string): Promise<TransactionFull | null> {
-  const diskTxs = readJsonFile<TransactionFull[]>('transactions.json', [])
+  const accessDenied = await requirePermission('transactions', 'view')
+  if (accessDenied) return null
+
+  const diskTxs = await readAuthorizedJsonFile<TransactionFull[]>('transactions.json', [])
   const foundDisk = diskTxs.find(t => t.id === id)
   if (foundDisk) return foundDisk
 

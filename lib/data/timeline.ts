@@ -6,7 +6,8 @@
  * لتسجيل كل حدث مهم تلقائياً بلا أي إدخال يدوي.
  * تدعم التخزين المزدوج (Supabase + Disk JSON) بدون رمي أي شاشة خطأ حمراء.
  */
-import { createAdminClient } from '@/lib/supabase/server'
+import { readAuthorizedJsonFile } from '@/lib/auth/scoped-store'
+import { createAdminClient, createClient } from '@/lib/supabase/server'
 import type { TimelineEventType, ViewCompanyTimeline } from '@/types/database'
 import { readJsonFile, writeJsonFile } from '@/lib/data/fs-store'
 
@@ -73,13 +74,13 @@ export async function logTimelineEvent(payload: {
 
 /** يجلب السجل الزمني الكامل لشركة، الأحدث أولاً مع دمج التخزين القرصي وتصفية التكرار */
 export async function getCompanyTimeline(companyId: string): Promise<TimelineEvent[]> {
-  const diskEvents = readJsonFile<TimelineEvent[]>('company_timeline.json', [])
+  const diskEvents = await readAuthorizedJsonFile<TimelineEvent[]>('company_timeline.json', [])
   const companyDiskEvents = diskEvents.filter(
     e => e.company_id === companyId && !e.company_id.startsWith('test_co_') && !e.company_id.startsWith('dup_')
   )
 
   try {
-    const supabase = createAdminClient()
+    const supabase = await createClient()
     const { data, error } = await supabase
       .from('company_timeline')
       .select('*')

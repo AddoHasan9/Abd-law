@@ -124,7 +124,7 @@ export async function getGeneralSettingsAction(): Promise<{ success: boolean; da
 }
 
 export async function updateGeneralSettingsAction(payload: Partial<Settings>): Promise<{ success: boolean; error?: string }> {
-  const denied = await requirePermission('users', 'manage_roles')
+  const denied = await requirePermission('users', 'manage_permissions')
   if (denied) return denied
 
   try {
@@ -169,7 +169,7 @@ export async function getWorkflowTemplatesAction(): Promise<{ success: boolean; 
 export async function saveWorkflowTemplatesAction(
   templates: Record<string, WorkflowTemplate>
 ): Promise<{ success: boolean; error?: string }> {
-  const denied = await requirePermission('users', 'manage_roles')
+  const denied = await requirePermission('users', 'manage_permissions')
   if (denied) return denied
 
   try {

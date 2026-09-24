@@ -1,7 +1,9 @@
 'use server'
 
+import { readAuthorizedJsonFile } from '@/lib/auth/scoped-store'
+import { requireRecordAccess } from '@/lib/auth/record-access'
 import { revalidatePath } from 'next/cache'
-import { createAdminClient } from '@/lib/supabase/server'
+import { createAdminClient, createClient } from '@/lib/supabase/server'
 import { logTimelineEvent } from '@/lib/data/timeline'
 import { readJsonFile, writeJsonFile } from '@/lib/data/fs-store'
 import type { CompanyWithWorkflow, CompanyIDRecord, CompanyIDStatus, TransactionFull, Company } from '@/types/database'
@@ -36,9 +38,12 @@ function generateUUID() {
 }
 
 export async function getCompanyIDsAction(companyIdFilter?: string) {
+  const accessDenied = await requirePermission('government_ids', 'view')
+  if (accessDenied) return { success: false, data: [], error: accessDenied.error }
+
   try {
-    const diskIDs = readJsonFile<CompanyIDRecord[]>('company_ids.json', [])
-    const supabase = createAdminClient()
+    const diskIDs = await readAuthorizedJsonFile<CompanyIDRecord[]>('company_ids.json', [])
+    const supabase = await createClient()
 
     let dbIDs: CompanyIDRecord[] = []
     try {
@@ -115,7 +120,7 @@ export async function getCompanyIDsAction(companyIdFilter?: string) {
     return { success: true, data: allItems }
   } catch (err) {
     console.warn('getCompanyIDsAction exception, using disk store:', err)
-    const diskIDs = readJsonFile<CompanyIDRecord[]>('company_ids.json', [])
+    const diskIDs = await readAuthorizedJsonFile<CompanyIDRecord[]>('company_ids.json', [])
     const filtered = companyIdFilter ? diskIDs.filter(x => x.company_id === companyIdFilter) : diskIDs
     return { success: true, data: filtered }
   }
@@ -135,6 +140,11 @@ export async function createCompanyIDAction(payload: {
   status?: CompanyIDStatus
   notes?: string
 }) {
+  if (payload.company_id) {
+    const access = await requireRecordAccess('companies', payload.company_id)
+    if (access) return access
+  }
+
   const denied = await requirePermission('government_ids', 'create')
   if (denied) return denied
 
@@ -373,6 +383,9 @@ export async function updateCompanyIDAction(
     notes?: string | null
   }
 ) {
+  const rowDenied = await requireRecordAccess('company_ids', id)
+  if (rowDenied) return rowDenied
+
   // إكمال/تجديد الهوية (status: 'done') يتطلب صلاحية renew المنفصلة عن create
   const denied = await requirePermission('government_ids', payload.status === 'done' ? 'renew' : 'create')
   if (denied) return denied
@@ -461,6 +474,9 @@ export async function completeCompanyIDAction(
 }
 
 export async function deleteCompanyIDAction(id: string) {
+  const rowDenied = await requireRecordAccess('company_ids', id)
+  if (rowDenied) return rowDenied
+
   const denied = await requirePermission('government_ids', 'delete')
   if (denied) return denied
 

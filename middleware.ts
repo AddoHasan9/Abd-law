@@ -5,6 +5,7 @@
  * من غير المسجّلين. هذا هو الحارس الأول قبل أي صفحة.
  */
 import { createServerClient, type CookieOptions } from '@supabase/ssr'
+import { isUserRole } from '@/lib/permissions'
 import { NextResponse, type NextRequest } from 'next/server'
 
 const PUBLIC_PATHS = ['/login', '/auth', '/reset-password']
@@ -67,6 +68,18 @@ export async function middleware(request: NextRequest) {
     const url = request.nextUrl.clone()
     url.pathname = '/login'
     return NextResponse.redirect(url)
+  }
+
+  if (user && !isPublic) {
+    const { data: profile, error } = await supabase.from('profiles').select('role, active').eq('id', user.id).maybeSingle()
+    if (error || !profile || profile.active !== true || !isUserRole(profile.role)) {
+      const url = request.nextUrl.clone()
+      url.pathname = '/login'
+      url.search = '?error=account_unavailable'
+      const redirect = NextResponse.redirect(url)
+      response.cookies.getAll().forEach(cookie => redirect.cookies.set(cookie))
+      return redirect
+    }
   }
 
   if (user && path === '/login') {

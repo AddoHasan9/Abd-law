@@ -16,8 +16,8 @@ import { usePermissions } from '@/lib/context/UserRoleContext'
 import { useDragScroll } from '@/lib/hooks/useDragScroll'
 
 export default function SettingsClient() {
-  const { isSuperAdmin, isAdmin } = usePermissions()
-  const canEdit = isSuperAdmin || isAdmin
+  const { can } = usePermissions()
+  const canEdit = can('users', 'manage_permissions')
 
   const [activeTab, setActiveTab] = useState<'general' | 'workflows' | 'shortcuts'>('workflows')
   const [loading, setLoading] = useState(true)

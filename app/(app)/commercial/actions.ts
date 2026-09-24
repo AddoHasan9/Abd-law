@@ -3,6 +3,7 @@
  */
 'use server'
 
+import { requireRecordAccess } from '@/lib/auth/record-access'
 import { revalidatePath } from 'next/cache'
 import { createAdminClient } from '@/lib/supabase/server'
 import type { TxPriority, CompanyWithWorkflow } from '@/types/database'
@@ -146,6 +147,14 @@ export async function assignLawyerToTransactionAction(
   lawyerName: string | null,
   companyId?: string | null
 ) {
+  if (companyId) {
+    const access = await requireRecordAccess('companies', companyId)
+    if (access) return access
+  }
+
+  const rowDenied = await requireRecordAccess('transactions', txId)
+  if (rowDenied) return rowDenied
+
   const denied = await requirePermission('transactions', 'edit')
   if (denied) return denied
 
@@ -215,6 +224,9 @@ export async function updateTransactionDetailsAction(
     manager_name?: string | null
   }
 ) {
+  const rowDenied = await requireRecordAccess('transactions', txId)
+  if (rowDenied) return rowDenied
+
   const denied = await requirePermission('transactions', 'edit')
   if (denied) return denied
 
@@ -382,6 +394,9 @@ export async function updateTransactionDetailsAction(
 
 /** أرشفة المعاملة */
 export async function archiveTransactionAction(txId: string, reason?: string) {
+  const rowDenied = await requireRecordAccess('transactions', txId)
+  if (rowDenied) return rowDenied
+
   const denied = await requirePermission('transactions', 'close')
   if (denied) return denied
 
@@ -416,6 +431,9 @@ export async function archiveTransactionAction(txId: string, reason?: string) {
 
 /** حذف المعاملة (مؤمنة مع القائمة السوداء الدائمة) */
 export async function deleteTransactionAction(txId: string) {
+  const rowDenied = await requireRecordAccess('transactions', txId)
+  if (rowDenied) return rowDenied
+
   const denied = await requirePermission('transactions', 'delete')
   if (denied) return denied
 
@@ -454,6 +472,14 @@ export async function deleteTransactionAction(txId: string) {
 const CLOSING_STATUSES = ['completed', 'closed', 'cancelled', 'done', 'rejected']
 
 export async function updateTransactionStatusAction(txId: string, status: string, companyId?: string | null) {
+  if (companyId) {
+    const access = await requireRecordAccess('companies', companyId)
+    if (access) return access
+  }
+
+  const rowDenied = await requireRecordAccess('transactions', txId)
+  if (rowDenied) return rowDenied
+
   const denied = await requirePermission('transactions', CLOSING_STATUSES.includes(status) ? 'close' : 'edit')
   if (denied) return denied
 

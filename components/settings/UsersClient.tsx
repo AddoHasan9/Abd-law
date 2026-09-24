@@ -1,5 +1,7 @@
 'use client'
 
+import { useRouter } from 'next/navigation'
+import { isProtectedAccount } from '@/lib/auth/account-policy'
 import { useState, useMemo, useEffect } from 'react'
 import { createPortal } from 'react-dom'
 import Link from 'next/link'
@@ -53,8 +55,12 @@ const ROLE_BADGES: Record<UserRole, { label: string; badgeClass: string; desc: s
 }
 
 export default function UsersClient({ initialProfiles }: Props) {
-  const { isSuperAdmin, can } = usePermissions()
+  const router = useRouter()
+  const { isSuperAdmin, can, profile: currentProfile } = usePermissions()
   const canManageUsers = can('users', 'create_users') || isSuperAdmin
+  const canEditUsers = can('users', 'edit_users')
+  const canDeleteUsers = can('users', 'delete_users')
+  const protectedUser = (u: ProfileWithStats) => isProtectedAccount(u) || u.id === currentProfile?.id
   const canManagePermissions = can('users', 'manage_permissions') || isSuperAdmin
   const [profiles, setProfiles] = useState<ProfileWithStats[]>(initialProfiles)
   const [auditLogs, setAuditLogs] = useState<UserAuditRecord[]>([])
@@ -103,6 +109,7 @@ export default function UsersClient({ initialProfiles }: Props) {
   const [phone, setPhone] = useState('')
   const [email, setEmail] = useState('')
   const [active, setActive] = useState(true)
+  const [initialPassword, setInitialPassword] = useState('')
   const [newPassword, setNewPassword] = useState('')
 
   const hasOpenModal = !!(viewingUser || isAddModalOpen || resetPassUser)
@@ -117,7 +124,7 @@ export default function UsersClient({ initialProfiles }: Props) {
   useEffect(() => {
     async function loadAudit() {
       const res = await getUserAuditLogsAction()
-      if (res.success && res.data) {
+      if (res.success) {
         setAuditLogs(res.data)
       }
     }
@@ -179,12 +186,13 @@ export default function UsersClient({ initialProfiles }: Props) {
     setTitle('')
     setPhone('')
     setEmail('')
+    setInitialPassword('')
     setActive(true)
     setIsAddModalOpen(true)
   }
 
   const openEditModal = (user: ProfileWithStats) => {
-    if (!isSuperAdmin && user.role === 'super_admin') {
+    if (protectedUser(user) || !canEditUsers) {
       alert('عذراً، يقتصر تعديل حسابات Super Admin على المدير الأعلى فقط')
       return
     }
@@ -216,18 +224,21 @@ export default function UsersClient({ initialProfiles }: Props) {
       phone,
       email,
       active,
+      ...(!formId ? { password: initialPassword } : {}),
     })
     setLoading(false)
 
-    if (res.success && res.data) {
+    if (res.success) {
       if (editingUser) {
         setProfiles(prev => prev.map(p => (p.id === res.data!.id ? res.data! : p)))
         setMessage({ type: 'ok', text: 'تم تحديث بيانات ورتبة المستخدم بنجاح' })
       } else {
         setProfiles(prev => [...prev, res.data!])
-        setMessage({ type: 'ok', text: 'تم إكمال وتفعيل بروفايل المستخدم بنجاح' })
+        setMessage({ type: 'ok', text: 'تم إنشاء حساب الدخول بنجاح' })
       }
       setIsAddModalOpen(false)
+      setInitialPassword('')
+      router.refresh()
       const auditRes = await getUserAuditLogsAction()
       if (auditRes.success && auditRes.data) setAuditLogs(auditRes.data)
     } else {
@@ -236,11 +247,12 @@ export default function UsersClient({ initialProfiles }: Props) {
   }
 
   const handleToggleActive = async (user: ProfileWithStats) => {
-    if (!isSuperAdmin && user.role === 'super_admin') {
+    if (protectedUser(user) || !canEditUsers) {
       alert('لا يمكن تعطيل حساب Super Admin')
       return
     }
     const res = await toggleUserActiveAction(user.id)
+    if (!res.success) setMessage({ type: 'err', text: res.error })
     if (res.success) {
       setProfiles(prev => prev.map(p => (p.id === user.id ? { ...p, active: res.active! } : p)))
       const auditRes = await getUserAuditLogsAction()
@@ -249,11 +261,11 @@ export default function UsersClient({ initialProfiles }: Props) {
   }
 
   const handleSoftDeleteUser = async (user: ProfileWithStats) => {
-    if (!isSuperAdmin) {
+    if (!canDeleteUsers) {
       alert('عذراً، يقتصر تعطيل وأرشفة الحسابات على Super Admin فقط')
       return
     }
-    if (user.role === 'super_admin') {
+    if (protectedUser(user)) {
       alert('لا يمكن حذف أو أرشفة حساب Super Admin الرئيسي')
       return
     }
@@ -261,6 +273,7 @@ export default function UsersClient({ initialProfiles }: Props) {
       return
     }
     const res = await deleteUserAction(user.id)
+    if (!res.success) setMessage({ type: 'err', text: res.error })
     if (res.success) {
       setProfiles(prev => prev.map(p => (p.id === user.id ? { ...p, active: false } : p)))
       setMessage({ type: 'ok', text: `تم تعطيل وأرشفة حساب ${user.name} مع حفظ كافة السجلات` })
@@ -270,11 +283,11 @@ export default function UsersClient({ initialProfiles }: Props) {
   }
 
   const handlePermanentDeleteUser = async (user: ProfileWithStats) => {
-    if (!isSuperAdmin) {
+    if (!canDeleteUsers) {
       alert('عذراً، يقتصر حذف الحسابات نهائياً على Super Admin فقط')
       return
     }
-    if (user.role === 'super_admin' || user.id === 'db13125d-3aa1-46ab-9159-8fad18746623') {
+    if (protectedUser(user)) {
       alert('لا يمكن حذف حساب Super Admin الرئيسي نهائياً')
       return
     }
@@ -300,11 +313,12 @@ export default function UsersClient({ initialProfiles }: Props) {
     e.preventDefault()
     if (!resetPassUser) return
     setLoading(true)
-    const res = await resetUserPasswordAction(resetPassUser.id, resetPassUser.email || `${resetPassUser.name}@khazraji-law.com`)
+    const res = await resetUserPasswordAction(resetPassUser.id, newPassword)
     setLoading(false)
     if (res.success) {
-      setMessage({ type: 'ok', text: res.message || 'تم إرسال تعليمات إعادة ضبط كلمة المرور' })
+      setMessage({ type: 'ok', text: res.message || 'تم تحديث كلمة المرور' })
       setResetPassUser(null)
+      setNewPassword('')
       const auditRes = await getUserAuditLogsAction()
       if (auditRes.success && auditRes.data) setAuditLogs(auditRes.data)
     } else {
@@ -596,6 +610,7 @@ export default function UsersClient({ initialProfiles }: Props) {
 
             {/* Edit */}
             <button
+              disabled={!canEditUsers || protectedUser(activeMenuUser)}
               type="button"
               onClick={() => {
                 const cur = activeMenuUser
@@ -611,6 +626,7 @@ export default function UsersClient({ initialProfiles }: Props) {
 
             {/* Activate / Deactivate */}
             <button
+              disabled={!canEditUsers || protectedUser(activeMenuUser)}
               type="button"
               onClick={() => {
                 const cur = activeMenuUser
@@ -630,6 +646,7 @@ export default function UsersClient({ initialProfiles }: Props) {
 
             {/* Reset Password */}
             <button
+              disabled={!canEditUsers || protectedUser(activeMenuUser)}
               type="button"
               onClick={() => {
                 const cur = activeMenuUser
@@ -644,7 +661,7 @@ export default function UsersClient({ initialProfiles }: Props) {
             </button>
 
             {/* Soft Delete / Archive */}
-            {isSuperAdmin && activeMenuUser.role !== 'super_admin' && (
+            {canDeleteUsers && !protectedUser(activeMenuUser) && (
               <button
                 type="button"
                 onClick={() => {
@@ -661,7 +678,7 @@ export default function UsersClient({ initialProfiles }: Props) {
             )}
 
             {/* Permanent Delete */}
-            {isSuperAdmin && activeMenuUser.role !== 'super_admin' && activeMenuUser.id !== 'db13125d-3aa1-46ab-9159-8fad18746623' && (
+            {canDeleteUsers && !protectedUser(activeMenuUser) && (
               <button
                 type="button"
                 onClick={() => {
@@ -838,6 +855,11 @@ export default function UsersClient({ initialProfiles }: Props) {
                   />
                 </div>
 
+                {!editingUser && <div className="field">
+                  <label htmlFor="initial-password">كلمة مرور حساب الدخول (12 حرفاً على الأقل) *</label>
+                  <input id="initial-password" type="password" autoComplete="new-password" required minLength={12}
+                    value={initialPassword} onChange={e => setInitialPassword(e.target.value)} className="input" dir="ltr" />
+                </div>}
                 {/* Full Name */}
                 <div className="field">
                   <label>الاسم الكامل *</label>
@@ -858,7 +880,7 @@ export default function UsersClient({ initialProfiles }: Props) {
                     <select
                       value={role}
                       onChange={e => setRole(e.target.value as UserRole)}
-                      disabled={!isSuperAdmin && editingUser?.role === 'super_admin'}
+                      disabled={!!editingUser && protectedUser(editingUser)}
                       className="input font-bold"
                     >
                       {isSuperAdmin && <option value="super_admin">Super Admin (مدير النظام الأعلى)</option>}
@@ -967,6 +989,8 @@ export default function UsersClient({ initialProfiles }: Props) {
                     type="password"
                     required
                     placeholder="••••••••"
+                    minLength={12}
+                    autoComplete="new-password"
                     value={newPassword}
                     onChange={e => setNewPassword(e.target.value)}
                     className="input num"

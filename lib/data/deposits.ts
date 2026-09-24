@@ -7,9 +7,10 @@
  * 3. كتاب المحاسب (accountant)
  * 4. رفع باركود / QR الشركة أو PDF (barcode)
  */
+import { readAuthorizedJsonFile } from '@/lib/auth/scoped-store'
+import { requirePermission } from '@/lib/auth/require-permission'
 import { createClient } from '@/lib/supabase/server'
 import type { DepositWithStages, DepositStage, Company } from '@/types/database'
-import { readJsonFile, writeJsonFile } from '@/lib/data/fs-store'
 
 interface RawStageItem {
   id?: string
@@ -41,10 +42,13 @@ const STANDARD_STAGES_CONFIG = [
 ]
 
 export async function listDeposits(): Promise<DepositWithStages[]> {
+  const accessDenied = await requirePermission('deposits', 'view')
+  if (accessDenied) return []
+
   try {
-    const deletedCompanyIds = readJsonFile<string[]>('deleted_company_ids.json', [])
-    const diskDeposits = readJsonFile<RawDepositItem[]>('deposits.json', [])
-    const diskCompanies = readJsonFile<Company[]>('companies.json', [])
+    const deletedCompanyIds = await readAuthorizedJsonFile<string[]>('deleted_company_ids.json', [])
+    const diskDeposits = await readAuthorizedJsonFile<RawDepositItem[]>('deposits.json', [])
+    const diskCompanies = await readAuthorizedJsonFile<Company[]>('companies.json', [])
 
     // Try fetching from Supabase
     let dbDeposits: RawDepositItem[] = []
@@ -157,16 +161,12 @@ export async function listDeposits(): Promise<DepositWithStages[]> {
       (a, b) => new Date(b.started_at || '').getTime() - new Date(a.started_at || '').getTime()
     )
 
-    // Ensure disk is updated with the normalized 4-stage schema
-    try {
-      writeJsonFile('deposits.json', result)
-    } catch {}
 
     return result
   } catch (e) {
     console.error('Exception in listDeposits:', e)
-    const diskDeposits = readJsonFile<RawDepositItem[]>('deposits.json', [])
-    const diskCompanies = readJsonFile<Company[]>('companies.json', [])
+    const diskDeposits = await readAuthorizedJsonFile<RawDepositItem[]>('deposits.json', [])
+    const diskCompanies = await readAuthorizedJsonFile<Company[]>('companies.json', [])
     return diskDeposits.map(d => ({
       ...d,
       companies: d.companies || diskCompanies.find(c => c.id === d.company_id) || null

@@ -3,20 +3,25 @@
  */
 'use server'
 
+import { readAuthorizedJsonFile } from '@/lib/auth/scoped-store'
+import { requireRecordAccess } from '@/lib/auth/record-access'
 import { revalidatePath } from 'next/cache'
-import { createAdminClient } from '@/lib/supabase/server'
+import { createAdminClient, createClient } from '@/lib/supabase/server'
 import { WORKFLOW, sanitizeFormationWorkflowSteps } from '@/lib/constants'
 import type { WfState, CompanyWithWorkflow, CompanyManager, CompanyShareholder, CompanyIDRecord, FinancialStatement, DepositStage, Trademark, TaxAssessment } from '@/types/database'
 import { createNotificationAction } from '@/app/(app)/notifications/actions'
 import { readJsonFile, writeJsonFile } from '@/lib/data/fs-store'
 import { logTimelineEvent, getCompanyTimeline, type TimelineEvent } from '@/lib/data/timeline'
-import { requirePermission } from '@/lib/auth/require-permission'
+import { getCurrentUserProfile, requirePermission } from '@/lib/auth/require-permission'
 
 // Memory store fallback for companies
 const inMemoryCompanies: CompanyWithWorkflow[] = []
 
 export async function getInMemoryCompaniesAction() {
-  return inMemoryCompanies
+  const accessDenied = await requirePermission('companies', 'view')
+  if (accessDenied) return []
+
+  return (await getCurrentUserProfile())?.role === 'super_admin' ? inMemoryCompanies : []
 }
 
 function generateUUID() {
@@ -341,6 +346,9 @@ export async function updateCompanyDetailsAction(
     }
   }
 ) {
+  const rowDenied = await requireRecordAccess('companies', companyId)
+  if (rowDenied) return rowDenied
+
   const denied = await requirePermission('companies', 'edit')
   if (denied) return denied
 
@@ -497,6 +505,9 @@ export async function updateCompanyDetailsAction(
 }
 
 export async function advanceCompanyStepAction(stepId: string, currentState: WfState) {
+  const rowDenied = await requireRecordAccess('workflow_steps', stepId)
+  if (rowDenied) return rowDenied
+
   const denied = await requirePermission('companies', 'edit')
   if (denied) return denied
 
@@ -623,10 +634,16 @@ const inMemoryDeposits: Array<{
 }> = []
 
 export async function getInMemoryDepositsAction() {
-  return inMemoryDeposits
+  const accessDenied = await requirePermission('deposits', 'view')
+  if (accessDenied) return []
+
+  return (await getCurrentUserProfile())?.role === 'super_admin' ? inMemoryDeposits : []
 }
 
 export async function launchDepositWorkflowAction(companyId: string) {
+  const rowDenied = await requireRecordAccess('companies', companyId)
+  if (rowDenied) return rowDenied
+
   const denied = await requirePermission('deposits', 'create')
   if (denied) return denied
 
@@ -762,6 +779,12 @@ export async function launchDepositWorkflowAction(companyId: string) {
 
 /** يسجّل ملاحظة حرة في السجل الزمني الدائم للشركة (يحل محل سجل الأحداث الوهمي بالذاكرة) */
 export async function addCompanyAuditLogAction(companyId: string, action: string, user?: string) {
+  const accessDenied = await requirePermission('companies', 'edit')
+  if (accessDenied) return accessDenied
+
+  const rowDenied = await requireRecordAccess('companies', companyId)
+  if (rowDenied) return rowDenied
+
   await logTimelineEvent({
     company_id: companyId,
     event_type: 'note',
@@ -774,6 +797,9 @@ export async function addCompanyAuditLogAction(companyId: string, action: string
 }
 
 export async function addCompanyDocumentAction(companyId: string, payload: { name: string; category: string; url?: string }) {
+  const rowDenied = await requireRecordAccess('companies', companyId)
+  if (rowDenied) return rowDenied
+
   const denied = await requirePermission('companies', 'edit')
   if (denied) return denied
 
@@ -812,8 +838,14 @@ export async function addCompanyDocumentAction(companyId: string, payload: { nam
 }
 
 export async function getCompany360DataAction(companyId: string) {
+  const accessDenied = await requirePermission('companies', 'view')
+  if (accessDenied) return accessDenied
+
+  const rowDenied = await requireRecordAccess('companies', companyId)
+  if (rowDenied) return rowDenied
+
   try {
-    const supabase = createAdminClient()
+    const supabase = await createClient()
 
     // 1. Fetch company record
     let company: CompanyWithWorkflow | null = null
@@ -849,7 +881,7 @@ export async function getCompany360DataAction(companyId: string) {
     }
 
     if (!company) {
-      const diskCompanies = readJsonFile<CompanyWithWorkflow[]>('companies.json', [])
+      const diskCompanies = await readAuthorizedJsonFile<CompanyWithWorkflow[]>('companies.json', [])
       const inMemCompanies = await getInMemoryCompaniesAction()
       company = diskCompanies.find(c => c.id === companyId) || inMemCompanies.find(c => c.id === companyId) || null
     }
@@ -911,8 +943,8 @@ export async function getCompany360DataAction(companyId: string) {
       timelineData = await getCompanyTimeline(companyId)
     } catch {}
 
-    const diskManagers = readJsonFile<CompanyManager[]>('company_managers.json', [])
-    const diskShareholders = readJsonFile<CompanyShareholder[]>('company_shareholders.json', [])
+    const diskManagers = await readAuthorizedJsonFile<CompanyManager[]>('company_managers.json', [])
+    const diskShareholders = await readAuthorizedJsonFile<CompanyShareholder[]>('company_shareholders.json', [])
 
     const finalManagers = (managersData && managersData.length > 0)
       ? managersData
@@ -927,7 +959,7 @@ export async function getCompany360DataAction(companyId: string) {
         : diskShareholders.filter(s => s.company_id === companyId)
 
     if (!depositData) {
-      const diskDeps = readJsonFile<Array<Record<string, unknown>>>('deposits.json', [])
+      const diskDeps = await readAuthorizedJsonFile<Array<Record<string, unknown>>>('deposits.json', [])
       const foundDep = diskDeps.find(d => d.company_id === companyId)
       if (foundDep) {
         depositData = foundDep as unknown as typeof depositData
@@ -945,7 +977,7 @@ export async function getCompany360DataAction(companyId: string) {
       if (taxDb) taxAssessmentsData = taxDb as TaxAssessment[]
     } catch {}
 
-    const diskTax = readJsonFile<TaxAssessment[]>('tax_assessments.json', [])
+    const diskTax = await readAuthorizedJsonFile<TaxAssessment[]>('tax_assessments.json', [])
     const diskCompanyTax = diskTax.filter(t => t.company_id === companyId)
     const taxMap = new Map<string, TaxAssessment>()
     taxAssessmentsData.forEach(t => taxMap.set(t.id, t))
@@ -985,6 +1017,9 @@ export async function getCompany360DataAction(companyId: string) {
  * حذف الشركة نهائياً من النظام وكافة الجداول والملفات المرتبطة بها
  */
 export async function deleteCompanyAction(companyId: string) {
+  const rowDenied = await requireRecordAccess('companies', companyId)
+  if (rowDenied) return rowDenied
+
   const denied = await requirePermission('companies', 'delete')
   if (denied) return denied
 

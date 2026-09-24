@@ -22,8 +22,8 @@ interface Props {
 
 export default function DepositsClient({ deposits = [], companyId }: Props) {
   const router = useRouter()
-  const { can, isSuperAdmin, isAdmin } = usePermissions()
-  const canRelease = can('deposits', 'release') || isSuperAdmin || isAdmin
+  const { can } = usePermissions()
+  const canRelease = can('deposits', 'release')
   const [depositsList, setDepositsList] = useState<DepositFull[]>(deposits)
   const [editingStageId, setEditingStageId] = useState<string | null>(null)
   const [editDate, setEditDate] = useState<string>('')

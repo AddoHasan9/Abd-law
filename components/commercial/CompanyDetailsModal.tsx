@@ -44,13 +44,13 @@ function formatStepArabicDate(dateStr?: string | null): string {
 export default function CompanyDetailsModal({ company, isOpen, onClose, onDelete, initialTab }: Props) {
   useModalBodyLock(isOpen)
   const router = useRouter()
-  const { can, isSuperAdmin, isAdmin } = usePermissions()
-  const canDeleteCompany = can('companies', 'delete') || isSuperAdmin || isAdmin
+  const { can } = usePermissions()
+  const canDeleteCompany = can('companies', 'delete')
   const modalTabsScrollRef = useDragScroll<HTMLDivElement>({ speed: 1.4 })
-  const canEditCompany = can('companies', 'edit') || isSuperAdmin || isAdmin
-  const canManageIDs = can('government_ids', 'create') || isSuperAdmin || isAdmin
-  const canDeleteIDs = can('government_ids', 'delete') || isSuperAdmin || isAdmin
-  const canRenewIDs = can('government_ids', 'renew') || isSuperAdmin || isAdmin
+  const canEditCompany = can('companies', 'edit')
+  const canManageIDs = can('government_ids', 'create')
+  const canDeleteIDs = can('government_ids', 'delete')
+  const canRenewIDs = can('government_ids', 'renew')
   const [mounted, setMounted] = useState(false)
   const [activeTab, setActiveTab] = useState<'info' | 'workflow' | 'ids' | 'tax' | 'cert' | 'notes' | 'financial'>('info')
   const [loading, setLoading] = useState(false)

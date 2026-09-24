@@ -68,12 +68,12 @@ export default function Company360Client({
   timeline = [],
 }: Props) {
   const router = useRouter()
-  const { can, isSuperAdmin, isAdmin } = usePermissions()
-  const canEdit = can('companies', 'edit') || isSuperAdmin || isAdmin
-  const canReleaseDeposit = can('deposits', 'release') || isSuperAdmin || isAdmin
-  const canCreateDeposit = can('deposits', 'create') || isSuperAdmin || isAdmin
-  const canManageIDs = can('government_ids', 'create') || isSuperAdmin || isAdmin
-  const canRenewIDs = can('government_ids', 'renew') || isSuperAdmin || isAdmin
+  const { can } = usePermissions()
+  const canEdit = can('companies', 'edit')
+  const canReleaseDeposit = can('deposits', 'release')
+  const canCreateDeposit = can('deposits', 'create')
+  const canManageIDs = can('government_ids', 'create')
+  const canRenewIDs = can('government_ids', 'renew')
 
   const [activeTab, setActiveTab] = useState<TabType>('all')
   const navTabsScrollRef = useDragScroll<HTMLDivElement>({ speed: 1.4 })
