@@ -49,7 +49,7 @@ export function ThemeToggle() {
     <button
       type="button"
       onClick={toggle}
-      className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/85 dark:bg-[#151A24]/85 hover:bg-white dark:hover:bg-[#1D2433] border border-slate-200/90 dark:border-white/15 backdrop-blur-xl shadow-md text-slate-800 dark:text-slate-100 transition-all duration-300 hover:scale-105 active:scale-95 cursor-pointer text-xs font-bold select-none"
+      className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/85 dark:bg-[#151A24]/85 hover:bg-white dark:hover:bg-[#1D2433] border border-slate-200/90 dark:border-white/15 backdrop-blur-xl shadow-md text-slate-800 dark:text-slate-100 transition duration-300 hover:scale-105 active:scale-95 cursor-pointer text-xs font-bold select-none"
       title={dark ? 'التبديل إلى الوضع النهاري' : 'التبديل إلى الوضع الليلي'}
       aria-label={dark ? 'التبديل إلى الوضع النهاري' : 'التبديل إلى الوضع الليلي'}
     >

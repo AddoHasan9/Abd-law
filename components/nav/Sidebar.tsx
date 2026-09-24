@@ -112,7 +112,7 @@ export default function Sidebar({
         key={leaf.key}
         href={leaf.href}
         onClick={onNavigate}
-        className={`nav-item${sub ? ' sub' : ' hover:-translate-x-0.5'} transition-all duration-150`}
+        className={`nav-item${sub ? ' sub' : ' hover:-translate-x-0.5'} transition duration-150`}
         aria-current={active ? 'page' : undefined}
       >
         {sub && (
@@ -155,7 +155,7 @@ export default function Sidebar({
             <Link
               href={g.href}
               onClick={onNavigate}
-              className="nav-item nav-item-head transition-all duration-150 hover:-translate-x-0.5"
+              className="nav-item nav-item-head transition duration-150 hover:-translate-x-0.5"
               aria-current={
                 pathname === g.href && !typeParam ? 'page' : undefined
               }

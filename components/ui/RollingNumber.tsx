@@ -14,7 +14,7 @@ export function RollingNumber({ value, format, className = '' }: Props) {
     <NumberFlow
       value={value}
       format={format}
-      className={`num transition-all duration-300 font-extrabold ${className}`}
+      className={`num transition duration-300 font-extrabold ${className}`}
     />
   )
 }

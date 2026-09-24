@@ -277,7 +277,7 @@ export default function AddIDModal({
                       type="button"
                       onClick={() => setIdType(typeKey)}
                       className={cn(
-                        'flex flex-col items-center justify-center p-3 rounded-xl border text-xs font-bold transition-all duration-150 cursor-pointer text-center gap-1.5',
+                        'flex flex-col items-center justify-center p-3 rounded-xl border text-xs font-bold transition duration-150 cursor-pointer text-center gap-1.5',
                         idType === typeKey
                           ? 'border-primary bg-primary-soft text-primary shadow-xs'
                           : 'border-border bg-surface-2 text-text-2 hover:border-text-3/40'
@@ -334,7 +334,7 @@ export default function AddIDModal({
                   }}
                   onFocus={() => setIsDropdownOpen(true)}
                   placeholder="ابحث عن الشركة أو اكتب اسم الشركة..."
-                  className="flex h-10 w-full rounded-xl bg-surface-2 border border-border px-3.5 pl-10 text-sm font-medium text-text placeholder:text-text-3 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
+                  className="flex h-10 w-full rounded-xl bg-surface-2 border border-border px-3.5 pl-10 text-sm font-medium text-text placeholder:text-text-3 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition"
                   required
                 />
                 <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-text-3 text-[18px]">
@@ -448,7 +448,7 @@ export default function AddIDModal({
                   type="button"
                   onClick={() => setStatus('in_progress')}
                   className={cn(
-                    'flex items-center justify-center gap-1.5 h-9 px-3 rounded-xl border text-xs font-bold transition-all cursor-pointer',
+                    'flex items-center justify-center gap-1.5 h-9 px-3 rounded-xl border text-xs font-bold transition cursor-pointer',
                     status === 'in_progress'
                       ? 'border-amber-500/50 bg-amber-500/15 text-amber-600 dark:text-amber-400'
                       : 'border-border bg-surface-2 text-text-3 hover:text-text'
@@ -462,7 +462,7 @@ export default function AddIDModal({
                   type="button"
                   onClick={() => setStatus('done')}
                   className={cn(
-                    'flex items-center justify-center gap-1.5 h-9 px-3 rounded-xl border text-xs font-bold transition-all cursor-pointer',
+                    'flex items-center justify-center gap-1.5 h-9 px-3 rounded-xl border text-xs font-bold transition cursor-pointer',
                     status === 'done'
                       ? 'border-emerald-500/50 bg-emerald-500/15 text-emerald-600 dark:text-emerald-400'
                       : 'border-border bg-surface-2 text-text-3 hover:text-text'
@@ -476,7 +476,7 @@ export default function AddIDModal({
                   type="button"
                   onClick={() => setStatus('lacks')}
                   className={cn(
-                    'flex items-center justify-center gap-1.5 h-9 px-3 rounded-xl border text-xs font-bold transition-all cursor-pointer',
+                    'flex items-center justify-center gap-1.5 h-9 px-3 rounded-xl border text-xs font-bold transition cursor-pointer',
                     status === 'lacks'
                       ? 'border-rose-500/50 bg-rose-500/15 text-rose-600 dark:text-rose-400'
                       : 'border-border bg-surface-2 text-text-3 hover:text-text'
@@ -490,7 +490,7 @@ export default function AddIDModal({
                   type="button"
                   onClick={() => setStatus('paused')}
                   className={cn(
-                    'flex items-center justify-center gap-1.5 h-9 px-3 rounded-xl border text-xs font-bold transition-all cursor-pointer',
+                    'flex items-center justify-center gap-1.5 h-9 px-3 rounded-xl border text-xs font-bold transition cursor-pointer',
                     status === 'paused'
                       ? 'border-border-soft bg-surface-3 text-text-2'
                       : 'border-border bg-surface-2 text-text-3 hover:text-text'

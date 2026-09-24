@@ -223,14 +223,14 @@ export default function SettingsClient() {
         <div className="flex items-center gap-2">
           <Link
             href="/settings/users"
-            className="px-4 py-2 rounded-xl bg-[var(--surface-2)] border border-[var(--line-soft)] text-xs font-bold text-[var(--text-2)] hover:text-[var(--accent)] hover:border-[var(--accent)] transition-all flex items-center gap-1.5"
+            className="px-4 py-2 rounded-xl bg-[var(--surface-2)] border border-[var(--line-soft)] text-xs font-bold text-[var(--text-2)] hover:text-[var(--accent)] hover:border-[var(--accent)] transition flex items-center gap-1.5"
           >
             <span className="material-symbols-outlined text-[16px]">manage_accounts</span>
             <span>المستخدمون</span>
           </Link>
           <Link
             href="/settings/permissions"
-            className="px-4 py-2 rounded-xl bg-[var(--surface-2)] border border-[var(--line-soft)] text-xs font-bold text-[var(--text-2)] hover:text-[var(--accent)] hover:border-[var(--accent)] transition-all flex items-center gap-1.5"
+            className="px-4 py-2 rounded-xl bg-[var(--surface-2)] border border-[var(--line-soft)] text-xs font-bold text-[var(--text-2)] hover:text-[var(--accent)] hover:border-[var(--accent)] transition flex items-center gap-1.5"
           >
             <span className="material-symbols-outlined text-[16px]">key</span>
             <span>الصلاحيات</span>
@@ -243,7 +243,7 @@ export default function SettingsClient() {
         <button
           type="button"
           onClick={() => setActiveTab('workflows')}
-          className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-black text-xs transition-all cursor-pointer ${
+          className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-black text-xs transition cursor-pointer ${
             activeTab === 'workflows'
               ? 'bg-[#3B82F6] text-white shadow-md shadow-blue-500/20'
               : 'text-[var(--text-3)] hover:text-[var(--text)]'
@@ -256,7 +256,7 @@ export default function SettingsClient() {
         <button
           type="button"
           onClick={() => setActiveTab('general')}
-          className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-black text-xs transition-all cursor-pointer ${
+          className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-black text-xs transition cursor-pointer ${
             activeTab === 'general'
               ? 'bg-[#3B82F6] text-white shadow-md shadow-blue-500/20'
               : 'text-[var(--text-3)] hover:text-[var(--text)]'
@@ -286,7 +286,7 @@ export default function SettingsClient() {
                   type="button"
                   onClick={handleSaveWorkflows}
                   disabled={saving}
-                  className="px-6 py-2.5 rounded-xl bg-[#10B981] hover:bg-emerald-600 active:scale-95 text-white font-black text-xs shadow-md shadow-emerald-500/20 transition-all flex items-center gap-2 cursor-pointer disabled:opacity-50"
+                  className="px-6 py-2.5 rounded-xl bg-[#10B981] hover:bg-emerald-600 active:scale-95 text-white font-black text-xs shadow-md shadow-emerald-500/20 transition flex items-center gap-2 cursor-pointer disabled:opacity-50"
                 >
                   <span className="material-symbols-outlined text-[18px]">save</span>
                   <span>{saving ? 'جاري الحفظ...' : 'حفظ كافة المسارات'}</span>
@@ -304,7 +304,7 @@ export default function SettingsClient() {
                     key={key}
                     type="button"
                     onClick={() => setSelectedTxKey(key)}
-                    className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl text-xs font-black transition-all flex-none cursor-pointer border ${
+                    className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl text-xs font-black transition flex-none cursor-pointer border ${
                       isSelected
                         ? 'bg-[#3B82F6] border-[#3B82F6] text-white shadow-md shadow-blue-500/25'
                         : 'bg-[var(--surface-2)] border-[var(--line-soft)] text-[var(--text-2)] hover:text-[var(--text)] hover:bg-[var(--surface-3)]'
@@ -362,7 +362,7 @@ export default function SettingsClient() {
                   {activeTemplate.steps.map((step, idx) => (
                     <div
                       key={step.id}
-                      className="p-3.5 sm:p-4 rounded-2xl bg-[var(--surface-2)] border border-[var(--line-soft)] hover:border-[color:color-mix(in_srgb,var(--accent)_40%,transparent)] transition-all flex items-center justify-between gap-4 group"
+                      className="p-3.5 sm:p-4 rounded-2xl bg-[var(--surface-2)] border border-[var(--line-soft)] hover:border-[color:color-mix(in_srgb,var(--accent)_40%,transparent)] transition flex items-center justify-between gap-4 group"
                     >
                       {editingStepId === step.id ? (
                         <div className="flex-1 flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5">
@@ -487,7 +487,7 @@ export default function SettingsClient() {
                   <button
                     type="button"
                     onClick={handleAddStep}
-                    className="px-5 py-2.5 rounded-xl bg-[#3B82F6] hover:bg-blue-600 active:bg-blue-700 text-white font-bold text-xs transition-all flex items-center justify-center gap-1.5 flex-none cursor-pointer shadow-md shadow-blue-500/20"
+                    className="px-5 py-2.5 rounded-xl bg-[#3B82F6] hover:bg-blue-600 active:bg-blue-700 text-white font-bold text-xs transition flex items-center justify-center gap-1.5 flex-none cursor-pointer shadow-md shadow-blue-500/20"
                   >
                     <span className="material-symbols-outlined text-[18px]">add</span>
                     <span>إضافة محطة</span>
@@ -586,7 +586,7 @@ export default function SettingsClient() {
               <button
                 type="submit"
                 disabled={saving}
-                className="px-6 py-2.5 rounded-xl bg-[#3B82F6] hover:bg-blue-600 text-white font-black text-xs shadow-md shadow-blue-500/25 active:scale-95 transition-all flex items-center gap-2 cursor-pointer disabled:opacity-50"
+                className="px-6 py-2.5 rounded-xl bg-[#3B82F6] hover:bg-blue-600 text-white font-black text-xs shadow-md shadow-blue-500/25 active:scale-95 transition flex items-center gap-2 cursor-pointer disabled:opacity-50"
               >
                 <span className="material-symbols-outlined text-[18px]">save</span>
                 <span>{saving ? 'جاري الحفظ...' : 'حفظ التغييرات'}</span>

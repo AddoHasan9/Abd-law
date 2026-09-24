@@ -303,7 +303,7 @@ export function WorkflowStatus({
         disabled={readOnly || isUpdating}
         onClick={toggleDropdown}
         className={cn(
-          'inline-flex items-center justify-center font-bold rounded-full whitespace-nowrap transition-all duration-150 select-none shadow-xs border',
+          'inline-flex items-center justify-center font-bold rounded-full whitespace-nowrap transition duration-150 select-none shadow-xs border',
           sizeClasses[size],
           readOnly ? 'cursor-default' : 'cursor-pointer hover:opacity-90 active:scale-[0.98]',
           isUpdating && 'opacity-60 pointer-events-none'
@@ -576,7 +576,7 @@ export function WorkflowStatus({
               <button
                 type="button"
                 onClick={handleModalSubmit}
-                className="h-9 px-5 rounded-xl bg-primary text-white text-xs font-bold shadow-sm hover:bg-primary/90 transition-all cursor-pointer"
+                className="h-9 px-5 rounded-xl bg-primary text-white text-xs font-bold shadow-sm hover:bg-primary/90 transition cursor-pointer"
               >
                 تأكيد التحديث
               </button>

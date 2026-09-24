@@ -103,7 +103,7 @@ export default function DeadlineCard({ deadlines = [], item = null }: Props) {
         /* Empty / All Compliant State - Matches Screenshot Exactly */
         <Link
           href="/commercial/deposits"
-          className="block rounded-2xl bg-[var(--surface-2)] hover:bg-[var(--surface-3)] p-3 border border-[var(--line-soft)] hover:border-[color:color-mix(in_srgb,var(--accent)_40%,transparent)] transition-all group shadow-2xs"
+          className="block rounded-2xl bg-[var(--surface-2)] hover:bg-[var(--surface-3)] p-3 border border-[var(--line-soft)] hover:border-[color:color-mix(in_srgb,var(--accent)_40%,transparent)] transition group shadow-2xs"
         >
           <div className="flex items-center justify-between gap-2">
             <div className="flex items-center gap-2">
@@ -140,7 +140,7 @@ export default function DeadlineCard({ deadlines = [], item = null }: Props) {
           return (
             <Link
               href={current.linkUrl}
-              className={`block rounded-xl p-2 transition-all relative overflow-hidden group shadow-2xs ${
+              className={`block rounded-xl p-2 transition relative overflow-hidden group shadow-2xs ${
                 late
                   ? 'bg-gradient-to-b from-rose-500/[0.08] to-rose-500/[0.02] border border-rose-500/30 hover:border-rose-500/50'
                   : warn
@@ -151,7 +151,7 @@ export default function DeadlineCard({ deadlines = [], item = null }: Props) {
               {/* Top Sub-Header: Category Pill + Micro Controls */}
               <div className="flex items-center justify-between mb-1">
                 <span
-                  className={`text-[10.5px] font-bold px-1.5 py-0.2 rounded-md ${
+                  className={`text-[10.5px] font-bold px-1.5 py-0.5 rounded-md ${
                     late
                       ? 'bg-rose-500/15 text-rose-500 border border-rose-500/30'
                       : warn
@@ -209,7 +209,7 @@ export default function DeadlineCard({ deadlines = [], item = null }: Props) {
                   {companyDisplayName}
                 </div>
 
-                <div className="text-[10px] text-[var(--text-3)] font-medium mt-0.2 line-clamp-1">
+                <div className="text-[10px] text-[var(--text-3)] font-medium mt-0.5 line-clamp-1">
                   {serviceDetail}
                 </div>
 

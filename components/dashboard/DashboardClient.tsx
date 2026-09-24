@@ -71,7 +71,7 @@ export default function DashboardClient({ stats, profiles = [], companies = [] }
               <h1 className="text-lg md:text-xl font-black tracking-tight text-[var(--text)] leading-tight">
                 لوحة التحكم التنفيذية
               </h1>
-              <span className="px-2 py-0.2 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 whitespace-nowrap">
+              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 whitespace-nowrap">
                 متصل ومحدّث
               </span>
             </div>
@@ -93,7 +93,7 @@ export default function DashboardClient({ stats, profiles = [], companies = [] }
         {/* Metric 1: Established Companies (الشركات المؤسسة) */}
         <Link
           href="/commercial/companies-registry"
-          className="glass-card p-2.5 sm:p-3 rounded-2xl relative overflow-hidden group hover:-translate-y-0.5 hover:shadow-xs transition-all duration-300 block border border-[var(--border)] bg-[var(--surface-glass)]"
+          className="glass-card p-2.5 sm:p-3 rounded-2xl relative overflow-hidden group hover:-translate-y-0.5 hover:shadow-xs transition duration-300 block border border-[var(--border)] bg-[var(--surface-glass)]"
         >
           <div className="flex justify-between items-start gap-1.5 mb-1.5 relative z-10">
             <div className="flex flex-col min-w-0">
@@ -113,7 +113,7 @@ export default function DashboardClient({ stats, profiles = [], companies = [] }
         {/* Metric 2: Forming Companies (قيد التأسيس) */}
         <Link
           href="/commercial/companies"
-          className="glass-card p-2.5 sm:p-3 rounded-2xl relative overflow-hidden group hover:-translate-y-0.5 hover:shadow-xs transition-all duration-300 block border border-[var(--border)] bg-[var(--surface-glass)]"
+          className="glass-card p-2.5 sm:p-3 rounded-2xl relative overflow-hidden group hover:-translate-y-0.5 hover:shadow-xs transition duration-300 block border border-[var(--border)] bg-[var(--surface-glass)]"
         >
           <div className="flex justify-between items-start gap-1.5 mb-1.5 relative z-10">
             <div className="flex flex-col min-w-0">
@@ -133,7 +133,7 @@ export default function DashboardClient({ stats, profiles = [], companies = [] }
         {/* Metric 3: Active Deposits (إطلاق الوديعة) */}
         <Link
           href="/commercial/deposits"
-          className="glass-card p-2.5 sm:p-3 rounded-2xl relative overflow-hidden group hover:-translate-y-0.5 hover:shadow-xs transition-all duration-300 block border border-[var(--border)] bg-[var(--surface-glass)]"
+          className="glass-card p-2.5 sm:p-3 rounded-2xl relative overflow-hidden group hover:-translate-y-0.5 hover:shadow-xs transition duration-300 block border border-[var(--border)] bg-[var(--surface-glass)]"
         >
           <div className="flex justify-between items-start gap-1.5 mb-1.5 relative z-10">
             <div className="flex flex-col min-w-0">
@@ -153,7 +153,7 @@ export default function DashboardClient({ stats, profiles = [], companies = [] }
         {/* Metric 4: LLC Transactions (قسم المحدودة) */}
         <Link
           href="/commercial/llc"
-          className="glass-card p-2.5 sm:p-3 rounded-2xl relative overflow-hidden group hover:-translate-y-0.5 hover:shadow-xs transition-all duration-300 block border border-[var(--border)] bg-[var(--surface-glass)]"
+          className="glass-card p-2.5 sm:p-3 rounded-2xl relative overflow-hidden group hover:-translate-y-0.5 hover:shadow-xs transition duration-300 block border border-[var(--border)] bg-[var(--surface-glass)]"
         >
           <div className="flex justify-between items-start gap-1.5 mb-1.5 relative z-10">
             <div className="flex flex-col min-w-0">
@@ -173,7 +173,7 @@ export default function DashboardClient({ stats, profiles = [], companies = [] }
         {/* Metric 5: Company IDs (قسم الهويات) */}
         <Link
           href="/commercial/ids"
-          className="glass-card p-2.5 sm:p-3 rounded-2xl relative overflow-hidden group hover:-translate-y-0.5 hover:shadow-xs transition-all duration-300 block border border-[var(--border)] bg-[var(--surface-glass)]"
+          className="glass-card p-2.5 sm:p-3 rounded-2xl relative overflow-hidden group hover:-translate-y-0.5 hover:shadow-xs transition duration-300 block border border-[var(--border)] bg-[var(--surface-glass)]"
         >
           <div className="flex justify-between items-start gap-1.5 mb-1.5 relative z-10">
             <div className="flex flex-col min-w-0">
@@ -193,7 +193,7 @@ export default function DashboardClient({ stats, profiles = [], companies = [] }
         {/* Metric 6: Financial Statements (الحسابات الختامية) */}
         <Link
           href="/commercial/financial-statements"
-          className="glass-card p-2.5 sm:p-3 rounded-2xl relative overflow-hidden group hover:-translate-y-0.5 hover:shadow-xs transition-all duration-300 block border border-[var(--border)] bg-[var(--surface-glass)]"
+          className="glass-card p-2.5 sm:p-3 rounded-2xl relative overflow-hidden group hover:-translate-y-0.5 hover:shadow-xs transition duration-300 block border border-[var(--border)] bg-[var(--surface-glass)]"
         >
           <div className="flex justify-between items-start gap-1.5 mb-1.5 relative z-10">
             <div className="flex flex-col min-w-0">
@@ -416,7 +416,7 @@ export default function DashboardClient({ stats, profiles = [], companies = [] }
                 return (
                   <div
                     key={lawyer.id || lawyer.name}
-                    className="flex flex-col justify-between gap-2 p-3 rounded-xl bg-[color:color-mix(in_srgb,var(--surface-2)_70%,transparent)] hover:bg-[var(--surface-2)] border border-[var(--glass-border)] hover:border-[color:color-mix(in_srgb,var(--accent)_30%,transparent)] transition-all shadow-2xs group"
+                    className="flex flex-col justify-between gap-2 p-3 rounded-xl bg-[color:color-mix(in_srgb,var(--surface-2)_70%,transparent)] hover:bg-[var(--surface-2)] border border-[var(--glass-border)] hover:border-[color:color-mix(in_srgb,var(--accent)_30%,transparent)] transition shadow-2xs group"
                   >
                     {/* Top Row: Avatar + Name + Task Status Badge */}
                     <div className="flex items-start justify-between gap-2">

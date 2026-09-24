@@ -125,7 +125,7 @@ export function AnimatedTabs<T extends string = string>({
 
             {tab.count !== undefined && tab.count !== null && (
               <span
-                className={`num text-[10.5px] px-1.5 py-0.2 rounded-full font-bold transition-colors ${
+                className={`num text-[10.5px] px-1.5 py-0.5 rounded-full font-bold transition-colors ${
                   isActive
                     ? 'bg-white/20 text-white'
                     : 'bg-[var(--surface-3)] text-[var(--text-3)]'

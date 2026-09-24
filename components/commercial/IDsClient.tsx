@@ -168,7 +168,7 @@ export default function IDsClient({ companies = [], initialCompanyId }: Props) {
             <button
               type="button"
               onClick={() => openAddModal('chamber_id')}
-              className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white shadow-xs transition-all active:scale-95"
+              className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white shadow-xs transition active:scale-95"
             >
               <Icon name="plus" />
               <span>هوية غرفة التجارة</span>
@@ -177,7 +177,7 @@ export default function IDsClient({ companies = [], initialCompanyId }: Props) {
             <button
               type="button"
               onClick={() => openAddModal('tax_id')}
-              className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold bg-[var(--accent)] hover:opacity-90 text-white shadow-xs transition-all active:scale-95"
+              className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold bg-[var(--accent)] hover:opacity-90 text-white shadow-xs transition active:scale-95"
             >
               <Icon name="plus" />
               <span>هوية ضريبية</span>
@@ -186,7 +186,7 @@ export default function IDsClient({ companies = [], initialCompanyId }: Props) {
             <button
               type="button"
               onClick={() => openAddModal('importer_id')}
-              className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold bg-[var(--surface-2)] hover:bg-[var(--surface-3)] text-[var(--text)] border border-[var(--line-soft)] transition-all active:scale-95"
+              className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold bg-[var(--surface-2)] hover:bg-[var(--surface-3)] text-[var(--text)] border border-[var(--line-soft)] transition active:scale-95"
             >
               <Icon name="plus" />
               <span>هوية مستورد</span>
@@ -195,7 +195,7 @@ export default function IDsClient({ companies = [], initialCompanyId }: Props) {
             <button
               type="button"
               onClick={() => openAddModal('planning_id')}
-              className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold bg-[var(--surface-2)] hover:bg-[var(--surface-3)] text-[var(--text)] border border-[var(--line-soft)] transition-all active:scale-95"
+              className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold bg-[var(--surface-2)] hover:bg-[var(--surface-3)] text-[var(--text)] border border-[var(--line-soft)] transition active:scale-95"
             >
               <Icon name="plus" />
               <span>هوية تخطيط</span>
@@ -214,7 +214,7 @@ export default function IDsClient({ companies = [], initialCompanyId }: Props) {
           <button
             type="button"
             onClick={() => setFocusedCompanyId(null)}
-            className="px-3 py-1 rounded-lg bg-[var(--surface)] text-[var(--accent)] text-xs font-bold border border-[color:color-mix(in_srgb,var(--accent)_30%,transparent)] hover:bg-[var(--surface-2)] transition-all"
+            className="px-3 py-1 rounded-lg bg-[var(--surface)] text-[var(--accent)] text-xs font-bold border border-[color:color-mix(in_srgb,var(--accent)_30%,transparent)] hover:bg-[var(--surface-2)] transition"
           >
             إلغاء التحديد وعرض كافة الشركات
           </button>
@@ -225,7 +225,7 @@ export default function IDsClient({ companies = [], initialCompanyId }: Props) {
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3.5 w-full">
         <div
           onClick={() => setStatusFilter('all')}
-          className={`glass-card p-4 rounded-[20px] cursor-pointer transition-all duration-200 block border ${statusFilter === 'all' ? 'border-[var(--accent)] shadow-md bg-[var(--surface-2)]' : 'border-[var(--glass-border)] bg-[var(--surface)] hover:-translate-y-0.5'}`}
+          className={`glass-card p-4 rounded-[20px] cursor-pointer transition duration-200 block border ${statusFilter === 'all' ? 'border-[var(--accent)] shadow-md bg-[var(--surface-2)]' : 'border-[var(--glass-border)] bg-[var(--surface)] hover:-translate-y-0.5'}`}
         >
           <div className="text-[11.5px] font-bold text-[var(--text-3)] mb-1">إجمالي الهويات المسجلة</div>
           <div className="text-2xl sm:text-3xl font-extrabold text-[var(--text)] num">{stats.total}</div>
@@ -233,7 +233,7 @@ export default function IDsClient({ companies = [], initialCompanyId }: Props) {
 
         <div
           onClick={() => setStatusFilter('in_progress')}
-          className={`glass-card p-4 rounded-[20px] cursor-pointer transition-all duration-200 block border ${statusFilter === 'in_progress' ? 'border-amber-500 shadow-md bg-amber-500/10' : 'border-[var(--glass-border)] bg-[var(--surface)] hover:-translate-y-0.5'}`}
+          className={`glass-card p-4 rounded-[20px] cursor-pointer transition duration-200 block border ${statusFilter === 'in_progress' ? 'border-amber-500 shadow-md bg-amber-500/10' : 'border-[var(--glass-border)] bg-[var(--surface)] hover:-translate-y-0.5'}`}
         >
           <div className="text-[11.5px] font-bold text-amber-600 dark:text-amber-400 mb-1 flex items-center gap-1.5">
             <span className="w-3 h-3 border-2 border-amber-500/40 border-t-amber-400 rounded-full animate-spin inline-block" />
@@ -244,7 +244,7 @@ export default function IDsClient({ companies = [], initialCompanyId }: Props) {
 
         <div
           onClick={() => setStatusFilter('done')}
-          className={`glass-card p-4 rounded-[20px] cursor-pointer transition-all duration-200 block border ${statusFilter === 'done' ? 'border-emerald-500 shadow-md bg-emerald-500/10' : 'border-[var(--glass-border)] bg-[var(--surface)] hover:-translate-y-0.5'}`}
+          className={`glass-card p-4 rounded-[20px] cursor-pointer transition duration-200 block border ${statusFilter === 'done' ? 'border-emerald-500 shadow-md bg-emerald-500/10' : 'border-[var(--glass-border)] bg-[var(--surface)] hover:-translate-y-0.5'}`}
         >
           <div className="text-[11.5px] font-bold text-emerald-600 dark:text-emerald-400 mb-1">المكتملة والسارية ✓</div>
           <div className="text-2xl sm:text-3xl font-extrabold text-emerald-600 dark:text-emerald-400 num">{stats.done}</div>
@@ -252,7 +252,7 @@ export default function IDsClient({ companies = [], initialCompanyId }: Props) {
 
         <div
           onClick={() => setStatusFilter('expiring')}
-          className={`glass-card p-4 rounded-[20px] cursor-pointer transition-all duration-200 block border ${statusFilter === 'expiring' ? 'border-rose-500 shadow-md bg-rose-500/10' : 'border-[var(--glass-border)] bg-[var(--surface)] hover:-translate-y-0.5'}`}
+          className={`glass-card p-4 rounded-[20px] cursor-pointer transition duration-200 block border ${statusFilter === 'expiring' ? 'border-rose-500 shadow-md bg-rose-500/10' : 'border-[var(--glass-border)] bg-[var(--surface)] hover:-translate-y-0.5'}`}
         >
           <div className="text-[11.5px] font-bold text-rose-600 dark:text-rose-400 mb-1">تتطلب تجديداً ⚠️</div>
           <div className="text-2xl sm:text-3xl font-extrabold text-rose-600 dark:text-rose-400 num">{stats.expiring}</div>

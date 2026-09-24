@@ -23,7 +23,7 @@ export function GlassCard({
     default: 'glass-card rounded-2xl p-6 border border-border-glass bg-surface/95 shadow-md',
     subtle: 'glass-card rounded-xl p-4 border border-border-glass/60 bg-surface-2/60 shadow-xs',
     gradient: 'glass-card rounded-2xl p-6 border border-border-glass bg-gradient-to-br from-surface to-surface-2 shadow-lg',
-    interactive: 'glass-card rounded-2xl p-6 border border-border-glass bg-surface/95 shadow-md hover:-translate-y-1 hover:shadow-lg hover:border-primary/40 transition-all duration-300 cursor-pointer',
+    interactive: 'glass-card rounded-2xl p-6 border border-border-glass bg-surface/95 shadow-md hover:-translate-y-1 hover:shadow-lg hover:border-primary/40 transition duration-300 cursor-pointer',
     outline: 'rounded-2xl p-6 border border-border bg-transparent',
   }
 
@@ -67,7 +67,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
             id={inputId}
             ref={ref}
             className={cn(
-              'flex h-10 w-full rounded-xl bg-surface-2/80 border text-text placeholder:text-text-3 text-sm font-medium transition-all duration-150',
+              'flex h-10 w-full rounded-xl bg-surface-2/80 border text-text placeholder:text-text-3 text-sm font-medium transition duration-150',
               'border-border hover:border-text-3/50 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20',
               'disabled:cursor-not-allowed disabled:opacity-50',
               icon ? 'pr-11 pl-3.5' : 'px-3.5',
@@ -157,7 +157,7 @@ export const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
             id={selectId}
             ref={ref}
             className={cn(
-              'flex h-10 w-full appearance-none rounded-xl bg-surface-2/80 border px-3.5 py-2 pl-9 text-text text-sm font-semibold transition-all duration-150 cursor-pointer',
+              'flex h-10 w-full appearance-none rounded-xl bg-surface-2/80 border px-3.5 py-2 pl-9 text-text text-sm font-semibold transition duration-150 cursor-pointer',
               'border-border hover:border-text-3/50 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20',
               'disabled:cursor-not-allowed disabled:opacity-50',
               error && 'border-destructive focus:border-destructive focus:ring-destructive/20',
@@ -225,7 +225,7 @@ export function Button({
       type={type}
       disabled={disabled || loading}
       className={cn(
-        'inline-flex items-center justify-center font-bold whitespace-nowrap transition-all duration-150 select-none cursor-pointer',
+        'inline-flex items-center justify-center font-bold whitespace-nowrap transition duration-150 select-none cursor-pointer',
         'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:ring-offset-1',
         'disabled:pointer-events-none disabled:opacity-50',
         variantStyles[variant],
@@ -347,7 +347,7 @@ export function Modal({
     >
       <div
         className={cn(
-          'w-full bg-surface border border-border-glass rounded-2xl shadow-2xl overflow-hidden flex flex-col my-auto transition-all duration-200 animate-scale-in text-text',
+          'w-full bg-surface border border-border-glass rounded-2xl shadow-2xl overflow-hidden flex flex-col my-auto transition duration-200 animate-scale-in text-text',
           sizeStyles[size],
           className
         )}

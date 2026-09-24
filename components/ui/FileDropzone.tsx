@@ -51,7 +51,7 @@ export function FileDropzone({
     <div className={`space-y-3 ${className}`} dir="rtl">
       <div
         {...getRootProps()}
-        className={`flex flex-col items-center justify-center p-6 border-2 border-dashed rounded-2xl cursor-pointer transition-all duration-300 backdrop-blur-xl select-none text-center ${
+        className={`flex flex-col items-center justify-center p-6 border-2 border-dashed rounded-2xl cursor-pointer transition duration-300 backdrop-blur-xl select-none text-center ${
           isDragActive
             ? 'border-cyan-400 bg-cyan-500/10 shadow-lg shadow-cyan-500/10 scale-[1.01]'
             : 'border-slate-300 dark:border-white/15 bg-white/40 dark:bg-slate-900/40 hover:bg-white/60 dark:hover:bg-slate-800/50 hover:border-blue-400 dark:hover:border-cyan-400'

@@ -35,7 +35,7 @@ export default function FormationServiceChecklist({ selected, onToggle }: Props)
               role="checkbox"
               aria-checked={isChecked}
               onClick={() => onToggle(srv.id)}
-              className={`flex items-center gap-2.5 p-2.5 rounded-xl border transition-all duration-200 cursor-pointer select-none ${
+              className={`flex items-center gap-2.5 p-2.5 rounded-xl border transition duration-200 cursor-pointer select-none ${
                 isChecked
                   ? 'bg-[var(--accent-soft)] border-[color:color-mix(in_srgb,var(--accent)_60%,transparent)] text-[var(--accent)] font-bold shadow-xs'
                   : 'bg-[var(--surface)] border-[var(--line-soft)] text-[var(--text-2)] hover:bg-[var(--surface-3)] hover:border-[var(--line)] font-medium'
@@ -43,7 +43,7 @@ export default function FormationServiceChecklist({ selected, onToggle }: Props)
             >
               {/* Checkbox box */}
               <div
-                className={`w-4 h-4 rounded-md flex-none flex items-center justify-center transition-all ${
+                className={`w-4 h-4 rounded-md flex-none flex items-center justify-center transition ${
                   isChecked
                     ? 'bg-[var(--accent)] text-white shadow-xs'
                     : 'border border-[var(--line)] bg-transparent'

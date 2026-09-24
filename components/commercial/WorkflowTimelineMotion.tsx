@@ -261,7 +261,7 @@ export default function WorkflowTimelineMotion({
                   <button
                     type="button"
                     onClick={() => onRevertStep(step.id, step.step_order)}
-                    className="px-3.5 py-1.5 rounded-xl text-xs font-bold text-slate-600 dark:text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-500/10 border border-slate-300 dark:border-slate-700 hover:border-rose-300 dark:hover:border-rose-500/30 transition-all cursor-pointer flex items-center gap-1.5"
+                    className="px-3.5 py-1.5 rounded-xl text-xs font-bold text-slate-600 dark:text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-500/10 border border-slate-300 dark:border-slate-700 hover:border-rose-300 dark:hover:border-rose-500/30 transition cursor-pointer flex items-center gap-1.5"
                     title="إعادة هذه الخطوة للتنفيذ"
                   >
                     <ArrowLeft className="w-3.5 h-3.5" />
@@ -290,7 +290,7 @@ export default function WorkflowTimelineMotion({
           <button
             type="button"
             onClick={onTransferToDeposit}
-            className="w-full py-4 px-6 rounded-2xl font-black text-sm bg-gradient-to-r from-emerald-500 via-amber-500 to-emerald-600 hover:brightness-105 active:scale-98 text-white shadow-lg shadow-emerald-500/25 flex items-center justify-center gap-2.5 transition-all cursor-pointer border border-white/20"
+            className="w-full py-4 px-6 rounded-2xl font-black text-sm bg-gradient-to-r from-emerald-500 via-amber-500 to-emerald-600 hover:brightness-105 active:scale-98 text-white shadow-lg shadow-emerald-500/25 flex items-center justify-center gap-2.5 transition cursor-pointer border border-white/20"
           >
             <ShieldCheck className="w-5 h-5" />
             <span>اكتمل التأسيس — إدخال بيانات الشهادة والتحويل لمسار إطلاق الوديعة ←</span>

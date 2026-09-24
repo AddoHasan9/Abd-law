@@ -28,7 +28,7 @@ export default function LoginPage() {
           <FadeInStagger className="space-y-6 relative z-10">
             {/* Logo & Headline */}
             <div className="space-y-3">
-              <div className="w-20 h-20 rounded-2xl bg-gradient-to-b from-white to-slate-50 dark:from-white/10 dark:to-white/[0.02] border border-amber-500/30 dark:border-amber-400/25 p-3 flex items-center justify-center shadow-xl shadow-blue-500/5 dark:shadow-black/40 backdrop-blur-xl shrink-0 transition-all">
+              <div className="w-20 h-20 rounded-2xl bg-gradient-to-b from-white to-slate-50 dark:from-white/10 dark:to-white/[0.02] border border-amber-500/30 dark:border-amber-400/25 p-3 flex items-center justify-center shadow-xl shadow-blue-500/5 dark:shadow-black/40 backdrop-blur-xl shrink-0 transition">
                 <Image
                   src="/logo.png"
                   alt="شعار مكتب المحامي عبدالحسن الخزرجي"

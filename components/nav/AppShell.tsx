@@ -82,8 +82,8 @@ export default function AppShell({
             onMenu={() => setOpen(v => !v)}
             onSearch={() => { /* البحث الشامل — يُبنى في مرحلة لاحقة */ }}
           />
-          <main id="view-root" className="transition-all duration-300">
-            <div className="view animate-fade-in-up">{children}</div>
+          <main id="view-root">
+            <div className="view">{children}</div>
           </main>
         </div>
 

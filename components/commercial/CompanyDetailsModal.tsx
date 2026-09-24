@@ -1040,7 +1040,7 @@ export default function CompanyDetailsModal({ company, isOpen, onClose, onDelete
                     <button
                       type="button"
                       onClick={() => setHasReservationLetter(true)}
-                      className={`px-3 py-1 rounded-lg text-xs font-bold transition-all ${
+                      className={`px-3 py-1 rounded-lg text-xs font-bold transition ${
                         hasReservationLetter
                           ? 'bg-[var(--accent)] text-white shadow-xs'
                           : 'text-[var(--text-3)] hover:text-[var(--text)]'
@@ -1051,7 +1051,7 @@ export default function CompanyDetailsModal({ company, isOpen, onClose, onDelete
                     <button
                       type="button"
                       onClick={() => setHasReservationLetter(false)}
-                      className={`px-3 py-1 rounded-lg text-xs font-bold transition-all ${
+                      className={`px-3 py-1 rounded-lg text-xs font-bold transition ${
                         !hasReservationLetter
                           ? 'bg-[var(--surface)] text-[var(--text)] shadow-xs'
                           : 'text-[var(--text-3)] hover:text-[var(--text)]'
@@ -1183,7 +1183,7 @@ export default function CompanyDetailsModal({ company, isOpen, onClose, onDelete
                       type="button"
                       onClick={handleReleaseDeposit}
                       disabled={loading}
-                      className="w-full py-3.5 px-6 rounded-2xl font-black text-sm bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 active:scale-98 text-white shadow-lg shadow-emerald-500/30 flex items-center justify-center gap-2 transition-all cursor-pointer"
+                      className="w-full py-3.5 px-6 rounded-2xl font-black text-sm bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 active:scale-98 text-white shadow-lg shadow-emerald-500/30 flex items-center justify-center gap-2 transition cursor-pointer"
                     >
                       <span className="material-symbols-outlined text-[20px]">send</span>
                       <span>{loading ? 'جاري الحفظ والتحويل...' : 'حفظ بيانات الشهادة والتحويل لإطلاق الوديعة الآن ←'}</span>

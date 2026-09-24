@@ -217,7 +217,7 @@ export default function CompaniesClient({ initialCompanies }: Props) {
             setActiveTab('established')
             setTimeFilter('all')
           }}
-          className={`glass-card p-4 sm:p-5 rounded-[22px] relative overflow-hidden group hover:-translate-y-1 hover:shadow-md transition-all duration-200 cursor-pointer ${
+          className={`glass-card p-4 sm:p-5 rounded-[22px] relative overflow-hidden group hover:-translate-y-1 hover:shadow-md transition duration-200 cursor-pointer ${
             activeTab === 'established' ? 'ring-2 ring-emerald-500/50 bg-emerald-500/5' : ''
           }`}
         >
@@ -281,7 +281,7 @@ export default function CompaniesClient({ initialCompanies }: Props) {
         {/* KPI 2: Forming Companies */}
         <div
           onClick={() => setActiveTab('forming')}
-          className={`glass-card p-4 sm:p-5 rounded-[22px] relative overflow-hidden group hover:-translate-y-1 hover:shadow-md transition-all duration-200 cursor-pointer ${
+          className={`glass-card p-4 sm:p-5 rounded-[22px] relative overflow-hidden group hover:-translate-y-1 hover:shadow-md transition duration-200 cursor-pointer ${
             activeTab === 'forming' ? 'ring-2 ring-amber-500/50 bg-amber-500/5' : ''
           }`}
         >
@@ -303,7 +303,7 @@ export default function CompaniesClient({ initialCompanies }: Props) {
         {/* KPI 3: Deposit Release Phase */}
         <div
           onClick={() => setActiveTab('deposit')}
-          className={`glass-card p-4 sm:p-5 rounded-[22px] relative overflow-hidden group hover:-translate-y-1 hover:shadow-md transition-all duration-200 cursor-pointer ${
+          className={`glass-card p-4 sm:p-5 rounded-[22px] relative overflow-hidden group hover:-translate-y-1 hover:shadow-md transition duration-200 cursor-pointer ${
             activeTab === 'deposit' ? 'ring-2 ring-blue-500/50 bg-blue-500/5' : ''
           }`}
         >
@@ -325,7 +325,7 @@ export default function CompaniesClient({ initialCompanies }: Props) {
         {/* KPI 4: Total Companies Directory */}
         <div
           onClick={() => setActiveTab('all')}
-          className={`glass-card p-4 sm:p-5 rounded-[22px] relative overflow-hidden group hover:-translate-y-1 hover:shadow-md transition-all duration-200 cursor-pointer ${
+          className={`glass-card p-4 sm:p-5 rounded-[22px] relative overflow-hidden group hover:-translate-y-1 hover:shadow-md transition duration-200 cursor-pointer ${
             activeTab === 'all' ? 'ring-2 ring-[color:color-mix(in_srgb,var(--accent)_50%,transparent)] bg-[color:color-mix(in_srgb,var(--accent)_5%,transparent)]' : ''
           }`}
         >
@@ -402,7 +402,7 @@ export default function CompaniesClient({ initialCompanies }: Props) {
             return (
               <div
                 key={co.id}
-                className="glass-card group relative p-4 rounded-[22px] bg-[var(--surface-glass)] backdrop-blur-xl border border-[var(--border)] hover:border-[color:color-mix(in_srgb,var(--accent)_50%,transparent)] hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1.5 flex flex-col justify-between overflow-hidden cursor-pointer h-full shadow-xs"
+                className="glass-card group relative p-4 rounded-[22px] bg-[var(--surface-glass)] backdrop-blur-xl border border-[var(--border)] hover:border-[color:color-mix(in_srgb,var(--accent)_50%,transparent)] hover:shadow-xl transition duration-300 transform hover:-translate-y-1.5 flex flex-col justify-between overflow-hidden cursor-pointer h-full shadow-xs"
                 onClick={() => handleCardClick(co)}
               >
                 {/* Glowing Top Indicator Bar */}
@@ -530,7 +530,7 @@ export default function CompaniesClient({ initialCompanies }: Props) {
                               type="button"
                               disabled={assigningId === co.id}
                               onClick={e => handleAssignFS(e, co.id, co.name)}
-                              className="inline-flex items-center gap-1 text-[10.5px] font-bold text-[var(--accent)] hover:text-white bg-[var(--accent-soft)] hover:bg-[var(--accent)] border border-[color:color-mix(in_srgb,var(--accent)_30%,transparent)] px-2.5 py-0.5 rounded-full transition-all truncate shadow-xs"
+                              className="inline-flex items-center gap-1 text-[10.5px] font-bold text-[var(--accent)] hover:text-white bg-[var(--accent-soft)] hover:bg-[var(--accent)] border border-[color:color-mix(in_srgb,var(--accent)_30%,transparent)] px-2.5 py-0.5 rounded-full transition truncate shadow-xs"
                               title="تكليف المكتب بالحسابات الختامية"
                             >
                               <span className="material-symbols-outlined text-[13px]">add_circle</span>
@@ -576,7 +576,7 @@ export default function CompaniesClient({ initialCompanies }: Props) {
                         <svg viewBox="0 0 40 40" className="w-6 h-6 -rotate-90">
                           <circle className="stroke-[var(--border-soft)]" strokeWidth="4" fill="none" cx="20" cy="20" r="16" />
                           <circle
-                            className={`${pg.current ? 'stroke-amber-500' : 'stroke-[var(--accent)]'} transition-all duration-500`}
+                            className={`${pg.current ? 'stroke-amber-500' : 'stroke-[var(--accent)]'} transition duration-500`}
                             strokeWidth="4"
                             strokeLinecap="round"
                             fill="none"

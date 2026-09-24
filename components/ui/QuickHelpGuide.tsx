@@ -315,7 +315,7 @@ export default function QuickHelpGuide() {
                 return (
                   <div
                     key={item.id}
-                    className={`rounded-2xl border transition-all duration-200 overflow-hidden ${
+                    className={`rounded-2xl border transition duration-200 overflow-hidden ${
                       isExpanded
                         ? 'bg-[var(--surface-2)] border-[#38BDF8]/40 shadow-md shadow-blue-500/5'
                         : 'bg-[color:color-mix(in_srgb,var(--surface-2)_50%,transparent)] border-[var(--glass-border)] hover:border-[var(--line)]'

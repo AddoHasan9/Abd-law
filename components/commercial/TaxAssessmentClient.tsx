@@ -182,7 +182,7 @@ export default function TaxAssessmentClient({ assessments = [], companies = [], 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3.5 w-full">
         <div
           onClick={() => setStatusFilter('all')}
-          className={`p-4 rounded-2xl cursor-pointer transition-all duration-200 block border ${statusFilter === 'all' ? 'border-[var(--accent)] shadow-xs bg-[var(--surface-2)] ring-2 ring-[color:color-mix(in_srgb,var(--accent)_15%,transparent)]' : 'border-[var(--border)] bg-[var(--surface)] hover:-translate-y-0.5 shadow-2xs'}`}
+          className={`p-4 rounded-2xl cursor-pointer transition duration-200 block border ${statusFilter === 'all' ? 'border-[var(--accent)] shadow-xs bg-[var(--surface-2)] ring-2 ring-[color:color-mix(in_srgb,var(--accent)_15%,transparent)]' : 'border-[var(--border)] bg-[var(--surface)] hover:-translate-y-0.5 shadow-2xs'}`}
         >
           <div className="text-[11.5px] font-bold text-[var(--text-3)] mb-1">إجمالي ملفات التحاسب</div>
           <div className="text-2xl sm:text-3xl font-black text-[var(--text)] num">{stats.total}</div>
@@ -190,7 +190,7 @@ export default function TaxAssessmentClient({ assessments = [], companies = [], 
 
         <div
           onClick={() => setStatusFilter('in_progress')}
-          className={`p-4 rounded-2xl cursor-pointer transition-all duration-200 block border ${statusFilter === 'in_progress' ? 'border-amber-500 shadow-xs bg-amber-500/10 ring-2 ring-amber-500/15' : 'border-[var(--border)] bg-[var(--surface)] hover:-translate-y-0.5 shadow-2xs'}`}
+          className={`p-4 rounded-2xl cursor-pointer transition duration-200 block border ${statusFilter === 'in_progress' ? 'border-amber-500 shadow-xs bg-amber-500/10 ring-2 ring-amber-500/15' : 'border-[var(--border)] bg-[var(--surface)] hover:-translate-y-0.5 shadow-2xs'}`}
         >
           <div className="text-[11.5px] font-bold text-amber-600 dark:text-amber-400 mb-1 flex items-center gap-1.5">
             <span className="w-2.5 h-2.5 border-2 border-amber-500/40 border-t-amber-500 rounded-full animate-spin inline-block" />

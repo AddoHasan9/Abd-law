@@ -161,7 +161,7 @@ export default function Topbar({ profile, title, subtitle, notifCount = 0, onMen
 
       {/* Rounded Glass Search Trigger */}
       <button
-        className="search-trigger group hover:border-[color:color-mix(in_srgb,var(--accent)_40%,transparent)] hover:shadow-md transition-all duration-200"
+        className="search-trigger group hover:border-[color:color-mix(in_srgb,var(--accent)_40%,transparent)] hover:shadow-md transition duration-200"
         onClick={() => {
           setIsCommandOpen(true)
           if (onSearch) onSearch()
@@ -185,7 +185,7 @@ export default function Topbar({ profile, title, subtitle, notifCount = 0, onMen
         <button
           type="button"
           onClick={() => setIsUserMenuOpen(prev => !prev)}
-          className="flex items-center gap-2 px-2.5 py-1 border-s border-[var(--border-soft)] hover:bg-[color:color-mix(in_srgb,var(--surface-2)_80%,transparent)] rounded-xl transition-all duration-200 cursor-pointer select-none text-right outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]"
+          className="flex items-center gap-2 px-2.5 py-1 border-s border-[var(--border-soft)] hover:bg-[color:color-mix(in_srgb,var(--surface-2)_80%,transparent)] rounded-xl transition duration-200 cursor-pointer select-none text-right outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]"
           aria-expanded={isUserMenuOpen}
           aria-haspopup="true"
           title="قائمة المستخدم"
@@ -329,7 +329,7 @@ export default function Topbar({ profile, title, subtitle, notifCount = 0, onMen
                   <span>مركز الإشعارات والتذكيرات</span>
                 </div>
                 {notifCount > 0 && (
-                  <span className="text-[10px] font-bold text-white bg-rose-500 px-1.5 py-0.2 rounded-full num">
+                  <span className="text-[10px] font-bold text-white bg-rose-500 px-1.5 py-0.5 rounded-full num">
                     {notifCount}
                   </span>
                 )}

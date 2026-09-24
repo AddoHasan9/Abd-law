@@ -31,14 +31,14 @@ export default function GlobalError({
         <div className="flex items-center gap-3 w-full pt-2">
           <button
             onClick={() => reset()}
-            className="flex-1 py-3 px-4 rounded-xl bg-[var(--accent)] text-slate-950 font-bold text-sm hover:brightness-110 active:scale-98 transition-all flex items-center justify-center gap-2 shadow-lg shadow-blue-500/20"
+            className="flex-1 py-3 px-4 rounded-xl bg-[var(--accent)] text-slate-950 font-bold text-sm hover:brightness-110 active:scale-98 transition flex items-center justify-center gap-2 shadow-lg shadow-blue-500/20"
           >
             <span className="material-symbols-outlined text-[18px]">refresh</span>
             <span>إعادة المحاولة</span>
           </button>
           <Link
             href="/dashboard"
-            className="py-3 px-4 rounded-xl bg-[var(--surface-2)] border border-[var(--line-soft)] text-[var(--text)] font-bold text-sm hover:bg-[var(--surface-3)] transition-all flex items-center justify-center gap-2"
+            className="py-3 px-4 rounded-xl bg-[var(--surface-2)] border border-[var(--line-soft)] text-[var(--text)] font-bold text-sm hover:bg-[var(--surface-3)] transition flex items-center justify-center gap-2"
           >
             <span>الرئيسية</span>
           </Link>

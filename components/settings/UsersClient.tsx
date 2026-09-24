@@ -340,7 +340,7 @@ export default function UsersClient({ initialProfiles }: Props) {
           {canManagePermissions && (
             <Link
               href="/settings/permissions"
-              className="flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-semibold border border-[var(--glass-border)] bg-[var(--surface-2)] text-[var(--text)] hover:bg-[var(--surface-3)] transition-all shadow-sm"
+              className="flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-semibold border border-[var(--glass-border)] bg-[var(--surface-2)] text-[var(--text)] hover:bg-[var(--surface-3)] transition shadow-sm"
             >
               <span className="material-symbols-outlined text-[18px]">key</span>
               <span>مصفوفة الصلاحيات</span>
@@ -351,7 +351,7 @@ export default function UsersClient({ initialProfiles }: Props) {
             <button
               type="button"
               onClick={openAddModal}
-              className="flex items-center gap-2 px-6 py-2.5 rounded-full text-sm font-bold bg-[var(--accent)] text-white shadow-lg hover:opacity-95 transition-all cursor-pointer"
+              className="flex items-center gap-2 px-6 py-2.5 rounded-full text-sm font-bold bg-[var(--accent)] text-white shadow-lg hover:opacity-95 transition cursor-pointer"
             >
               <span className="material-symbols-outlined text-[18px]">person_add</span>
               <span>إضافة مستخدم جديد</span>
@@ -397,7 +397,7 @@ export default function UsersClient({ initialProfiles }: Props) {
         <div className="flex items-center gap-3 w-full lg:w-auto flex-wrap">
           {/* Role Filter */}
           <select
-            className="px-4 py-2.5 rounded-xl bg-[var(--surface-2)] border border-[var(--glass-border)] text-[var(--text)] text-xs font-semibold focus:outline-none transition-all cursor-pointer"
+            className="px-4 py-2.5 rounded-xl bg-[var(--surface-2)] border border-[var(--glass-border)] text-[var(--text)] text-xs font-semibold focus:outline-none transition cursor-pointer"
             value={roleFilter}
             onChange={e => setRoleFilter(e.target.value)}
           >
@@ -411,7 +411,7 @@ export default function UsersClient({ initialProfiles }: Props) {
 
           {/* Department Filter */}
           <select
-            className="px-4 py-2.5 rounded-xl bg-[var(--surface-2)] border border-[var(--glass-border)] text-[var(--text)] text-xs font-semibold focus:outline-none transition-all cursor-pointer"
+            className="px-4 py-2.5 rounded-xl bg-[var(--surface-2)] border border-[var(--glass-border)] text-[var(--text)] text-xs font-semibold focus:outline-none transition cursor-pointer"
             value={deptFilter}
             onChange={e => setDeptFilter(e.target.value)}
           >
@@ -425,7 +425,7 @@ export default function UsersClient({ initialProfiles }: Props) {
 
           {/* Status Filter */}
           <select
-            className="px-4 py-2.5 rounded-xl bg-[var(--surface-2)] border border-[var(--glass-border)] text-[var(--text)] text-xs font-semibold focus:outline-none transition-all cursor-pointer"
+            className="px-4 py-2.5 rounded-xl bg-[var(--surface-2)] border border-[var(--glass-border)] text-[var(--text)] text-xs font-semibold focus:outline-none transition cursor-pointer"
             value={statusFilter}
             onChange={e => setStatusFilter(e.target.value)}
           >
@@ -542,7 +542,7 @@ export default function UsersClient({ initialProfiles }: Props) {
                     <td className="py-4 px-6 text-center">
                       <button
                         type="button"
-                        className="w-8 h-8 rounded-xl bg-[var(--surface-2)] border border-[var(--glass-border)] text-[var(--text)] hover:bg-[var(--surface-3)] transition-all flex items-center justify-center mx-auto cursor-pointer"
+                        className="w-8 h-8 rounded-xl bg-[var(--surface-2)] border border-[var(--glass-border)] text-[var(--text)] hover:bg-[var(--surface-3)] transition flex items-center justify-center mx-auto cursor-pointer"
                         onClick={e => {
                           e.stopPropagation()
                           if (activeMenuUser?.id === u.id) {

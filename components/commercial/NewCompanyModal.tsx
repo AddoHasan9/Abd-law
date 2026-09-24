@@ -371,7 +371,7 @@ export default function NewCompanyModal({ isOpen, onClose }: Props) {
                     <button
                       type="button"
                       onClick={() => setHasReservationLetter(true)}
-                      className={`px-3 py-1 rounded-lg text-xs font-bold transition-all ${
+                      className={`px-3 py-1 rounded-lg text-xs font-bold transition ${
                         hasReservationLetter
                           ? 'bg-[var(--accent)] text-white shadow-xs'
                           : 'text-[var(--text-3)] hover:text-[var(--text)]'
@@ -382,7 +382,7 @@ export default function NewCompanyModal({ isOpen, onClose }: Props) {
                     <button
                       type="button"
                       onClick={() => setHasReservationLetter(false)}
-                      className={`px-3 py-1 rounded-lg text-xs font-bold transition-all ${
+                      className={`px-3 py-1 rounded-lg text-xs font-bold transition ${
                         !hasReservationLetter
                           ? 'bg-[var(--surface)] text-[var(--text)] shadow-xs'
                           : 'text-[var(--text-3)] hover:text-[var(--text)]'

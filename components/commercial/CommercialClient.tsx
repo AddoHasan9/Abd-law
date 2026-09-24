@@ -301,7 +301,7 @@ export default function CommercialClient({ rows = [], companies = [] }: Props) {
           <button
             type="button"
             onClick={() => setOnlyIncompleteFilter(!onlyIncompleteFilter)}
-            className={`px-3.5 py-1.5 rounded-xl border text-xs font-bold transition-all ${
+            className={`px-3.5 py-1.5 rounded-xl border text-xs font-bold transition ${
               onlyIncompleteFilter
                 ? 'bg-amber-500 text-slate-950 border-amber-400 shadow-xs'
                 : 'bg-transparent text-amber-400 border-amber-500/40 hover:bg-amber-500/15'
@@ -342,7 +342,7 @@ export default function CommercialClient({ rows = [], companies = [] }: Props) {
 
           <button
             type="button"
-            className="h-10 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 active:scale-[0.98] text-white font-bold text-xs flex items-center justify-center gap-2 transition-all shadow-xs shrink-0 cursor-pointer"
+            className="h-10 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 active:scale-[0.98] text-white font-bold text-xs flex items-center justify-center gap-2 transition shadow-xs shrink-0 cursor-pointer"
             onClick={handleExportExcel}
             title="تصدير جدول المعاملات إلى ملف بيانات إكسل"
           >
@@ -354,7 +354,7 @@ export default function CommercialClient({ rows = [], companies = [] }: Props) {
             <button
               type="button"
               onClick={clearFilters}
-              className="h-10 px-3 rounded-xl bg-[var(--surface-2)] hover:bg-[var(--surface-3)] text-[var(--text-3)] hover:text-rose-500 font-bold text-xs flex items-center justify-center gap-1.5 transition-all border border-[var(--line-soft)] shrink-0 cursor-pointer"
+              className="h-10 px-3 rounded-xl bg-[var(--surface-2)] hover:bg-[var(--surface-3)] text-[var(--text-3)] hover:text-rose-500 font-bold text-xs flex items-center justify-center gap-1.5 transition border border-[var(--line-soft)] shrink-0 cursor-pointer"
               title="إعادة تعيين جميع الفلاتر"
             >
               <span className="material-symbols-outlined text-[16px]">filter_alt_off</span>
@@ -366,7 +366,7 @@ export default function CommercialClient({ rows = [], companies = [] }: Props) {
         {/* Row 2: Four Filter Select Dropdowns in Responsive Grid */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
           <select
-            className="h-9 px-3 rounded-xl bg-[var(--surface-2)] border border-[var(--line-soft)] text-xs font-semibold text-[var(--text-2)] hover:text-[var(--text)] focus:border-[var(--accent)] transition-all outline-none cursor-pointer"
+            className="h-9 px-3 rounded-xl bg-[var(--surface-2)] border border-[var(--line-soft)] text-xs font-semibold text-[var(--text-2)] hover:text-[var(--text)] focus:border-[var(--accent)] transition outline-none cursor-pointer"
             value={typeFilter}
             onChange={e => setTypeFilter(e.target.value)}
           >
@@ -377,7 +377,7 @@ export default function CommercialClient({ rows = [], companies = [] }: Props) {
           </select>
 
           <select
-            className="h-9 px-3 rounded-xl bg-[var(--surface-2)] border border-[var(--line-soft)] text-xs font-semibold text-[var(--text-2)] hover:text-[var(--text)] focus:border-[var(--accent)] transition-all outline-none cursor-pointer"
+            className="h-9 px-3 rounded-xl bg-[var(--surface-2)] border border-[var(--line-soft)] text-xs font-semibold text-[var(--text-2)] hover:text-[var(--text)] focus:border-[var(--accent)] transition outline-none cursor-pointer"
             value={statusFilter}
             onChange={e => setStatusFilter(e.target.value)}
           >
@@ -388,7 +388,7 @@ export default function CommercialClient({ rows = [], companies = [] }: Props) {
           </select>
 
           <select
-            className="h-9 px-3 rounded-xl bg-[var(--surface-2)] border border-[var(--line-soft)] text-xs font-semibold text-[var(--text-2)] hover:text-[var(--text)] focus:border-[var(--accent)] transition-all outline-none cursor-pointer"
+            className="h-9 px-3 rounded-xl bg-[var(--surface-2)] border border-[var(--line-soft)] text-xs font-semibold text-[var(--text-2)] hover:text-[var(--text)] focus:border-[var(--accent)] transition outline-none cursor-pointer"
             value={priorityFilter}
             onChange={e => setPriorityFilter(e.target.value)}
           >
@@ -399,7 +399,7 @@ export default function CommercialClient({ rows = [], companies = [] }: Props) {
           </select>
 
           <select
-            className="h-9 px-3 rounded-xl bg-[var(--surface-2)] border border-[var(--line-soft)] text-xs font-semibold text-[var(--text-2)] hover:text-[var(--text)] focus:border-[var(--accent)] transition-all outline-none cursor-pointer"
+            className="h-9 px-3 rounded-xl bg-[var(--surface-2)] border border-[var(--line-soft)] text-xs font-semibold text-[var(--text-2)] hover:text-[var(--text)] focus:border-[var(--accent)] transition outline-none cursor-pointer"
             value={lawyerFilter}
             onChange={e => setLawyerFilter(e.target.value)}
           >
@@ -619,7 +619,7 @@ export default function CommercialClient({ rows = [], companies = [] }: Props) {
                             setMenuCoords({ top, left })
                             setActiveMenuTx(t)
                           }}
-                          className={`w-8 h-8 rounded-full border transition-all inline-flex items-center justify-center text-sm font-bold shadow-xs cursor-pointer ${
+                          className={`w-8 h-8 rounded-full border transition inline-flex items-center justify-center text-sm font-bold shadow-xs cursor-pointer ${
                             activeMenuTx?.id === t.id
                               ? 'bg-[var(--accent)] text-white border-[var(--accent)]'
                               : 'bg-[var(--surface-2)] border-[var(--border)] text-[var(--text-2)] hover:bg-[var(--accent)] hover:text-white hover:border-[var(--accent)]'
