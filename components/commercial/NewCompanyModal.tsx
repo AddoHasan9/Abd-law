@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { Mi } from '@/components/ui/Mi'
 import { useRouter } from 'next/navigation'
 import { createPortal } from 'react-dom'
 import { Icon } from '@/components/ui/Icon'
@@ -582,11 +583,11 @@ export default function NewCompanyModal({ isOpen, onClose }: Props) {
                         </span>
                       ) : isOver ? (
                         <span className="tag tag-bad" style={{ fontSize: '11px', fontWeight: 700 }}>
-                          ⚠️ مجموع الحصص يتجاوز 100% ({totalAllocatedPct}%)
+                          <Mi n="warning" />مجموع الحصص يتجاوز 100% ({totalAllocatedPct}%)
                         </span>
                       ) : (
                         <span className="tag" style={{ fontSize: '11px', background: 'rgba(245, 158, 11, 0.15)', color: '#d97706', border: '1px solid rgba(245, 158, 11, 0.3)' }}>
-                          ⏳ متبقي غير موزع: {remainingPct}%
+                          <Mi n="hourglass_top" />متبقي غير موزع: {remainingPct}%
                         </span>
                       )}
                     </div>
@@ -712,7 +713,7 @@ export default function NewCompanyModal({ isOpen, onClose }: Props) {
           <div className="modal-foot" style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
             {error && (
               <div className="login-err" style={{ width: '100%', marginBottom: 0 }}>
-                ⚠️ {error}
+                <Mi n="warning" />{error}
               </div>
             )}
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '10px', width: '100%' }}>

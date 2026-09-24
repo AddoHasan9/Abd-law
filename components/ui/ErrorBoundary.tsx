@@ -1,6 +1,7 @@
 'use client'
 
 import React, { Component, ErrorInfo, ReactNode } from 'react'
+import { Mi } from '@/components/ui/Mi'
 import { logger } from '@/lib/logger'
 
 interface Props {
@@ -40,7 +41,7 @@ export class ErrorBoundary extends Component<Props, State> {
       return (
         <div className="p-8 rounded-[24px] bg-[var(--surface-2)] border border-red-500/30 text-center flex flex-col items-center justify-center gap-4 my-6">
           <div className="w-12 h-12 rounded-full bg-red-500/20 text-red-500 flex items-center justify-center font-bold text-xl">
-            ⚠️
+            <Mi n="warning" />
           </div>
           <h3 className="text-lg font-bold text-[var(--text)]">حدث خطأ غير متوقع في هذا الجزء</h3>
           <p className="text-xs text-[var(--text-3)] max-w-md">

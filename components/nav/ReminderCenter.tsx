@@ -1,6 +1,8 @@
 'use client'
 
 import { useState, useEffect, useRef, useCallback } from 'react'
+import { Mi } from '@/components/ui/Mi'
+import { confirmAction } from '@/components/ui/ConfirmDialog'
 import { Icon } from '@/components/ui/Icon'
 import {
   getRemindersAction,
@@ -54,7 +56,7 @@ export default function ReminderCenter() {
 
   const handleDelete = async (id: string, e: React.MouseEvent) => {
     e.stopPropagation()
-    if (!confirm('هل أنت متأكد من حذف هذا التذكير؟')) return
+    if (!(await confirmAction({ title: 'حذف التذكير', tone: 'danger' }))) return
     setReminders(prev => prev.filter(r => r.id !== id))
     await deleteReminderAction(id)
   }
@@ -176,7 +178,7 @@ export default function ReminderCenter() {
               </div>
             ) : activeReminders.length === 0 ? (
               <div style={{ padding: '32px 16px', textAlign: 'center', color: 'var(--text-3)', fontSize: '12.5px' }}>
-                لا توجد تذكيرات قائمة حالياً 🎉
+                لا توجد تذكيرات قائمة حالياً 
               </div>
             ) : (
               activeReminders.map(item => (
@@ -211,7 +213,7 @@ export default function ReminderCenter() {
 
                     <div style={{ fontSize: '10.5px', color: 'var(--text-3)', marginTop: '2px', display: 'flex', gap: '8px' }}>
                       {item.due_date && (
-                        <span>📅 {item.due_date} {item.due_time ? `⏰ ${item.due_time}` : ''}</span>
+                        <span><Mi n="event" />{item.due_date}{item.due_time && <><Mi n="schedule" className="ms-2" />{item.due_time}</>}</span>
                       )}
                     </div>
                   </div>
@@ -226,7 +228,7 @@ export default function ReminderCenter() {
                       style={{ border: 'none', background: 'none', color: 'var(--text-2)', cursor: 'pointer', padding: '4px' }}
                       title="تعديل"
                     >
-                      ✏️
+                      <Mi n="edit" />
                     </button>
                     <button
                       type="button"
@@ -234,7 +236,7 @@ export default function ReminderCenter() {
                       style={{ border: 'none', background: 'none', color: 'var(--bad)', cursor: 'pointer', padding: '4px' }}
                       title="حذف"
                     >
-                      🗑️
+                      <Mi n="delete" />
                     </button>
                   </div>
                 </div>

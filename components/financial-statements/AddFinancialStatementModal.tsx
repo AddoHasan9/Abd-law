@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
+import { Mi } from '@/components/ui/Mi'
 import { useRouter } from 'next/navigation'
 import { createPortal } from 'react-dom'
 import { Icon } from '@/components/ui/Icon'
@@ -365,11 +366,11 @@ export default function AddFinancialStatementModal({
               color: 'var(--text)',
             }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <span style={{ color: '#d97706', fontSize: '16px' }}>🏛️</span>
+                <span style={{ color: '#d97706', fontSize: '16px' }}><Mi n="account_balance" /></span>
                 <span>مهلة الضرائب القانونية: <strong>31 تموز (31/7)</strong></span>
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <span style={{ color: '#2563eb', fontSize: '16px' }}>🏢</span>
+                <span style={{ color: '#2563eb', fontSize: '16px' }}><Mi n="domain" /></span>
                 <span>مهلة مسجل الشركات: <strong>7 تشرين الأول (7/10)</strong></span>
               </div>
             </div>
@@ -583,7 +584,7 @@ export default function AddFinancialStatementModal({
                       />
                       <div>
                         <div style={{ fontSize: '13px', fontWeight: 800, color: 'var(--text)' }}>
-                          تم التسليم للهيئة العامة للضرائب 🏛️
+                          تم التسليم للهيئة العامة للضرائب <Mi n="account_balance" />
                         </div>
                         <div style={{ fontSize: '11px', color: 'var(--text-3)' }}>
                           المهلة القصوى: 31/07/{editYear + 1}
@@ -641,7 +642,7 @@ export default function AddFinancialStatementModal({
                       />
                       <div>
                         <div style={{ fontSize: '13px', fontWeight: 800, color: 'var(--text)' }}>
-                          تم التسليم لدائرة تسجيل الشركات 🏢
+                          تم التسليم لدائرة تسجيل الشركات <Mi n="domain" />
                         </div>
                         <div style={{ fontSize: '11px', color: 'var(--text-3)' }}>
                           المهلة القصوى: 07/10/{editYear + 1}
@@ -796,7 +797,7 @@ export default function AddFinancialStatementModal({
                           />
                           <div>
                             <div style={{ fontSize: '13px', fontWeight: 800, color: 'var(--text)' }}>
-                              تم التسليم للضرائب 🏛️
+                              تم التسليم للضرائب <Mi n="account_balance" />
                             </div>
                             <div style={{ fontSize: '11px', color: 'var(--text-3)' }}>
                               المهلة: 31/07/{row.year + 1}
@@ -848,7 +849,7 @@ export default function AddFinancialStatementModal({
                           />
                           <div>
                             <div style={{ fontSize: '13px', fontWeight: 800, color: 'var(--text)' }}>
-                              تم التسليم لمسجل الشركات 🏢
+                              تم التسليم لمسجل الشركات <Mi n="domain" />
                             </div>
                             <div style={{ fontSize: '11px', color: 'var(--text-3)' }}>
                               المهلة: 07/10/{row.year + 1}

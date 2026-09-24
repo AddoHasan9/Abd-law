@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useState, useEffect, useRef } from 'react'
+import { Mi } from '@/components/ui/Mi'
 import { useRouter } from 'next/navigation'
 import { createPortal } from 'react-dom'
 import { Icon } from '@/components/ui/Icon'
@@ -230,7 +231,7 @@ export default function UserProfileModal({ isOpen, onClose, profile }: Props) {
                 title="تغيير الصورة الشخصية"
                 aria-label="تغيير الصورة الشخصية"
               >
-                📷
+                <Mi n="photo_camera" />
               </button>
               <input
                 ref={fileInputRef}
@@ -321,7 +322,7 @@ export default function UserProfileModal({ isOpen, onClose, profile }: Props) {
                     transition: 'all 150ms ease',
                   }}
                 >
-                  👨 ذكر
+                  <Mi n="male" />ذكر
                 </button>
                 <button
                   type="button"
@@ -339,7 +340,7 @@ export default function UserProfileModal({ isOpen, onClose, profile }: Props) {
                     transition: 'all 150ms ease',
                   }}
                 >
-                  👩 أنثى
+                  <Mi n="female" />أنثى
                 </button>
               </div>
             </div>

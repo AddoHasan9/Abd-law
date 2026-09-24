@@ -1,6 +1,8 @@
 'use client'
 
 import { useState, useMemo, useEffect } from 'react'
+import { Mi } from '@/components/ui/Mi'
+import { confirmAction } from '@/components/ui/ConfirmDialog'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { formatMoney, formatDate, formatNumberWithCommas } from '@/lib/constants'
@@ -249,7 +251,7 @@ export default function Company360Client({
 
   const handleReleaseDeposit = async () => {
     if (!canCreateDeposit) return
-    if (!confirm('هل أنت متأكد من إطلاق مسار الوديعة لهذه الشركة؟')) return
+    if (!(await confirmAction({ title: 'إطلاق مسار الوديعة', message: 'سيبدأ مسار إطلاق الوديعة لهذه الشركة.', tone: 'primary', confirmText: 'إطلاق المسار' }))) return
     setLoading(true)
     const res = await launchDepositWorkflowAction(company.id)
     setLoading(false)
@@ -390,7 +392,7 @@ export default function Company360Client({
         <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
           {!canEdit && (
             <span className="tag tag-warn" style={{ fontSize: '11px' }}>
-              🔒 وضع العرض فقط (لست أدمن)
+              <Mi n="lock" />وضع العرض فقط (لست أدمن)
             </span>
           )}
           <WorkflowStatus
@@ -441,7 +443,7 @@ export default function Company360Client({
       <div ref={navTabsScrollRef} style={{ display: 'flex', gap: '6px', borderBottom: '1px solid var(--line-soft)', paddingBottom: '8px', overflowX: 'auto', userSelect: 'none' }} className="scrollbar-none">
         {([
           { id: 'all', label: 'عرض الكل (360°)' },
-          { id: 'workflow', label: '⚡ مخطط سير العمل (Swimlanes)' },
+          { id: 'workflow', label: 'مخطط سير العمل' },
           { id: 'basic', label: '1. البيانات الأساسية والمالية' },
           { id: 'shareholders', label: '2. المساهمون' },
           { id: 'manager', label: '3. المدير المفوض' },
@@ -539,7 +541,7 @@ export default function Company360Client({
                 const isFull = hasTax && hasReg
                 return (
                   <span key={fs.id} style={{ fontSize: '12px', color: isFull ? 'var(--ok)' : hasTax || hasReg ? 'var(--warn)' : 'var(--text-3)' }}>
-                    {isFull ? '✓' : hasTax || hasReg ? '⚠️' : '⏳'} {fs.year} {isFull ? 'مكتملة (الضرائب والمسجل)' : hasTax ? 'مسلّمة للضرائب فقط' : hasReg ? 'مسلّمة للمسجل فقط' : 'قيد الانتظار'}
+                    <Mi n={isFull ? 'check_circle' : hasTax || hasReg ? 'warning' : 'hourglass_top'} />{fs.year} {isFull ? 'مكتملة (الضرائب والمسجل)' : hasTax ? 'مسلّمة للضرائب فقط' : hasReg ? 'مسلّمة للمسجل فقط' : 'قيد الانتظار'}
                   </span>
                 )
               })}
@@ -990,7 +992,7 @@ export default function Company360Client({
             <div style={{ padding: '20px', textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px' }}>
               {!isDepositReleased && company.status !== 'established' && !company.cert_date ? (
                 <div style={{ padding: '12px 24px', background: 'rgba(239, 68, 68, 0.08)', border: '1px solid rgba(239, 68, 68, 0.25)', borderRadius: 'var(--r-md)', color: 'var(--bad)', fontSize: '13px', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <span>🚫 الحسابات الختامية ممنوعة ومغلقة للشركات قيد التأسيس (متاحة حصرياً بعد اكتمال التأسيس بالكامل وصدور الشهادة الرسمية)</span>
+                  <span><Mi n="block" />الحسابات الختامية ممنوعة ومغلقة للشركات قيد التأسيس (متاحة حصرياً بعد اكتمال التأسيس بالكامل وصدور الشهادة الرسمية)</span>
                 </div>
               ) : (
                 <>
@@ -1029,7 +1031,7 @@ export default function Company360Client({
 
               {financialStatements.length === 0 ? (
                 <div style={{ fontSize: '13px', color: 'var(--text-3)', padding: '10px', background: 'var(--surface-2)', borderRadius: 'var(--r-sm)' }}>
-                  ⏳ السنة المالية المستحقة ({new Date().getFullYear() - 1}): قيد المتابعة والتثبيت
+                  <Mi n="hourglass_top" />السنة المالية المستحقة ({new Date().getFullYear() - 1}): قيد المتابعة والتثبيت
                 </div>
               ) : (
                 financialStatements.map(fs => {
@@ -1041,7 +1043,7 @@ export default function Company360Client({
                     <div key={fs.id} style={{ display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '13px', padding: '12px 14px', background: 'var(--surface-2)', borderRadius: 'var(--r-md)', border: '1px solid var(--line-soft)' }}>
                       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                          <span>{isFull ? '✅' : hasTax || hasReg ? '⚠️' : '⏳'}</span>
+                          <Mi n={isFull ? 'check_circle' : hasTax || hasReg ? 'warning' : 'hourglass_top'} />
                           <strong style={{ fontSize: '13.5px' }}>السنة المالية {fs.year}</strong>
                         </div>
                         <span className={`tag ${isFull ? 'tag-ok' : hasTax || hasReg ? 'tag-warn' : 'tag-gray'}`} style={{ fontSize: '11px' }}>
@@ -1051,15 +1053,15 @@ export default function Company360Client({
 
                       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '8px', fontSize: '11.5px', color: 'var(--text-2)', background: 'var(--surface)', padding: '8px 10px', borderRadius: 'var(--r-sm)' }}>
                         <div>
-                          <span style={{ color: 'var(--text-3)' }}>🏛️ الهيئة العامة للضرائب: </span>
+                          <span style={{ color: 'var(--text-3)' }}><Mi n="account_balance" />الهيئة العامة للضرائب: </span>
                           <strong style={{ color: hasTax ? 'var(--ok)' : 'var(--warn)' }}>
-                            {hasTax ? `✓ تم التسليم (${formatDate(fs.date_submitted_tax || fs.date_submitted || '')})` : '⏳ لم تُسلّم بعد (مهلة 31/7)'}
+                            {hasTax ? `✓ تم التسليم (${formatDate(fs.date_submitted_tax || fs.date_submitted || '')})` : 'لم تُسلّم بعد (مهلة 31/7)'}
                           </strong>
                         </div>
                         <div>
-                          <span style={{ color: 'var(--text-3)' }}>🏢 دائرة تسجيل الشركات: </span>
+                          <span style={{ color: 'var(--text-3)' }}><Mi n="domain" />دائرة تسجيل الشركات: </span>
                           <strong style={{ color: hasReg ? 'var(--ok)' : 'var(--warn)' }}>
-                            {hasReg ? `✓ تم التسليم (${formatDate(fs.date_submitted_registrar || fs.date_submitted || '')})` : '⏳ لم تُسلّم بعد (مهلة 7/10)'}
+                            {hasReg ? `✓ تم التسليم (${formatDate(fs.date_submitted_registrar || fs.date_submitted || '')})` : 'لم تُسلّم بعد (مهلة 7/10)'}
                           </strong>
                         </div>
                       </div>
@@ -1133,7 +1135,7 @@ export default function Company360Client({
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '10px' }}>
             {documents.map(doc => (
               <div key={doc.id} style={{ padding: '10px 12px', background: 'var(--surface-2)', border: '1px solid var(--line-soft)', borderRadius: 'var(--r-md)', display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                <div style={{ fontSize: '12.5px', fontWeight: 700, color: 'var(--text)' }}>📄 {doc.name}</div>
+                <div style={{ fontSize: '12.5px', fontWeight: 700, color: 'var(--text)' }}><Mi n="description" />{doc.name}</div>
                 <div style={{ fontSize: '11px', color: 'var(--accent)' }}>الفئة: {doc.category}</div>
                 <div style={{ fontSize: '10.5px', color: 'var(--text-3)' }}>تاريخ الرفع: {formatDate(doc.created_at)}</div>
               </div>
@@ -1150,7 +1152,7 @@ export default function Company360Client({
           </div>
           {company.lacks ? (
             <div style={{ padding: '12px 14px', background: 'var(--warn-soft)', border: '1px solid var(--warn)', borderRadius: 'var(--r-md)', color: 'var(--warn)', fontSize: '13px', fontWeight: 600 }}>
-              ⚠️ نواقص مستندات الشركة: {company.lacks}
+              <Mi n="warning" />نواقص مستندات الشركة: {company.lacks}
             </div>
           ) : (
             <div style={{ padding: '14px', color: 'var(--text-3)', textAlign: 'center', fontSize: '13px' }}>

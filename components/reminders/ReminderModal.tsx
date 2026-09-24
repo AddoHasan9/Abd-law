@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { Mi } from '@/components/ui/Mi'
 import { createPortal } from 'react-dom'
 import { Icon } from '@/components/ui/Icon'
 import { createReminderAction, updateReminderAction } from '@/app/(app)/reminders/actions'
@@ -174,7 +175,7 @@ export default function ReminderModal({ isOpen, onClose, companies = [], editing
                 >
                   <option value="low">منخفضة</option>
                   <option value="medium">متوسطة</option>
-                  <option value="high">عالية 🔥</option>
+                  <option value="high">عالية</option>
                 </select>
               </div>
 

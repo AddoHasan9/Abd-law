@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { confirmAction } from '@/components/ui/ConfirmDialog'
 import { DataPanel } from '@/components/ui/DataPanel'
 import CompanyFileLink from '@/components/commercial/CompanyFileLink'
 import { useRouter } from 'next/navigation'
@@ -95,7 +96,7 @@ export default function TaxAssessmentClient({ assessments = [], companies = [], 
   }
 
   const handleDelete = async (id: string, coName: string) => {
-    if (!confirm(`هل أنت متأكد من حذف سجل التحاسب الضريبي لشركة (${coName})؟`)) return
+    if (!(await confirmAction({ title: 'حذف سجل التحاسب الضريبي', message: `سيُحذف سجل التحاسب الضريبي لشركة «${coName}».`, tone: 'danger' }))) return
     setItems(prev => prev.filter(i => i.id !== id))
     const res = await deleteTaxAssessmentAction(id)
     if (res.success) {

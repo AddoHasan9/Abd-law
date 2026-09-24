@@ -1,6 +1,8 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
+import { Mi } from '@/components/ui/Mi'
+import { confirmAction } from '@/components/ui/ConfirmDialog'
 import { DataPanel } from '@/components/ui/DataPanel'
 import { Icon } from '@/components/ui/Icon'
 import { formatMoney } from '@/lib/constants'
@@ -157,7 +159,7 @@ export default function FinancialStatementsClient({ companies = [] }: Props) {
     let overallTagClass = 'tag-ok'
 
     if (hasPenalty) {
-      overallStatusLabel = 'خاضعة للغرامة ⚠'
+      overallStatusLabel = 'خاضعة للغرامة'
       overallTagClass = 'tag-bad'
     } else if (hasOverdue) {
       overallStatusLabel = 'قيد المتابعة'
@@ -195,25 +197,25 @@ export default function FinancialStatementsClient({ companies = [] }: Props) {
   }
 
   const handleDelete = async (id: string) => {
-    if (!confirm('هل أنت متأكد من حذف سجّل الميزانية هذا؟')) return
+    if (!(await confirmAction({ title: 'حذف سجل الميزانية', tone: 'danger' }))) return
     await deleteFinancialStatementAction(id)
     loadData()
   }
 
   const handleMarkSubmitted = async (id: string) => {
-    if (!confirm('تسجيل تقديم الميزانية اليوم لكلا الدائرتين (الضرائب ومسجل الشركات)؟')) return
+    if (!(await confirmAction({ title: 'تسجيل تقديم الميزانية', message: 'سيُسجَّل تقديم الميزانية اليوم لكلا الدائرتين: الضرائب ومسجل الشركات.', tone: 'primary', confirmText: 'تسجيل' }))) return
     await markStatementSubmittedAction(id)
     loadData()
   }
 
   const handleMarkTaxSubmitted = async (id: string) => {
-    if (!confirm('تسجيل تسليم الميزانية اليوم للهيئة العامة للضرائب؟')) return
+    if (!(await confirmAction({ title: 'تسليم الميزانية للضرائب', message: 'سيُسجَّل تسليم الميزانية اليوم للهيئة العامة للضرائب.', tone: 'primary', confirmText: 'تسجيل' }))) return
     await markStatementTaxSubmittedAction(id)
     loadData()
   }
 
   const handleMarkRegistrarSubmitted = async (id: string) => {
-    if (!confirm('تسجيل تسليم الميزانية اليوم لدائرة تسجيل الشركات؟')) return
+    if (!(await confirmAction({ title: 'تسليم الميزانية لمسجل الشركات', message: 'سيُسجَّل تسليم الميزانية اليوم لدائرة تسجيل الشركات.', tone: 'primary', confirmText: 'تسجيل' }))) return
     await markStatementRegistrarSubmittedAction(id)
     loadData()
   }

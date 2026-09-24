@@ -1,6 +1,8 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
+import { Mi } from '@/components/ui/Mi'
+import { confirmAction } from '@/components/ui/ConfirmDialog'
 import Link from 'next/link'
 import { Icon } from '@/components/ui/Icon'
 import {
@@ -77,7 +79,7 @@ export default function RemindersWidget({ companies = [], hideIfEmpty = false }:
   }
 
   const handleDelete = async (id: string) => {
-    if (!confirm('هل أنت متأكد من حذف هذا التذكير؟')) return
+    if (!(await confirmAction({ title: 'حذف التذكير', tone: 'danger' }))) return
     setReminders(prev => prev.filter(r => r.id !== id))
     await deleteReminderAction(id)
   }
@@ -419,19 +421,19 @@ function ReminderItemCard({
 
         <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '8px', marginTop: '4px', fontSize: '10.5px', color: 'var(--text-3)' }}>
           {item.due_date && (
-            <span>📅 {item.due_date} {item.due_time ? `⏰ ${item.due_time}` : ''}</span>
+            <span><Mi n="event" />{item.due_date}{item.due_time && <><Mi n="schedule" className="ms-2" />{item.due_time}</>}</span>
           )}
           {item.company_id ? (
             <Link
               href={`/commercial/companies/${item.company_id}`}
               className="inline-flex items-center gap-1 font-bold text-[var(--accent)] hover:underline bg-[color:color-mix(in_srgb,var(--accent-soft)_60%,transparent)] px-1.5 py-0.5 rounded text-[10.5px] transition-colors"
             >
-              <span>🏢</span>
+              <span><Mi n="domain" /></span>
               <span>{item.company_name || 'ملف الشركة'}</span>
               <span>←</span>
             </Link>
           ) : item.company_name ? (
-            <span>🏢 {item.company_name}</span>
+            <span><Mi n="domain" />{item.company_name}</span>
           ) : null}
         </div>
       </div>
@@ -444,7 +446,7 @@ function ReminderItemCard({
           style={{ border: 'none', background: 'none', color: 'var(--text-2)', cursor: 'pointer', padding: '4px' }}
           title="تعديل"
         >
-          ✏️
+          <Mi n="edit" />
         </button>
         <button
           type="button"
@@ -452,7 +454,7 @@ function ReminderItemCard({
           style={{ border: 'none', background: 'none', color: 'var(--text-3)', cursor: 'pointer', padding: '4px' }}
           title={item.is_archived ? 'إلغاء الأرشفة' : 'أرشفة'}
         >
-          📦
+          <Mi n="archive" />
         </button>
         <button
           type="button"
@@ -460,7 +462,7 @@ function ReminderItemCard({
           style={{ border: 'none', background: 'none', color: 'var(--bad)', cursor: 'pointer', padding: '4px' }}
           title="حذف"
         >
-          🗑️
+          <Mi n="delete" />
         </button>
       </div>
     </div>

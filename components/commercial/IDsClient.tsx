@@ -1,6 +1,8 @@
 'use client'
 
 import { useState, useEffect, useCallback, useMemo } from 'react'
+import { Mi } from '@/components/ui/Mi'
+import { confirmAction } from '@/components/ui/ConfirmDialog'
 import { DataPanel } from '@/components/ui/DataPanel'
 import CompanyFileLink from '@/components/commercial/CompanyFileLink'
 import { Icon } from '@/components/ui/Icon'
@@ -68,7 +70,7 @@ export default function IDsClient({ companies = [], initialCompanyId }: Props) {
   }
 
   const handleDelete = async (id: string, name?: string | null) => {
-    if (!confirm(`هل أنت متأكد من حذف معاملة/سجل الهوية لشركة «${name || 'المحددة'}»؟`)) return
+    if (!(await confirmAction({ title: 'حذف سجل الهوية', message: `سيُحذف سجل الهوية لشركة «${name || 'المحددة'}».`, tone: 'danger' }))) return
     await deleteCompanyIDAction(id)
     loadData()
   }
@@ -254,7 +256,7 @@ export default function IDsClient({ companies = [], initialCompanyId }: Props) {
           onClick={() => setStatusFilter('expiring')}
           className={`glass-card p-4 rounded-[20px] cursor-pointer transition duration-200 block border ${statusFilter === 'expiring' ? 'border-rose-500 shadow-md bg-rose-500/10' : 'border-[var(--glass-border)] bg-[var(--surface)] hover:-translate-y-0.5'}`}
         >
-          <div className="text-[11.5px] font-bold text-rose-600 dark:text-rose-400 mb-1">تتطلب تجديداً ⚠️</div>
+          <div className="text-[11.5px] font-bold text-rose-600 dark:text-rose-400 mb-1"><Mi n="warning" />تتطلب تجديداً</div>
           <div className="text-2xl sm:text-3xl font-extrabold text-rose-600 dark:text-rose-400 num">{stats.expiring}</div>
         </div>
       </div>
@@ -272,7 +274,7 @@ export default function IDsClient({ companies = [], initialCompanyId }: Props) {
             { id: 'all', label: 'الكل', count: stats.total },
             { id: 'in_progress', label: 'قيد الإصدار', count: stats.inProgress },
             { id: 'done', label: 'المكتملة ✓', count: stats.done },
-            { id: 'expiring', label: 'تتطلب تجديداً ⚠️', count: stats.expiring },
+            { id: 'expiring', label: 'تتطلب تجديداً', count: stats.expiring },
           ]}
         />
 
@@ -415,11 +417,11 @@ export default function IDsClient({ companies = [], initialCompanyId }: Props) {
                       <td className="py-3.5 px-3 text-center align-middle">
                         {r.status === 'lacks' ? (
                           <span className="inline-flex items-center whitespace-nowrap px-2.5 py-1 rounded-full text-xs font-bold bg-rose-500/10 text-rose-600 border border-rose-500/20">
-                            ⚠️ بها نواقص
+                            <Mi n="warning" />بها نواقص
                           </span>
                         ) : r.status === 'paused' ? (
                           <span className="inline-flex items-center whitespace-nowrap px-2.5 py-1 rounded-full text-xs font-bold bg-amber-500/10 text-amber-700 border border-amber-500/20">
-                            ⏸️ متوقفة مؤقتاً
+                            <Mi n="pause_circle" />متوقفة مؤقتاً
                           </span>
                         ) : !isDone || r.status === 'in_progress' ? (
                           <span className="inline-flex items-center gap-1.5 whitespace-nowrap px-2.5 py-1 rounded-full text-xs font-bold bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-500/30">

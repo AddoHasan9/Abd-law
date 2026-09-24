@@ -1,6 +1,8 @@
 'use client'
 
 import { useState, useMemo, useEffect, useRef } from 'react'
+import { toast } from 'sonner'
+import { confirmAction } from '@/components/ui/ConfirmDialog'
 import { DataPanel } from '@/components/ui/DataPanel'
 import { createPortal } from 'react-dom'
 import { useRouter } from 'next/navigation'
@@ -222,7 +224,7 @@ export default function CommercialClient({ rows = [], companies = [] }: Props) {
   }
 
   const handleDelete = async (txId: string) => {
-    if (!confirm('هل أنت متأكد من حذف هذه المعاملة نهائياً؟ هذا الإجراء لا يمكن التراجع عنه.')) return
+    if (!(await confirmAction({ title: 'حذف المعاملة نهائياً', message: 'لا يمكن التراجع عن هذا الإجراء بعد تنفيذه.', tone: 'danger', confirmText: 'حذف نهائي' }))) return
     setLocalRows(prev => prev.filter(t => t.id !== txId))
     const res = await deleteTransactionAction(txId)
     if (res.success) {
@@ -938,7 +940,7 @@ export default function CommercialClient({ rows = [], companies = [] }: Props) {
                   setEditTx(null)
                   router.refresh()
                 } else {
-                  alert(res.error || 'فشل التحديث')
+                  toast.error(res.error || 'فشل التحديث')
                 }
               }}
               style={{ display: 'flex', flexDirection: 'column', flex: 1, overflow: 'hidden' }}

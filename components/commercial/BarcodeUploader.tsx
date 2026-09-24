@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useState, useRef, useEffect, DragEvent, ChangeEvent } from 'react'
+import { toast } from 'sonner'
 import { createPortal } from 'react-dom'
 import { useModalBodyLock } from '@/lib/hooks/useModalBodyLock'
 
@@ -48,7 +49,7 @@ export default function BarcodeUploader({
     const isPdfFile = file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf')
 
     if (!isImage && !isPdfFile) {
-      alert('يرجى اختيار ملف صورة أو مستند PDF صالح (PNG, JPG, WebP, PDF)')
+      toast.error('يرجى اختيار ملف صورة أو مستند PDF صالح (PNG, JPG, WebP, PDF)')
       return
     }
 

@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
+import { Mi } from '@/components/ui/Mi'
 import { createPortal } from 'react-dom'
 import { Icon } from '@/components/ui/Icon'
 import {
@@ -482,7 +483,7 @@ export default function AddIDModal({
                       : 'border-border bg-surface-2 text-text-3 hover:text-text'
                   )}
                 >
-                  <span>⚠️</span>
+                  <span><Mi n="warning" /></span>
                   <span>بها نواقص</span>
                 </button>
 
@@ -496,7 +497,7 @@ export default function AddIDModal({
                       : 'border-border bg-surface-2 text-text-3 hover:text-text'
                   )}
                 >
-                  <span>⏸️</span>
+                  <span><Mi n="pause_circle" /></span>
                   <span>متوقفة</span>
                 </button>
               </div>

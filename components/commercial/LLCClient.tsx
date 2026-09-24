@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useMemo } from 'react'
+import { confirmAction } from '@/components/ui/ConfirmDialog'
 import { DataPanel } from '@/components/ui/DataPanel'
 import CompanyFileLink from '@/components/commercial/CompanyFileLink'
 import { useRouter } from 'next/navigation'
@@ -69,7 +70,7 @@ export default function LLCClient({ transactions = [], companies = [], lawyers =
   })
 
   const handleDelete = async (txId: string) => {
-    if (!confirm('هل أنت متأكد من حذف هذه المعاملة؟')) return
+    if (!(await confirmAction({ title: 'حذف المعاملة', message: 'هل أنت متأكد من حذف هذه المعاملة؟', tone: 'danger' }))) return
     await deleteTransactionAction(txId)
     router.refresh()
   }

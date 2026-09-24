@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useState, useRef, useEffect } from 'react'
+import { toast } from 'sonner'
 import { createPortal } from 'react-dom'
 import { useRouter } from 'next/navigation'
 import {
@@ -203,11 +204,11 @@ export function WorkflowStatus({
       } else {
         // Rollback on failure
         setCurrentStatusKey(oldKey)
-        alert(result.error || 'فشل تحديث الحالة في الخادم')
+        toast.error(result.error || 'فشل تحديث الحالة في الخادم')
       }
     } catch {
       setCurrentStatusKey(oldKey)
-      alert('حدث خطأ أثناء الاتصال بالخادم')
+      toast.error('حدث خطأ أثناء الاتصال بالخادم')
     } finally {
       setIsUpdating(false)
     }

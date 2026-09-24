@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from 'next'
 import { Cairo } from 'next/font/google'
 import { Toaster } from '@/components/ui/Toaster'
+import { ConfirmHost } from '@/components/ui/ConfirmDialog'
 import { QueryProvider } from '@/components/providers/QueryProvider'
 import '@/styles/globals.css'
 
@@ -63,6 +64,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className="min-h-screen antialiased bg-[var(--bg)] text-[var(--text)] transition-colors duration-200">
         <QueryProvider>
           <Toaster />
+          <ConfirmHost />
           {children}
         </QueryProvider>
       </body>

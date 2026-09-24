@@ -2577,3 +2577,56 @@ input.auth-input {
     transform: none;
   }
 }
+
+/* نافذة التأكيد الموحّدة (ConfirmDialog) */
+.confirm-veil {
+  position: fixed;
+  inset: 0;
+  z-index: 100000;
+  display: grid;
+  place-items: center;
+  padding: 16px;
+  background: rgba(15, 23, 42, .45);
+  -webkit-backdrop-filter: blur(4px);
+  backdrop-filter: blur(4px);
+  animation: confirmVeilIn .16s ease-out both;
+}
+.confirm-card {
+  width: 100%;
+  max-width: 420px;
+  background: var(--surface);
+  border: 1px solid var(--line-soft);
+  border-radius: 20px;
+  padding: 20px;
+  box-shadow: 0 24px 48px -12px rgba(15, 23, 42, .35);
+  animation: confirmIn .22s var(--ease-out, ease-out) both;
+}
+.confirm-veil.is-closing { animation: confirmVeilOut .14s ease-in both; }
+.confirm-veil.is-closing .confirm-card { animation: confirmOut .14s ease-in both; }
+@keyframes confirmVeilIn { from { opacity: 0; } }
+@keyframes confirmVeilOut { to { opacity: 0; } }
+@keyframes confirmIn { from { opacity: 0; transform: translateY(10px) scale(.96); } }
+@keyframes confirmOut { to { opacity: 0; transform: scale(.97); } }
+@media (max-width: 640px) {
+  /* على الموبايل تظهر من الأسفل مثل أوراق iOS */
+  .confirm-veil { place-items: end center; padding: 0; }
+  .confirm-card {
+    max-width: none;
+    border-radius: 22px 22px 0 0;
+    padding: 20px 18px calc(18px + env(safe-area-inset-bottom));
+    animation-name: confirmSheetIn;
+  }
+  @keyframes confirmSheetIn { from { transform: translateY(100%); } }
+}
+@media (prefers-reduced-motion: reduce) {
+  .confirm-veil, .confirm-card { animation: none !important; }
+}
+
+/* أيقونة داخل النص (Mi) — بنفس ارتفاع السطر تقريباً */
+.mi {
+  font-size: 1.2em;
+  line-height: 1;
+  vertical-align: -0.22em;
+  margin-inline-end: .3em;
+}
+.mi:only-child { margin: 0; }

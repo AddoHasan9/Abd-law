@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { Mi } from '@/components/ui/Mi'
 import { createPortal } from 'react-dom'
 import { Icon } from '@/components/ui/Icon'
 import { formatMoney } from '@/lib/constants'
@@ -352,7 +353,7 @@ export default function CompanyFSDetailsModal({
                                   className="btn btn-ghost"
                                   style={{ padding: '2px 6px', fontSize: '11px' }}
                                 >
-                                  ✏️ تعديل
+                                  <Mi n="edit" />تعديل
                                 </button>
                                 {canDelete && (
                                   <button
@@ -360,7 +361,7 @@ export default function CompanyFSDetailsModal({
                                     onClick={() => onDeleteYear(item.statementObj!.id)}
                                     style={{ border: 'none', background: 'none', color: 'var(--bad)', cursor: 'pointer', fontSize: '11px' }}
                                   >
-                                    🗑 حذف
+                                    <Mi n="delete" />حذف
                                   </button>
                                 )}
                               </>
@@ -371,7 +372,7 @@ export default function CompanyFSDetailsModal({
                                 className="btn btn-go"
                                 style={{ padding: '2px 8px', fontSize: '11px' }}
                               >
-                                ➕ إثبات الميزانية
+                                <Mi n="add" />إثبات الميزانية
                               </button>
                             )}
                           </div>

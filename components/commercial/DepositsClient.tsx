@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { Mi } from '@/components/ui/Mi'
 import { useRouter } from 'next/navigation'
 import { Icon } from '@/components/ui/Icon'
 import { Empty } from '@/components/ui/Empty'
@@ -208,7 +209,7 @@ export default function DepositsClient({ deposits = [], companyId }: Props) {
             fontWeight: 700,
           }}
         >
-          <span>🎯 تم تحديد الشركة المطلوبة وتصديرها للأعلى لمتابعة مسار الوديعة</span>
+          <span><Mi n="my_location" />تم تحديد الشركة المطلوبة وتصديرها للأعلى لمتابعة مسار الوديعة</span>
           <button
             type="button"
             onClick={() => {
@@ -440,7 +441,7 @@ export default function DepositsClient({ deposits = [], companyId }: Props) {
                           <div style={{ marginTop: '2px', display: 'flex', flexDirection: 'column', gap: '3px' }}>
                             {isBarcodeLocked && (
                               <div style={{ fontSize: '10.5px', color: 'var(--warn)', background: 'rgba(245, 158, 11, 0.1)', padding: '4px 6px', borderRadius: '4px' }}>
-                                🔒 يلزم إكمال المحطات الثلاث الأولى (الإرسال، المشاور، المحاسب) لرفع الباركود.
+                                <Mi n="lock" />يلزم إكمال المحطات الثلاث الأولى (الإرسال، المشاور، المحاسب) لرفع الباركود.
                               </div>
                             )}
 
@@ -459,7 +460,7 @@ export default function DepositsClient({ deposits = [], companyId }: Props) {
                         {/* Lock Warning for 15-day shareholder rule */}
                         {isLockedByShareholderRule && !isDone && (
                           <div style={{ fontSize: '10.5px', color: 'var(--bad)', background: 'var(--bad-soft)', padding: '3px 6px', borderRadius: '4px' }}>
-                            ⚠️ شركة شركاء: يلزم انتظار {pen?.daysUntilSubmitAllowed} يوماً للإرسال.
+                            <Mi n="warning" />شركة شركاء: يلزم انتظار {pen?.daysUntilSubmitAllowed} يوماً للإرسال.
                           </div>
                         )}
 

@@ -1,6 +1,8 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { Mi } from '@/components/ui/Mi'
+import { confirmAction } from '@/components/ui/ConfirmDialog'
 import CompanyFileLink from '@/components/commercial/CompanyFileLink'
 import { createPortal } from 'react-dom'
 import { Icon } from '@/components/ui/Icon'
@@ -143,7 +145,7 @@ export default function LLCTransactionDetailsModal({
   }
 
   const handleDelete = async () => {
-    if (!confirm('هل أنت متأكد من حذف هذه المعاملة نهائياً؟')) return
+    if (!(await confirmAction({ title: 'حذف المعاملة نهائياً', message: 'لا يمكن التراجع عن هذا الإجراء بعد تنفيذه.', tone: 'danger', confirmText: 'حذف نهائي' }))) return
     setDeleting(true)
     await deleteTransactionAction(transaction.id)
     setDeleting(false)
@@ -280,7 +282,7 @@ export default function LLCTransactionDetailsModal({
               >
                 <div className="field" style={{ margin: 0 }}>
                   <label htmlFor="edit-cap-before" style={{ fontSize: '12px', fontWeight: 700, color: 'var(--text)' }}>
-                    💰 رأس المال القديم (السابق)
+                    <Mi n="payments" />رأس المال القديم (السابق)
                   </label>
                   <input
                     id="edit-cap-before"
@@ -294,7 +296,7 @@ export default function LLCTransactionDetailsModal({
 
                 <div className="field" style={{ margin: 0 }}>
                   <label htmlFor="edit-cap-after" style={{ fontSize: '12px', fontWeight: 700, color: 'var(--text)' }}>
-                    📈 رأس المال بعد الزيادة (الجديد)
+                    <Mi n="trending_up" />رأس المال بعد الزيادة (الجديد)
                   </label>
                   <input
                     id="edit-cap-after"
@@ -323,7 +325,7 @@ export default function LLCTransactionDetailsModal({
               >
                 <div className="field" style={{ margin: 0 }}>
                   <label htmlFor="edit-seller-name" style={{ fontSize: '12px', fontWeight: 700, color: 'var(--text)' }}>
-                    👤 اسم البائع (المتنازل)
+                    <Mi n="person" />اسم البائع (المتنازل)
                   </label>
                   <input
                     id="edit-seller-name"
@@ -337,7 +339,7 @@ export default function LLCTransactionDetailsModal({
 
                 <div className="field" style={{ margin: 0 }}>
                   <label htmlFor="edit-buyer-name" style={{ fontSize: '12px', fontWeight: 700, color: 'var(--text)' }}>
-                    🤝 اسم المشتري (المتنازل له)
+                    <Mi n="handshake" />اسم المشتري (المتنازل له)
                   </label>
                   <input
                     id="edit-buyer-name"

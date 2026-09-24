@@ -1,6 +1,8 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
+import { Mi } from '@/components/ui/Mi'
+import { confirmAction } from '@/components/ui/ConfirmDialog'
 import CompanyFileLink from '@/components/commercial/CompanyFileLink'
 import { useRouter } from 'next/navigation'
 import { createPortal } from 'react-dom'
@@ -492,9 +494,12 @@ export default function CompanyDetailsModal({ company, isOpen, onClose, onDelete
 
   const handleDeleteCompany = async () => {
     if (!company) return
-    const confirmed = confirm(
-      `هل أنت متأكد من حذف شركة «${company.name}»؟\n\nتنبيه: سيتم حذف الشركة نهائياً من كافة أقسام النظام وجداول المعاملات وسير العمل والودائع والوثائق التابعة لها.`
-    )
+    const confirmed = await confirmAction({
+      title: `حذف شركة «${company.name}»`,
+      message: 'ستُحذف الشركة نهائياً من كافة أقسام النظام مع معاملاتها وسير العمل والودائع والوثائق التابعة لها.',
+      tone: 'danger',
+      confirmText: 'حذف الشركة نهائياً',
+    })
     if (!confirmed) return
 
     setLoading(true)
@@ -935,11 +940,11 @@ export default function CompanyDetailsModal({ company, isOpen, onClose, onDelete
                             </span>
                           ) : isOver ? (
                             <span className="tag tag-bad" style={{ fontSize: '10.5px', fontWeight: 700 }}>
-                              ⚠️ يتجاوز 100% ({totalAllocatedPct}%)
+                              <Mi n="warning" />يتجاوز 100% ({totalAllocatedPct}%)
                             </span>
                           ) : (
                             <span className="tag" style={{ fontSize: '10.5px', background: 'rgba(245, 158, 11, 0.15)', color: '#d97706', border: '1px solid rgba(245, 158, 11, 0.3)' }}>
-                              ⏳ متبقي: {remainingPct}%
+                              <Mi n="hourglass_top" />متبقي: {remainingPct}%
                             </span>
                           )}
                         </div>
@@ -1447,14 +1452,14 @@ export default function CompanyDetailsModal({ company, isOpen, onClose, onDelete
                 {!company.financial_statements_enabled ? (
                   !isCompanyEstablished ? (
                     <div style={{ padding: '10px 20px', background: 'rgba(239, 68, 68, 0.08)', border: '1px solid rgba(239, 68, 68, 0.25)', borderRadius: 'var(--r-md)', fontSize: '12.5px', color: 'var(--bad)', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '6px' }}>
-                      <span>🚫 الحسابات الختامية ممنوعة للشركات قيد التأسيس</span>
+                      <span><Mi n="block" />الحسابات الختامية ممنوعة للشركات قيد التأسيس</span>
                     </div>
                   ) : (
                     <button
                       type="button"
                       disabled={loading}
                       onClick={async () => {
-                        if (confirm('هل تم تكليف المكتب بمتابعة الحسابات الختامية لهذه الشركة؟')) {
+                        if (await confirmAction({ title: 'تكليف المكتب بالحسابات الختامية', message: 'هل تم تكليف المكتب بمتابعة الحسابات الختامية لهذه الشركة؟', tone: 'primary', confirmText: 'نعم، تم التكليف' })) {
                           setLoading(true)
                           const res = await updateCompanyFSSettingsAction(company.id, { financial_statements_enabled: true })
                           setLoading(false)
@@ -1485,7 +1490,7 @@ export default function CompanyDetailsModal({ company, isOpen, onClose, onDelete
                       type="button"
                       disabled={loading}
                       onClick={async () => {
-                        if (confirm('هل تريد إلغاء تكليف المكتب بالحسابات الختامية لهذه الشركة؟\nلن تظهر الشركة بعد الآن في المهل القانونية أو قسم الميزانيات.')) {
+                        if (await confirmAction({ title: 'إلغاء تكليف الحسابات الختامية', message: 'لن تظهر الشركة بعد الآن في المهل القانونية أو قسم الميزانيات.', tone: 'warn', confirmText: 'إلغاء التكليف', cancelText: 'تراجع' })) {
                           setLoading(true)
                           const res = await updateCompanyFSSettingsAction(company.id, { financial_statements_enabled: false })
                           setLoading(false)
@@ -1605,9 +1610,9 @@ export default function CompanyDetailsModal({ company, isOpen, onClose, onDelete
                           {isDone ? (
                             <span className="tag tag-ok" style={{ fontSize: '11px', fontWeight: 800 }}>✓ مكتملة ومُصدرة</span>
                           ) : isLacks ? (
-                            <span className="tag tag-bad" style={{ fontSize: '11px', fontWeight: 800 }}>⚠️ بها نواقص</span>
+                            <span className="tag tag-bad" style={{ fontSize: '11px', fontWeight: 800 }}><Mi n="warning" />بها نواقص</span>
                           ) : isPaused ? (
-                            <span className="tag tag-gray" style={{ fontSize: '11px', fontWeight: 800 }}>⏸️ متوقفة مؤقتاً</span>
+                            <span className="tag tag-gray" style={{ fontSize: '11px', fontWeight: 800 }}><Mi n="pause_circle" />متوقفة مؤقتاً</span>
                           ) : isInProgress ? (
                             <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-extrabold bg-amber-500/15 text-amber-500 border border-amber-500/30 shadow-xs">
                               <span className="w-3.5 h-3.5 border-2 border-amber-400/40 border-t-amber-400 rounded-full animate-spin flex-none" />
@@ -1673,7 +1678,7 @@ export default function CompanyDetailsModal({ company, isOpen, onClose, onDelete
                                 <button
                                   type="button"
                                   onClick={async () => {
-                                    if (confirm(`هل أنت متأكد من حذف هوية «${cat.title}»؟`)) {
+                                    if (await confirmAction({ title: `حذف هوية «${cat.title}»`, tone: 'danger' })) {
                                       await deleteCompanyIDAction(rec.id)
                                       loadCompanyIDs()
                                     }

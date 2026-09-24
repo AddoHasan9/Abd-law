@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
+import { Mi } from '@/components/ui/Mi'
 import { createPortal } from 'react-dom'
 import { Icon } from '@/components/ui/Icon'
 import { formatNumberWithCommas } from '@/lib/constants'
@@ -360,7 +361,7 @@ export default function AddLLCTransactionModal({
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 p-3.5 rounded-xl bg-sky-500/10 border border-sky-500/25">
                 <div className="field" style={{ margin: 0 }}>
                   <label htmlFor="llc-cap-before" style={{ fontSize: '12px', fontWeight: 700, color: 'var(--text)' }}>
-                    💰 رأس المال القديم (السابق)
+                    <Mi n="payments" />رأس المال القديم (السابق)
                   </label>
                   <input
                     id="llc-cap-before"
@@ -374,7 +375,7 @@ export default function AddLLCTransactionModal({
 
                 <div className="field" style={{ margin: 0 }}>
                   <label htmlFor="llc-cap-after" style={{ fontSize: '12px', fontWeight: 700, color: 'var(--text)' }}>
-                    📈 رأس المال بعد الزيادة (الجديد) *
+                    <Mi n="trending_up" />رأس المال بعد الزيادة (الجديد) *
                   </label>
                   <input
                     id="llc-cap-after"
@@ -393,7 +394,7 @@ export default function AddLLCTransactionModal({
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 p-3.5 rounded-xl bg-orange-500/10 border border-orange-500/25">
                 <div className="field" style={{ margin: 0 }}>
                   <label htmlFor="llc-seller-name" style={{ fontSize: '12px', fontWeight: 700, color: 'var(--text)' }}>
-                    👤 اسم البائع (المتنازل) *
+                    <Mi n="person" />اسم البائع (المتنازل) *
                   </label>
                   <input
                     id="llc-seller-name"
@@ -407,7 +408,7 @@ export default function AddLLCTransactionModal({
 
                 <div className="field" style={{ margin: 0 }}>
                   <label htmlFor="llc-buyer-name" style={{ fontSize: '12px', fontWeight: 700, color: 'var(--text)' }}>
-                    🤝 اسم المشتري (المتنازل له) *
+                    <Mi n="handshake" />اسم المشتري (المتنازل له) *
                   </label>
                   <input
                     id="llc-buyer-name"

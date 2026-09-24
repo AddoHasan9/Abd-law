@@ -1,6 +1,8 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
+import { toast } from 'sonner'
+import { confirmAction } from '@/components/ui/ConfirmDialog'
 import { isProtectedAccount } from '@/lib/auth/account-policy'
 import { useState, useMemo, useEffect } from 'react'
 import { createPortal } from 'react-dom'
@@ -193,7 +195,7 @@ export default function UsersClient({ initialProfiles }: Props) {
 
   const openEditModal = (user: ProfileWithStats) => {
     if (protectedUser(user) || !canEditUsers) {
-      alert('عذراً، يقتصر تعديل حسابات Super Admin على المدير الأعلى فقط')
+      toast.error('عذراً، يقتصر تعديل حسابات Super Admin على المدير الأعلى فقط')
       return
     }
     setEditingUser(user)
@@ -248,7 +250,7 @@ export default function UsersClient({ initialProfiles }: Props) {
 
   const handleToggleActive = async (user: ProfileWithStats) => {
     if (protectedUser(user) || !canEditUsers) {
-      alert('لا يمكن تعطيل حساب Super Admin')
+      toast.error('لا يمكن تعطيل حساب Super Admin')
       return
     }
     const res = await toggleUserActiveAction(user.id)
@@ -262,14 +264,14 @@ export default function UsersClient({ initialProfiles }: Props) {
 
   const handleSoftDeleteUser = async (user: ProfileWithStats) => {
     if (!canDeleteUsers) {
-      alert('عذراً، يقتصر تعطيل وأرشفة الحسابات على Super Admin فقط')
+      toast.error('عذراً، يقتصر تعطيل وأرشفة الحسابات على Super Admin فقط')
       return
     }
     if (protectedUser(user)) {
-      alert('لا يمكن حذف أو أرشفة حساب Super Admin الرئيسي')
+      toast.error('لا يمكن حذف أو أرشفة حساب Super Admin الرئيسي')
       return
     }
-    if (!confirm(`هل أنت تأكد من تعطيل وأرشفة حساب "${user.name}"؟ (سيتم حفظ جميع المعاملات وسجل التدقيق ولن يتم مسح أي بيانات دائمية)`)) {
+    if (!(await confirmAction({ title: `تعطيل وأرشفة حساب «${user.name}»`, message: 'ستُحفظ جميع المعاملات وسجل التدقيق، ولن تُمسح أي بيانات.', tone: 'warn', confirmText: 'تعطيل وأرشفة' }))) {
       return
     }
     const res = await deleteUserAction(user.id)
@@ -284,14 +286,14 @@ export default function UsersClient({ initialProfiles }: Props) {
 
   const handlePermanentDeleteUser = async (user: ProfileWithStats) => {
     if (!canDeleteUsers) {
-      alert('عذراً، يقتصر حذف الحسابات نهائياً على Super Admin فقط')
+      toast.error('عذراً، يقتصر حذف الحسابات نهائياً على Super Admin فقط')
       return
     }
     if (protectedUser(user)) {
-      alert('لا يمكن حذف حساب Super Admin الرئيسي نهائياً')
+      toast.error('لا يمكن حذف حساب Super Admin الرئيسي نهائياً')
       return
     }
-    if (!confirm(`تحذير نهائي: هل تريد حذف المستخدم "${user.name}" نهائياً من النظام وقاعدة بيانات Supabase Auth؟\nلا يمكن التراجع عن هذا الإجراء.`)) {
+    if (!(await confirmAction({ title: `حذف المستخدم «${user.name}» نهائياً`, message: 'سيُحذف من النظام ومن حسابات تسجيل الدخول. لا يمكن التراجع عن هذا الإجراء.', tone: 'danger', confirmText: 'حذف نهائي' }))) {
       return
     }
 

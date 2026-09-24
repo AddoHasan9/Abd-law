@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
+import { Mi } from '@/components/ui/Mi'
 import { Icon } from '@/components/ui/Icon'
 import { formatDate, formatTime } from '@/lib/constants'
 import {
@@ -235,7 +236,7 @@ export default function NotificationCenter({ initialCount = 0 }: Props) {
               </div>
             ) : filteredNotifications.length === 0 ? (
               <div style={{ padding: '32px 16px', textAlign: 'center', color: 'var(--text-3)', fontSize: '12.5px' }}>
-                {filter === 'unread' ? 'لا توجد إشعارات غير مقروءة حالياً 🎉' : 'لا توجد إشعارات مسجلة'}
+                {filter === 'unread' ? 'لا توجد إشعارات غير مقروءة حالياً' : 'لا توجد إشعارات مسجلة'}
               </div>
             ) : (
               filteredNotifications.map(item => {

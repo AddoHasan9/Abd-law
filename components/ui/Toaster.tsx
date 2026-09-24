@@ -11,7 +11,7 @@ export function Toaster() {
       closeButton
       toastOptions={{
         style: {
-          fontFamily: 'var(--font-tajawal), sans-serif',
+          fontFamily: 'var(--font-ui)',
           borderRadius: '12px',
           padding: '12px 16px',
         },
