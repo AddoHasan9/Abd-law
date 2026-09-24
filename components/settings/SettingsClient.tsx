@@ -182,7 +182,7 @@ export default function SettingsClient() {
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[50vh] gap-3">
-        <div className="w-10 h-10 border-3 border-[var(--accent)]/20 border-t-[var(--accent)] rounded-full animate-spin" />
+        <div className="w-10 h-10 border-3 border-[color:color-mix(in_srgb,var(--accent)_20%,transparent)] border-t-[var(--accent)] rounded-full animate-spin" />
         <span className="text-xs font-bold text-[var(--text-3)]">جاري تحميل إعدادات النظام ومسارات العمل...</span>
       </div>
     )
@@ -362,7 +362,7 @@ export default function SettingsClient() {
                   {activeTemplate.steps.map((step, idx) => (
                     <div
                       key={step.id}
-                      className="p-3.5 sm:p-4 rounded-2xl bg-[var(--surface-2)] border border-[var(--line-soft)] hover:border-[var(--accent)]/40 transition-all flex items-center justify-between gap-4 group"
+                      className="p-3.5 sm:p-4 rounded-2xl bg-[var(--surface-2)] border border-[var(--line-soft)] hover:border-[color:color-mix(in_srgb,var(--accent)_40%,transparent)] transition-all flex items-center justify-between gap-4 group"
                     >
                       {editingStepId === step.id ? (
                         <div className="flex-1 flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5">

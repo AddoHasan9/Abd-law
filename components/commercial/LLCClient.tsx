@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useMemo } from 'react'
+import { DataPanel } from '@/components/ui/DataPanel'
 import CompanyFileLink from '@/components/commercial/CompanyFileLink'
 import { useRouter } from 'next/navigation'
 import { Icon } from '@/components/ui/Icon'
@@ -129,7 +130,7 @@ export default function LLCClient({ transactions = [], companies = [], lawyers =
       </div>
 
       {/* Table of Transactions */}
-      <div className="glass-card !p-0 rounded-[22px] border-0 shadow-sm overflow-hidden bg-[var(--surface-glass)]">
+      <DataPanel icon="corporate_fare" title="معاملات الشركات المحدودة" subtitle="المعاملات الجارية والمنجزة للشركات المحدودة المسجلة" count={filteredTransactions.length} total={llcTransactions.length} unit="معاملة">
         {filteredTransactions.length === 0 ? (
           <div className="p-8">
             <Empty
@@ -142,7 +143,7 @@ export default function LLCClient({ transactions = [], companies = [], lawyers =
           <div className="overflow-x-auto w-full">
             <table className="w-full border-collapse text-right text-xs table-auto">
               <thead>
-                <tr className="border-b border-[var(--border-soft)] bg-[var(--surface-2)]/80 text-xs text-[var(--text-2)] font-bold">
+                <tr className="border-b border-[var(--border-soft)] bg-[color:color-mix(in_srgb,var(--surface-2)_80%,transparent)] text-xs text-[var(--text-2)] font-bold">
                   <th className="py-3 px-3 text-right">الشركة</th>
                   <th className="py-3 px-2 text-center">نوع المعاملة</th>
                   <th className="py-3 px-2 text-center">المدير المفوض</th>
@@ -181,7 +182,7 @@ export default function LLCClient({ transactions = [], companies = [], lawyers =
                           className="flex items-center gap-3 text-right group w-full bg-transparent border-0 p-0 cursor-pointer"
                           title="اضغط لعرض وتعديل تفاصيل المعاملة"
                         >
-                          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[var(--accent-soft)] to-blue-500/10 border border-[var(--accent)]/20 text-[var(--accent)] flex items-center justify-center shrink-0 shadow-xs group-hover:scale-105 transition-transform">
+                          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[var(--accent-soft)] to-blue-500/10 border border-[color:color-mix(in_srgb,var(--accent)_20%,transparent)] text-[var(--accent)] flex items-center justify-center shrink-0 shadow-xs group-hover:scale-105 transition-transform">
                             <span className="material-symbols-outlined text-[19px]">domain</span>
                           </div>
                           <span className="font-bold text-[13.5px] text-[var(--text)] group-hover:text-[var(--accent)] transition-colors leading-snug">
@@ -272,7 +273,7 @@ export default function LLCClient({ transactions = [], companies = [], lawyers =
             </table>
           </div>
         )}
-      </div>
+      </DataPanel>
 
       {/* Add Modal */}
       {isAddModalOpen && (

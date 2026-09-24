@@ -196,7 +196,7 @@ export default function Sidebar({
     <aside id="sidebar" className="transition-all duration-300">
       {/* Brand Header with Refined Luxury Styling */}
       <div className="side-head group cursor-default">
-        <div className="w-[38px] h-[38px] rounded-xl bg-gradient-to-br from-white/10 to-white/[0.03] border border-white/15 p-1 flex items-center justify-center shadow-2xs group-hover:scale-105 group-hover:border-[var(--accent)]/50 transition-all duration-300 flex-none overflow-hidden">
+        <div className="w-[38px] h-[38px] rounded-xl bg-gradient-to-br from-white/10 to-white/[0.03] border border-white/15 p-1 flex items-center justify-center shadow-2xs group-hover:scale-105 group-hover:border-[color:color-mix(in_srgb,var(--accent)_50%,transparent)] transition-all duration-300 flex-none overflow-hidden">
           <Image
             src="/logo.png"
             alt="شعار مكتب المحامي عبدالحسن الخزرجي"

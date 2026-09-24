@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { DataPanel } from '@/components/ui/DataPanel'
 import CompanyFileLink from '@/components/commercial/CompanyFileLink'
 import { useRouter } from 'next/navigation'
 import { Icon } from '@/components/ui/Icon'
@@ -152,7 +153,7 @@ export default function TaxAssessmentClient({ assessments = [], companies = [], 
       {/* Page Header Banner */}
       <div className="flex items-center justify-between flex-wrap gap-4 pb-2 border-b border-[var(--line-soft)]">
         <div className="flex items-center gap-3.5">
-          <div className="w-11 h-11 rounded-xl bg-[var(--accent-soft)] border border-[var(--accent)]/20 flex items-center justify-center text-[var(--accent)] shadow-xs flex-none">
+          <div className="w-11 h-11 rounded-xl bg-[var(--accent-soft)] border border-[color:color-mix(in_srgb,var(--accent)_20%,transparent)] flex items-center justify-center text-[var(--accent)] shadow-xs flex-none">
             <span className="material-symbols-outlined text-[24px]">receipt_long</span>
           </div>
           <div>
@@ -181,7 +182,7 @@ export default function TaxAssessmentClient({ assessments = [], companies = [], 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3.5 w-full">
         <div
           onClick={() => setStatusFilter('all')}
-          className={`p-4 rounded-2xl cursor-pointer transition-all duration-200 block border ${statusFilter === 'all' ? 'border-[var(--accent)] shadow-xs bg-[var(--surface-2)] ring-2 ring-[var(--accent)]/15' : 'border-[var(--border)] bg-[var(--surface)] hover:-translate-y-0.5 shadow-2xs'}`}
+          className={`p-4 rounded-2xl cursor-pointer transition-all duration-200 block border ${statusFilter === 'all' ? 'border-[var(--accent)] shadow-xs bg-[var(--surface-2)] ring-2 ring-[color:color-mix(in_srgb,var(--accent)_15%,transparent)]' : 'border-[var(--border)] bg-[var(--surface)] hover:-translate-y-0.5 shadow-2xs'}`}
         >
           <div className="text-[11.5px] font-bold text-[var(--text-3)] mb-1">إجمالي ملفات التحاسب</div>
           <div className="text-2xl sm:text-3xl font-black text-[var(--text)] num">{stats.total}</div>
@@ -258,7 +259,7 @@ export default function TaxAssessmentClient({ assessments = [], companies = [], 
       </div>
 
       {/* Main Table Card */}
-      <div className="w-full glass-card !p-0 rounded-[22px] border-0 shadow-sm overflow-hidden bg-[var(--surface-glass)] relative">
+      <DataPanel icon="receipt_long" title="التحاسب الضريبي" subtitle="ملفات التحاسب الضريبي للشركات ومراحل إنجازها" count={filteredItems.length} total={items.length} unit="ملف">
         {filteredItems.length === 0 ? (
           <div className="p-12">
             <Empty
@@ -292,7 +293,7 @@ export default function TaxAssessmentClient({ assessments = [], companies = [], 
                   return (
                     <tr
                       key={item.id}
-                      className="border-b border-[var(--line-soft)] hover:bg-[var(--surface-2)]/60 transition-colors"
+                      className="border-b border-[var(--line-soft)] hover:bg-[color:color-mix(in_srgb,var(--surface-2)_60%,transparent)] transition-colors"
                     >
                       {/* Company Name (Opens Tax Assessment Details directly) */}
                       <td className="p-3.5 font-bold">
@@ -400,7 +401,7 @@ export default function TaxAssessmentClient({ assessments = [], companies = [], 
             </table>
           </div>
         )}
-      </div>
+      </DataPanel>
 
       {/* Modal for Add / Edit */}
       {isModalOpen && (

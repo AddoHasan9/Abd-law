@@ -4,7 +4,7 @@ export default function NotFound() {
   return (
     <div className="min-h-screen flex items-center justify-center p-6 bg-[var(--bg)] text-[var(--text)] font-sans antialiased text-right" dir="rtl">
       <div className="max-w-md w-full p-8 rounded-3xl bg-[var(--surface)] border border-[var(--glass-border)] shadow-2xl text-center flex flex-col items-center gap-5">
-        <div className="w-16 h-16 rounded-2xl bg-[var(--accent)]/15 border border-[var(--accent)]/30 flex items-center justify-center text-[var(--accent)] text-3xl shadow-inner">
+        <div className="w-16 h-16 rounded-2xl bg-[color:color-mix(in_srgb,var(--accent)_15%,transparent)] border border-[color:color-mix(in_srgb,var(--accent)_30%,transparent)] flex items-center justify-center text-[var(--accent)] text-3xl shadow-inner">
           <span className="material-symbols-outlined text-[36px]">search_off</span>
         </div>
 

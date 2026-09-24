@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
+import { DataPanel } from '@/components/ui/DataPanel'
 import { Icon } from '@/components/ui/Icon'
 import { formatMoney } from '@/lib/constants'
 import {
@@ -373,18 +374,8 @@ export default function FinancialStatementsClient({ companies = [] }: Props) {
 
       {/* Tab 1: Grouped Main Table (Strictly ONE Row Per Company) */}
       {activeTab === 'grouped' && (
-        <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
-          <div className="p-3.5 px-4 bg-[var(--surface-2)]/60 border-b border-[var(--line-soft)] flex items-center justify-between gap-3">
-            <div className="flex items-center gap-2">
-              <span className="material-symbols-outlined text-[18px] text-[var(--accent)]">account_balance</span>
-              <span className="text-xs sm:text-sm font-extrabold text-[var(--text)]">
-                سجل الشركات والحسابات الختامية
-              </span>
-            </div>
-            <span className="text-xs font-bold text-[var(--accent)] bg-[var(--accent-soft)] border border-[var(--accent)]/20 px-2.5 py-0.5 rounded-full num">
-              {visibleGrouped.length}{searchTerm.trim() ? ` من ${groupedCompanies.length}` : ''} شركة
-            </span>
-          </div>
+        <DataPanel icon="account_balance" title="سجل الشركات والحسابات الختامية" subtitle="سنة واحدة لكل شركة مع حالة الميزانيات والغرامات" count={visibleGrouped.length} total={groupedCompanies.length} unit="شركة">
+          
 
           {loading ? (
             <div style={{ padding: '30px', textAlign: 'center', color: 'var(--text-3)' }}>جاري تحميل الحسابات الختامية...</div>
@@ -469,7 +460,7 @@ export default function FinancialStatementsClient({ companies = [] }: Props) {
               </table>
             </div>
           )}
-        </div>
+        </DataPanel>
       )}
 
       {/* Tab 2: Required Statements (ERP Engine) */}

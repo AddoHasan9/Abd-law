@@ -221,7 +221,7 @@ export default function DashboardClient({ stats, profiles = [], companies = [] }
             {/* Header & Filter Tabs */}
             <div className="flex items-center justify-between flex-wrap gap-2 pb-2.5 border-b border-[var(--line-soft)]">
               <div className="flex items-center gap-2">
-                <div className="p-1.5 bg-[var(--accent-soft)] rounded-lg border border-[var(--accent)]/20 text-[var(--accent)]">
+                <div className="p-1.5 bg-[var(--accent-soft)] rounded-lg border border-[color:color-mix(in_srgb,var(--accent)_20%,transparent)] text-[var(--accent)]">
                   <span className="material-symbols-outlined text-[17px]">assignment</span>
                 </div>
                 <div>
@@ -255,7 +255,7 @@ export default function DashboardClient({ stats, profiles = [], companies = [] }
               <div className="overflow-x-auto">
                 <table className="w-full text-xs text-right border-collapse">
                   <thead>
-                    <tr className="border-b border-[var(--line-soft)] text-[var(--text-3)] bg-[var(--surface-2)]/50 text-[11px]">
+                    <tr className="border-b border-[var(--line-soft)] text-[var(--text-3)] bg-[color:color-mix(in_srgb,var(--surface-2)_50%,transparent)] text-[11px]">
                       <th className="py-2 px-2.5 font-bold">الشركة / المعاملة</th>
                       <th className="py-2 px-2.5 font-bold text-center">نوع المعاملة</th>
                       <th className="py-2 px-2.5 font-bold text-center">المحامي المكلف</th>
@@ -266,7 +266,7 @@ export default function DashboardClient({ stats, profiles = [], companies = [] }
                   </thead>
                   <tbody>
                     {filteredRecentTxs.slice(0, 7).map(tx => (
-                      <tr key={tx.id} className="border-b border-[var(--line-soft)]/50 hover:bg-[var(--surface-2)]/60 transition-colors">
+                      <tr key={tx.id} className="border-b border-[color:color-mix(in_srgb,var(--line-soft)_50%,transparent)] hover:bg-[color:color-mix(in_srgb,var(--surface-2)_60%,transparent)] transition-colors">
                         {/* Company / Task Name */}
                         <td className="py-2 px-2.5">
                           <div className="flex flex-col min-w-[160px]">
@@ -318,7 +318,7 @@ export default function DashboardClient({ stats, profiles = [], companies = [] }
                                     : `/commercial/companies/${tx.companyId}`)
                                 : (tx.type === 'llc' ? `/commercial/llc?id=${tx.id}` : '/commercial')
                             }
-                            className="inline-flex items-center justify-center px-2.5 py-0.5 rounded-md text-[11px] font-bold text-[var(--accent)] hover:bg-[var(--accent-soft)] transition-colors border border-[var(--accent)]/20 hover:border-[var(--accent)]/40"
+                            className="inline-flex items-center justify-center px-2.5 py-0.5 rounded-md text-[11px] font-bold text-[var(--accent)] hover:bg-[var(--accent-soft)] transition-colors border border-[color:color-mix(in_srgb,var(--accent)_20%,transparent)] hover:border-[color:color-mix(in_srgb,var(--accent)_40%,transparent)]"
                           >
                             عرض
                           </Link>
@@ -360,7 +360,7 @@ export default function DashboardClient({ stats, profiles = [], companies = [] }
             {/* Header: Title, Total Staff Counter & Direct Link */}
             <div className="flex items-center justify-between pb-2.5 border-b border-[var(--line-soft)] flex-wrap gap-2">
               <div className="flex items-center gap-2">
-                <div className="w-7 h-7 rounded-lg bg-[var(--accent-soft)] border border-[var(--accent)]/20 text-[var(--accent)] flex items-center justify-center shadow-2xs shrink-0">
+                <div className="w-7 h-7 rounded-lg bg-[var(--accent-soft)] border border-[color:color-mix(in_srgb,var(--accent)_20%,transparent)] text-[var(--accent)] flex items-center justify-center shadow-2xs shrink-0">
                   <span className="material-symbols-outlined text-[17px]">group</span>
                 </div>
                 <div>
@@ -416,7 +416,7 @@ export default function DashboardClient({ stats, profiles = [], companies = [] }
                 return (
                   <div
                     key={lawyer.id || lawyer.name}
-                    className="flex flex-col justify-between gap-2 p-3 rounded-xl bg-[var(--surface-2)]/70 hover:bg-[var(--surface-2)] border border-[var(--glass-border)] hover:border-[var(--accent)]/30 transition-all shadow-2xs group"
+                    className="flex flex-col justify-between gap-2 p-3 rounded-xl bg-[color:color-mix(in_srgb,var(--surface-2)_70%,transparent)] hover:bg-[var(--surface-2)] border border-[var(--glass-border)] hover:border-[color:color-mix(in_srgb,var(--accent)_30%,transparent)] transition-all shadow-2xs group"
                   >
                     {/* Top Row: Avatar + Name + Task Status Badge */}
                     <div className="flex items-start justify-between gap-2">
@@ -458,7 +458,7 @@ export default function DashboardClient({ stats, profiles = [], companies = [] }
                     </div>
 
                     {/* Middle Section: Task Capacity & Interactive Progress Ratio Bar */}
-                    <div className="space-y-1 pt-1 border-t border-[var(--line-soft)]/50">
+                    <div className="space-y-1 pt-1 border-t border-[color:color-mix(in_srgb,var(--line-soft)_50%,transparent)]">
                       <div className="flex items-center justify-between text-[10.5px] font-bold">
                         <span className="text-[var(--text-3)]">نسبة الإشغال:</span>
                         <span className={`font-mono ${isFree ? 'text-emerald-600 dark:text-emerald-400' : 'text-[var(--accent)]'}`}>
@@ -477,7 +477,7 @@ export default function DashboardClient({ stats, profiles = [], companies = [] }
 
                     {/* Bottom Micro Details: Direct Contact / Email */}
                     {(lawyer.email || lawyer.phone) && (
-                      <div className="flex items-center justify-between text-[10.5px] text-[var(--text-3)] font-mono pt-1 border-t border-[var(--line-soft)]/40 truncate">
+                      <div className="flex items-center justify-between text-[10.5px] text-[var(--text-3)] font-mono pt-1 border-t border-[color:color-mix(in_srgb,var(--line-soft)_40%,transparent)] truncate">
                         <span className="truncate" dir="ltr">
                           {lawyer.phone || lawyer.email}
                         </span>

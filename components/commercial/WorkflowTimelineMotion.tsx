@@ -147,7 +147,7 @@ export default function WorkflowTimelineMotion({
                   ? 'bg-amber-500/[0.05] dark:bg-amber-950/20 border-2 border-amber-500 shadow-[0_0_22px_rgba(245,158,11,0.22)] ring-2 ring-amber-500/20'
                   : isDone
                   ? 'bg-[var(--surface)] border border-emerald-500/40 shadow-xs hover:border-emerald-500/60'
-                  : 'bg-[var(--surface-2)]/60 border border-[var(--line-soft)] opacity-70 hover:opacity-90'
+                  : 'bg-[color:color-mix(in_srgb,var(--surface-2)_60%,transparent)] border border-[var(--line-soft)] opacity-70 hover:opacity-90'
               }`}
             >
               {/* 1. RIGHT SIDE (اليمين): Step Number / Spinner + Title + Badges + Subtitle */}

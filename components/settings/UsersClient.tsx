@@ -435,7 +435,7 @@ export default function UsersClient({ initialProfiles }: Props) {
           </select>
 
           {/* Counter Badge */}
-          <div className="px-3.5 py-2 rounded-xl bg-[var(--accent-soft)] border border-[var(--accent)]/20 text-[var(--accent)] text-xs font-bold whitespace-nowrap">
+          <div className="px-3.5 py-2 rounded-xl bg-[var(--accent-soft)] border border-[color:color-mix(in_srgb,var(--accent)_20%,transparent)] text-[var(--accent)] text-xs font-bold whitespace-nowrap">
             {filteredProfiles.length} مستخدم
           </div>
         </div>
@@ -458,7 +458,7 @@ export default function UsersClient({ initialProfiles }: Props) {
                 <th className="py-4 px-6 text-center">الإجراءات</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-[var(--glass-border)]/50">
+            <tbody className="divide-y divide-[color:color-mix(in_srgb,var(--glass-border)_50%,transparent)]">
               {filteredProfiles.map((u, idx) => {
                 const roleBadge = ROLE_BADGES[u.role] || ROLE_BADGES.lawyer
                 const userEmail = u.email || `${u.name.toLowerCase()}@khazraji-law.com`
@@ -468,7 +468,7 @@ export default function UsersClient({ initialProfiles }: Props) {
                   <tr
                     key={u.id}
                     className={`hover:bg-[var(--surface-3)] transition-colors ${
-                      u.active ? 'opacity-100' : 'opacity-60 bg-[var(--surface-2)]/40'
+                      u.active ? 'opacity-100' : 'opacity-60 bg-[color:color-mix(in_srgb,var(--surface-2)_40%,transparent)]'
                     }`}
                   >
                     {/* Full Name & Avatar */}
@@ -479,7 +479,7 @@ export default function UsersClient({ initialProfiles }: Props) {
                             u.role === 'super_admin'
                               ? 'bg-red-500/20 text-red-500 border border-red-500/30'
                               : u.active
-                              ? 'bg-[var(--accent-soft)] text-[var(--accent)] border border-[var(--accent)]/30'
+                              ? 'bg-[var(--accent-soft)] text-[var(--accent)] border border-[color:color-mix(in_srgb,var(--accent)_30%,transparent)]'
                               : 'bg-[var(--surface-3)] text-[var(--text-3)]'
                           }`}
                         >

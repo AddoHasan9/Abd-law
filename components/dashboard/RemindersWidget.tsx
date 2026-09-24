@@ -424,7 +424,7 @@ function ReminderItemCard({
           {item.company_id ? (
             <Link
               href={`/commercial/companies/${item.company_id}`}
-              className="inline-flex items-center gap-1 font-bold text-[var(--accent)] hover:underline bg-[var(--accent-soft)]/60 px-1.5 py-0.5 rounded text-[10.5px] transition-colors"
+              className="inline-flex items-center gap-1 font-bold text-[var(--accent)] hover:underline bg-[color:color-mix(in_srgb,var(--accent-soft)_60%,transparent)] px-1.5 py-0.5 rounded text-[10.5px] transition-colors"
             >
               <span>🏢</span>
               <span>{item.company_name || 'ملف الشركة'}</span>

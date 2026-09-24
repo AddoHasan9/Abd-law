@@ -161,7 +161,7 @@ export default function Topbar({ profile, title, subtitle, notifCount = 0, onMen
 
       {/* Rounded Glass Search Trigger */}
       <button
-        className="search-trigger group hover:border-[var(--accent)]/40 hover:shadow-md transition-all duration-200"
+        className="search-trigger group hover:border-[color:color-mix(in_srgb,var(--accent)_40%,transparent)] hover:shadow-md transition-all duration-200"
         onClick={() => {
           setIsCommandOpen(true)
           if (onSearch) onSearch()
@@ -169,7 +169,7 @@ export default function Topbar({ profile, title, subtitle, notifCount = 0, onMen
       >
         <span className="material-symbols-outlined text-[18px] text-[var(--text-3)] group-hover:text-[var(--accent)] transition-colors">search</span>
         <span className="group-hover:text-[var(--text)] transition-colors">البحث في النظام…</span>
-        <span className="kbd border border-[var(--glass-border)] bg-[var(--surface-3)]/80 text-[10.5px]">Ctrl K</span>
+        <span className="kbd border border-[var(--glass-border)] bg-[color:color-mix(in_srgb,var(--surface-3)_80%,transparent)] text-[10.5px]">Ctrl K</span>
       </button>
 
       <ReminderCenter />
@@ -185,7 +185,7 @@ export default function Topbar({ profile, title, subtitle, notifCount = 0, onMen
         <button
           type="button"
           onClick={() => setIsUserMenuOpen(prev => !prev)}
-          className="flex items-center gap-2 px-2.5 py-1 border-s border-[var(--border-soft)] hover:bg-[var(--surface-2)]/80 rounded-xl transition-all duration-200 cursor-pointer select-none text-right outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]"
+          className="flex items-center gap-2 px-2.5 py-1 border-s border-[var(--border-soft)] hover:bg-[color:color-mix(in_srgb,var(--surface-2)_80%,transparent)] rounded-xl transition-all duration-200 cursor-pointer select-none text-right outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]"
           aria-expanded={isUserMenuOpen}
           aria-haspopup="true"
           title="قائمة المستخدم"

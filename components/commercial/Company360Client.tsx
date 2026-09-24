@@ -669,7 +669,7 @@ export default function Company360Client({
             <div className="overflow-x-auto w-full">
               <table className="w-full border-collapse text-right text-xs">
                 <thead>
-                  <tr className="border-b border-[var(--border)] bg-[var(--surface-2)]/80 text-xs text-[var(--text-2)] font-bold">
+                  <tr className="border-b border-[var(--border)] bg-[color:color-mix(in_srgb,var(--surface-2)_80%,transparent)] text-xs text-[var(--text-2)] font-bold">
                     <th className="py-3 px-4 text-right">اسم المساهم</th>
                     <th className="py-3 px-3 text-center">صفة الشراكة</th>
                     <th className="py-3 px-3 text-center">عدد الأسهم (د.ع)</th>

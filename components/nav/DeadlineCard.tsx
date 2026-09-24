@@ -103,7 +103,7 @@ export default function DeadlineCard({ deadlines = [], item = null }: Props) {
         /* Empty / All Compliant State - Matches Screenshot Exactly */
         <Link
           href="/commercial/deposits"
-          className="block rounded-2xl bg-[var(--surface-2)] hover:bg-[var(--surface-3)] p-3 border border-[var(--line-soft)] hover:border-[var(--accent)]/40 transition-all group shadow-2xs"
+          className="block rounded-2xl bg-[var(--surface-2)] hover:bg-[var(--surface-3)] p-3 border border-[var(--line-soft)] hover:border-[color:color-mix(in_srgb,var(--accent)_40%,transparent)] transition-all group shadow-2xs"
         >
           <div className="flex items-center justify-between gap-2">
             <div className="flex items-center gap-2">
@@ -122,7 +122,7 @@ export default function DeadlineCard({ deadlines = [], item = null }: Props) {
             </div>
           </div>
 
-          <div className="text-[10.5px] text-[var(--text-3)] font-medium mt-2 pt-1.5 border-t border-[var(--line-soft)]/60 flex items-center gap-1">
+          <div className="text-[10.5px] text-[var(--text-3)] font-medium mt-2 pt-1.5 border-t border-[color:color-mix(in_srgb,var(--line-soft)_60%,transparent)] flex items-center gap-1">
             <span>✓ كافة المعاملات والمهل القانونية ضمن المدد المحددة</span>
           </div>
         </Link>
@@ -145,7 +145,7 @@ export default function DeadlineCard({ deadlines = [], item = null }: Props) {
                   ? 'bg-gradient-to-b from-rose-500/[0.08] to-rose-500/[0.02] border border-rose-500/30 hover:border-rose-500/50'
                   : warn
                   ? 'bg-gradient-to-b from-amber-500/[0.08] to-amber-500/[0.02] border border-amber-500/30 hover:border-amber-500/50'
-                  : 'bg-[var(--surface-2)]/90 border border-[var(--line)] hover:border-[var(--accent)]/50'
+                  : 'bg-[color:color-mix(in_srgb,var(--surface-2)_90%,transparent)] border border-[var(--line)] hover:border-[color:color-mix(in_srgb,var(--accent)_50%,transparent)]'
               }`}
             >
               {/* Top Sub-Header: Category Pill + Micro Controls */}

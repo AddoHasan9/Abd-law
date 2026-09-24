@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { DataPanel } from '@/components/ui/DataPanel'
 import CompanyFileLink from '@/components/commercial/CompanyFileLink'
 import { useRouter } from 'next/navigation'
 import { Icon } from '@/components/ui/Icon'
@@ -171,7 +172,7 @@ export default function CompaniesRegistryClient({ companies = [] }: Props) {
       </div>
 
       {/* Companies Standard Strip Table */}
-      <div className="glass-card !p-0 rounded-[22px] border-0 shadow-sm overflow-hidden bg-[var(--surface-glass)]">
+      <DataPanel icon="domain" title="سجل الشركات" subtitle="الشركات المتأسسة وبيانات مدرائها المفوضين" count={filteredCompanies.length} total={companiesList.length} unit="شركة">
         {filteredCompanies.length === 0 ? (
           <div className="p-8">
             <Empty
@@ -184,7 +185,7 @@ export default function CompaniesRegistryClient({ companies = [] }: Props) {
           <div className="w-full overflow-x-auto">
             <table className="w-full border-collapse text-right text-xs table-auto">
               <thead>
-                <tr className="border-b border-[var(--border-soft)] bg-[var(--surface-2)]/90 text-xs text-[var(--text-2)] font-bold">
+                <tr className="border-b border-[var(--border-soft)] bg-[color:color-mix(in_srgb,var(--surface-2)_90%,transparent)] text-xs text-[var(--text-2)] font-bold">
                   <th className="py-3 px-3 text-right">اسم الشركة</th>
                   <th className="py-3 px-2 text-center">النوع</th>
                   <th className="py-3 px-2 text-center">المدير المفوض</th>
@@ -210,7 +211,7 @@ export default function CompaniesRegistryClient({ companies = [] }: Props) {
                       {/* Company Name */}
                       <td className="py-2.5 px-3">
                         <div className="flex items-center gap-2.5">
-                          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[var(--accent-soft)] to-blue-500/10 border border-[var(--accent)]/20 text-[var(--accent)] flex items-center justify-center shrink-0 shadow-xs">
+                          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[var(--accent-soft)] to-blue-500/10 border border-[color:color-mix(in_srgb,var(--accent)_20%,transparent)] text-[var(--accent)] flex items-center justify-center shrink-0 shadow-xs">
                             <span className="material-symbols-outlined text-[17px]">domain</span>
                           </div>
                           <span className="font-bold text-[13.5px] text-[var(--text)] leading-snug break-words whitespace-normal" title={co.name}>
@@ -287,7 +288,7 @@ export default function CompaniesRegistryClient({ companies = [] }: Props) {
             </table>
           </div>
         )}
-      </div>
+      </DataPanel>
 
       {/* Add Established Company Modal */}
       {isAddModalOpen && (

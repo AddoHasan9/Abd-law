@@ -318,7 +318,7 @@ export default function QuickHelpGuide() {
                     className={`rounded-2xl border transition-all duration-200 overflow-hidden ${
                       isExpanded
                         ? 'bg-[var(--surface-2)] border-[#38BDF8]/40 shadow-md shadow-blue-500/5'
-                        : 'bg-[var(--surface-2)]/50 border-[var(--glass-border)] hover:border-[var(--line)]'
+                        : 'bg-[color:color-mix(in_srgb,var(--surface-2)_50%,transparent)] border-[var(--glass-border)] hover:border-[var(--line)]'
                     }`}
                   >
                     <button
@@ -357,7 +357,7 @@ export default function QuickHelpGuide() {
                     </button>
 
                     {isExpanded && (
-                      <div className="px-4 pb-4 pt-1 border-t border-[var(--line-soft)]/60 text-[var(--text-2)] animate-fade-in">
+                      <div className="px-4 pb-4 pt-1 border-t border-[color:color-mix(in_srgb,var(--line-soft)_60%,transparent)] text-[var(--text-2)] animate-fade-in">
                         {item.content}
                       </div>
                     )}

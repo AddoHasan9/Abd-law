@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback, useMemo } from 'react'
+import { DataPanel } from '@/components/ui/DataPanel'
 import CompanyFileLink from '@/components/commercial/CompanyFileLink'
 import { Icon } from '@/components/ui/Icon'
 import { Empty } from '@/components/ui/Empty'
@@ -213,7 +214,7 @@ export default function IDsClient({ companies = [], initialCompanyId }: Props) {
           <button
             type="button"
             onClick={() => setFocusedCompanyId(null)}
-            className="px-3 py-1 rounded-lg bg-[var(--surface)] text-[var(--accent)] text-xs font-bold border border-[var(--accent)]/30 hover:bg-[var(--surface-2)] transition-all"
+            className="px-3 py-1 rounded-lg bg-[var(--surface)] text-[var(--accent)] text-xs font-bold border border-[color:color-mix(in_srgb,var(--accent)_30%,transparent)] hover:bg-[var(--surface-2)] transition-all"
           >
             إلغاء التحديد وعرض كافة الشركات
           </button>
@@ -302,7 +303,7 @@ export default function IDsClient({ companies = [], initialCompanyId }: Props) {
       </div>
 
       {/* Table Records */}
-      <div className="glass-card !p-0 rounded-[22px] border-0 shadow-sm overflow-hidden bg-[var(--surface-glass)]">
+      <DataPanel icon="badge" title="سجل الهويات" subtitle="هويات الضريبة والغرفة التجارية والمستورد والتخطيط" count={filteredRecords.length} total={records.length} unit="هوية">
         {loading ? (
           <div className="p-10 text-center text-[var(--text-3)]">
             <div className="skeleton w-28 h-4 mx-auto mb-3" />
@@ -320,7 +321,7 @@ export default function IDsClient({ companies = [], initialCompanyId }: Props) {
           <div className="overflow-x-auto w-full">
             <table className="w-full border-collapse text-right text-xs table-auto">
               <thead>
-                <tr className="border-b border-[var(--border-soft)] bg-[var(--surface-2)]/80 text-xs text-[var(--text-2)] font-bold">
+                <tr className="border-b border-[var(--border-soft)] bg-[color:color-mix(in_srgb,var(--surface-2)_80%,transparent)] text-xs text-[var(--text-2)] font-bold">
                   <th className="py-3 px-3 text-right">الشركة</th>
                   <th className="py-3 px-2 text-center">نوع الهوية</th>
                   <th className="py-3 px-2 text-center">المدير المفوض</th>
@@ -348,7 +349,7 @@ export default function IDsClient({ companies = [], initialCompanyId }: Props) {
                       {/* Company Name */}
                       <td className="py-3.5 px-4">
                         <div className="flex items-center gap-3">
-                          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[var(--accent-soft)] to-blue-500/10 border border-[var(--accent)]/20 text-[var(--accent)] flex items-center justify-center shrink-0 shadow-xs">
+                          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[var(--accent-soft)] to-blue-500/10 border border-[color:color-mix(in_srgb,var(--accent)_20%,transparent)] text-[var(--accent)] flex items-center justify-center shrink-0 shadow-xs">
                             <span className="material-symbols-outlined text-[19px]">domain</span>
                           </div>
                           <span className="font-bold text-[13.5px] text-[var(--text)] leading-snug">
@@ -486,7 +487,7 @@ export default function IDsClient({ companies = [], initialCompanyId }: Props) {
             </table>
           </div>
         )}
-      </div>
+      </DataPanel>
 
       {/* Add / Edit ID Modal */}
       {isModalOpen && (

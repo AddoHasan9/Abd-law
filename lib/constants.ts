@@ -47,8 +47,11 @@ export const TX_TYPES: TxType[] = [
   { id: 'ss-statement',  label: 'كشف ضمان اجتماعي' },
 ]
 
+/** «tasis» اسم قديم لنفس خدمة التأسيس — بدونه تظهر معاملات التأسيس كـ«سجل غير مكتمل» */
+const TX_TYPE_ALIASES: Record<string, string> = { tasis: 'formation' }
+
 export const txType = (id: string): TxType =>
-  TX_TYPES.find(t => t.id === id) ?? { id, label: '—' }
+  TX_TYPES.find(t => t.id === (TX_TYPE_ALIASES[id] ?? id)) ?? { id, label: '—' }
 
 /* ============================================================
    2) الحالات والأولويات — مع أصناف الوسم

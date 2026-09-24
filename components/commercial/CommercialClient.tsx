@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useMemo, useEffect, useRef } from 'react'
+import { DataPanel } from '@/components/ui/DataPanel'
 import { createPortal } from 'react-dom'
 import { useRouter } from 'next/navigation'
 import { TX_TYPES, PRIORITIES, txType, priorityOf, formatDate, formatNumberWithCommas } from '@/lib/constants'
@@ -411,22 +412,8 @@ export default function CommercialClient({ rows = [], companies = [] }: Props) {
       </div>
 
       {/* 2. Main Transactions Interactive Table */}
-      <div className="glass-card !p-0 rounded-[22px] border-0 shadow-sm overflow-hidden bg-[var(--surface-glass)]">
-        {/* Table Title Header */}
-        <div className="p-4 sm:p-5 border-b border-[var(--border-soft)] flex items-center justify-between gap-4 bg-[var(--surface-2)]/60 backdrop-blur-md">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-[var(--accent-soft)] border border-[var(--accent)]/20 text-[var(--accent)] flex items-center justify-center shrink-0 shadow-xs">
-              <span className="material-symbols-outlined text-[20px]">table_rows</span>
-            </div>
-            <div>
-              <h3 className="text-base font-extrabold text-[var(--text)] tracking-tight">جدول المعاملات التجارية</h3>
-              <p className="text-xs text-[var(--text-3)] font-medium mt-0.5">متابعة كافة معاملات وحركات الشركات وقسم المحدودة</p>
-            </div>
-          </div>
-          <span className="text-xs font-bold text-[var(--accent)] bg-[var(--accent-soft)] border border-[var(--accent)]/25 px-3 py-1 rounded-full num">
-            {filteredRows.length} من {localRows.length} معاملة
-          </span>
-        </div>
+      <DataPanel icon="table_rows" title="جدول المعاملات التجارية" subtitle="متابعة كافة معاملات وحركات الشركات وقسم المحدودة" count={filteredRows.length} total={localRows.length} unit="معاملة">
+        
 
         {!localRows.length ? (
           <Empty
@@ -442,7 +429,7 @@ export default function CommercialClient({ rows = [], companies = [] }: Props) {
           <div className="overflow-x-auto w-full">
             <table className="w-full border-collapse text-right text-xs table-auto">
               <thead>
-                <tr className="border-b border-[var(--border-soft)] bg-[var(--surface-2)]/80 text-xs text-[var(--text-2)] font-bold">
+                <tr className="border-b border-[var(--border-soft)] bg-[color:color-mix(in_srgb,var(--surface-2)_80%,transparent)] text-xs text-[var(--text-2)] font-bold">
                   <th className="py-3 px-3 text-right">اسم الشركة</th>
                   <th className="py-3 px-2 text-center">نوع الخدمة</th>
                   <th className="py-3 px-2 text-center">المحامي المكلف</th>
@@ -476,7 +463,7 @@ export default function CommercialClient({ rows = [], companies = [] }: Props) {
                       {/* 1. Company Name */}
                       <td className="py-3.5 px-4">
                         <div className="flex items-center gap-3">
-                          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[var(--accent-soft)] to-blue-500/10 border border-[var(--accent)]/20 text-[var(--accent)] flex items-center justify-center shrink-0 shadow-xs">
+                          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[var(--accent-soft)] to-blue-500/10 border border-[color:color-mix(in_srgb,var(--accent)_20%,transparent)] text-[var(--accent)] flex items-center justify-center shrink-0 shadow-xs">
                             <span className="material-symbols-outlined text-[19px]">domain</span>
                           </div>
                           <div className="flex flex-col min-w-0">
@@ -649,7 +636,7 @@ export default function CommercialClient({ rows = [], companies = [] }: Props) {
             </table>
           </div>
         )}
-      </div>
+      </DataPanel>
 
       {/* Floating Actions Menu Portal (Floats smoothly above all containers) */}
       {activeMenuTx && menuCoords && typeof document !== 'undefined' && createPortal(

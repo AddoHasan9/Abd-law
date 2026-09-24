@@ -326,7 +326,7 @@ export default function CompaniesClient({ initialCompanies }: Props) {
         <div
           onClick={() => setActiveTab('all')}
           className={`glass-card p-4 sm:p-5 rounded-[22px] relative overflow-hidden group hover:-translate-y-1 hover:shadow-md transition-all duration-200 cursor-pointer ${
-            activeTab === 'all' ? 'ring-2 ring-[var(--accent)]/50 bg-[var(--accent)]/5' : ''
+            activeTab === 'all' ? 'ring-2 ring-[color:color-mix(in_srgb,var(--accent)_50%,transparent)] bg-[color:color-mix(in_srgb,var(--accent)_5%,transparent)]' : ''
           }`}
         >
           <div className="flex justify-between items-start mb-3 relative z-10">
@@ -334,7 +334,7 @@ export default function CompaniesClient({ initialCompanies }: Props) {
               <span className="text-[11px] font-bold uppercase tracking-wider text-[var(--text-3)] mb-0.5">إجمالي شركات التأسيس</span>
               <span className="text-3xl font-extrabold text-[var(--text)] num">{formationList.length}</span>
             </div>
-            <div className="w-10 h-10 rounded-xl bg-[var(--accent-soft)] border border-[var(--accent)]/20 flex items-center justify-center text-[var(--accent)] group-hover:scale-105 transition-transform">
+            <div className="w-10 h-10 rounded-xl bg-[var(--accent-soft)] border border-[color:color-mix(in_srgb,var(--accent)_20%,transparent)] flex items-center justify-center text-[var(--accent)] group-hover:scale-105 transition-transform">
               <span className="material-symbols-outlined text-[22px]">corporate_fare</span>
             </div>
           </div>
@@ -402,7 +402,7 @@ export default function CompaniesClient({ initialCompanies }: Props) {
             return (
               <div
                 key={co.id}
-                className="glass-card group relative p-4 rounded-[22px] bg-[var(--surface-glass)] backdrop-blur-xl border border-[var(--border)] hover:border-[var(--accent)]/50 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1.5 flex flex-col justify-between overflow-hidden cursor-pointer h-full shadow-xs"
+                className="glass-card group relative p-4 rounded-[22px] bg-[var(--surface-glass)] backdrop-blur-xl border border-[var(--border)] hover:border-[color:color-mix(in_srgb,var(--accent)_50%,transparent)] hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1.5 flex flex-col justify-between overflow-hidden cursor-pointer h-full shadow-xs"
                 onClick={() => handleCardClick(co)}
               >
                 {/* Glowing Top Indicator Bar */}
@@ -450,14 +450,14 @@ export default function CompaniesClient({ initialCompanies }: Props) {
                       entityType="company"
                       size="sm"
                     />
-                    <span className="text-[10.5px] font-extrabold text-[var(--accent)] bg-[var(--accent-soft)] border border-[var(--accent)]/25 px-2.5 py-0.5 rounded-full num shadow-xs">
+                    <span className="text-[10.5px] font-extrabold text-[var(--accent)] bg-[var(--accent-soft)] border border-[color:color-mix(in_srgb,var(--accent)_25%,transparent)] px-2.5 py-0.5 rounded-full num shadow-xs">
                       #{co.task_no ?? '—'}
                     </span>
                   </div>
                 </div>
 
                 {/* Facts Grid (شبكة البيانات المختصرة 2x2 مع أيقونات ناعمة) */}
-                <div className="grid grid-cols-2 gap-2.5 p-3 rounded-2xl bg-[var(--surface-2)]/80 border border-[var(--border-soft)] text-xs my-2.5">
+                <div className="grid grid-cols-2 gap-2.5 p-3 rounded-2xl bg-[color:color-mix(in_srgb,var(--surface-2)_80%,transparent)] border border-[var(--border-soft)] text-xs my-2.5">
                   <div className="flex flex-col min-w-0">
                     <span className="text-[10px] font-bold text-[var(--text-3)]">رقم الشهادة</span>
                     <span className="text-[11.5px] font-bold text-[var(--text)] truncate num mt-0.5" dir="ltr" style={{ textAlign: 'right' }}>
@@ -485,7 +485,7 @@ export default function CompaniesClient({ initialCompanies }: Props) {
                 </div>
 
                 {/* Dual Compact Indicators (حالة الوديعة + الحسابات الختامية) */}
-                <div className="grid grid-cols-2 gap-2 p-2.5 rounded-2xl bg-[var(--surface-2)]/60 border border-[var(--border-soft)] text-xs items-center mb-2.5">
+                <div className="grid grid-cols-2 gap-2 p-2.5 rounded-2xl bg-[color:color-mix(in_srgb,var(--surface-2)_60%,transparent)] border border-[var(--border-soft)] text-xs items-center mb-2.5">
                   {/* Deposit status */}
                   <div className="flex flex-col gap-1 min-w-0">
                     <span className="text-[10px] font-bold text-[var(--text-3)]">حالة الوديعة</span>
@@ -496,7 +496,7 @@ export default function CompaniesClient({ initialCompanies }: Props) {
                         </span>
                       ) : pen ? (
                         <span className={`inline-flex items-center text-[10.5px] font-bold px-2.5 py-0.5 rounded-full num truncate ${
-                          pen.level === 'late' ? 'text-rose-600 bg-rose-500/15 border border-rose-500/20' : pen.level === 'soon' ? 'text-amber-700 bg-amber-500/15 border border-amber-500/20' : 'text-[var(--accent)] bg-[var(--accent-soft)] border border-[var(--accent)]/20'
+                          pen.level === 'late' ? 'text-rose-600 bg-rose-500/15 border border-rose-500/20' : pen.level === 'soon' ? 'text-amber-700 bg-amber-500/15 border border-amber-500/20' : 'text-[var(--accent)] bg-[var(--accent-soft)] border border-[color:color-mix(in_srgb,var(--accent)_20%,transparent)]'
                         }`}>
                           متابعة ({pen.daysLeft}ي)
                         </span>
@@ -530,7 +530,7 @@ export default function CompaniesClient({ initialCompanies }: Props) {
                               type="button"
                               disabled={assigningId === co.id}
                               onClick={e => handleAssignFS(e, co.id, co.name)}
-                              className="inline-flex items-center gap-1 text-[10.5px] font-bold text-[var(--accent)] hover:text-white bg-[var(--accent-soft)] hover:bg-[var(--accent)] border border-[var(--accent)]/30 px-2.5 py-0.5 rounded-full transition-all truncate shadow-xs"
+                              className="inline-flex items-center gap-1 text-[10.5px] font-bold text-[var(--accent)] hover:text-white bg-[var(--accent-soft)] hover:bg-[var(--accent)] border border-[color:color-mix(in_srgb,var(--accent)_30%,transparent)] px-2.5 py-0.5 rounded-full transition-all truncate shadow-xs"
                               title="تكليف المكتب بالحسابات الختامية"
                             >
                               <span className="material-symbols-outlined text-[13px]">add_circle</span>

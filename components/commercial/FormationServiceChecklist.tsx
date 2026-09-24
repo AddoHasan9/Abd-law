@@ -37,7 +37,7 @@ export default function FormationServiceChecklist({ selected, onToggle }: Props)
               onClick={() => onToggle(srv.id)}
               className={`flex items-center gap-2.5 p-2.5 rounded-xl border transition-all duration-200 cursor-pointer select-none ${
                 isChecked
-                  ? 'bg-[var(--accent-soft)] border-[var(--accent)]/60 text-[var(--accent)] font-bold shadow-xs'
+                  ? 'bg-[var(--accent-soft)] border-[color:color-mix(in_srgb,var(--accent)_60%,transparent)] text-[var(--accent)] font-bold shadow-xs'
                   : 'bg-[var(--surface)] border-[var(--line-soft)] text-[var(--text-2)] hover:bg-[var(--surface-3)] hover:border-[var(--line)] font-medium'
               }`}
             >

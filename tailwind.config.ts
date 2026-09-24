@@ -1,6 +1,8 @@
 import type { Config } from 'tailwindcss'
 
 const config: Config = {
+  // الـ hover يشتغل فقط على الأجهزة اللي بيها ماوس — يمنع بقاء الصف ملوّن بعد اللمس على الموبايل
+  future: { hoverOnlyWhenSupported: true },
   content: ['./app/**/*.{ts,tsx}', './components/**/*.{ts,tsx}', './lib/**/*.{ts,tsx}'],
   darkMode: ['class', '[data-theme="dark"]'],
   theme: {

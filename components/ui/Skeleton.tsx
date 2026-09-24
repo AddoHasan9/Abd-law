@@ -62,7 +62,7 @@ export function SkeletonTable({ rows = 5, cols = 6 }: { rows?: number; cols?: nu
       </div>
       <div className="p-4 flex flex-col gap-4">
         {Array.from({ length: rows }).map((_, rIdx) => (
-          <div key={rIdx} className="flex items-center justify-between gap-4 py-2 border-b border-[var(--glass-border)]/40">
+          <div key={rIdx} className="flex items-center justify-between gap-4 py-2 border-b border-[color:color-mix(in_srgb,var(--glass-border)_40%,transparent)]">
             {Array.from({ length: cols }).map((_, cIdx) => (
               <Skeleton key={cIdx} width={`${Math.floor(100 / cols) - 2}%`} height="18px" borderRadius="6px" />
             ))}

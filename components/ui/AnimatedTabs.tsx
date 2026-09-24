@@ -58,7 +58,7 @@ export function AnimatedTabs<T extends string = string>({
         WebkitOverflowScrolling: 'touch',
         scrollBehavior: 'smooth',
       }}
-      className={`animated-tabs-track rounded-xl bg-[var(--surface-2)]/90 border border-[var(--glass-border)] overflow-x-auto scrollbar-none select-none relative shadow-2xs ${className}`}
+      className={`animated-tabs-track rounded-xl bg-[color:color-mix(in_srgb,var(--surface-2)_90%,transparent)] border border-[var(--glass-border)] overflow-x-auto scrollbar-none select-none relative shadow-2xs ${className}`}
       role="tablist"
     >
       {tabs.map(tab => {
@@ -95,7 +95,7 @@ export function AnimatedTabs<T extends string = string>({
             } font-bold rounded-lg transition-colors duration-150 whitespace-nowrap cursor-pointer shrink-0 ${
               isActive
                 ? 'text-white'
-                : 'text-[var(--text-3)] hover:text-[var(--text)] hover:bg-[var(--surface-3)]/40'
+                : 'text-[var(--text-3)] hover:text-[var(--text)] hover:bg-[color:color-mix(in_srgb,var(--surface-3)_40%,transparent)]'
             }`}
           >
             {/* Sliding Fluid Indicator via Framer Motion */}
