@@ -40,10 +40,10 @@ interface GroupedCompanyFS {
 }
 
 export default function FinancialStatementsClient({ companies = [] }: Props) {
-  const { can, isSuperAdmin, isAdmin } = usePermissions()
-  const canCreateFS = can('financial_statements', 'create') || isSuperAdmin || isAdmin
-  const canSubmitFS = can('financial_statements', 'submit') || isSuperAdmin || isAdmin
-  const canDeleteFS = can('financial_statements', 'delete') || isSuperAdmin || isAdmin
+  const { can } = usePermissions()
+  const canCreateFS = can('financial_statements', 'create')
+  const canSubmitFS = can('financial_statements', 'submit')
+  const canDeleteFS = can('financial_statements', 'delete')
   const [statements, setStatements] = useState<FinancialStatement[]>([])
   const [contactStatuses, setContactStatuses] = useState<Record<string, FSContactStatus>>({})
   const [loading, setLoading] = useState(true)

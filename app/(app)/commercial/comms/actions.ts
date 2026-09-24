@@ -1,5 +1,6 @@
 'use server'
 
+import { requireRecordAccess } from '@/lib/auth/record-access'
 import { revalidatePath } from 'next/cache'
 import { createAdminClient } from '@/lib/supabase/server'
 import { sendWhatsAppMessage } from '@/lib/whatsapp/send'
@@ -18,6 +19,11 @@ export async function sendCompanyWhatsAppAction(payload: {
   event_type: WhatsAppEventType
   attachment_url?: string
 }) {
+  if (payload.company_id) {
+    const access = await requireRecordAccess('companies', payload.company_id)
+    if (access) return access
+  }
+
   const denied = await requirePermission('companies', 'edit')
   if (denied) return denied
 
@@ -49,6 +55,14 @@ export async function sendCompanyWhatsAppAction(payload: {
 
 /** يحفظ الحدث في سجل التواصل بلا إرسال واتساب — خيار "حفظ فقط" */
 export async function logCompanyEventOnlyAction(companyId: string) {
+  if (companyId) {
+    const access = await requireRecordAccess('companies', companyId)
+    if (access) return access
+  }
+
+  const accessDenied = await requirePermission('companies', 'edit')
+  if (accessDenied) return accessDenied
+
   revalidatePath(`/commercial/companies/${companyId}`)
   return { success: true }
 }

@@ -1,5 +1,6 @@
 'use client'
 
+import { useRouter } from 'next/navigation'
 import { useState, useEffect } from 'react'
 import { Icon } from '@/components/ui/Icon'
 import type { UserRole } from '@/types/database'
@@ -29,6 +30,8 @@ const CATEGORY_NAMES: Record<keyof RolePermissions, { title: string; desc: strin
 }
 
 export default function PermissionsClient() {
+  const router = useRouter()
+  const [version, setVersion] = useState(0)
   const [selectedRole, setSelectedRole] = useState<UserRole>('admin')
   const [perms, setPerms] = useState<Record<UserRole, RolePermissions> | null>(null)
   const [loading, setLoading] = useState(true)
@@ -38,9 +41,11 @@ export default function PermissionsClient() {
   useEffect(() => {
     async function load() {
       const res = await getRolePermissionsAction()
-      if (res.success && res.data) {
+      if (res.success) {
         setPerms(res.data)
+        setVersion(res.version)
       }
+      else setMessage({ type: 'err', text: res.error || 'تعذر تحميل الصلاحيات' })
       setLoading(false)
     }
     load()
@@ -69,10 +74,13 @@ export default function PermissionsClient() {
     if (!perms) return
     setSaving(true)
     setMessage(null)
-    const res = await saveRolePermissionsAction(perms)
+    const res = await saveRolePermissionsAction(perms, version)
     setSaving(false)
 
     if (res.success) {
+      setVersion(res.version)
+      setPerms(res.data)
+      router.refresh()
       setMessage({ type: 'ok', text: 'تم حفظ وتطبيق مصفوفة الصلاحيات بنجاح' })
       setTimeout(() => setMessage(null), 3500)
     } else {
@@ -83,7 +91,7 @@ export default function PermissionsClient() {
   if (loading || !perms) {
     return (
       <div style={{ padding: '40px', textAlign: 'center', color: 'var(--text-3)' }}>
-        جاري تحميل مصفوفة الصلاحيات...
+        {loading ? 'جاري تحميل مصفوفة الصلاحيات...' : message?.text || 'تعذر تحميل الصلاحيات'}
       </div>
     )
   }

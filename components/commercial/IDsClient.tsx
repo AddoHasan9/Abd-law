@@ -27,9 +27,9 @@ const ID_TYPE_CONFIG: Record<string, { label: string; icon: string; tagClass: st
 }
 
 export default function IDsClient({ companies = [], initialCompanyId }: Props) {
-  const { can, isSuperAdmin, isAdmin } = usePermissions()
-  const canCreateID = can('government_ids', 'create') || isSuperAdmin || isAdmin
-  const canDeleteID = can('government_ids', 'delete') || isSuperAdmin || isAdmin
+  const { can } = usePermissions()
+  const canCreateID = can('government_ids', 'create')
+  const canDeleteID = can('government_ids', 'delete')
   const [records, setRecords] = useState<CompanyIDRecord[]>([])
   const [loading, setLoading] = useState(true)
 

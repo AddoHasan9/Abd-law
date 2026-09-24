@@ -1,3 +1,6 @@
+import { redirect } from 'next/navigation'
+import { readPermissions } from '@/lib/auth/permission-store'
+import { emptyPermissionsMatrix } from '@/lib/permissions'
 /**
  * تخطيط التطبيق — يجلب بيانات الهيكل مرة واحدة لكل طلب
  * ------------------------------------------------------------
@@ -21,9 +24,12 @@ import type { DeadlineItem } from '@/components/nav/DeadlineCard'
 export const dynamic = 'force-dynamic'
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
+  const verifiedProfile = await getProfile()
+  if (!verifiedProfile) redirect('/login?error=account_unavailable')
+  const permissions = await readPermissions().then(s => s.matrix).catch(() => emptyPermissionsMatrix())
   // تُجلب على التوازي لتقليل زمن الاستجابة
   const [profile, settings, txCounts, companies, submitted, expiryAlerts] = await Promise.all([
-    getProfile(),
+    Promise.resolve(verifiedProfile),
     getSettings(),
     countsByType().catch(() => ({})),
     listCompanies().catch(() => []),
@@ -138,6 +144,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
       <IconSprite />
       <AppShell
         profile={profile}
+        permissions={permissions}
         officeName={settings?.office_name ?? 'مكتب المحامي عبد الحسن الخزرجي'}
         txCounts={txCounts}
         badges={{}}

@@ -1,3 +1,4 @@
+import { requirePermission } from '@/lib/auth/require-permission'
 import nextDynamic from 'next/dynamic'
 import { SkeletonTable } from '@/components/ui/Skeleton'
 
@@ -13,6 +14,8 @@ export const metadata = { title: 'مصفوفة الصلاحيات والأذون
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
 
-export default function SettingsPermissionsPage() {
+export default async function SettingsPermissionsPage() {
+  const denied = await requirePermission('users', 'manage_permissions')
+  if (denied) return <p role="alert">{denied.error}</p>
   return <PermissionsClient />
 }

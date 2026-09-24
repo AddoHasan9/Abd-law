@@ -1,7 +1,9 @@
 'use server'
 
+import { readAuthorizedJsonFile } from '@/lib/auth/scoped-store'
+import { requireRecordAccess } from '@/lib/auth/record-access'
 import { revalidatePath } from 'next/cache'
-import { createAdminClient } from '@/lib/supabase/server'
+import { createAdminClient, createClient } from '@/lib/supabase/server'
 import type { FinancialStatement } from '@/types/database'
 import { createNotificationAction } from '@/app/(app)/notifications/actions'
 import { logTimelineEvent } from '@/lib/data/timeline'
@@ -9,9 +11,12 @@ import { requirePermission } from '@/lib/auth/require-permission'
 import { readJsonFile, writeJsonFile } from '@/lib/data/fs-store'
 
 export async function getFinancialStatementsAction(companyId?: string) {
-  const diskFS = readJsonFile<FinancialStatement[]>('financial_statements.json', [])
+  const accessDenied = await requirePermission('financial_statements', 'view')
+  if (accessDenied) return { success: false, data: [], error: accessDenied.error }
+
+  const diskFS = await readAuthorizedJsonFile<FinancialStatement[]>('financial_statements.json', [])
   try {
-    const supabase = createAdminClient()
+    const supabase = await createClient()
     let query = supabase
       .from('financial_statements')
       .select('*, companies(name)')
@@ -115,6 +120,11 @@ export async function createFinancialStatementsBatchAction(payload: {
     notes?: string
   }>
 }) {
+  if (payload.company_id) {
+    const access = await requireRecordAccess('companies', payload.company_id)
+    if (access) return access
+  }
+
   const denied = await requirePermission('financial_statements', 'create')
   if (denied) return denied
 
@@ -308,6 +318,9 @@ export async function updateFinancialStatementAction(
     notes?: string
   }
 ) {
+  const rowDenied = await requireRecordAccess('financial_statements', id)
+  if (rowDenied) return rowDenied
+
   const denied = await requirePermission(
     'financial_statements',
     (payload.date_submitted !== undefined || payload.date_submitted_tax !== undefined || payload.date_submitted_registrar !== undefined) ? 'submit' : 'create'
@@ -421,6 +434,9 @@ export async function markStatementSubmittedAction(id: string, dateSubmitted?: s
 }
 
 export async function deleteFinancialStatementAction(id: string) {
+  const rowDenied = await requireRecordAccess('financial_statements', id)
+  if (rowDenied) return rowDenied
+
   const denied = await requirePermission('financial_statements', 'delete')
   if (denied) return denied
 
@@ -450,10 +466,21 @@ export async function deleteFinancialStatementAction(id: string) {
 const inMemoryContactStatuses: Record<string, string> = {}
 
 export async function getFSContactStatusesAction() {
+  const accessDenied = await requirePermission('financial_statements', 'view')
+  if (accessDenied) return { success: false, data: {}, error: accessDenied.error }
+
   return { success: true, data: inMemoryContactStatuses }
 }
 
 export async function updateFSContactStatusAction(companyId: string, year: number, status: string) {
+  if (companyId) {
+    const access = await requireRecordAccess('companies', companyId)
+    if (access) return access
+  }
+
+  const accessDenied = await requirePermission('financial_statements', 'create')
+  if (accessDenied) return accessDenied
+
   const key = `${companyId}_${year}`
   inMemoryContactStatuses[key] = status
 
@@ -467,6 +494,9 @@ export async function updateCompanyFSSettingsAction(companyId: string, payload: 
   fs_first_method?: 'standard' | 'merge_next_year' | null
   financial_statements_enabled?: boolean | null
 }) {
+  const rowDenied = await requireRecordAccess('companies', companyId)
+  if (rowDenied) return rowDenied
+
   const denied = await requirePermission('financial_statements', 'create')
   if (denied) return denied
 

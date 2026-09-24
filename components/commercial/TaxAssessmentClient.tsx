@@ -20,9 +20,9 @@ interface Props {
 
 export default function TaxAssessmentClient({ assessments = [], companies = [], lawyers = [] }: Props) {
   const router = useRouter()
-  const { can, isSuperAdmin, isAdmin } = usePermissions()
-  const canManage = can('companies', 'create') || isSuperAdmin || isAdmin
-  const canDelete = can('companies', 'delete') || isSuperAdmin || isAdmin
+  const { can } = usePermissions()
+  const canManage = can('companies', 'create')
+  const canDelete = can('companies', 'delete')
 
   const [items, setItems] = useState<TaxAssessment[]>(assessments)
   const [searchTerm, setSearchTerm] = useState('')

@@ -44,21 +44,10 @@ export async function createClient() {
   )
 }
 
-let hasWarnedServiceRole = false
-
+/** Privileged access is explicit; never silently switch to an anonymous client. */
 export function createAdminClient() {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL!
-  const key = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-  if (!key) throw new Error('Supabase Key غير مضبوط')
-
-  if (!process.env.SUPABASE_SERVICE_ROLE_KEY && !hasWarnedServiceRole && process.env.NODE_ENV !== 'production') {
-    hasWarnedServiceRole = true
-    console.info(
-      '[createAdminClient] SUPABASE_SERVICE_ROLE_KEY غير مضبوط — تم استخدام مفتاح anon العام.'
-    )
-  }
-
-  return createSupabaseClient(url, key, {
-    auth: { persistSession: false },
-  })
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY
+  if (!url || !key) throw new Error('إعدادات Supabase الخاصة بالخادم غير مكتملة')
+  return createSupabaseClient(url, key, { auth: { persistSession: false, autoRefreshToken: false } })
 }

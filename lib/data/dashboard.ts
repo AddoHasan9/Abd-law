@@ -3,6 +3,7 @@
  * ------------------------------------------------------------
  * تجميع المؤشرات، المهل الحاضرة، الغرامات المتراكمة، وتوزيع المعاملات.
  */
+import { readAuthorizedJsonFile } from '@/lib/auth/scoped-store'
 import { createClient } from '@/lib/supabase/server'
 import { penaltyState, DEFAULT_PENALTY, txType } from '@/lib/constants'
 import { WORKFLOW_STATUS_LIST, normalizeWorkflowStatus } from '@/lib/workflow-status'
@@ -70,7 +71,6 @@ export interface DashboardStats {
 import { listCompanies } from '@/lib/data/companies'
 import { listTransactions } from '@/lib/data/transactions'
 import { listDeposits } from '@/lib/data/deposits'
-import { readJsonFile } from '@/lib/data/fs-store'
 
 export async function getDashboardStats(): Promise<DashboardStats> {
   try {
@@ -96,7 +96,7 @@ export async function getDashboardStats(): Promise<DashboardStats> {
     console.error('getDashboardStats deposits failed:', depositsResult.reason)
   }
 
-  const diskIDs = readJsonFile<Array<unknown>>('company_ids.json', [])
+  const diskIDs = await readAuthorizedJsonFile<Array<unknown>>('company_ids.json', [])
   const totalIDsCount = diskIDs.length || 0
 
   const establishedCompaniesCount = companies.filter(

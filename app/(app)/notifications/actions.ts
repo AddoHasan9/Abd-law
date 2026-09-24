@@ -1,13 +1,17 @@
 'use server'
 
+import { requirePermission } from '@/lib/auth/require-permission'
 import { revalidatePath } from 'next/cache'
-import { createAdminClient } from '@/lib/supabase/server'
+import { createAdminClient, createClient } from '@/lib/supabase/server'
 import type { NotificationItem, NotificationType } from '@/types/database'
 import { getCurrentUserProfile } from '@/lib/auth/require-permission'
 
 export async function getNotificationsAction(): Promise<{ success: boolean; data: NotificationItem[]; unreadCount: number }> {
+  const accessDenied = await requirePermission('notifications', 'view')
+  if (accessDenied) return { success: false, data: [], unreadCount: 0 }
+
   try {
-    const supabase = createAdminClient()
+    const supabase = await createClient()
     const { data, error } = await supabase
       .from('notifications')
       .select('*')
@@ -74,6 +78,8 @@ export async function createNotificationAction(payload: {
 }
 
 export async function markNotificationReadAction(id: string) {
+  const denied = await requirePermission('notifications', 'dismiss')
+  if (denied) return denied
   const profile = await getCurrentUserProfile()
   if (!profile) {
     return { success: false, error: 'يجب تسجيل الدخول لتحديث الإشعار' }
@@ -101,6 +107,8 @@ export async function markNotificationReadAction(id: string) {
 }
 
 export async function markAllNotificationsReadAction() {
+  const denied = await requirePermission('notifications', 'dismiss')
+  if (denied) return denied
   const profile = await getCurrentUserProfile()
   if (!profile) {
     return { success: false, error: 'يجب تسجيل الدخول لتحديث الإشعارات' }

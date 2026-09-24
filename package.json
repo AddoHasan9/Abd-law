@@ -6,9 +6,10 @@
     "dev": "node --max-old-space-size=4096 ./node_modules/next/dist/bin/next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint",
+    "lint": "eslint .",
     "test": "npx -y tsx --env-file=.env.local --test tests/*.test.ts",
-    "types": "supabase gen types typescript --project-id %SUPABASE_PROJECT_ID% > types/database.ts"
+    "types": "supabase gen types typescript --project-id %SUPABASE_PROJECT_ID% > types/database.ts",
+    "test:permissions": "node --test tests/permissions/*.test.cjs"
   },
   "dependencies": {
     "@formkit/auto-animate": "^0.10.0",
@@ -51,6 +52,7 @@
     "zod": "^3.25.76"
   },
   "devDependencies": {
+    "@electric-sql/pglite": "^0.5.8",
     "@types/node": "^22.10.0",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",

@@ -1,5 +1,6 @@
 'use server'
 
+import { requireRecordAccess } from '@/lib/auth/record-access'
 import { revalidatePath } from 'next/cache'
 import { createAdminClient } from '@/lib/supabase/server'
 import { logTimelineEvent } from '@/lib/data/timeline'
@@ -18,6 +19,11 @@ export async function createTrademarkAction(payload: {
   expiry_date?: string
   notes?: string
 }) {
+  if (payload.company_id) {
+    const access = await requireRecordAccess('companies', payload.company_id)
+    if (access) return access
+  }
+
   const denied = await requirePermission('companies', 'edit')
   if (denied) return denied
 

@@ -1,13 +1,10 @@
-/**
- * استعلامات وخدمات إدارة فريق العمل والمستخدمين
- * ------------------------------------------------------------
- * مصدر الحقيقة هو جدول profiles في Supabase مع التزامن مع profiles.json.
- * يدعم التعديل الكامل، التعطيل والتفعيل، والحذف الدائم من النظام والسحابة.
- */
-import { createAdminClient } from '@/lib/supabase/server'
-import type { Profile, UserRole, DepartmentTask, TransactionFull } from '@/types/database'
-import { readJsonFile, writeJsonFile } from '@/lib/data/fs-store'
-import { listTransactions } from '@/lib/data/transactions'
+import { z } from 'zod'
+import { createAdminClient, createClient } from '@/lib/supabase/server'
+import { getCurrentUserProfile, requirePermission, requireUserAdministration } from '@/lib/auth/require-permission'
+import { readPermissions } from '@/lib/auth/permission-store'
+import { assertManageableAccount } from '@/lib/auth/account-policy'
+import { USER_ROLES } from '@/lib/permissions'
+import type { Profile } from '@/types/database'
 
 export interface ProfileWithStats extends Profile {
   title?: string | null
@@ -16,268 +13,122 @@ export interface ProfileWithStats extends Profile {
   last_login?: string | null
 }
 
-const PRIMARY_ADMIN_ID = 'db13125d-3aa1-46ab-9159-8fad18746623'
+const userSchema = z.object({
+  id: z.string().uuid().optional(),
+  name: z.string().trim().min(1).max(200),
+  role: z.enum(USER_ROLES),
+  email: z.string().trim().email().optional(),
+  password: z.string().min(12, 'كلمة المرور يجب أن تكون 12 حرفاً على الأقل').max(128).optional(),
+  dept: z.string().trim().max(200).nullish(),
+  title: z.string().trim().max(200).nullish(),
+  phone: z.string().trim().max(40).nullish(),
+  active: z.boolean().default(true),
+}).strict()
+export type UserInput = z.input<typeof userSchema>
 
-export async function listProfiles(): Promise<ProfileWithStats[]> {
-  try {
-    const supabase = createAdminClient()
-
-    const { data, error } = await supabase
-      .from('profiles')
-      .select('*')
-      .order('created_at', { ascending: true })
-
-    const map = new Map<string, ProfileWithStats>()
-
-    const diskProfiles = readJsonFile<ProfileWithStats[]>('profiles.json', [])
-    diskProfiles.forEach(p => {
-      if (p.id) {
-        map.set(p.id, p)
-      }
-    })
-
-    if (!error && data && data.length > 0) {
-      data.forEach((p: Profile) => {
-        const diskP = map.get(p.id)
-        map.set(p.id, {
-          ...p,
-          title: p.dept || diskP?.title || 'عضو فريق',
-          email: p.email || diskP?.email || `${p.id}@khazraji-law.com`,
-          last_login: diskP?.last_login || null,
-        })
-      })
-    }
-
-    if (map.size === 0) {
-      map.set(PRIMARY_ADMIN_ID, {
-        id: PRIMARY_ADMIN_ID,
-        name: 'منتظر الخزرجي',
-        role: 'super_admin',
-        dept: 'الإدارة العامة',
-        title: 'مدير النظام الأعلى',
-        phone: '07801606600',
-        email: 'addo_97@outlook.com',
-        active: true,
-        created_at: '2026-08-05T11:58:53.324741+00:00',
-        last_login: new Date().toISOString(),
-        active_tx_count: 0,
-      })
-    }
-
-    const allProfiles = Array.from(map.values())
-
-    // 1. جلب المعاملات النشطة غير المكتملة لحساب عبء العمل المباشر لكل محامي
-    let activeTransactions: TransactionFull[] = []
-    try {
-      const txs = await listTransactions()
-      activeTransactions = txs.filter(
-        t => t.status !== 'completed' && t.status !== 'closed' && t.status !== 'cancelled' && t.status !== 'done'
-      )
-    } catch (txErr) {
-      console.warn('Could not fetch active transactions for workload:', txErr)
-    }
-
-    // 2. جلب المهام الفردية غير المنتهية
-    let pendingTasks: DepartmentTask[] = []
-    try {
-      pendingTasks = readJsonFile<DepartmentTask[]>('department_tasks.json', []).filter(
-        t => t.status !== 'completed' && t.status !== 'cancelled'
-      )
-    } catch {}
-
-    // 3. احتساب إجمالي عبء العمل لكل محامي ديناميكياً
-    return allProfiles.map(p => {
-      const pNameLower = p.name.trim().toLowerCase()
-      const pFirstName = pNameLower.split(' ')[0]
-
-      const txCount = activeTransactions.filter(t => {
-        if (t.lawyer_id === p.id) return true
-        if (t.profiles?.id === p.id) return true
-        const assignedName = ((t as unknown as { assigned_lawyer_name?: string }).assigned_lawyer_name || t.profiles?.name || '').trim().toLowerCase()
-        if (assignedName && (assignedName.includes(pFirstName) || pNameLower.includes(assignedName))) return true
-        return false
-      }).length
-
-      const taskCount = pendingTasks.filter(t => {
-        if (t.assigned_to === p.id) return true
-        const assignedName = (t.assigned_to || '').trim().toLowerCase()
-        if (assignedName && (assignedName.includes(pFirstName) || pNameLower.includes(assignedName))) return true
-        return false
-      }).length
-
-      return {
-        ...p,
-        active_tx_count: txCount + taskCount,
-      }
-    })
-  } catch {
-    return []
+/** Directory queries use session RLS; Auth emails are limited to user administrators. */
+export async function listProfiles(includeAuth = false): Promise<ProfileWithStats[]> {
+  if (!await getCurrentUserProfile()) throw new Error('الحساب غير مخول')
+  if (includeAuth) {
+    const denied = await requireUserAdministration()
+    if (denied) throw new Error(denied.error)
   }
+  const client = includeAuth ? createAdminClient() : await createClient()
+  const { data, error } = await client.from('profiles').select('*').order('created_at')
+  if (error) throw new Error('تعذر تحميل المستخدمين')
+  const profiles = (data || []) as ProfileWithStats[]
+  if (!includeAuth) return profiles
+  const authUsers = new Map<string, { email?: string; last_sign_in_at?: string }>()
+  for (let page = 1; ; page++) {
+    const { data, error } = await client.auth.admin.listUsers({ page, perPage: 1000 })
+    if (error) throw new Error('تعذر تحميل حسابات الدخول')
+    data.users.forEach(u => authUsers.set(u.id, u))
+    if (data.users.length < 1000) break
+  }
+  return profiles.map(p => ({ ...p, email: authUsers.get(p.id)?.email, last_login: authUsers.get(p.id)?.last_sign_in_at || null }))
 }
 
 export async function getProfile(id: string): Promise<ProfileWithStats | null> {
-  const profiles = await listProfiles()
-  return profiles.find(p => p.id === id) || null
+  const client = await createClient()
+  const { data, error } = await client.from('profiles').select('*').eq('id', id).maybeSingle()
+  if (error) throw new Error('تعذر تحميل المستخدم')
+  return data
 }
 
-export async function saveProfile(profile: Partial<ProfileWithStats> & { name: string; role: UserRole }): Promise<ProfileWithStats> {
-  const profiles = await listProfiles()
-  const now = new Date().toISOString()
-
-  let updatedProfile: ProfileWithStats
-
-  if (profile.id) {
-    const idx = profiles.findIndex(p => p.id === profile.id)
-    if (idx !== -1) {
-      updatedProfile = {
-        ...profiles[idx],
-        ...profile,
-        name: profile.name.trim(),
-        role: profile.role,
-        dept: profile.dept ?? profiles[idx].dept ?? null,
-        title: profile.title ?? profiles[idx].title ?? 'عضو فريق',
-        phone: profile.phone ?? profiles[idx].phone ?? null,
-        email: profile.email ?? profiles[idx].email ?? undefined,
-        active: profile.active ?? profiles[idx].active ?? true,
-      }
-      profiles[idx] = updatedProfile
-    } else {
-      updatedProfile = {
-        id: profile.id,
-        name: profile.name.trim(),
-        role: profile.role,
-        dept: profile.dept || null,
-        title: profile.title || 'عضو فريق',
-        phone: profile.phone || null,
-        email: profile.email || `${profile.name.toLowerCase()}@khazraji-law.com`,
-        active: profile.active ?? true,
-        created_at: now,
-        last_login: now,
-      }
-      profiles.push(updatedProfile)
-    }
-  } else {
-    updatedProfile = {
-      id: `prof_${Date.now()}`,
-      name: profile.name.trim(),
-      role: profile.role,
-      dept: profile.dept || null,
-      title: profile.title || 'عضو فريق',
-      phone: profile.phone || null,
-      email: profile.email || `${profile.name.toLowerCase()}@khazraji-law.com`,
-      active: profile.active ?? true,
-      created_at: now,
-      last_login: now,
-    }
-    profiles.push(updatedProfile)
+export async function authorizeAccountMutation(action: string, targetId?: string, nextRole?: Profile['role']) {
+  const denied = await requirePermission('users', action)
+  if (denied) throw new Error(denied.error)
+  const actor = await getCurrentUserProfile()
+  if (!actor) throw new Error('الحساب غير مخول')
+  const client = createAdminClient()
+  let target: ProfileWithStats | null = null
+  if (targetId) {
+    z.string().uuid().parse(targetId)
+    const { data, error } = await client.from('profiles').select('*').eq('id', targetId).single()
+    if (error || !data) throw new Error('المستخدم غير موجود')
+    target = data as ProfileWithStats
   }
+  const matrix = actor.role === 'super_admin' ? undefined : (await readPermissions()).matrix
+  assertManageableAccount(actor, target, nextRole, matrix)
+  return { client, actor, target }
+}
 
-  writeJsonFile('profiles.json', profiles)
-
-  // Try updating Supabase as well
-  try {
-    const supabase = createAdminClient()
-    await supabase.from('profiles').upsert({
-      id: updatedProfile.id.startsWith('prof_') ? undefined : updatedProfile.id,
-      name: updatedProfile.name,
-      role: updatedProfile.role,
-      dept: updatedProfile.dept,
-      phone: updatedProfile.phone,
-      active: updatedProfile.active,
-    })
-  } catch (err) {
-    console.warn('Supabase saveProfile notice:', err)
+export async function saveProfile(input: UserInput): Promise<ProfileWithStats> {
+  const payload = userSchema.parse(input)
+  const { client, target } = await authorizeAccountMutation(payload.id ? 'edit_users' : 'create_users', payload.id, payload.role)
+  const fields = { name: payload.name, role: payload.role, dept: payload.dept || null, title: payload.title || null, phone: payload.phone || null, active: payload.active }
+  if (target) {
+    // Identity/email/password are separate operations and cannot be mass-assigned.
+    const { data, error } = await client.from('profiles').update(fields).eq('id', target.id).eq('role', target.role).select('*').single()
+    if (error || !data) throw new Error('تعذر حفظ المستخدم أو تغيرت رتبته أثناء التعديل. أعد تحميل الصفحة')
+    const { data: auth, error: authError } = await client.auth.admin.getUserById(target.id)
+    if (authError) return data as ProfileWithStats
+    return { ...data, email: auth.user.email } as ProfileWithStats
   }
-
-  return updatedProfile
+  if (!payload.email || !payload.password) throw new Error('البريد الإلكتروني وكلمة المرور مطلوبان لإنشاء حساب دخول')
+  // The DB signup trigger creates an inactive staff profile. No metadata grants a role.
+  const { data: auth, error: authError } = await client.auth.admin.createUser({
+    email: payload.email, password: payload.password, email_confirm: true,
+    user_metadata: { full_name: payload.name },
+  })
+  if (authError || !auth.user) throw new Error('تعذر إنشاء حساب الدخول. تحقق من البريد وكلمة المرور وأن الحساب غير موجود مسبقاً')
+  const { data, error } = await client.from('profiles').update(fields).eq('id', auth.user.id).select('*').single()
+  if (error || !data) {
+    const cleanup = await client.auth.admin.deleteUser(auth.user.id)
+    if (cleanup.error) throw new Error('لم تكتمل إضافة المستخدم وتعذر إزالة حساب الدخول الجزئي. راجع حسابات Auth قبل إعادة المحاولة')
+    throw new Error('لم تكتمل إضافة المستخدم وتم التراجع عن حساب الدخول')
+  }
+  return { ...data, email: auth.user.email } as ProfileWithStats
 }
 
 export async function toggleProfileActive(id: string): Promise<boolean> {
-  const profiles = await listProfiles()
-  const target = profiles.find(p => p.id === id)
-  if (!target) return false
-
-  target.active = !target.active
-  writeJsonFile('profiles.json', profiles)
-
-  try {
-    const supabase = createAdminClient()
-    await supabase.from('profiles').update({ active: target.active }).eq('id', id)
-  } catch {}
-
-  return target.active
+  const { client, target } = await authorizeAccountMutation('edit_users', id)
+  const active = !target!.active
+  const { data, error } = await client.from('profiles').update({ active }).eq('id', id)
+    .eq('role', target!.role).eq('active', target!.active).select('id').single()
+  if (error || !data) throw new Error('تعذر تغيير حالة الحساب. أعد تحميل الصفحة')
+  return active
 }
 
-/** Soft Delete: Deactivates user account */
 export async function deleteProfile(id: string): Promise<boolean> {
-  const profiles = await listProfiles()
-  const target = profiles.find(p => p.id === id)
-  if (!target) return false
-
-  target.active = false
-  writeJsonFile('profiles.json', profiles)
-
-  try {
-    const supabase = createAdminClient()
-    await supabase.from('profiles').update({ active: false }).eq('id', id)
-  } catch {}
-
+  const { client, target } = await authorizeAccountMutation('delete_users', id)
+  const { data, error } = await client.from('profiles').update({ active: false }).eq('id', id).eq('role', target!.role).select('id').single()
+  if (error || !data) throw new Error('تعذر تعطيل الحساب')
   return true
 }
 
-/** Permanent Delete: Removes user permanently from Supabase Auth, Profiles table, and disk storage */
 export async function permanentDeleteProfile(id: string): Promise<boolean> {
-  if (id === PRIMARY_ADMIN_ID) {
-    throw new Error('لا يمكن حذف حساب مدير النظام الرئيسي (Super Admin)')
-  }
-
-  // 1. Remove from local profiles.json
-  const profiles = readJsonFile<ProfileWithStats[]>('profiles.json', [])
-  const filtered = profiles.filter(p => p.id !== id)
-  writeJsonFile('profiles.json', filtered)
-
-  // 2. Unassign from active transactions to preserve relational integrity
-  try {
-    const diskTxs = readJsonFile<Array<Record<string, unknown>>>('transactions.json', [])
-    let changed = false
-    diskTxs.forEach(t => {
-      if (t.lawyer_id === id) {
-        t.lawyer_id = null
-        changed = true
-      }
-    })
-    if (changed) {
-      writeJsonFile('transactions.json', diskTxs)
-    }
-  } catch {}
-
-  // 3. Delete from Supabase profiles and Supabase Auth
-  try {
-    const supabase = createAdminClient()
-    
-    // Set lawyer_id to null on transactions
-    try {
-      await supabase.from('transactions').update({ lawyer_id: null }).eq('lawyer_id', id)
-    } catch {}
-
-    // Delete from profiles table
-    try {
-      await supabase.from('profiles').delete().eq('id', id)
-    } catch (e) {
-      console.warn('Supabase delete profile notice:', e)
-    }
-
-    // Delete user from Supabase Auth
-    try {
-      if (!id.startsWith('prof_')) {
-        await supabase.auth.admin.deleteUser(id)
-      }
-    } catch (authErr) {
-      console.warn('Supabase auth delete user notice:', authErr)
-    }
-  } catch (err) {
-    console.warn('permanentDeleteProfile exception:', err)
-  }
-
+  const { client } = await authorizeAccountMutation('delete_users', id)
+  // FK cascades remove the profile atomically; SET NULL retains historical records.
+  // A DB trigger also protects super admins if their role changes concurrently.
+  const { error } = await client.auth.admin.deleteUser(id)
+  if (error) throw new Error('تعذر حذف حساب الدخول. لم يتم حذف ملفه مسبقاً أو إخفاؤه محلياً')
   return true
+}
+
+export async function resetProfilePassword(id: string, password: string) {
+  z.string().min(12, 'كلمة المرور يجب أن تكون 12 حرفاً على الأقل').max(128).parse(password)
+  const { client } = await authorizeAccountMutation('edit_users', id)
+  const { error } = await client.auth.admin.updateUserById(id, { password })
+  if (error) throw new Error('تعذر تحديث كلمة المرور')
 }

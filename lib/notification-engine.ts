@@ -12,8 +12,9 @@
  * ⚫ < 0 أيام     ← منتهية الصلاحية (Expired).
  */
 
-import { createAdminClient } from '@/lib/supabase/server'
-import { readJsonFile } from '@/lib/data/fs-store'
+import { readAuthorizedJsonFile } from '@/lib/auth/scoped-store'
+import { requirePermission } from '@/lib/auth/require-permission'
+import { createClient } from '@/lib/supabase/server'
 import type { CompanyIDRecord, Company } from '@/types/database'
 
 export type AlertCategory =
@@ -165,11 +166,14 @@ export function calculateExpiryDaysAndPriority(expiryDateStr: string): {
 
 /** يجلب كافة التنبيهات النشطة للهويات القانونية التي تفصلها 60 يوماً أو أقل عن الانتهاء مع فرز ذكي */
 export async function getActiveExpiryAlerts(): Promise<ExpiryAlertItem[]> {
+  const accessDenied = await requirePermission('government_ids', 'view')
+  if (accessDenied) return []
+
   const alerts: ExpiryAlertItem[] = []
   const seenKeys = new Set<string>()
 
   try {
-    const supabase = createAdminClient()
+    const supabase = await createClient()
 
     // 1. جلب الهويات الحكومية من قاعدة البيانات Supabase
     try {
@@ -217,8 +221,8 @@ export async function getActiveExpiryAlerts(): Promise<ExpiryAlertItem[]> {
 
     // 2. فحص التخزين القرصي المساعد (company_ids.json & companies.json)
     try {
-      const diskIDs = readJsonFile<CompanyIDRecord[]>('company_ids.json', [])
-      const diskCompanies = readJsonFile<Company[]>('companies.json', [])
+      const diskIDs = await readAuthorizedJsonFile<CompanyIDRecord[]>('company_ids.json', [])
+      const diskCompanies = await readAuthorizedJsonFile<Company[]>('companies.json', [])
       const compMap = new Map<string, string>()
       diskCompanies.forEach(c => compMap.set(c.id, c.name))
 

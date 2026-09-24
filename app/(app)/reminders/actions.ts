@@ -10,6 +10,7 @@ import { getCurrentUserProfile } from '@/lib/auth/require-permission'
 const inMemoryReminders: ReminderItem[] = []
 
 export async function getRemindersAction(filter?: 'active' | 'completed' | 'archived' | 'all' | 'pending') {
+  if (!await getCurrentUserProfile()) return { success: false, data: [], error: 'الحساب غير مخول' }
   try {
     const supabase = createAdminClient()
     let query = supabase.from('reminders').select('*').order('created_at', { ascending: false })
@@ -296,7 +297,7 @@ export async function deleteReminderAction(id: string) {
 /**
   فحص آلي للتذكيرات المستحقة التي حان موعدها ولم يُرسل بها إشعار سابقاً
  */
-export async function checkAndTriggerDueRemindersAction(reminders: ReminderItem[]) {
+async function checkAndTriggerDueRemindersAction(reminders: ReminderItem[]) {
   try {
     const now = new Date()
     const todayStr = now.toISOString().slice(0, 10)

@@ -25,8 +25,8 @@ export default function CompaniesClient({ initialCompanies }: Props) {
   const router = useRouter()
   const searchParams = useSearchParams()
   const targetId = searchParams.get('id') || searchParams.get('companyId')
-  const { can, isSuperAdmin, isAdmin } = usePermissions()
-  const canCreateCompany = can('companies', 'create') || isSuperAdmin || isAdmin
+  const { can } = usePermissions()
+  const canCreateCompany = can('companies', 'create')
   const [companiesList, setCompaniesList] = useState<CompanyWithWorkflow[]>(initialCompanies)
   const [selectedCompany, setSelectedCompany] = useState<CompanyWithWorkflow | null>(null)
   const [isDetailsOpen, setIsDetailsOpen] = useState(false)

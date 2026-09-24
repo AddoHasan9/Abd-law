@@ -65,6 +65,14 @@ export default function LoginForm() {
         return
       }
 
+      const { data: profile, error: profileError } = await supabase.from('profiles')
+        .select('active').eq('id', authData.user!.id).maybeSingle()
+      if (profileError || profile?.active !== true) {
+        await supabase.auth.signOut()
+        toast.error('الحساب معطل أو غير مهيأ. يرجى مراجعة مدير النظام')
+        return
+      }
+
       // Success Feedback
       toast.success('تم التحقق بنجاح، جاري تهيئة لوحة التحكم...')
       setIsRedirecting(true)
