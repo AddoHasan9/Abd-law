@@ -906,6 +906,7 @@ export default function CommercialClient({ rows = [], companies = [] }: Props) {
                 })
 
                 if (res.success) {
+                  toast.success('تم حفظ تعديلات المعاملة')
                   // تحديث حالة العميل التفاعلية مباشرة حتى يظهر السجل المكتمل بالبيانات الحقيقية
                   setLocalRows(prev =>
                     prev.map(t => {

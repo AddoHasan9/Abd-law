@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { toast } from 'sonner'
 import CompanyFileLink from '@/components/commercial/CompanyFileLink'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { wfProgress, formatMoney, formatDate, penaltyState } from '@/lib/constants'
@@ -67,6 +68,7 @@ export default function CompaniesClient({ initialCompanies }: Props) {
       setTimeout(() => setNotification(null), 6000)
       return
     }
+    toast.success('تم تحديث إعدادات الحسابات الختامية')
 
     const currentYear = new Date().getFullYear()
     await createFinancialStatementAction({ company_id: companyId, year: currentYear })

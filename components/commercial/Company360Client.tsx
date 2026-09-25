@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useMemo, useEffect } from 'react'
+import { toast } from 'sonner'
 import { Mi } from '@/components/ui/Mi'
 import { confirmAction } from '@/components/ui/ConfirmDialog'
 import Link from 'next/link'
@@ -336,6 +337,7 @@ export default function Company360Client({
     })
     setLoading(false)
     if (res.success) {
+      toast.success('تمت إضافة المستند')
       setIsUploadModalOpen(false)
       setDocName('')
       router.refresh()
@@ -372,6 +374,7 @@ export default function Company360Client({
     })
     setLoading(false)
     if (res.success) {
+      toast.success('تمت إضافة العلامة التجارية')
       setIsTrademarkFormOpen(false)
       setTmName('')
       setTmRegNo('')

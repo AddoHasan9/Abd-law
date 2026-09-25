@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
+import { toast } from 'sonner'
 import { Mi } from '@/components/ui/Mi'
 import { confirmAction } from '@/components/ui/ConfirmDialog'
 import CompanyFileLink from '@/components/commercial/CompanyFileLink'
@@ -482,6 +483,7 @@ export default function CompanyDetailsModal({ company, isOpen, onClose, onDelete
     const res = await launchDepositWorkflowAction(company.id)
     setLoading(false)
     if (res.success) {
+      toast.success('تم إطلاق مسار الوديعة')
       setMessage({ type: 'ok', text: '✓ تم إطلاق مسار الوديعة بنجاح! جاري الانتقال لقسم إطلاق الوديعة...' })
       setTimeout(() => {
         onClose()
@@ -508,6 +510,7 @@ export default function CompanyDetailsModal({ company, isOpen, onClose, onDelete
     setLoading(false)
 
     if (res.success) {
+      toast.success('تم حذف الشركة')
       if (onDelete) onDelete(company.id)
       onClose()
       router.refresh()
@@ -1464,6 +1467,7 @@ export default function CompanyDetailsModal({ company, isOpen, onClose, onDelete
                           const res = await updateCompanyFSSettingsAction(company.id, { financial_statements_enabled: true })
                           setLoading(false)
                           if (res.success) {
+                            toast.success('تم تحديث إعدادات الحسابات الختامية')
                             setMessage({ type: 'ok', text: 'تم تكليف المكتب بالحسابات الختامية بنجاح' })
                             router.refresh()
                           } else {
@@ -1495,6 +1499,7 @@ export default function CompanyDetailsModal({ company, isOpen, onClose, onDelete
                           const res = await updateCompanyFSSettingsAction(company.id, { financial_statements_enabled: false })
                           setLoading(false)
                           if (res.success) {
+                            toast.success('تم تحديث إعدادات الحسابات الختامية')
                             setMessage({ type: 'ok', text: 'تم إلغاء تكليف المكتب بالحسابات الختامية' })
                             router.refresh()
                           } else {

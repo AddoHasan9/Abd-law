@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { toast } from 'sonner'
 import { Mi } from '@/components/ui/Mi'
 import { confirmAction } from '@/components/ui/ConfirmDialog'
 import CompanyFileLink from '@/components/commercial/CompanyFileLink'
@@ -137,6 +138,7 @@ export default function LLCTransactionDetailsModal({
     setLoading(false)
 
     if (res.success) {
+      toast.success('تم حفظ تعديلات المعاملة')
       if (onUpdated) onUpdated()
       onClose()
     } else {

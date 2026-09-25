@@ -231,6 +231,7 @@ export default function UsersClient({ initialProfiles }: Props) {
     setLoading(false)
 
     if (res.success) {
+      toast.success('تم حفظ بيانات المستخدم')
       if (editingUser) {
         setProfiles(prev => prev.map(p => (p.id === res.data!.id ? res.data! : p)))
         setMessage({ type: 'ok', text: 'تم تحديث بيانات ورتبة المستخدم بنجاح' })
@@ -256,6 +257,7 @@ export default function UsersClient({ initialProfiles }: Props) {
     const res = await toggleUserActiveAction(user.id)
     if (!res.success) setMessage({ type: 'err', text: res.error })
     if (res.success) {
+      toast.success('تم تحديث حالة الحساب')
       setProfiles(prev => prev.map(p => (p.id === user.id ? { ...p, active: res.active! } : p)))
       const auditRes = await getUserAuditLogsAction()
       if (auditRes.success && auditRes.data) setAuditLogs(auditRes.data)
@@ -277,6 +279,7 @@ export default function UsersClient({ initialProfiles }: Props) {
     const res = await deleteUserAction(user.id)
     if (!res.success) setMessage({ type: 'err', text: res.error })
     if (res.success) {
+      toast.success('تمت أرشفة الحساب')
       setProfiles(prev => prev.map(p => (p.id === user.id ? { ...p, active: false } : p)))
       setMessage({ type: 'ok', text: `تم تعطيل وأرشفة حساب ${user.name} مع حفظ كافة السجلات` })
       const auditRes = await getUserAuditLogsAction()
@@ -302,6 +305,7 @@ export default function UsersClient({ initialProfiles }: Props) {
     setLoading(false)
 
     if (res.success) {
+      toast.success('تم حذف المستخدم نهائياً')
       setProfiles(prev => prev.filter(p => p.id !== user.id))
       setMessage({ type: 'ok', text: `تم حذف المستخدم ${user.name} نهائياً من النظام وقاعدة البيانات` })
       const auditRes = await getUserAuditLogsAction()
@@ -318,6 +322,7 @@ export default function UsersClient({ initialProfiles }: Props) {
     const res = await resetUserPasswordAction(resetPassUser.id, newPassword)
     setLoading(false)
     if (res.success) {
+      toast.success('تم تغيير كلمة المرور')
       setMessage({ type: 'ok', text: res.message || 'تم تحديث كلمة المرور' })
       setResetPassUser(null)
       setNewPassword('')

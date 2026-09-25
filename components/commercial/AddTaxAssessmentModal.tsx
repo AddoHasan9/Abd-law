@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { toast } from 'sonner'
 import { createPortal } from 'react-dom'
 import { Icon } from '@/components/ui/Icon'
 import { useModalBodyLock } from '@/lib/hooks/useModalBodyLock'
@@ -184,6 +185,7 @@ export default function AddTaxAssessmentModal({
 
     setLoading(false)
     if (res.success) {
+      toast.success('تم حفظ ملف التحاسب الضريبي')
       onSuccess?.()
       onClose()
     } else {

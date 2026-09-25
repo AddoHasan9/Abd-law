@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
+import { toast } from 'sonner'
 import { Mi } from '@/components/ui/Mi'
 import { createPortal } from 'react-dom'
 import { Icon } from '@/components/ui/Icon'
@@ -190,6 +191,7 @@ export default function AddIDModal({
           setLoading(false)
           return
         }
+        toast.success('تم حفظ تعديلات الهوية')
 
         if (res.record && onSaved) onSaved(res.record)
       } else {
@@ -213,6 +215,7 @@ export default function AddIDModal({
           setLoading(false)
           return
         }
+        toast.success('تمت إضافة الهوية بنجاح')
 
         if (res.record && onSaved) onSaved(res.record)
       }

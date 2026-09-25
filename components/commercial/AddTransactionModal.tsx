@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
+import { toast } from 'sonner'
 import { createPortal } from 'react-dom'
 import { Icon } from '@/components/ui/Icon'
 import { TX_TYPES, formatNumberWithCommas } from '@/lib/constants'
@@ -112,6 +113,7 @@ export default function AddTransactionModal({ isOpen, onClose, companies, lawyer
 
     setLoading(false)
     if (res.success) {
+      toast.success('تمت إضافة المعاملة بنجاح')
       onClose()
     } else {
       setError(res.error || 'حدث خطأ أثناء حفظ المعاملة')

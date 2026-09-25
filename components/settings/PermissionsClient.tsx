@@ -1,6 +1,7 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
+import { toast } from 'sonner'
 import { useState, useEffect } from 'react'
 import { Icon } from '@/components/ui/Icon'
 import type { UserRole } from '@/types/database'
@@ -78,6 +79,7 @@ export default function PermissionsClient() {
     setSaving(false)
 
     if (res.success) {
+      toast.success('تم حفظ الصلاحيات')
       setVersion(res.version)
       setPerms(res.data)
       router.refresh()

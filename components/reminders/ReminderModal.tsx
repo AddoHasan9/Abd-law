@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { toast } from 'sonner'
 import { Mi } from '@/components/ui/Mi'
 import { createPortal } from 'react-dom'
 import { Icon } from '@/components/ui/Icon'
@@ -99,6 +100,7 @@ export default function ReminderModal({ isOpen, onClose, companies = [], editing
     setLoading(false)
 
     if (res.success) {
+      toast.success('تم حفظ التذكير')
       onClose()
     } else {
       setError(res.error || 'فشل حفظ التذكير الشخصي')

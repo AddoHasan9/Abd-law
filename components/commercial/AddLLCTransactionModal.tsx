@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
+import { toast } from 'sonner'
 import { Mi } from '@/components/ui/Mi'
 import { createPortal } from 'react-dom'
 import { Icon } from '@/components/ui/Icon'
@@ -165,6 +166,7 @@ export default function AddLLCTransactionModal({
     setLoading(false)
 
     if (res.success) {
+      toast.success('تمت إضافة المعاملة بنجاح')
       if (onSuccess) onSuccess()
       onClose()
     } else {

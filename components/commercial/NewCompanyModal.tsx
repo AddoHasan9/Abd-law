@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { toast } from 'sonner'
 import { Mi } from '@/components/ui/Mi'
 import { useRouter } from 'next/navigation'
 import { createPortal } from 'react-dom'
@@ -267,6 +268,7 @@ export default function NewCompanyModal({ isOpen, onClose }: Props) {
     setLoading(false)
 
     if (res.success) {
+      toast.success('تم إنشاء معاملة التأسيس بنجاح')
       router.refresh()
       onClose()
     } else {

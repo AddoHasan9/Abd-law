@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { toast } from 'sonner'
 import { Mi } from '@/components/ui/Mi'
 import { createPortal } from 'react-dom'
 import { Icon } from '@/components/ui/Icon'
@@ -302,6 +303,7 @@ export default function AddEstablishedCompanyModal({ isOpen, onClose, onSuccess 
     setLoading(false)
 
     if (res.success) {
+      toast.success('تمت إضافة الشركة بنجاح')
       if (onSuccess) onSuccess(res.company)
       onClose()
     } else {
