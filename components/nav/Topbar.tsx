@@ -176,6 +176,9 @@ export default function Topbar({ profile, title, subtitle, notifCount = 0, onMen
       <NotificationCenter initialCount={notifCount} />
 
       {/* Theme Switcher Button */}
+      <button className="icon-btn help-top" onClick={() => window.dispatchEvent(new Event('open-help'))} aria-label="دليل الاستخدام" title="دليل الاستخدام">
+        <span className="material-symbols-outlined text-[20px]" aria-hidden>help</span>
+      </button>
       <button className="icon-btn hover:scale-105 active:scale-95 transition-transform" onClick={toggleTheme} aria-label="تبديل المظهر">
         <Icon name={dark ? 'sun' : 'moon'} />
       </button>

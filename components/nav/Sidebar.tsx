@@ -207,7 +207,7 @@ export default function Sidebar({
           />
         </div>
         <div className="flex-1 min-w-0 pr-0.5">
-          <div className="side-name tracking-tight font-black text-[13.5px] text-[var(--text)] group-hover:text-[var(--accent)] transition-colors leading-snug">
+          <div className="side-name tracking-tight font-black text-[13px] text-[var(--text)] leading-snug">
             مكتب المحامي عبدالحسن الخزرجي
           </div>
           <div className="side-role text-[10px] text-[var(--text-3)] font-bold mt-0.5 tracking-wide">

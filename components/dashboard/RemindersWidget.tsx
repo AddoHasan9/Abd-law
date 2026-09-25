@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
+import { DataPanel } from '@/components/ui/DataPanel'
 import { Mi } from '@/components/ui/Mi'
 import { confirmAction } from '@/components/ui/ConfirmDialog'
 import Link from 'next/link'
@@ -98,47 +99,19 @@ export default function RemindersWidget({ companies = [], hideIfEmpty = false }:
   }
 
   return (
-    <div className="glass-card rounded-2xl p-3 sm:p-3.5 flex flex-col gap-2.5 h-full border border-[var(--glass-border)]">
-      {/* Widget Header */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-          <div
-            style={{
-              width: '28px',
-              height: '28px',
-              borderRadius: '7px',
-              background: 'var(--accent-soft)',
-              color: 'var(--accent)',
-              display: 'grid',
-              placeItems: 'center',
-            }}
-          >
-            <Icon name="bell" />
-          </div>
-          <div>
-            <h3 style={{ fontSize: '14px', fontWeight: 700, margin: 0, color: 'var(--text)' }}>
-              التذكيرات الشخصية والمستحقات
-            </h3>
-            <span style={{ fontSize: '10.5px', color: 'var(--text-3)' }}>
-              إدارة المواعيد والتنبيهات المخصصة
-            </span>
-          </div>
-        </div>
-
-        <button
-          type="button"
-          onClick={() => {
-            setEditingReminder(null)
-            setIsModalOpen(true)
-          }}
-          className="btn btn-primary"
-          style={{ padding: '4px 10px', fontSize: '11.5px', borderRadius: '8px' }}
-        >
-          <Icon name="plus" />
-          <span>إضافة تذكير</span>
+    <DataPanel
+      className="h-full flex flex-col"
+      icon="notifications"
+      title="التذكيرات والمستحقات"
+      subtitle="مواعيدك وتنبيهاتك الخاصة"
+      actions={
+        <button type="button" onClick={() => { setEditingReminder(null); setIsModalOpen(true) }} className="btn btn-sm btn-primary">
+          <span className="material-symbols-outlined" aria-hidden>add</span>
+          إضافة تذكير
         </button>
-      </div>
-
+      }
+    >
+      <div className="p-3 sm:p-4 flex flex-col gap-2.5 flex-1">
       {/* Tabs */}
       <div
         style={{
@@ -311,8 +284,22 @@ export default function RemindersWidget({ companies = [], hideIfEmpty = false }:
           )}
 
           {reminders.length === 0 && (
-            <div style={{ padding: '24px', textAlign: 'center', color: 'var(--text-3)', fontSize: '13px' }}>
-              لا توجد تذكيرات قائمة حالياً. اضغط «+ إضافة تذكير» لإنشاء أول تذكير.
+            <div className="dash-empty">
+              <span className="dash-empty-icon material-symbols-outlined" aria-hidden>
+                {activeTab === 'pending' ? 'notifications_active' : activeTab === 'completed' ? 'task_alt' : 'inventory_2'}
+              </span>
+              <p className="dash-empty-title">
+                {activeTab === 'pending' ? 'لا توجد تذكيرات مستحقة' : activeTab === 'completed' ? 'لا توجد تذكيرات مكتملة' : 'الأرشيف فارغ'}
+              </p>
+              {activeTab === 'pending' && (
+                <>
+                  <p className="dash-empty-text">سجّل موعد جلسة أو مراجعة دائرة حتى ينبّهك النظام قبلها.</p>
+                  <button type="button" className="btn btn-sm btn-soft" onClick={() => { setEditingReminder(null); setIsModalOpen(true) }}>
+                    <span className="material-symbols-outlined" aria-hidden>add</span>
+                    تذكير جديد
+                  </button>
+                </>
+              )}
             </div>
           )}
         </div>
@@ -353,6 +340,7 @@ export default function RemindersWidget({ companies = [], hideIfEmpty = false }:
         editingReminder={editingReminder}
       />
     </div>
+    </DataPanel>
   )
 }
 

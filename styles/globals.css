@@ -2898,3 +2898,68 @@ input.auth-input {
 }
 .tool-drop:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
 .tool-card > .tool-drop { flex: 1; }
+
+/* ============================================================
+   لوحة التحكم — نسخة أهدأ وأوضح
+   ============================================================ */
+.dash-intro { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+.dash-intro h1 { margin: 0; font-size: 17px; font-weight: 800; color: var(--text); }
+.dash-date { display: inline-flex; align-items: center; gap: 6px; font-size: 12.5px; font-weight: 600; color: var(--text-3); }
+.dash-date .material-symbols-outlined { font-size: 16px; }
+
+.kpi-grid { display: grid; gap: 12px; grid-template-columns: repeat(6, minmax(0, 1fr)); }
+.kpi-card {
+  position: relative; display: grid; grid-template-columns: 1fr auto; grid-template-areas: "label icon" "value value" "hint hint";
+  row-gap: 2px; padding: 14px 16px; min-width: 0;
+  background: var(--surface); border: 1px solid var(--line-soft); border-radius: 18px;
+  color: inherit; text-decoration: none;
+  transition: border-color .15s ease, box-shadow .2s ease, transform .15s ease;
+}
+.kpi-label { grid-area: label; font-size: 12.5px; font-weight: 700; color: var(--text-2); align-self: center; }
+.kpi-icon { grid-area: icon; width: 34px; height: 34px; display: grid; place-items: center; border-radius: 10px; background: var(--surface-2); color: var(--text-3); }
+.kpi-icon .material-symbols-outlined { font-size: 19px; }
+.kpi-value { grid-area: value; font-size: 30px; font-weight: 800; line-height: 1.15; color: var(--text); margin-top: 6px; }
+.kpi-hint { grid-area: hint; display: flex; align-items: center; gap: 2px; font-size: 11.5px; font-weight: 600; color: var(--text-3); margin-top: 2px; }
+.kpi-hint .material-symbols-outlined { font-size: 16px; transition: transform .15s ease; }
+@media (hover: hover) {
+  .kpi-card:hover { border-color: color-mix(in srgb, var(--accent) 35%, transparent); box-shadow: 0 10px 24px -16px color-mix(in srgb, var(--accent) 60%, transparent); transform: translateY(-2px); }
+  .kpi-card:hover .kpi-icon { background: var(--accent-soft); color: var(--accent); }
+  .kpi-card:hover .kpi-hint { color: var(--accent); }
+  .kpi-card:hover .kpi-hint .material-symbols-outlined { transform: translateX(-3px); }
+}
+.kpi-card:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+/* اللون فقط للبطاقة التي تحتاج انتباهاً */
+.kpi-card.is-alert { border-color: color-mix(in srgb, #e11d48 30%, var(--line-soft)); background: color-mix(in srgb, #e11d48 4%, var(--surface)); }
+.kpi-card.is-alert .kpi-icon { background: color-mix(in srgb, #e11d48 12%, transparent); color: #e11d48; }
+.kpi-card.is-alert .kpi-hint { color: #e11d48; }
+@media (max-width: 1279px) { .kpi-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+@media (max-width: 640px) {
+  .kpi-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+  .kpi-card { padding: 12px 13px; border-radius: 16px; grid-template-areas: "label label" "value value" "hint hint"; }
+  .kpi-icon { display: none; }
+  .kpi-value { font-size: 26px; margin-top: 2px; }
+  .kpi-hint { font-size: 11px; }
+}
+
+/* صفوف المعاملات: الصف كله يفتح المعاملة */
+.dash-row { cursor: pointer; transition: background-color .15s ease; }
+.dash-row-link { color: inherit; text-decoration: none; }
+.dash-row-link:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 4px; }
+.dash-row-go { font-size: 18px !important; color: var(--text-3); transition: transform .15s ease, color .15s ease; }
+@media (hover: hover) {
+  .dash-row:hover { background: color-mix(in srgb, var(--accent) 4%, var(--surface)); }
+  .dash-row:hover .dash-row-go { color: var(--accent); transform: translateX(-3px); }
+}
+
+/* حالة فارغة */
+.dash-empty { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; padding: 28px 16px; text-align: center; }
+.dash-empty-icon { width: 52px !important; height: 52px; font-size: 26px !important; display: grid !important; place-items: center; border-radius: 16px; background: var(--surface-2); color: var(--text-3); margin-bottom: 4px; }
+.dash-empty-title { margin: 0; font-size: 14px; font-weight: 800; color: var(--text); }
+.dash-empty-text { margin: 0 0 6px; font-size: 12.5px; line-height: 1.7; color: var(--text-3); max-width: 32ch; }
+
+/* زر المساعدة: عائم على الموبايل، وفي الشريط العلوي على الشاشات الكبيرة حتى لا يغطي المحتوى */
+.icon-btn.help-top { display: none; }
+@media (min-width: 1024px) {
+  .icon-btn.help-top { display: grid; place-items: center; }
+  .help-fab { display: none !important; }
+}

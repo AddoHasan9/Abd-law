@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { DataPanel } from '@/components/ui/DataPanel'
 import Link from 'next/link'
 import { formatDate, formatFullDate } from '@/lib/constants'
@@ -21,6 +22,7 @@ interface Props {
 
 export default function DashboardClient({ stats, profiles = [], companies = [] }: Props) {
   const [txFilter, setTxFilter] = useState<'all' | 'progress' | 'new' | 'done'>('all')
+  const router = useRouter()
 
   // Dynamic values mapped from stats store
   const establishedCount = stats.establishedCompaniesCount ?? stats.totalCompaniesCount ?? 0
@@ -56,160 +58,52 @@ export default function DashboardClient({ stats, profiles = [], companies = [] }
         },
       ]
 
+  const txHref = (tx: (typeof recentTxs)[number]) =>
+    tx.companyId
+      ? (tx.type === 'formation' || tx.typeLabel?.includes('تأسيس') ? `/commercial/companies?id=${tx.companyId}` : `/commercial/companies/${tx.companyId}`)
+      : (tx.type === 'llc' ? `/commercial/llc?id=${tx.id}` : '/commercial')
+  // عمود المحامي يظهر فقط إذا كان هناك تكليف فعلي — بدل تكرار «غير محدد» في كل صف
+  const showLawyer = recentTxs.some(tx => !!tx.lawyerName)
+
+  const urgentFS = stats.urgentDeadlines?.length || 0
+  const kpis = [
+    { label: 'الشركات المؤسسة', value: establishedCount, hint: 'دليل الشركات', icon: 'domain', href: '/commercial/companies-registry' },
+    { label: 'قيد التأسيس', value: formingCount, hint: 'مسار التأسيس', icon: 'pending_actions', href: '/commercial/companies' },
+    { label: 'إطلاق الوديعة', value: depositsCount, hint: 'مسار الودائع', icon: 'savings', href: '/commercial/deposits' },
+    { label: 'قسم المحدودة', value: llcCount, hint: 'المعاملات النشطة', icon: 'history_edu', href: '/commercial/llc' },
+    { label: 'الهويات', value: idsCount, hint: 'مستورد وضريبة وغرفة', icon: 'badge', href: '/commercial/ids' },
+    { label: 'الحسابات الختامية', value: urgentFS, hint: urgentFS ? 'مهل قريبة تحتاج متابعة' : 'مهلة 7/10 السنوية', icon: 'receipt_long', href: '/commercial/financial-statements', alert: urgentFS > 0 },
+  ]
+
   const maxWorkload = Math.max(...displayLawyers.map(l => l.active_tx_count ?? 0), 1)
 
   return (
     <div className="flex flex-col w-full gap-3.5 relative z-10 animate-fade-in-up">
       
-      {/* 1. Executive Page Header (Calm, Dignified, No Redundant Buttons) */}
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between w-full gap-2.5 pb-2.5 border-b border-[var(--line-soft)]">
-        <div className="flex items-center gap-2.5 min-w-0">
-          <div className="w-8 h-8 shrink-0 rounded-xl bg-[var(--surface-2)] border border-[var(--glass-border)] text-[var(--accent)] flex items-center justify-center shadow-2xs">
-            <span className="material-symbols-outlined text-[18px]">account_balance</span>
-          </div>
-          <div className="min-w-0">
-            <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5">
-              <h1 className="text-lg md:text-xl font-black tracking-tight text-[var(--text)] leading-tight">
-                لوحة التحكم التنفيذية
-              </h1>
-              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 whitespace-nowrap">
-                متصل ومحدّث
-              </span>
-            </div>
-            <p className="text-xs text-[var(--text-3)] leading-tight mt-0.5">
-              مكتب المحامي عبدالحسن الخزرجي — ملخص شامل للعمليات والشركات والمهل القانونية
-            </p>
-          </div>
-        </div>
-
-        {/* Live Date Pill */}
-        <div className="flex items-center gap-1.5 self-start lg:self-auto shrink-0 bg-[var(--surface-2)] px-3 py-1.5 rounded-xl border border-[var(--glass-border)] text-xs text-[var(--text-2)] font-semibold shadow-2xs">
-          <span className="material-symbols-outlined text-[14px] text-[var(--accent)]">calendar_today</span>
-          <span dir="rtl">{formatFullDate()}</span>
-        </div>
+      {/* 1. سطر علوي هادئ: العنوان موجود أصلاً في الشريط العلوي، فهنا ملخص + التاريخ فقط */}
+      <div className="dash-intro">
+        <h1>ملخص اليوم</h1>
+        <span className="dash-date">
+          <span className="material-symbols-outlined" aria-hidden>calendar_today</span>
+          {formatFullDate()}
+        </span>
       </div>
 
-      {/* 2. Executive Metric Pillars with GSAP Fade-In Stagger */}
-      <FadeInStagger className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-6 gap-2 w-full">
-        {/* Metric 1: Established Companies (الشركات المؤسسة) */}
-        <Link
-          href="/commercial/companies-registry"
-          className="glass-card p-2.5 sm:p-3 rounded-2xl relative overflow-hidden group hover:-translate-y-0.5 hover:shadow-xs transition duration-300 block border border-[var(--border)] bg-[var(--surface-glass)]"
-        >
-          <div className="flex justify-between items-start gap-1.5 mb-1.5 relative z-10">
-            <div className="flex flex-col min-w-0">
-              <span className="text-[10.5px] font-bold text-[var(--text-3)] mb-0.5 leading-tight">الشركات المؤسسة</span>
-              <RollingNumber value={establishedCount} className="text-lg sm:text-xl font-black text-[var(--text)] leading-none" />
-            </div>
-            <div className="w-6 h-6 shrink-0 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-600 dark:text-emerald-400 group-hover:scale-105 transition-transform duration-200">
-              <span className="material-symbols-outlined text-[15px]">domain</span>
-            </div>
-          </div>
-          <div className="flex items-center justify-between text-[10px] font-bold text-[var(--text-2)] group-hover:text-emerald-600 dark:group-hover:text-emerald-400 bg-[var(--surface-2)] group-hover:bg-[var(--surface-3)] px-2 py-0.5 rounded-md relative z-10 border border-[var(--line-soft)] transition-colors">
-            <span>دليل الشركات</span>
-            <span className="material-symbols-outlined text-[11px] group-hover:-translate-x-0.5 transition-transform">arrow_left</span>
-          </div>
-        </Link>
-
-        {/* Metric 2: Forming Companies (قيد التأسيس) */}
-        <Link
-          href="/commercial/companies"
-          className="glass-card p-2.5 sm:p-3 rounded-2xl relative overflow-hidden group hover:-translate-y-0.5 hover:shadow-xs transition duration-300 block border border-[var(--border)] bg-[var(--surface-glass)]"
-        >
-          <div className="flex justify-between items-start gap-1.5 mb-1.5 relative z-10">
-            <div className="flex flex-col min-w-0">
-              <span className="text-[10.5px] font-bold text-[var(--text-3)] mb-0.5 leading-tight">قيد التأسيس</span>
-              <RollingNumber value={formingCount} className="text-lg sm:text-xl font-black text-[var(--text)] leading-none" />
-            </div>
-            <div className="w-6 h-6 shrink-0 rounded-lg bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-600 dark:text-amber-400 group-hover:scale-105 transition-transform duration-200">
-              <span className="material-symbols-outlined text-[15px]">pending_actions</span>
-            </div>
-          </div>
-          <div className="flex items-center justify-between text-[10px] font-bold text-[var(--text-2)] group-hover:text-amber-600 dark:group-hover:text-amber-400 bg-[var(--surface-2)] group-hover:bg-[var(--surface-3)] px-2 py-0.5 rounded-md relative z-10 border border-[var(--line-soft)] transition-colors">
-            <span>مسار التأسيس (8)</span>
-            <span className="material-symbols-outlined text-[11px] group-hover:-translate-x-0.5 transition-transform">arrow_left</span>
-          </div>
-        </Link>
-
-        {/* Metric 3: Active Deposits (إطلاق الوديعة) */}
-        <Link
-          href="/commercial/deposits"
-          className="glass-card p-2.5 sm:p-3 rounded-2xl relative overflow-hidden group hover:-translate-y-0.5 hover:shadow-xs transition duration-300 block border border-[var(--border)] bg-[var(--surface-glass)]"
-        >
-          <div className="flex justify-between items-start gap-1.5 mb-1.5 relative z-10">
-            <div className="flex flex-col min-w-0">
-              <span className="text-[10.5px] font-bold text-[var(--text-3)] mb-0.5 leading-tight">إطلاق الوديعة</span>
-              <RollingNumber value={depositsCount} className="text-lg sm:text-xl font-black text-[var(--text)] leading-none" />
-            </div>
-            <div className="w-6 h-6 shrink-0 rounded-lg bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-600 dark:text-blue-400 group-hover:scale-105 transition-transform duration-200">
-              <span className="material-symbols-outlined text-[15px]">savings</span>
-            </div>
-          </div>
-          <div className="flex items-center justify-between text-[10px] font-bold text-[var(--text-2)] group-hover:text-blue-600 dark:group-hover:text-blue-400 bg-[var(--surface-2)] group-hover:bg-[var(--surface-3)] px-2 py-0.5 rounded-md relative z-10 border border-[var(--line-soft)] transition-colors">
-            <span>مسار الودائع (4)</span>
-            <span className="material-symbols-outlined text-[11px] group-hover:-translate-x-0.5 transition-transform">arrow_left</span>
-          </div>
-        </Link>
-
-        {/* Metric 4: LLC Transactions (قسم المحدودة) */}
-        <Link
-          href="/commercial/llc"
-          className="glass-card p-2.5 sm:p-3 rounded-2xl relative overflow-hidden group hover:-translate-y-0.5 hover:shadow-xs transition duration-300 block border border-[var(--border)] bg-[var(--surface-glass)]"
-        >
-          <div className="flex justify-between items-start gap-1.5 mb-1.5 relative z-10">
-            <div className="flex flex-col min-w-0">
-              <span className="text-[10.5px] font-bold text-[var(--text-3)] mb-0.5 leading-tight">قسم المحدودة</span>
-              <RollingNumber value={llcCount} className="text-lg sm:text-xl font-black text-[var(--text)] leading-none" />
-            </div>
-            <div className="w-6 h-6 shrink-0 rounded-lg bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-600 dark:text-blue-400 group-hover:scale-105 transition-transform duration-200">
-              <span className="material-symbols-outlined text-[15px]">history_edu</span>
-            </div>
-          </div>
-          <div className="flex items-center justify-between text-[10px] font-bold text-[var(--text-2)] group-hover:text-blue-600 dark:group-hover:text-blue-400 bg-[var(--surface-2)] group-hover:bg-[var(--surface-3)] px-2 py-0.5 rounded-md relative z-10 border border-[var(--line-soft)] transition-colors">
-            <span>معاملات نشطة</span>
-            <span className="material-symbols-outlined text-[11px] group-hover:-translate-x-0.5 transition-transform">arrow_left</span>
-          </div>
-        </Link>
-
-        {/* Metric 5: Company IDs (قسم الهويات) */}
-        <Link
-          href="/commercial/ids"
-          className="glass-card p-2.5 sm:p-3 rounded-2xl relative overflow-hidden group hover:-translate-y-0.5 hover:shadow-xs transition duration-300 block border border-[var(--border)] bg-[var(--surface-glass)]"
-        >
-          <div className="flex justify-between items-start gap-1.5 mb-1.5 relative z-10">
-            <div className="flex flex-col min-w-0">
-              <span className="text-[10.5px] font-bold text-[var(--text-3)] mb-0.5 leading-tight">قسم الهويات</span>
-              <RollingNumber value={idsCount} className="text-lg sm:text-xl font-black text-[var(--text)] leading-none" />
-            </div>
-            <div className="w-6 h-6 shrink-0 rounded-lg bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-purple-600 dark:text-purple-400 group-hover:scale-105 transition-transform duration-200">
-              <span className="material-symbols-outlined text-[15px]">badge</span>
-            </div>
-          </div>
-          <div className="flex items-center justify-between text-[10px] font-bold text-[var(--text-2)] group-hover:text-purple-600 dark:group-hover:text-purple-400 bg-[var(--surface-2)] group-hover:bg-[var(--surface-3)] px-2 py-0.5 rounded-md relative z-10 border border-[var(--line-soft)] transition-colors">
-            <span>مستورد / ضريبة</span>
-            <span className="material-symbols-outlined text-[11px] group-hover:-translate-x-0.5 transition-transform">arrow_left</span>
-          </div>
-        </Link>
-
-        {/* Metric 6: Financial Statements (الحسابات الختامية) */}
-        <Link
-          href="/commercial/financial-statements"
-          className="glass-card p-2.5 sm:p-3 rounded-2xl relative overflow-hidden group hover:-translate-y-0.5 hover:shadow-xs transition duration-300 block border border-[var(--border)] bg-[var(--surface-glass)]"
-        >
-          <div className="flex justify-between items-start gap-1.5 mb-1.5 relative z-10">
-            <div className="flex flex-col min-w-0">
-              <span className="text-[10.5px] font-bold text-[var(--text-3)] mb-0.5 leading-tight">الحسابات الختامية</span>
-              <RollingNumber value={stats.urgentDeadlines?.length || 0} className="text-lg sm:text-xl font-black text-[var(--text)] leading-none" />
-            </div>
-            <div className="w-6 h-6 shrink-0 rounded-lg bg-rose-500/10 border border-rose-500/20 flex items-center justify-center text-rose-600 dark:text-rose-400 group-hover:scale-105 transition-transform duration-200">
-              <span className="material-symbols-outlined text-[15px]">receipt_long</span>
-            </div>
-          </div>
-          <div className="flex items-center justify-between text-[10px] font-bold text-[var(--text-2)] group-hover:text-rose-600 dark:group-hover:text-rose-400 bg-[var(--surface-2)] group-hover:bg-[var(--surface-3)] px-2 py-0.5 rounded-md relative z-10 border border-[var(--line-soft)] transition-colors">
-            <span>مهلة 7/10 السنوية</span>
-            <span className="material-symbols-outlined text-[11px] group-hover:-translate-x-0.5 transition-transform">arrow_left</span>
-          </div>
-        </Link>
+      {/* 2. المؤشرات: البطاقة كلها رابط، الرقم هو الأبرز، واللون فقط لما يحتاج انتباه */}
+      <FadeInStagger className="kpi-grid">
+        {kpis.map(k => (
+          <Link key={k.href} href={k.href} className={`kpi-card ${k.alert ? 'is-alert' : ''}`}>
+            <span className="kpi-icon" aria-hidden>
+              <span className="material-symbols-outlined">{k.icon}</span>
+            </span>
+            <span className="kpi-label">{k.label}</span>
+            <RollingNumber value={k.value} className="kpi-value" />
+            <span className="kpi-hint">
+              {k.hint}
+              <span className="material-symbols-outlined" aria-hidden>chevron_left</span>
+            </span>
+          </Link>
+        ))}
       </FadeInStagger>
 
       {/* 3. Central Interactive Bento Section: Active Transactions (8 cols) + Reminders & Deadlines (4 cols) */}
@@ -249,21 +143,25 @@ export default function DashboardClient({ stats, profiles = [], companies = [] }
                     <tr className="border-b border-[var(--line-soft)] text-[var(--text-3)] bg-[color:color-mix(in_srgb,var(--surface-2)_50%,transparent)] text-[11px]">
                       <th className="py-2 px-2.5 font-bold">الشركة / المعاملة</th>
                       <th className="py-2 px-2.5 font-bold text-center">نوع المعاملة</th>
-                      <th className="py-2 px-2.5 font-bold text-center">المحامي المكلف</th>
+                      {showLawyer && <th className="py-2 px-2.5 font-bold text-center">المحامي المكلف</th>}
                       <th className="py-2 px-2.5 font-bold text-center">الحالة</th>
                       <th className="py-2 px-2.5 font-bold text-center">التاريخ</th>
-                      <th className="py-2 px-2.5 font-bold text-left">إجراء</th>
+                      <th className="py-2 px-2.5 w-8"><span className="sr-only">فتح</span></th>
                     </tr>
                   </thead>
                   <tbody>
                     {filteredRecentTxs.slice(0, 7).map(tx => (
-                      <tr key={tx.id} className="border-b border-[color:color-mix(in_srgb,var(--line-soft)_50%,transparent)] hover:bg-[color:color-mix(in_srgb,var(--surface-2)_60%,transparent)] transition-colors">
+                      <tr
+                        key={tx.id}
+                        className="dash-row border-b border-[color:color-mix(in_srgb,var(--line-soft)_50%,transparent)]"
+                        onClick={e => { if (!(e.target as HTMLElement).closest('a,button,[role="menu"],[role="listbox"]')) router.push(txHref(tx)) }}
+                      >
                         {/* Company / Task Name */}
                         <td className="py-2 px-2.5">
                           <div className="flex flex-col min-w-[160px]">
-                            <span className="font-extrabold text-[var(--text)] text-xs truncate max-w-[260px]">
+                            <Link href={txHref(tx)} className="dash-row-link font-extrabold text-[var(--text)] text-xs truncate max-w-[260px] xl:max-w-[440px]">
                               {tx.companyName || tx.clientName || 'معاملة تجارية'}
-                            </span>
+                            </Link>
                             {tx.clientName && tx.companyName && (
                               <span className="text-[10px] text-[var(--text-3)] truncate">
                                 العميل: {tx.clientName}
@@ -280,9 +178,11 @@ export default function DashboardClient({ stats, profiles = [], companies = [] }
                         </td>
 
                         {/* Assigned Lawyer from DB */}
-                        <td className="py-2 px-2.5 text-center text-[var(--text-2)] font-semibold text-[11px] whitespace-nowrap">
-                          {tx.lawyerName || 'غير محدد'}
-                        </td>
+                        {showLawyer && (
+                          <td className="py-2 px-2.5 text-center text-[var(--text-2)] font-semibold text-[11px] whitespace-nowrap">
+                            {tx.lawyerName || <span className="text-[var(--text-3)]">—</span>}
+                          </td>
+                        )}
 
                         {/* Live Workflow Status Badge */}
                         <td className="py-2 px-2.5 text-center whitespace-nowrap">
@@ -299,20 +199,8 @@ export default function DashboardClient({ stats, profiles = [], companies = [] }
                           {tx.txDate ? formatDate(tx.txDate) : '—'}
                         </td>
 
-                        {/* Action Button */}
-                        <td className="py-2 px-2.5 text-left whitespace-nowrap">
-                          <Link
-                            href={
-                              tx.companyId
-                                ? (tx.type === 'formation' || tx.typeLabel?.includes('تأسيس')
-                                    ? `/commercial/companies?id=${tx.companyId}`
-                                    : `/commercial/companies/${tx.companyId}`)
-                                : (tx.type === 'llc' ? `/commercial/llc?id=${tx.id}` : '/commercial')
-                            }
-                            className="inline-flex items-center justify-center px-2.5 py-0.5 rounded-md text-[11px] font-bold text-[var(--accent)] hover:bg-[var(--accent-soft)] transition-colors border border-[color:color-mix(in_srgb,var(--accent)_20%,transparent)] hover:border-[color:color-mix(in_srgb,var(--accent)_40%,transparent)]"
-                          >
-                            عرض
-                          </Link>
+                        <td className="py-2 px-2 text-left">
+                          <span className="material-symbols-outlined dash-row-go" aria-hidden>chevron_left</span>
                         </td>
                       </tr>
                     ))}
