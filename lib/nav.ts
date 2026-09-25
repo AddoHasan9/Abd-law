@@ -59,6 +59,21 @@ export const NAV: NavGroup[] = [
     ],
   },
 
+  // أدوات المستندات — تعمل على جهاز المستخدم
+  {
+    key: 'g-tools',
+    label: 'الأدوات',
+    icon: 'tools',
+    href: '/tools',
+    items: [
+      { key: 'tool-editor', label: 'محرر صفحات PDF', href: '/tools/editor', icon: 'doc' },
+      { key: 'tool-convert', label: 'PDF إلى صور', href: '/tools/pdf-to-images', icon: 'doc' },
+      { key: 'tool-images', label: 'صور إلى PDF', href: '/tools/images-to-pdf', icon: 'doc' },
+      { key: 'tool-compress', label: 'ضغط PDF والصور', href: '/tools/compress-pdf', icon: 'archive' },
+      { key: 'tool-stamp', label: 'ختم وترقيم', href: '/tools/stamp', icon: 'stamp' },
+    ],
+  },
+
   // إدارة النظام والمستخدمين والإعدادات
   {
     key: 'g-sys',
@@ -97,6 +112,9 @@ export function pageTitle(pathname: string, typeParam?: string | null): string {
         return leaf.label
       }
     }
+
+    // صفحات فرعية بلا عنصر خاص في القائمة (مثل /tools/merge) تأخذ اسم المجموعة
+    if (g.href && g.href !== '/' && pathname.startsWith(g.href + '/') && g.key === 'g-tools') return g.label ?? ''
 
     if (g.withTxTypes && typeParam) {
       const match = txTypeLeaves().find(t => t.href === `${pathname}?type=${typeParam}`)
