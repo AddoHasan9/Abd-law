@@ -23,6 +23,13 @@ export default function QuickHelpGuide() {
   const [isOpen, setIsOpen] = useState(false)
   const [activeAccordion, setActiveAccordion] = useState<string>('overview')
 
+  // زر المساعدة في الشريط العلوي (على الشاشات الكبيرة) يفتح الدليل عبر هذا الحدث
+  useEffect(() => {
+    const open = () => setIsOpen(true)
+    window.addEventListener('open-help', open)
+    return () => window.removeEventListener('open-help', open)
+  }, [])
+
   // إغلاق النافذة بزر Escape
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -260,7 +267,7 @@ export default function QuickHelpGuide() {
       <button
         type="button"
         onClick={() => setIsOpen(true)}
-        className="fixed bottom-6 left-6 z-40 w-12 h-12 rounded-full bg-gradient-to-tr from-[#2563EB] to-[#38BDF8] text-white font-black text-xl shadow-[0_8px_25px_rgba(37,99,235,0.45)] border-2 border-white/25 flex items-center justify-center hover:scale-110 active:scale-95 transition-all duration-300 group cursor-pointer"
+        className="help-fab fixed bottom-6 left-6 z-40 w-12 h-12 rounded-full bg-gradient-to-tr from-[#2563EB] to-[#38BDF8] text-white font-black text-xl shadow-[0_8px_25px_rgba(37,99,235,0.45)] border-2 border-white/25 flex items-center justify-center hover:scale-110 active:scale-95 transition-all duration-300 group cursor-pointer"
         aria-label="دليل الاستخدام والمساعدة"
         title="دليل الصفحة واستخدام النظام"
       >

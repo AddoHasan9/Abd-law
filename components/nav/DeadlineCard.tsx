@@ -100,31 +100,18 @@ export default function DeadlineCard({ deadlines = [], item = null }: Props) {
       className="w-full flex-none mt-2.5 mb-1"
     >
       {items.length === 0 ? (
-        /* Empty / All Compliant State - Matches Screenshot Exactly */
+        /* لا مهل قريبة: بطاقة هادئة بسطرين بدل نص دعائي */
         <Link
-          href="/commercial/deposits"
-          className="block rounded-2xl bg-[var(--surface-2)] hover:bg-[var(--surface-3)] p-3 border border-[var(--line-soft)] hover:border-[color:color-mix(in_srgb,var(--accent)_40%,transparent)] transition group shadow-2xs"
+          href="/commercial/financial-statements"
+          className="flex items-center gap-2.5 rounded-2xl bg-[var(--surface-2)] hover:bg-[var(--surface-3)] p-3 border border-[var(--line-soft)] transition"
         >
-          <div className="flex items-center justify-between gap-2">
-            <div className="flex items-center gap-2">
-              <div className="w-7 h-7 rounded-full bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-emerald-500 dark:text-emerald-400 shrink-0">
-                <span className="material-symbols-outlined text-[18px]">verified</span>
-              </div>
-              <div className="flex flex-col text-right leading-tight">
-                <span className="text-[12px] font-black text-[var(--text)]">متابعة المهل</span>
-                <span className="text-[12px] font-black text-[var(--text)]">والاستحقاقات</span>
-              </div>
-            </div>
-
-            <div className="bg-emerald-500/15 border border-emerald-500/30 text-emerald-600 dark:text-emerald-400 px-2 py-0.5 rounded-lg text-[10.5px] font-black flex flex-col items-center justify-center leading-tight shrink-0">
-              <span>سجلات</span>
-              <span>منتظمة ✓</span>
-            </div>
-          </div>
-
-          <div className="text-[10.5px] text-[var(--text-3)] font-medium mt-2 pt-1.5 border-t border-[color:color-mix(in_srgb,var(--line-soft)_60%,transparent)] flex items-center gap-1">
-            <span>✓ كافة المعاملات والمهل القانونية ضمن المدد المحددة</span>
-          </div>
+          <span className="w-8 h-8 rounded-full bg-emerald-500/12 text-emerald-600 dark:text-emerald-400 grid place-items-center shrink-0">
+            <span className="material-symbols-outlined text-[18px]" aria-hidden>event_available</span>
+          </span>
+          <span className="flex flex-col min-w-0 leading-tight">
+            <span className="text-[12.5px] font-extrabold text-[var(--text)]">لا توجد مهل قريبة</span>
+            <span className="text-[11px] text-[var(--text-3)] mt-0.5">المهل القانونية كلها ضمن المدة</span>
+          </span>
         </Link>
       ) : (
         /* Active Deadlines Rotating Card - Compact & Proportional */
