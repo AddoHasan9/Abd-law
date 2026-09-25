@@ -13,7 +13,7 @@ export function ToolShell({ tool, children }: { tool: ToolDef; children: React.R
   const asCard = useContext(ToolCardContext)
   if (asCard) {
     return (
-      <article className={`tool-card tone-${tool.group}`} id={tool.slug} aria-labelledby={`t-${tool.slug}`}>
+      <article className={`tool-card tone-${tool.group}${tool.wide ? ' is-wide' : ''}`} id={tool.slug} aria-labelledby={`t-${tool.slug}`}>
         <header className="tool-card-head">
           <span className="tool-card-icon" aria-hidden>
             <span className="material-symbols-outlined">{tool.icon}</span>

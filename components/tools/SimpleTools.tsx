@@ -431,6 +431,7 @@ export function StampPdf() {
             {file ? <FileChip name={file.name} size={file.size} onRemove={() => setFile(null)} />
               : <FileDrop accept={PDF_ACCEPT} onFiles={f => setFile(f[0])} title="اختر ملف PDF" hint="ثم اختر الإضافات من الأسفل" />}
 
+            <div className="tool-sections">
             <div className="tool-section">
               <Toggle on={sealOn} set={setSealOn} title="ختم أو توقيع" hint="صورة PNG بخلفية شفافة تعطي أفضل نتيجة" />
               {sealOn && (
@@ -473,6 +474,8 @@ export function StampPdf() {
                   ]} />
                 </div>
               )}
+            </div>
+
             </div>
 
             <div className="tool-footer">
