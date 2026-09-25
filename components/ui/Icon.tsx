@@ -13,6 +13,7 @@ import React, { type SVGProps } from 'react'
 export type IconName = keyof typeof SYMBOLS
 
 const SYMBOLS = {
+  "tools": <symbol key="tools" id="ic-tools" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><path d="M14.7 6.3a4 4 0 0 0 5 5l-8.4 8.4a2.1 2.1 0 0 1-3-3z" /><path d="M14.7 6.3 17 4l3 3-2.3 2.3M4 4l5 5M3.5 7.5l4-4" /></symbol>,
   "scale": <symbol key="scale" id="ic-scale" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><path d="M12 3v18M7 21h10M6 7l-3 7h6zM18 7l-3 7h6z" /><path d="M3 14a3 3 0 0 0 6 0M15 14a3 3 0 0 0 6 0M5 7h14" /></symbol>,
   "grid": <symbol key="grid" id="ic-grid" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="7.5" height="7.5" rx="2" /><rect x="13.5" y="3" width="7.5" height="7.5" rx="2" /><rect x="3" y="13.5" width="7.5" height="7.5" rx="2" /><rect x="13.5" y="13.5" width="7.5" height="7.5" rx="2" /></symbol>,
   "brief": <symbol key="brief" id="ic-brief" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><rect x="2.5" y="7" width="19" height="13.5" rx="2.5" /><path d="M8.5 7V5.5A2 2 0 0 1 10.5 3.5h3A2 2 0 0 1 15.5 5.5V7M2.5 12.5h19" /></symbol>,

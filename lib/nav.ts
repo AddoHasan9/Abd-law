@@ -39,6 +39,7 @@ export const NAV: NavGroup[] = [
     items: [
       { key: 'dashboard', label: 'لوحة التحكم', href: '/dashboard', icon: 'grid' },
       { key: 'reminders', label: 'التذكير والاشعارات', href: '/reminders', icon: 'bell' },
+      { key: 'tools', label: 'الأدوات', href: '/tools', icon: 'tools' },
     ],
   },
 
