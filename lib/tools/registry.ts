@@ -14,10 +14,10 @@ export interface ToolDef {
 }
 
 export const TOOL_GROUPS: { id: ToolDef['group']; title: string; hint: string }[] = [
-  { id: 'edit', title: 'تعديل ملفات PDF', hint: 'ترتيب الصفحات وحذفها وإضافتها، الدمج والتقسيم' },
+  { id: 'edit', title: 'تعديل PDF', hint: 'ترتيب الصفحات وحذفها وإضافتها، الدمج والتقسيم' },
   { id: 'convert', title: 'تحويل', hint: 'بين PDF والصور بالاتجاهين' },
   { id: 'compress', title: 'ضغط', hint: 'تصغير الحجم للإرسال بالبريد أو واتساب أو البوابات الحكومية' },
-  { id: 'finish', title: 'تجهيز للتسليم', hint: 'ختم المكتب والتوقيع والترقيم والعلامة المائية' },
+  { id: 'finish', title: 'ختم وترقيم', hint: 'ختم المكتب والتوقيع والترقيم والعلامة المائية' },
 ]
 
 export const TOOLS: ToolDef[] = [

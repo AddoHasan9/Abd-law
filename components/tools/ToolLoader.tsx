@@ -4,9 +4,7 @@ import dynamic from 'next/dynamic'
 import type { ToolSlug } from '@/lib/tools/registry'
 
 /** كل أداة تُحمَّل عند فتحها فقط (مكتبات PDF ثقيلة ولا نريدها في باقي الصفحات) */
-const Loading = () => (
-  <div className="tool-page"><div className="tool-drop skeleton-shimmer" style={{ minHeight: 180 }} /></div>
-)
+const Loading = () => <div className="tool-card tool-card-loading skeleton-shimmer" aria-hidden />
 const load = (name: string) =>
   dynamic(() => import('./SimpleTools').then(m => (m as unknown as Record<string, React.ComponentType>)[name]), { ssr: false, loading: Loading })
 

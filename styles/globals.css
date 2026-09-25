@@ -2834,3 +2834,67 @@ input.auth-input {
 @media (prefers-reduced-motion: reduce) {
   .tool-result { animation: none; }
 }
+
+/* ---------- صفحة الأدوات: بطاقات تعمل في مكانها ---------- */
+.tools-filter { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 2px; scrollbar-width: none; }
+.tools-filter::-webkit-scrollbar { display: none; }
+.tools-filter button {
+  flex: none; display: inline-flex; align-items: center; gap: 6px; height: 36px; padding: 0 14px;
+  border-radius: 99px; border: 1px solid var(--line); background: var(--surface);
+  font-size: 13px; font-weight: 700; color: var(--text-2); transition: background-color .15s ease, color .15s ease, border-color .15s ease;
+}
+.tools-filter button .num { font-size: 11px; min-width: 18px; height: 18px; padding: 0 5px; display: grid; place-items: center; border-radius: 99px; background: var(--surface-2); color: var(--text-3); }
+.tools-filter button.is-on { background: var(--text); border-color: var(--text); color: var(--surface); }
+.tools-filter button.is-on .num { background: color-mix(in srgb, var(--surface) 20%, transparent); color: var(--surface); }
+
+.tools-cards { display: grid; gap: 16px; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); align-items: stretch; }
+.tool-card {
+  --tone: var(--accent);
+  display: flex; flex-direction: column; gap: 14px; padding: 18px; min-width: 0;
+  background: var(--surface); border: 1px solid var(--line-soft); border-radius: 22px;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, .04);
+  animation: panelIn .35s var(--ease-out, ease) both;
+}
+.tool-card.tone-convert { --tone: #7c3aed; }
+.tool-card.tone-compress { --tone: #059669; }
+.tool-card.tone-finish { --tone: #d97706; }
+/* المحرر بعد فتح ملف، أو أي نتيجة متعددة الملفات: عرض كامل */
+.tool-card:has(.tool-pages), .tool-card:has(.tool-thumbs), .tool-card:has(.tool-result-list) { grid-column: 1 / -1; }
+.tool-card-loading { min-height: 300px; }
+.tool-card-head { display: flex; align-items: center; gap: 12px; }
+.tool-card-head h2 { margin: 0; font-size: 16px; font-weight: 800; color: var(--text); }
+.tool-card-head p { margin: 2px 0 0; font-size: 12.5px; line-height: 1.6; color: var(--text-3); }
+.tool-card-icon {
+  width: 46px; height: 46px; flex: none; display: grid; place-items: center; border-radius: 14px;
+  background: color-mix(in srgb, var(--tone) 12%, var(--surface)); color: var(--tone);
+}
+.tool-card-icon .material-symbols-outlined { font-size: 24px; }
+
+/* داخل البطاقة: بلا إطار مزدوج، ومسافات أهدأ */
+.tool-card .tool-panel { padding: 0; border: 0; background: none; gap: 14px; flex: 1; }
+.tool-card .tool-go, .tool-card .tool-panel > .tool-footer { margin-top: auto; }
+.tool-card .tool-drop { min-height: 150px; padding: 20px 14px; border-color: color-mix(in srgb, var(--tone) 30%, var(--line)); background: color-mix(in srgb, var(--tone) 3%, var(--surface)); }
+.tool-card .tool-drop.is-over { border-color: var(--tone); background: color-mix(in srgb, var(--tone) 9%, var(--surface)); }
+.tool-card .tool-drop-icon { font-size: 36px !important; color: var(--tone); }
+.tool-card .tool-drop .btn { display: none; }
+.tool-card .tool-drop { cursor: pointer; }
+.tool-card .tool-drop.is-compact { min-height: 0; padding: 10px 12px; }
+.tool-card .tool-options { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.tool-card .tool-choice-row { gap: 6px; }
+.tool-card .tool-choice-row button { padding: 8px 6px; min-width: 0; font-size: 12.5px; border-radius: 10px; }
+.tool-card .tool-choice-row button small { display: none; }
+.tool-card .tool-choice legend { font-size: 12px; margin-bottom: 6px; }
+.tool-card .tool-go { width: 100%; justify-content: center; height: 44px; }
+.tool-card .tool-footer .btn { width: 100%; }
+.tool-card .tool-result { padding: 0; border: 0; animation: none; }
+.tool-card .tool-pages { margin: 0 -4px; }
+.tool-card .tool-bar { position: static; }
+.tool-go:disabled { opacity: .45; box-shadow: none; }
+
+@media (max-width: 640px) {
+  .tools-cards { grid-template-columns: 1fr; gap: 12px; }
+  .tool-card { padding: 16px; border-radius: 20px; }
+  .tool-card .tool-options { grid-template-columns: 1fr; }
+}
+.tool-drop:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+.tool-card > .tool-drop { flex: 1; }

@@ -46,27 +46,26 @@ export function PdfToImages() {
 
   return (
     <ToolShell tool={tool}>
-      {out ? <ResultPanel outputs={out} onReset={() => { setOut(null); setFile(null) }} zipName={`${baseName(file?.name ?? 'صور')} - صور.zip`} />
-        : !file ? <FileDrop accept={PDF_ACCEPT} onFiles={f => setFile(f[0])} title="اختر ملف PDF" hint="ستتحول كل صفحة إلى صورة مستقلة" />
-        : (
-          <div className="tool-panel">
-            <FileChip name={file.name} size={file.size} onRemove={() => setFile(null)} />
-            <Choice label="صيغة الصور" value={format} onChange={setFormat} options={[
-              { value: 'image/jpeg', label: 'JPG', hint: 'حجم أصغر — مناسب للإرسال' },
-              { value: 'image/png', label: 'PNG', hint: 'أوضح للنصوص — حجم أكبر' },
+      {out ? <ResultPanel outputs={out} onReset={() => { setOut(null); setFile(null) }} zipName={`${baseName(file?.name ?? 'صور')} - صور.zip`} /> : (
+        <div className="tool-panel">
+          {file ? <FileChip name={file.name} size={file.size} onRemove={() => setFile(null)} />
+            : <FileDrop accept={PDF_ACCEPT} onFiles={f => setFile(f[0])} title="اختر ملف PDF" hint="كل صفحة تتحول إلى صورة مستقلة" />}
+          <div className="tool-options">
+            <Choice label="الصيغة" value={format} onChange={setFormat} options={[
+              { value: 'image/jpeg', label: 'JPG', hint: 'حجم أصغر' },
+              { value: 'image/png', label: 'PNG', hint: 'أوضح للنصوص' },
             ]} />
             <Choice label="الدقة" value={dpi} onChange={setDpi} options={[
-              { value: 100, label: 'عادية', hint: 'للمعاينة والواتساب' },
-              { value: 150, label: 'عالية', hint: 'مناسبة لأغلب الاستخدامات' },
-              { value: 300, label: 'للطباعة', hint: 'أعلى وضوح وأكبر حجم' },
+              { value: 100, label: 'عادية' }, { value: 150, label: 'عالية' }, { value: 300, label: 'طباعة' },
             ]} />
-            {prog ? <Progress {...prog} /> : (
-              <div className="tool-footer"><button className="btn btn-primary" onClick={run}>
-                <span className="material-symbols-outlined" aria-hidden>imagesmode</span>تحويل إلى صور
-              </button></div>
-            )}
           </div>
-        )}
+          {prog ? <Progress {...prog} /> : (
+            <button className="btn btn-primary tool-go" onClick={run} disabled={!file}>
+              <span className="material-symbols-outlined" aria-hidden>imagesmode</span>تحويل إلى صور
+            </button>
+          )}
+        </div>
+      )}
     </ToolShell>
   )
 }
@@ -101,10 +100,9 @@ export function ImagesToPdf() {
 
   return (
     <ToolShell tool={tool}>
-      {out ? <ResultPanel outputs={out} onReset={() => { setOut(null); setFiles([]) }} />
-        : !files.length ? <FileDrop accept="image/*" multiple onFiles={add} title="اختر الصور" hint="JPG أو PNG أو WEBP — يمكنك اختيار عدة صور مرة واحدة" />
-        : (
-          <div className="tool-panel">
+      {out ? <ResultPanel outputs={out} onReset={() => { setOut(null); setFiles([]) }} /> : (
+        <div className="tool-panel">
+          {files.length > 0 && (
             <ol className="tool-thumbs">
               {files.map((f, i) => (
                 <li key={f.id}>
@@ -119,21 +117,24 @@ export function ImagesToPdf() {
                 </li>
               ))}
             </ol>
-            <FileDrop accept="image/*" multiple compact onFiles={add} title="إضافة صور أخرى" hint="" />
-            <Choice label="حجم الصفحة" value={size} onChange={setSize} options={[
-              { value: 'a4', label: 'A4', hint: 'مناسب للطباعة والتقديم الرسمي' },
-              { value: 'fit', label: 'بحجم الصورة', hint: 'بدون هوامش' },
+          )}
+          <FileDrop accept="image/*" multiple compact={files.length > 0} onFiles={add} title={files.length ? 'إضافة صور أخرى' : 'اختر الصور'} hint="JPG أو PNG أو WEBP — يمكن اختيار عدة صور" />
+          <div className="tool-options">
+            <Choice label="حجم الورقة" value={size} onChange={setSize} options={[
+              { value: 'a4', label: 'A4' }, { value: 'fit', label: 'بحجم الصورة' },
             ]} />
-            {size === 'a4' && <Choice label="الهامش" value={margin} onChange={setMargin} options={[
+            <Choice label="الهامش" value={size === 'a4' ? margin : 0} onChange={setMargin} options={[
               { value: 0, label: 'بدون' }, { value: 24, label: 'صغير' }, { value: 48, label: 'كبير' },
-            ]} />}
-            {prog ? <Progress {...prog} /> : (
-              <div className="tool-footer"><button className="btn btn-primary" onClick={run}>
-                <span className="material-symbols-outlined" aria-hidden>picture_as_pdf</span>إنشاء PDF ({files.length} صفحة)
-              </button></div>
-            )}
+            ]} />
           </div>
-        )}
+          {prog ? <Progress {...prog} /> : (
+            <button className="btn btn-primary tool-go" onClick={run} disabled={!files.length}>
+              <span className="material-symbols-outlined" aria-hidden>picture_as_pdf</span>
+              {files.length ? `إنشاء PDF (${files.length} صفحة)` : 'تحويل إلى PDF'}
+            </button>
+          )}
+        </div>
+      )}
     </ToolShell>
   )
 }
@@ -173,10 +174,9 @@ export function MergePdf() {
   const totalPages = files.reduce((s, f) => s + f.pages, 0)
   return (
     <ToolShell tool={tool}>
-      {out ? <ResultPanel outputs={out} onReset={() => { setOut(null); setFiles([]) }} />
-        : !files.length ? <FileDrop accept={PDF_ACCEPT} multiple onFiles={add} title="اختر ملفات PDF للدمج" hint="اختر ملفين أو أكثر، ثم رتّبها" />
-        : (
-          <div className="tool-panel">
+      {out ? <ResultPanel outputs={out} onReset={() => { setOut(null); setFiles([]) }} /> : (
+        <div className="tool-panel">
+          {files.length > 0 && (
             <ol className="tool-list">
               {files.map((f, i) => (
                 <li key={f.id}>
@@ -191,15 +191,14 @@ export function MergePdf() {
                 </li>
               ))}
             </ol>
-            <FileDrop accept={PDF_ACCEPT} multiple compact onFiles={add} title="إضافة ملفات أخرى" hint="" />
-            <div className="tool-footer">
-              <button className="btn btn-primary" onClick={run} disabled={busy || files.length < 2}>
-                <span className="material-symbols-outlined" aria-hidden>library_add</span>
-                {busy ? 'جارٍ الدمج…' : files.length < 2 ? 'أضف ملفاً آخر للدمج' : `دمج ${files.length} ملفات (${totalPages} صفحة)`}
-              </button>
-            </div>
-          </div>
-        )}
+          )}
+          <FileDrop accept={PDF_ACCEPT} multiple compact={files.length > 0} onFiles={add} title={files.length ? 'إضافة ملفات أخرى' : 'اختر ملفات PDF'} hint="ملفان أو أكثر — رتّبها بعد الإضافة" />
+          <button className="btn btn-primary tool-go" onClick={run} disabled={busy || files.length < 2}>
+            <span className="material-symbols-outlined" aria-hidden>library_add</span>
+            {busy ? 'جارٍ الدمج…' : files.length < 2 ? 'دمج الملفات' : `دمج ${files.length} ملفات (${totalPages} صفحة)`}
+          </button>
+        </div>
+      )}
     </ToolShell>
   )
 }
@@ -242,31 +241,30 @@ export function SplitPdf() {
 
   return (
     <ToolShell tool={tool}>
-      {out ? <ResultPanel outputs={out} onReset={() => { setOut(null); setFile(null); setRange('') }} zipName={`${baseName(file?.file.name ?? 'ملف')} - صفحات.zip`} />
-        : !file ? <FileDrop accept={PDF_ACCEPT} onFiles={open} title="اختر ملف PDF" hint="لاستخراج صفحات منه أو فصل صفحاته" />
-        : (
-          <div className="tool-panel">
-            <FileChip name={`${file.file.name} (${file.pages} صفحة)`} size={file.file.size} onRemove={() => setFile(null)} />
-            <Choice label="طريقة التقسيم" value={mode} onChange={setMode} options={[
-              { value: 'range', label: 'استخراج صفحات محددة', hint: 'في ملف واحد' },
-              { value: 'each', label: 'كل صفحة بملف', hint: `${file.pages} ملفات` },
-            ]} />
-            {mode === 'range' && (
-              <label className="tool-field">
-                <span>أرقام الصفحات</span>
-                <input dir="ltr" inputMode="numeric" value={range} onChange={e => setRange(e.target.value)} placeholder={`مثال: 1-3, 5, 8-${file.pages}`} />
-                <small className={range && !parsed ? 'text-rose-600' : ''}>
-                  {range && !parsed ? `صيغة غير صحيحة أو رقم أكبر من ${file.pages}` : parsed ? `سيتم استخراج ${parsed.length} صفحة` : 'افصل بفاصلة، واستخدم - للمدى'}
-                </small>
-              </label>
-            )}
-            {prog ? <Progress {...prog} /> : (
-              <div className="tool-footer"><button className="btn btn-primary" onClick={run} disabled={mode === 'range' && !parsed}>
-                <span className="material-symbols-outlined" aria-hidden>call_split</span>{mode === 'range' ? 'استخراج الصفحات' : 'فصل الصفحات'}
-              </button></div>
-            )}
-          </div>
-        )}
+      {out ? <ResultPanel outputs={out} onReset={() => { setOut(null); setFile(null); setRange('') }} zipName={`${baseName(file?.file.name ?? 'ملف')} - صفحات.zip`} /> : (
+        <div className="tool-panel">
+          {file ? <FileChip name={`${file.file.name} (${file.pages} صفحة)`} size={file.file.size} onRemove={() => setFile(null)} />
+            : <FileDrop accept={PDF_ACCEPT} onFiles={open} title="اختر ملف PDF" hint="لاستخراج صفحات منه أو فصل صفحاته" />}
+          <Choice label="الطريقة" value={mode} onChange={setMode} options={[
+            { value: 'range', label: 'صفحات محددة' },
+            { value: 'each', label: 'كل صفحة بملف' },
+          ]} />
+          {mode === 'range' && (
+            <label className="tool-field">
+              <span>أرقام الصفحات</span>
+              <input type="text" className="input" dir="ltr" inputMode="numeric" value={range} onChange={e => setRange(e.target.value)} placeholder={file ? `مثال: 1-3, 5, 8-${file.pages}` : 'مثال: 1-3, 5'} />
+              <small className={file && range && !parsed ? 'text-rose-600' : ''}>
+                {file && range && !parsed ? `صيغة غير صحيحة أو رقم أكبر من ${file.pages}` : parsed ? `سيتم استخراج ${parsed.length} صفحة` : 'افصل بفاصلة، واستخدم - للمدى'}
+              </small>
+            </label>
+          )}
+          {prog ? <Progress {...prog} /> : (
+            <button className="btn btn-primary tool-go" onClick={run} disabled={!file || (mode === 'range' && !parsed)}>
+              <span className="material-symbols-outlined" aria-hidden>call_split</span>{mode === 'range' ? 'استخراج الصفحات' : 'فصل الصفحات'}
+            </button>
+          )}
+        </div>
+      )}
     </ToolShell>
   )
 }
@@ -298,27 +296,24 @@ export function CompressPdf() {
 
   return (
     <ToolShell tool={tool}>
-      {out ? <ResultPanel outputs={out} originalSize={file?.size} onReset={() => { setOut(null); setFile(null) }} />
-        : !file ? <FileDrop accept={PDF_ACCEPT} onFiles={f => setFile(f[0])} title="اختر ملف PDF لضغطه" hint="الأنسب للملفات الممسوحة ضوئياً (سكانر) والصور" />
-        : (
-          <div className="tool-panel">
-            <FileChip name={file.name} size={file.size} onRemove={() => setFile(null)} />
-            <Choice label="مستوى الضغط" value={level} onChange={setLevel} options={[
-              { value: 'light', label: 'خفيف', hint: 'أفضل وضوح' },
-              { value: 'balanced', label: 'متوازن', hint: 'موصى به' },
-              { value: 'strong', label: 'قوي', hint: 'أصغر حجم' },
-            ]} />
-            <p className="tool-note">
-              <span className="material-symbols-outlined" aria-hidden>info</span>
-              تتحول الصفحات إلى صور مضغوطة، فلن يعود النص قابلاً للتحديد والنسخ. المحتوى المرئي يبقى كما هو.
-            </p>
-            {prog ? <Progress {...prog} /> : (
-              <div className="tool-footer"><button className="btn btn-primary" onClick={run}>
-                <span className="material-symbols-outlined" aria-hidden>compress</span>ضغط الملف
-              </button></div>
-            )}
-          </div>
-        )}
+      {out ? <ResultPanel outputs={out} originalSize={file?.size} onReset={() => { setOut(null); setFile(null) }} /> : (
+        <div className="tool-panel">
+          {file ? <FileChip name={file.name} size={file.size} onRemove={() => setFile(null)} />
+            : <FileDrop accept={PDF_ACCEPT} onFiles={f => setFile(f[0])} title="اختر ملف PDF" hint="الأنسب للملفات الممسوحة ضوئياً" />}
+          <Choice label="مستوى الضغط" value={level} onChange={setLevel} options={[
+            { value: 'light', label: 'خفيف' }, { value: 'balanced', label: 'متوازن' }, { value: 'strong', label: 'قوي' },
+          ]} />
+          <p className="tool-note">
+            <span className="material-symbols-outlined" aria-hidden>info</span>
+            تتحول الصفحات إلى صور مضغوطة، فلن يعود النص قابلاً للنسخ.
+          </p>
+          {prog ? <Progress {...prog} /> : (
+            <button className="btn btn-primary tool-go" onClick={run} disabled={!file}>
+              <span className="material-symbols-outlined" aria-hidden>compress</span>ضغط الملف
+            </button>
+          )}
+        </div>
+      )}
     </ToolShell>
   )
 }
@@ -350,32 +345,33 @@ export function CompressImages() {
   const original = files.reduce((s, f) => s + f.size, 0)
   return (
     <ToolShell tool={tool}>
-      {out ? <ResultPanel outputs={out} originalSize={original} onReset={() => { setOut(null); setFiles([]) }} zipName="صور مضغوطة.zip" />
-        : !files.length ? <FileDrop accept="image/*" multiple onFiles={setFiles} title="اختر الصور لضغطها" hint="يمكن اختيار عدة صور — مفيد لصور الهويات والمستندات قبل رفعها" />
-        : (
-          <div className="tool-panel">
+      {out ? <ResultPanel outputs={out} originalSize={original} onReset={() => { setOut(null); setFiles([]) }} zipName="صور مضغوطة.zip" /> : (
+        <div className="tool-panel">
+          {files.length > 0 && (
             <div className="tool-list-plain">
               {files.map((f, i) => <FileChip key={i} name={f.name} size={f.size} onRemove={() => setFiles(prev => prev.filter((_, j) => j !== i))} />)}
             </div>
-            <Choice label="أقصى أبعاد" value={maxSide} onChange={setMaxSide} options={[
-              { value: 1280, label: '1280px', hint: 'واتساب والبريد' },
-              { value: 2000, label: '2000px', hint: 'متوازن' },
-              { value: 3200, label: '3200px', hint: 'للطباعة' },
+          )}
+          <FileDrop accept="image/*" multiple compact={files.length > 0} onFiles={list => setFiles(prev => [...prev, ...list])} title={files.length ? 'إضافة صور أخرى' : 'اختر الصور'} hint="يمكن اختيار عدة صور مرة واحدة" />
+          <div className="tool-options">
+            <Choice label="الأبعاد" value={maxSide} onChange={setMaxSide} options={[
+              { value: 1280, label: 'صغيرة' }, { value: 2000, label: 'متوسطة' }, { value: 3200, label: 'كبيرة' },
             ]} />
             <Choice label="الجودة" value={quality} onChange={setQuality} options={[
               { value: 0.85, label: 'عالية' }, { value: 0.75, label: 'متوسطة' }, { value: 0.6, label: 'منخفضة' },
             ]} />
-            <Choice label="الصيغة" value={type} onChange={setType} options={[
-              { value: 'image/jpeg', label: 'JPG', hint: 'تفتح في كل مكان' },
-              { value: 'image/webp', label: 'WEBP', hint: 'أصغر، قد لا تقبلها بعض البوابات' },
-            ]} />
-            {prog ? <Progress {...prog} /> : (
-              <div className="tool-footer"><button className="btn btn-primary" onClick={run}>
-                <span className="material-symbols-outlined" aria-hidden>photo_size_select_large</span>ضغط {files.length} صورة ({formatBytes(original)})
-              </button></div>
-            )}
           </div>
-        )}
+          <Choice label="الصيغة" value={type} onChange={setType} options={[
+            { value: 'image/jpeg', label: 'JPG' }, { value: 'image/webp', label: 'WEBP' },
+          ]} />
+          {prog ? <Progress {...prog} /> : (
+            <button className="btn btn-primary tool-go" onClick={run} disabled={!files.length}>
+              <span className="material-symbols-outlined" aria-hidden>photo_size_select_large</span>
+              {files.length ? `ضغط ${files.length} صورة (${formatBytes(original)})` : 'ضغط الصور'}
+            </button>
+          )}
+        </div>
+      )}
     </ToolShell>
   )
 }
@@ -430,11 +426,10 @@ export function StampPdf() {
 
   return (
     <ToolShell tool={tool}>
-      {out ? <ResultPanel outputs={out} onReset={() => { setOut(null); setFile(null) }} />
-        : !file ? <FileDrop accept={PDF_ACCEPT} onFiles={f => setFile(f[0])} title="اختر ملف PDF" hint="لإضافة ختم المكتب أو التوقيع وترقيم الصفحات" />
-        : (
+      {out ? <ResultPanel outputs={out} onReset={() => { setOut(null); setFile(null) }} /> : (
           <div className="tool-panel">
-            <FileChip name={file.name} size={file.size} onRemove={() => setFile(null)} />
+            {file ? <FileChip name={file.name} size={file.size} onRemove={() => setFile(null)} />
+              : <FileDrop accept={PDF_ACCEPT} onFiles={f => setFile(f[0])} title="اختر ملف PDF" hint="ثم اختر الإضافات من الأسفل" />}
 
             <div className="tool-section">
               <Toggle on={sealOn} set={setSealOn} title="ختم أو توقيع" hint="صورة PNG بخلفية شفافة تعطي أفضل نتيجة" />
@@ -471,7 +466,7 @@ export function StampPdf() {
                 <div className="tool-section-body">
                   <label className="tool-field">
                     <span>النص</span>
-                    <input value={wmText} onChange={e => setWmText(e.target.value)} placeholder="نسخة / مسودة / سري" maxLength={40} />
+                    <input type="text" className="input" value={wmText} onChange={e => setWmText(e.target.value)} placeholder="نسخة / مسودة / سري" maxLength={40} />
                   </label>
                   <Choice label="الشفافية" value={wmOpacity} onChange={setWmOpacity} options={[
                     { value: 0.1, label: 'خفيفة' }, { value: 0.15, label: 'متوسطة' }, { value: 0.25, label: 'واضحة' },
@@ -481,9 +476,9 @@ export function StampPdf() {
             </div>
 
             <div className="tool-footer">
-              <button className="btn btn-primary" onClick={run} disabled={busy || nothing || (sealOn && !seal)}>
+              <button className="btn btn-primary tool-go" onClick={run} disabled={!file || busy || nothing || (sealOn && !seal)}>
                 <span className="material-symbols-outlined" aria-hidden>approval</span>
-                {busy ? 'جارٍ التطبيق…' : nothing ? 'اختر إضافة واحدة على الأقل' : sealOn && !seal ? 'اختر صورة الختم' : 'تطبيق على الملف'}
+                {busy ? 'جارٍ التطبيق…' : !file ? 'تطبيق على الملف' : nothing ? 'اختر إضافة واحدة على الأقل' : sealOn && !seal ? 'اختر صورة الختم' : 'تطبيق على الملف'}
               </button>
             </div>
           </div>

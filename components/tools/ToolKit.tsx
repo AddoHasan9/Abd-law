@@ -1,13 +1,32 @@
 'use client'
 
 import Link from 'next/link'
-import { useRef, useState } from 'react'
+import { createContext, useContext, useRef, useState } from 'react'
 import { toast } from 'sonner'
 import type { ToolDef } from '@/lib/tools/registry'
 import { canShareFiles, downloadBlob, formatBytes, shareFiles } from '@/lib/tools/files'
 
-/* ---------- إطار صفحة الأداة ---------- */
+/* ---------- إطار الأداة: بطاقة داخل صفحة الأدوات ---------- */
+export const ToolCardContext = createContext(false)
+
 export function ToolShell({ tool, children }: { tool: ToolDef; children: React.ReactNode }) {
+  const asCard = useContext(ToolCardContext)
+  if (asCard) {
+    return (
+      <article className={`tool-card tone-${tool.group}`} id={tool.slug} aria-labelledby={`t-${tool.slug}`}>
+        <header className="tool-card-head">
+          <span className="tool-card-icon" aria-hidden>
+            <span className="material-symbols-outlined">{tool.icon}</span>
+          </span>
+          <div className="min-w-0">
+            <h2 id={`t-${tool.slug}`}>{tool.title}</h2>
+            <p>{tool.desc}</p>
+          </div>
+        </header>
+        {children}
+      </article>
+    )
+  }
   return (
     <div className="tool-page">
       <Link href="/tools" className="tool-back">
@@ -24,10 +43,6 @@ export function ToolShell({ tool, children }: { tool: ToolDef; children: React.R
         </div>
       </header>
       {children}
-      <p className="tool-privacy">
-        <span className="material-symbols-outlined" aria-hidden>lock</span>
-        تتم المعالجة على جهازك. الملفات لا تُرفع إلى أي خادم.
-      </p>
     </div>
   )
 }
@@ -65,6 +80,11 @@ export function FileDrop({
   return (
     <div
       className={`tool-drop ${over ? 'is-over' : ''} ${compact ? 'is-compact' : ''}`}
+      role="button"
+      tabIndex={0}
+      aria-label={title}
+      onClick={() => input.current?.click()}
+      onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); input.current?.click() } }}
       onDragOver={e => { e.preventDefault(); setOver(true) }}
       onDragLeave={() => setOver(false)}
       onDrop={e => { e.preventDefault(); setOver(false); take(e.dataTransfer.files) }}
@@ -74,7 +94,7 @@ export function FileDrop({
         <p className="tool-drop-title">{title}</p>
         {!compact && <p className="tool-drop-hint">{hint}</p>}
       </div>
-      <button type="button" className="btn btn-primary" onClick={() => input.current?.click()}>
+      <button type="button" className="btn btn-primary" tabIndex={-1} onClick={e => { e.stopPropagation(); input.current?.click() }}>
         اختيار {multiple ? 'ملفات' : 'ملف'}
       </button>
       <input
@@ -83,6 +103,7 @@ export function FileDrop({
         accept={accept}
         multiple={multiple}
         hidden
+        onClick={e => e.stopPropagation()}
         onChange={e => { take(e.target.files); e.target.value = '' }}
       />
     </div>
