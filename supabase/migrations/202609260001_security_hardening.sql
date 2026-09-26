@@ -109,3 +109,8 @@ end $$;
 delete from public.workflow_steps
 where step_key in ('study','feasible','offer','issue','notify','approve','assign','finish');
 create unique index if not exists workflow_steps_company_order_uniq on public.workflow_steps (company_id, step_order);
+
+-- 8) حذف نسخ المدير المكررة (كان كل حفظ يضيف سجلاً جديداً لنفس المدير)
+delete from public.company_managers m
+using public.company_managers a
+where a.company_id = m.company_id and a.active is true and m.active is not true and trim(m.name) = trim(a.name);

@@ -417,7 +417,14 @@ export async function updateCompanyDetailsAction(
     }
 
     // تفعيل وتحديث المدير المفوض في جدول company_managers بشكل مستقل (دون مساس بحقل manager في جدول الشركات)
-    if (payload.manager !== undefined && payload.manager.trim()) {
+    // جلب المدير الحالي والمساهمين الحاليين دفعة واحدة، حتى لا نعيد الكتابة إن لم يتغير شيء
+    const [{ data: currentManagers }, { data: currentShareholders }] = await Promise.all([
+      supabase.from('company_managers').select('name').eq('company_id', companyId).eq('active', true),
+      supabase.from('company_shareholders').select('id, name, share_amount, share_percentage, notes').eq('company_id', companyId),
+    ])
+    const currentManagerName = (currentManagers?.[0]?.name || '').trim()
+
+    if (payload.manager !== undefined && payload.manager.trim() && payload.manager.trim() !== currentManagerName) {
       const managerName = payload.manager.trim()
       const managerObj = {
         id: generateUUID(),
@@ -458,10 +465,16 @@ export async function updateCompanyDetailsAction(
           created_at: new Date().toISOString(),
         }))
 
+      const sig = (list: Array<{ name: string; share_amount?: number | null; share_percentage?: number | null; notes?: string | null }>) =>
+        JSON.stringify(list.map(x => [x.name.trim(), Number(x.share_amount) || 0, Number(x.share_percentage) || 0, x.notes || '']).sort())
+      const unchanged = sig(shObjs) === sig((currentShareholders || []) as typeof shObjs)
+
       try {
-        await supabase.from('company_shareholders').delete().eq('company_id', companyId)
-        if (shObjs.length > 0) {
-          await supabase.from('company_shareholders').insert(shObjs)
+        if (!unchanged) {
+          await supabase.from('company_shareholders').delete().eq('company_id', companyId)
+          if (shObjs.length > 0) {
+            await supabase.from('company_shareholders').insert(shObjs)
+          }
         }
       } catch (shErr) {
         console.warn('company_shareholders update notice:', shErr)
