@@ -97,3 +97,15 @@ create trigger user_audit_logs_no_change
 
 -- 6) نقل امتداد pg_trgm خارج مخطط public (غير مستخدم في أي فهرس أو دالة)
 alter extension pg_trgm set schema extensions;
+
+-- ============================================================
+-- 7) إصلاح تكرار خطوات سير العمل (كانت كل خطوة مسجّلة مرتين فيضيع التقدم)
+-- ============================================================
+create or replace function public.after_company_insert()
+returns trigger language plpgsql set search_path = '' as $$
+begin
+  return new; -- خطوات التأسيس يولّدها التطبيق
+end $$;
+delete from public.workflow_steps
+where step_key in ('study','feasible','offer','issue','notify','approve','assign','finish');
+create unique index if not exists workflow_steps_company_order_uniq on public.workflow_steps (company_id, step_order);

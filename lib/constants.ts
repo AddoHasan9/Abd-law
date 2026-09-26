@@ -157,6 +157,27 @@ export function sanitizeFormationWorkflowSteps(
     }))
   }
 
+  // الصفوف الحقيقية حسب المفتاح (حتى لو وُجدت صفوف قديمة إضافية) — نحافظ على معرّفاتها الحقيقية
+  if (Array.isArray(rawSteps)) {
+    const byKey = new Map(rawSteps.filter(s => s.step_key).map(s => [s.step_key as string, s]))
+    if (WORKFLOW.every(wf => byKey.has(wf.id) && byKey.get(wf.id)?.id)) {
+      return WORKFLOW.map((wf, idx) => {
+        const s = byKey.get(wf.id)!
+        return {
+          id: s.id as string,
+          step_key: wf.id,
+          step_order: idx + 1,
+          label: wf.label,
+          owner_kind: wf.owner,
+          company_id: companyId,
+          state: s.state || (idx === 0 ? 'doing' : 'wait'),
+          done_by: s.done_by || null,
+          done_at: s.done_at || null,
+        }
+      })
+    }
+  }
+
   // Check if rawSteps is already exactly the 8 official steps matching WORKFLOW keys
   const isClean = Array.isArray(rawSteps) && 
     rawSteps.length === 8 && 

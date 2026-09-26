@@ -411,6 +411,7 @@ export default function CompanyDetailsModal({ company, isOpen, onClose, onDelete
   }
 
   const handleStepComplete = async (stepId: string, stepOrder: number) => {
+    const before = steps
     // Optimistic UI update: Mark current as done, and immediately activate the next step below!
     setSteps(prev =>
       prev.map(s => {
@@ -424,7 +425,12 @@ export default function CompanyDetailsModal({ company, isOpen, onClose, onDelete
       })
     )
 
-    await advanceCompanyStepAction(stepId, 'doing')
+    const res = await advanceCompanyStepAction(stepId, 'doing')
+    if (!res.success) {
+      setSteps(before)
+      toast.error(res.error || 'تعذّر حفظ الخطوة')
+      return
+    }
 
     // Scroll smoothly to the newly activated step below!
     setTimeout(() => {
@@ -442,6 +448,7 @@ export default function CompanyDetailsModal({ company, isOpen, onClose, onDelete
   }
 
   const handleStepRevert = async (stepId: string, stepOrder: number) => {
+    const before = steps
     // Revert this step to 'doing', and reset all subsequent steps to 'wait'
     setSteps(prev =>
       prev.map(s => {
@@ -455,7 +462,12 @@ export default function CompanyDetailsModal({ company, isOpen, onClose, onDelete
       })
     )
 
-    await advanceCompanyStepAction(stepId, 'done')
+    const res = await advanceCompanyStepAction(stepId, 'done')
+    if (!res.success) {
+      setSteps(before)
+      toast.error(res.error || 'تعذّر إعادة فتح الخطوة')
+      return
+    }
     router.refresh()
   }
 

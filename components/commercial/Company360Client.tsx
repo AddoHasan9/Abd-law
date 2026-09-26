@@ -218,7 +218,7 @@ export default function Company360Client({
     if (!canEdit) return
     setLoading(true)
     try {
-      const res = await advanceCompanyStepAction(stepId, 'done')
+      const res = await advanceCompanyStepAction(stepId, 'doing')
       if (res.success) {
         setMsg({ type: 'ok', text: `تم إكمال الخطوة ${stepOrder} بنجاح!` })
         router.refresh()
@@ -236,7 +236,7 @@ export default function Company360Client({
     if (!canEdit) return
     setLoading(true)
     try {
-      const res = await advanceCompanyStepAction(stepId, 'doing')
+      const res = await advanceCompanyStepAction(stepId, 'done')
       if (res.success) {
         setMsg({ type: 'ok', text: `تمت إعادة فتح الخطوة ${stepOrder} للمتابعة!` })
         router.refresh()
