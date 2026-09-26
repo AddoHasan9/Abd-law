@@ -417,7 +417,14 @@ export async function updateCompanyDetailsAction(
     }
 
     // تفعيل وتحديث المدير المفوض في جدول company_managers بشكل مستقل (دون مساس بحقل manager في جدول الشركات)
-    if (payload.manager !== undefined && payload.manager.trim()) {
+    // جلب المدير الحالي والمساهمين الحاليين دفعة واحدة، حتى لا نعيد الكتابة إن لم يتغير شيء
+    const [{ data: currentManagers }, { data: currentShareholders }] = await Promise.all([
+      supabase.from('company_managers').select('name').eq('company_id', companyId).eq('active', true),
+      supabase.from('company_shareholders').select('id, name, share_amount, share_percentage, notes').eq('company_id', companyId),
+    ])
+    const currentManagerName = (currentManagers?.[0]?.name || '').trim()
+
+    if (payload.manager !== undefined && payload.manager.trim() && payload.manager.trim() !== currentManagerName) {
       const managerName = payload.manager.trim()
       const managerObj = {
         id: generateUUID(),
@@ -458,10 +465,16 @@ export async function updateCompanyDetailsAction(
           created_at: new Date().toISOString(),
         }))
 
+      const sig = (list: Array<{ name: string; share_amount?: number | null; share_percentage?: number | null; notes?: string | null }>) =>
+        JSON.stringify(list.map(x => [x.name.trim(), Number(x.share_amount) || 0, Number(x.share_percentage) || 0, x.notes || '']).sort())
+      const unchanged = sig(shObjs) === sig((currentShareholders || []) as typeof shObjs)
+
       try {
-        await supabase.from('company_shareholders').delete().eq('company_id', companyId)
-        if (shObjs.length > 0) {
-          await supabase.from('company_shareholders').insert(shObjs)
+        if (!unchanged) {
+          await supabase.from('company_shareholders').delete().eq('company_id', companyId)
+          if (shObjs.length > 0) {
+            await supabase.from('company_shareholders').insert(shObjs)
+          }
         }
       } catch (shErr) {
         console.warn('company_shareholders update notice:', shErr)
@@ -504,113 +517,67 @@ export async function updateCompanyDetailsAction(
   }
 }
 
+/**
+ * تغيير حالة خطوة سير العمل. currentState هي الحالة الحالية للخطوة:
+ * 'doing' ← تُكمَل (وتُفتح التالية)، 'done' ← يُعاد فتحها (وتُعاد اللاحقة للانتظار).
+ * تعمل على صف قاعدة البيانات الحقيقي حصراً (لا ملفات مؤقتة)، وتعيد الخطأ للواجهة.
+ */
 export async function advanceCompanyStepAction(stepId: string, currentState: WfState) {
-  const rowDenied = await requireRecordAccess('workflow_steps', stepId)
-  if (rowDenied) return rowDenied
-
   const denied = await requirePermission('companies', 'edit')
   if (denied) return denied
 
   try {
     const supabase = createAdminClient()
 
-    let nextState: WfState = 'doing'
-    if (currentState === 'wait') nextState = 'doing'
-    else if (currentState === 'doing') nextState = 'done'
-    else if (currentState === 'done') nextState = 'doing'
+    // الواجهة قد ترسل معرّفاً حقيقياً أو معرّفاً مولّداً بصيغة wf_<الشركة>_<الترتيب>
+    const synthetic = /^wf_(.+)_(\d+)$/.exec(stepId)
+    const lookup = synthetic
+      ? supabase.from('workflow_steps').select('id, company_id, step_order').eq('company_id', synthetic[1]).eq('step_order', Number(synthetic[2])).maybeSingle()
+      : supabase.from('workflow_steps').select('id, company_id, step_order').eq('id', stepId).maybeSingle()
+    const { data: row, error: findErr } = await lookup
+    if (findErr || !row) return { success: false as const, error: 'تعذّر العثور على الخطوة. حدّث الصفحة وحاول مجدداً' }
 
-    // 1. Update disk JSON store
-    const diskCompanies = readJsonFile<CompanyWithWorkflow[]>('companies.json', [])
-    let currentStepOrder = 1
-    let companyId: string | null = null
+    const rowDenied = await requireRecordAccess('companies', row.company_id)
+    if (rowDenied) return rowDenied
 
-    for (const c of diskCompanies) {
-      const stepIdx = c.workflow_steps?.findIndex(s => s.id === stepId) ?? -1
-      if (stepIdx !== -1 && c.workflow_steps) {
-        const step = c.workflow_steps[stepIdx]
-        companyId = c.id
-        currentStepOrder = step.step_order || stepIdx + 1
+    const nextState: WfState = currentState === 'doing' || currentState === 'wait' ? 'done' : 'doing'
+    const today = new Date().toISOString().slice(0, 10)
 
-        if (nextState === 'done') {
-          step.state = 'done'
-          step.done_at = new Date().toISOString()
-
-          // Auto-advance NEXT step to 'doing'
-          const nextStep = c.workflow_steps.find(s => (s.step_order || 0) === currentStepOrder + 1)
-          if (nextStep && nextStep.state === 'wait') {
-            nextStep.state = 'doing'
-          }
-        } else if (nextState === 'doing') {
-          // If reverting to doing, ensure all subsequent steps are reset to 'wait'
-          step.state = 'doing'
-          step.done_at = null
-          c.workflow_steps.forEach(s => {
-            if ((s.step_order || 0) > currentStepOrder) {
-              s.state = 'wait'
-              s.done_at = null
-            }
-          })
-        }
-        break
-      }
-    }
-    writeJsonFile('companies.json', diskCompanies)
-
-    // 2. Update Supabase
-    try {
-      if (nextState === 'done') {
-        await supabase
-          .from('workflow_steps')
-          .update({
-            state: 'done',
-            done_at: new Date().toISOString(),
-          })
-          .eq('id', stepId)
-
-        if (companyId) {
-          // Advance next step in DB
-          await supabase
-            .from('workflow_steps')
-            .update({ state: 'doing' })
-            .eq('company_id', companyId)
-            .eq('step_order', currentStepOrder + 1)
-            .eq('state', 'wait')
-        }
-      } else {
-        await supabase
-          .from('workflow_steps')
-          .update({
-            state: 'doing',
-            done_at: null,
-          })
-          .eq('id', stepId)
-
-        if (companyId) {
-          await supabase
-            .from('workflow_steps')
-            .update({ state: 'wait', done_at: null })
-            .eq('company_id', companyId)
-            .gt('step_order', currentStepOrder)
-        }
-      }
-    } catch (dbErr) {
-      console.warn('advanceCompanyStepAction Supabase notice:', dbErr)
+    if (nextState === 'done') {
+      const { error } = await supabase.from('workflow_steps').update({ state: 'done', done_at: today }).eq('id', row.id)
+      if (error) throw error
+      await supabase
+        .from('workflow_steps')
+        .update({ state: 'doing' })
+        .eq('company_id', row.company_id)
+        .eq('step_order', row.step_order + 1)
+        .eq('state', 'wait')
+    } else {
+      const { error } = await supabase.from('workflow_steps').update({ state: 'doing', done_at: null }).eq('id', row.id)
+      if (error) throw error
+      await supabase
+        .from('workflow_steps')
+        .update({ state: 'wait', done_at: null })
+        .eq('company_id', row.company_id)
+        .gt('step_order', row.step_order)
     }
 
-    const stateLabel = nextState === 'done' ? 'مكتملة ✓ والانتقال للخطوة التالية' : 'قيد التنفيذ ⏳'
+    const stateLabel = nextState === 'done' ? 'مكتملة والانتقال للخطوة التالية' : 'قيد التنفيذ'
     await createNotificationAction({
-      title: `تحديث محطة سير العمل`,
-      description: `تغيرت حالة الخطوة إلى ${stateLabel}`,
+      title: 'تحديث محطة سير العمل',
+      description: `تغيرت حالة الخطوة ${row.step_order} إلى ${stateLabel}`,
       type: 'step_completed',
-      link_url: '/commercial/companies',
+      link_url: `/commercial/companies/${row.company_id}`,
     })
 
     revalidatePath('/commercial/companies')
+    revalidatePath(`/commercial/companies/${row.company_id}`)
     revalidatePath('/commercial')
-    return { success: true, nextState }
+    revalidatePath('/dashboard')
+    return { success: true as const, nextState }
   } catch (err: unknown) {
     console.error('advanceCompanyStepAction exception:', err)
-    return { success: false, error: 'تعذر تحديث حالة الخطوة' }
+    return { success: false as const, error: 'تعذّر حفظ حالة الخطوة. تحقق من الاتصال وحاول مجدداً' }
   }
 }
 

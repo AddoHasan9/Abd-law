@@ -3,7 +3,7 @@
 import { revalidatePath } from 'next/cache'
 import { createAdminClient } from '@/lib/supabase/server'
 import { readJsonFile, writeJsonFile } from '@/lib/data/fs-store'
-import { requirePermission } from '@/lib/auth/require-permission'
+import { getCurrentUserProfile, requirePermission } from '@/lib/auth/require-permission'
 import type { Settings } from '@/types/database'
 
 export interface WorkflowTemplateStep {
@@ -98,6 +98,8 @@ const DEFAULT_WORKFLOW_TEMPLATES: Record<string, WorkflowTemplate> = {
 }
 
 export async function getGeneralSettingsAction(): Promise<{ success: boolean; data?: Settings; error?: string }> {
+  // تُقرأ بمفتاح المدير، لذا لا تُسلَّم إلا لمستخدم مسجّل ومفعّل
+  if (!(await getCurrentUserProfile())) return { success: false, error: 'غير مصرح' }
   try {
     const supabase = createAdminClient()
     const { data, error } = await supabase.from('settings').select('*').eq('id', 1).single()
@@ -153,6 +155,7 @@ export async function updateGeneralSettingsAction(payload: Partial<Settings>): P
 }
 
 export async function getWorkflowTemplatesAction(): Promise<{ success: boolean; data: Record<string, WorkflowTemplate> }> {
+  if (!(await getCurrentUserProfile())) return { success: false, data: {} }
   try {
     const templates = readJsonFile<Record<string, WorkflowTemplate>>('workflow_templates.json', DEFAULT_WORKFLOW_TEMPLATES)
     const merged: Record<string, WorkflowTemplate> = { ...DEFAULT_WORKFLOW_TEMPLATES, ...templates }

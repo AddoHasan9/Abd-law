@@ -370,7 +370,8 @@ export default function CompanyDetailsModal({ company, isOpen, onClose, onDelete
         share_percentage: parseFloat(s.share_percentage) || 0,
       }))
 
-    const res = await updateCompanyDetailsAction(company.id, {
+    // الإجراءان مستقلان — يُرسلان معاً بدل الانتظار واحداً بعد الآخر
+    const [res, fsRes] = await Promise.all([updateCompanyDetailsAction(company.id, {
       name,
       kind: shareholders.length > 1 ? 'محدودة' : kind,
       capital: parseFloat(capital.replace(/[^0-9.]/g, '')) || 0,
@@ -387,13 +388,11 @@ export default function CompanyDetailsModal({ company, isOpen, onClose, onDelete
       deposit_released_at: depositReleasedAt || company.deposit_released_at || undefined,
       lacks,
       shareholders: cleanShareholders,
-    })
-
-    const fsRes = await updateCompanyFSSettingsAction(company.id, {
+    }), updateCompanyFSSettingsAction(company.id, {
       establishment_date: establishmentDate,
       last_completed_fs_year: parseInt(lastCompletedYear) || null,
       fs_first_method: fsFirstMethod,
-    })
+    })])
 
     setLoading(false)
     if (res.success && fsRes.success) {
@@ -411,6 +410,7 @@ export default function CompanyDetailsModal({ company, isOpen, onClose, onDelete
   }
 
   const handleStepComplete = async (stepId: string, stepOrder: number) => {
+    const before = steps
     // Optimistic UI update: Mark current as done, and immediately activate the next step below!
     setSteps(prev =>
       prev.map(s => {
@@ -424,7 +424,13 @@ export default function CompanyDetailsModal({ company, isOpen, onClose, onDelete
       })
     )
 
-    await advanceCompanyStepAction(stepId, 'doing')
+    const res = await advanceCompanyStepAction(stepId, 'doing')
+    if (!res.success) {
+      setSteps(before)
+      toast.error(res.error || 'تعذّر حفظ الخطوة')
+      return
+    }
+    toast.success(`تم حفظ الخطوة ${stepOrder}`)
 
     // Scroll smoothly to the newly activated step below!
     setTimeout(() => {
@@ -442,6 +448,7 @@ export default function CompanyDetailsModal({ company, isOpen, onClose, onDelete
   }
 
   const handleStepRevert = async (stepId: string, stepOrder: number) => {
+    const before = steps
     // Revert this step to 'doing', and reset all subsequent steps to 'wait'
     setSteps(prev =>
       prev.map(s => {
@@ -455,7 +462,12 @@ export default function CompanyDetailsModal({ company, isOpen, onClose, onDelete
       })
     )
 
-    await advanceCompanyStepAction(stepId, 'done')
+    const res = await advanceCompanyStepAction(stepId, 'done')
+    if (!res.success) {
+      setSteps(before)
+      toast.error(res.error || 'تعذّر إعادة فتح الخطوة')
+      return
+    }
     router.refresh()
   }
 
@@ -1751,7 +1763,13 @@ export default function CompanyDetailsModal({ company, isOpen, onClose, onDelete
             )}
 
             <div style={{ display: 'flex', gap: '8px' }}>
-              {canEditCompany && (
+              {activeTab === 'workflow' && (
+                <span className="hidden sm:inline-flex items-center gap-1.5 text-[12px] font-semibold text-[var(--text-3)]">
+                  <span className="material-symbols-outlined text-[16px] text-emerald-600" aria-hidden>cloud_done</span>
+                  خطوات سير العمل تُحفظ تلقائياً
+                </span>
+              )}
+              {canEditCompany && !['workflow', 'tax', 'ids'].includes(activeTab) && (
                 <button type="submit" className="btn btn-primary" disabled={loading}>
                   {loading ? 'جاري الحفظ...' : 'حفظ التغييرات'}
                 </button>
