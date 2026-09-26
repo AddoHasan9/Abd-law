@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { KpiCard } from '@/components/ui/KpiCard'
 import { DataPanel } from '@/components/ui/DataPanel'
 import Link from 'next/link'
 import { formatDate, formatFullDate } from '@/lib/constants'
@@ -67,12 +68,12 @@ export default function DashboardClient({ stats, profiles = [], companies = [] }
 
   const urgentFS = stats.urgentDeadlines?.length || 0
   const kpis = [
-    { label: 'الشركات المؤسسة', value: establishedCount, hint: 'دليل الشركات', icon: 'domain', href: '/commercial/companies-registry' },
-    { label: 'قيد التأسيس', value: formingCount, hint: 'مسار التأسيس', icon: 'pending_actions', href: '/commercial/companies' },
-    { label: 'إطلاق الوديعة', value: depositsCount, hint: 'مسار الودائع', icon: 'savings', href: '/commercial/deposits' },
-    { label: 'قسم المحدودة', value: llcCount, hint: 'المعاملات النشطة', icon: 'history_edu', href: '/commercial/llc' },
-    { label: 'الهويات', value: idsCount, hint: 'مستورد وضريبة وغرفة', icon: 'badge', href: '/commercial/ids' },
-    { label: 'الحسابات الختامية', value: urgentFS, hint: urgentFS ? 'مهل قريبة تحتاج متابعة' : 'مهلة 7/10 السنوية', icon: 'receipt_long', href: '/commercial/financial-statements', alert: urgentFS > 0 },
+    { label: 'الشركات المؤسسة', value: establishedCount, hint: 'دليل الشركات', icon: 'verified', href: '/commercial/companies-registry', tone: 'emerald' as const },
+    { label: 'قيد التأسيس', value: formingCount, hint: 'مسار التأسيس', icon: 'pending_actions', href: '/commercial/companies', tone: 'amber' as const },
+    { label: 'إطلاق الوديعة', value: depositsCount, hint: 'مسار الودائع', icon: 'account_balance', href: '/commercial/deposits', tone: 'blue' as const },
+    { label: 'قسم المحدودة', value: llcCount, hint: 'المعاملات النشطة', icon: 'history_edu', href: '/commercial/llc', tone: 'indigo' as const },
+    { label: 'الهويات', value: idsCount, hint: 'مستورد وضريبة وغرفة', icon: 'badge', href: '/commercial/ids', tone: 'violet' as const },
+    { label: 'الحسابات الختامية', value: urgentFS, hint: urgentFS ? 'مهل قريبة تحتاج متابعة' : 'مهلة 7/10 السنوية', icon: 'receipt_long', href: '/commercial/financial-statements', tone: 'rose' as const, alert: urgentFS > 0 },
   ]
 
   const maxWorkload = Math.max(...displayLawyers.map(l => l.active_tx_count ?? 0), 1)
@@ -92,17 +93,7 @@ export default function DashboardClient({ stats, profiles = [], companies = [] }
       {/* 2. المؤشرات: البطاقة كلها رابط، الرقم هو الأبرز، واللون فقط لما يحتاج انتباه */}
       <FadeInStagger className="kpi-grid">
         {kpis.map(k => (
-          <Link key={k.href} href={k.href} className={`kpi-card ${k.alert ? 'is-alert' : ''}`}>
-            <span className="kpi-icon" aria-hidden>
-              <span className="material-symbols-outlined">{k.icon}</span>
-            </span>
-            <span className="kpi-label">{k.label}</span>
-            <RollingNumber value={k.value} className="kpi-value" />
-            <span className="kpi-hint">
-              {k.hint}
-              <span className="material-symbols-outlined" aria-hidden>chevron_left</span>
-            </span>
-          </Link>
+          <KpiCard key={k.href} label={k.label} value={k.value} icon={k.icon} tone={k.tone} hint={k.hint} href={k.href} alert={k.alert} />
         ))}
       </FadeInStagger>
 

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { toast } from 'sonner'
-import CompanyFileLink from '@/components/commercial/CompanyFileLink'
+import { KpiCard } from '@/components/ui/KpiCard'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { wfProgress, formatMoney, formatDate, penaltyState } from '@/lib/constants'
 import { calculateFSState } from '@/lib/financial-statements/calc'
@@ -20,6 +20,14 @@ import { AnimatedTabs } from '@/components/ui/AnimatedTabs'
 
 interface Props {
   initialCompanies: CompanyWithWorkflow[]
+}
+
+/** رأس المال بصيغة مختصرة تتسع في البطاقة: 1 مليار د.ع / 250 مليون د.ع */
+function compactIQD(n: number) {
+  const fmt = (v: number) => (Number.isInteger(v) ? v : Number(v.toFixed(2))).toLocaleString('en-US')
+  if (n >= 1e9) return `${fmt(n / 1e9)} مليار د.ع`
+  if (n >= 1e6) return `${fmt(n / 1e6)} مليون د.ع`
+  return `${n.toLocaleString('en-US')} د.ع`
 }
 
 export default function CompaniesClient({ initialCompanies }: Props) {
@@ -210,142 +218,35 @@ export default function CompaniesClient({ initialCompanies }: Props) {
         )}
       </div>
 
-      {/* Top 4 KPI Cards (Matching Dashboard SaaS Luxury Style) */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5 w-full">
-        
-        {/* KPI 1: Established Companies with Dynamic Time Breakdown */}
-        <div
-          onClick={() => {
-            setActiveTab('established')
-            setTimeFilter('all')
-          }}
-          className={`glass-card p-4 sm:p-5 rounded-[22px] relative overflow-hidden group hover:-translate-y-1 hover:shadow-md transition duration-200 cursor-pointer ${
-            activeTab === 'established' ? 'ring-2 ring-emerald-500/50 bg-emerald-500/5' : ''
-          }`}
-        >
-          <div className="flex justify-between items-start mb-2 relative z-10">
-            <div className="flex flex-col">
-              <span className="text-[11px] font-bold uppercase tracking-wider text-[var(--text-3)] mb-0.5">الشركات المؤسسة</span>
-              <span className="text-3xl font-extrabold text-emerald-600 dark:text-emerald-400 num">{establishedCompanies.length}</span>
-            </div>
-            <div className="w-10 h-10 rounded-xl bg-emerald-500/15 border border-emerald-500/20 flex items-center justify-center text-emerald-600 dark:text-emerald-400 group-hover:scale-105 transition-transform">
-              <span className="material-symbols-outlined text-[22px]">verified</span>
-            </div>
-          </div>
-          
-          {/* Timeframe Pill Breakdown */}
-          <div className="flex items-center gap-1.5 flex-wrap text-[10.5px] font-bold relative z-10 mt-1">
-            <span
-              onClick={e => {
-                e.stopPropagation()
-                setActiveTab('established')
-                setTimeFilter('week')
-              }}
-              className={`px-2 py-0.5 rounded-full transition-colors ${
-                activeTab === 'established' && timeFilter === 'week'
-                  ? 'bg-emerald-600 text-white'
-                  : 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-500/20'
-              }`}
-            >
-              الأسبوع: {thisWeekEstablished}
+      {/* المؤشرات — نفس بطاقة لوحة التحكم */}
+      <div className="kpi-grid cols-4">
+        <KpiCard
+          label="الشركات المؤسسة"
+          value={establishedCompanies.length}
+          icon="verified"
+          tone="emerald"
+          active={activeTab === 'established'}
+          onClick={() => { setActiveTab('established'); setTimeFilter('all') }}
+          footer={
+            <span className="kpi-chips">
+              {([['week', 'الأسبوع', thisWeekEstablished], ['month', 'الشهر', thisMonthEstablished], ['year', 'السنة', thisYearEstablished]] as const).map(([id, label, n]) => (
+                <span
+                  key={id}
+                  role="button"
+                  tabIndex={0}
+                  className={activeTab === 'established' && timeFilter === id ? 'is-on' : ''}
+                  onClick={e => { e.stopPropagation(); setActiveTab('established'); setTimeFilter(id) }}
+                  onKeyDown={e => { if (e.key === 'Enter') { e.stopPropagation(); setActiveTab('established'); setTimeFilter(id) } }}
+                >
+                  {label} <b className="num">{n}</b>
+                </span>
+              ))}
             </span>
-            <span
-              onClick={e => {
-                e.stopPropagation()
-                setActiveTab('established')
-                setTimeFilter('month')
-              }}
-              className={`px-2 py-0.5 rounded-full transition-colors ${
-                activeTab === 'established' && timeFilter === 'month'
-                  ? 'bg-emerald-600 text-white'
-                  : 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-500/20'
-              }`}
-            >
-              الشهر: {thisMonthEstablished}
-            </span>
-            <span
-              onClick={e => {
-                e.stopPropagation()
-                setActiveTab('established')
-                setTimeFilter('year')
-              }}
-              className={`px-2 py-0.5 rounded-full transition-colors ${
-                activeTab === 'established' && timeFilter === 'year'
-                  ? 'bg-emerald-600 text-white'
-                  : 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-500/20'
-              }`}
-            >
-              السنة: {thisYearEstablished}
-            </span>
-          </div>
-        </div>
-
-        {/* KPI 2: Forming Companies */}
-        <div
-          onClick={() => setActiveTab('forming')}
-          className={`glass-card p-4 sm:p-5 rounded-[22px] relative overflow-hidden group hover:-translate-y-1 hover:shadow-md transition duration-200 cursor-pointer ${
-            activeTab === 'forming' ? 'ring-2 ring-amber-500/50 bg-amber-500/5' : ''
-          }`}
-        >
-          <div className="flex justify-between items-start mb-3 relative z-10">
-            <div className="flex flex-col">
-              <span className="text-[11px] font-bold uppercase tracking-wider text-[var(--text-3)] mb-0.5">قيد التأسيس</span>
-              <span className="text-3xl font-extrabold text-amber-600 dark:text-amber-400 num">{formingCompanies.length}</span>
-            </div>
-            <div className="w-10 h-10 rounded-xl bg-amber-500/15 border border-amber-500/20 flex items-center justify-center text-amber-600 dark:text-amber-400 group-hover:scale-105 transition-transform">
-              <span className="material-symbols-outlined text-[22px]">pending_actions</span>
-            </div>
-          </div>
-          <div className="flex items-center justify-between text-[11px] font-bold text-amber-700 dark:text-amber-300 bg-amber-500/10 px-2.5 py-1 rounded-full relative z-10">
-            <span>مسار التأسيس (8 خطوات)</span>
-            <span className="material-symbols-outlined text-[13px]">arrow_left</span>
-          </div>
-        </div>
-
-        {/* KPI 3: Deposit Release Phase */}
-        <div
-          onClick={() => setActiveTab('deposit')}
-          className={`glass-card p-4 sm:p-5 rounded-[22px] relative overflow-hidden group hover:-translate-y-1 hover:shadow-md transition duration-200 cursor-pointer ${
-            activeTab === 'deposit' ? 'ring-2 ring-blue-500/50 bg-blue-500/5' : ''
-          }`}
-        >
-          <div className="flex justify-between items-start mb-3 relative z-10">
-            <div className="flex flex-col">
-              <span className="text-[11px] font-bold uppercase tracking-wider text-[var(--text-3)] mb-0.5">إطلاق الوديعة</span>
-              <span className="text-3xl font-extrabold text-blue-600 dark:text-blue-400 num">{depositPhaseCompanies.length}</span>
-            </div>
-            <div className="w-10 h-10 rounded-xl bg-blue-500/15 border border-blue-500/20 flex items-center justify-center text-blue-600 dark:text-blue-400 group-hover:scale-105 transition-transform">
-              <span className="material-symbols-outlined text-[22px]">account_balance</span>
-            </div>
-          </div>
-          <div className="flex items-center justify-between text-[11px] font-bold text-blue-700 dark:text-blue-300 bg-blue-500/10 px-2.5 py-1 rounded-full relative z-10">
-            <span>ودائع قيد الإطلاق (30 يوماً)</span>
-            <span className="material-symbols-outlined text-[13px]">arrow_left</span>
-          </div>
-        </div>
-
-        {/* KPI 4: Total Companies Directory */}
-        <div
-          onClick={() => setActiveTab('all')}
-          className={`glass-card p-4 sm:p-5 rounded-[22px] relative overflow-hidden group hover:-translate-y-1 hover:shadow-md transition duration-200 cursor-pointer ${
-            activeTab === 'all' ? 'ring-2 ring-[color:color-mix(in_srgb,var(--accent)_50%,transparent)] bg-[color:color-mix(in_srgb,var(--accent)_5%,transparent)]' : ''
-          }`}
-        >
-          <div className="flex justify-between items-start mb-3 relative z-10">
-            <div className="flex flex-col">
-              <span className="text-[11px] font-bold uppercase tracking-wider text-[var(--text-3)] mb-0.5">إجمالي شركات التأسيس</span>
-              <span className="text-3xl font-extrabold text-[var(--text)] num">{formationList.length}</span>
-            </div>
-            <div className="w-10 h-10 rounded-xl bg-[var(--accent-soft)] border border-[color:color-mix(in_srgb,var(--accent)_20%,transparent)] flex items-center justify-center text-[var(--accent)] group-hover:scale-105 transition-transform">
-              <span className="material-symbols-outlined text-[22px]">corporate_fare</span>
-            </div>
-          </div>
-          <div className="flex items-center justify-between text-[11px] font-bold text-[var(--accent)] bg-[var(--accent-soft)] px-2.5 py-1 rounded-full relative z-10">
-            <span>عرض كافة شركات التأسيس</span>
-            <span className="material-symbols-outlined text-[13px]">arrow_left</span>
-          </div>
-        </div>
-
+          }
+        />
+        <KpiCard label="قيد التأسيس" value={formingCompanies.length} icon="pending_actions" tone="amber" hint="مسار التأسيس (8 خطوات)" active={activeTab === 'forming'} onClick={() => setActiveTab('forming')} />
+        <KpiCard label="إطلاق الوديعة" value={depositPhaseCompanies.length} icon="account_balance" tone="blue" hint="ودائع قيد الإطلاق" active={activeTab === 'deposit'} onClick={() => setActiveTab('deposit')} />
+        <KpiCard label="إجمالي الشركات" value={formationList.length} icon="corporate_fare" tone="indigo" hint="عرض كل الشركات" active={activeTab === 'all'} onClick={() => setActiveTab('all')} />
       </div>
 
       {/* Filter Tabs & Search Bar */}
@@ -395,219 +296,64 @@ export default function CompaniesClient({ initialCompanies }: Props) {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4" style={{ alignItems: 'stretch' }}>
           {filteredCompanies.map(co => {
             const pg = wfProgress(co.workflow_steps)
-            const calculatedSt = calculateCompanyStatus({ company: co })
             const pen = penaltyState(co, false)
 
-            const activeManager = co.managers?.find(m => m.active)?.name || co.managers?.[0]?.name || '—'
             const isEstablished = co.status === 'established' || co.deposit_released
 
             return (
-              <div
+              <article
                 key={co.id}
-                className="glass-card group relative p-4 rounded-[22px] bg-[var(--surface-glass)] backdrop-blur-xl border border-[var(--border)] hover:border-[color:color-mix(in_srgb,var(--accent)_50%,transparent)] hover:shadow-xl transition duration-300 transform hover:-translate-y-1.5 flex flex-col justify-between overflow-hidden cursor-pointer h-full shadow-xs"
+                className={`co-card ${isEstablished ? 'is-est' : co.lacks ? 'is-lack' : 'is-forming'}`}
+                role="button"
+                tabIndex={0}
+                aria-label={`فتح تفاصيل ${co.name}`}
                 onClick={() => handleCardClick(co)}
+                onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleCardClick(co) } }}
               >
-                {/* Glowing Top Indicator Bar */}
-                <div
-                  style={{
-                    position: 'absolute',
-                    top: 0,
-                    left: 0,
-                    right: 0,
-                    height: '3.5px',
-                    background: isEstablished
-                      ? 'linear-gradient(90deg, #10B981, #34D399, #10B981)'
-                      : co.lacks
-                      ? 'linear-gradient(90deg, #F59E0B, #EF4444, #F59E0B)'
-                      : 'linear-gradient(90deg, #2563EB, #6366F1, #38BDF8)',
-                    opacity: 0.9,
-                  }}
-                />
-
-                {/* Header (الأيقونة + اسم الشركة + رمز الحالة ورقم المهمة) */}
-                <div className="flex items-start justify-between gap-3 pb-3 border-b border-[var(--border-soft)]">
-                  <div className="flex items-start gap-2.5 min-w-0 flex-1">
-                    <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-blue-500/15 to-indigo-500/10 border border-blue-500/20 flex items-center justify-center text-blue-600 dark:text-cyan-400 flex-none shadow-xs group-hover:scale-105 group-hover:rotate-2 transition-transform duration-300 mt-0.5">
-                      <span className="material-symbols-outlined text-[19px]">domain</span>
-                    </div>
-                    <div className="flex flex-col min-w-0 flex-1">
-                      <h3
-                        className="font-display font-black text-[14px] sm:text-[15px] text-[var(--text)] transition-colors leading-snug group-hover:text-[var(--accent)] break-words whitespace-normal"
-                        title={co.name}
-                      >
-                        {co.name}
-                      </h3>
-                      <div className="flex items-center gap-1.5 mt-1 flex-wrap">
-                        <span className="text-[10.5px] font-bold text-[var(--text-2)] bg-[var(--surface-2)] px-2.5 py-0.5 rounded-full border border-[var(--border)]">
-                          {co.kind ?? 'شركة'}
-                        </span>
-                      </div>
-                    </div>
+                <header className="co-card-head">
+                  <div className="min-w-0">
+                    <h3 title={co.name}>{co.name}</h3>
+                    <p className="co-card-meta">
+                      <span className="num">#{co.task_no ?? '—'}</span>
+                      <span aria-hidden>·</span>
+                      <span>{co.kind ?? 'شركة'}</span>
+                    </p>
                   </div>
+                  <span className={`co-pill co-card-status ${isEstablished ? 'is-ok' : 'is-warn'}`}>{isEstablished ? 'مؤسسة' : 'قيد التأسيس'}</span>
+                </header>
 
-                  <div className="flex flex-col items-end gap-1.5 flex-none" onClick={e => e.stopPropagation()}>
-                    <WorkflowStatus
-                      status={co.status}
-                      entityId={co.id}
-                      entityType="company"
-                      size="sm"
-                    />
-                    <span className="text-[10.5px] font-extrabold text-[var(--accent)] bg-[var(--accent-soft)] border border-[color:color-mix(in_srgb,var(--accent)_25%,transparent)] px-2.5 py-0.5 rounded-full num shadow-xs">
-                      #{co.task_no ?? '—'}
+                <dl className="co-card-facts">
+                  <div>
+                    <dt>رقم الشهادة</dt>
+                    <dd className="num">{co.cert_no || '—'}</dd>
+                  </div>
+                  <div>
+                    <dt>تاريخ الشهادة</dt>
+                    <dd className="num">{co.cert_date ? formatDate(co.cert_date) : '—'}</dd>
+                  </div>
+                  <div>
+                    <dt>رأس المال</dt>
+                    <dd className="num co-card-money" title={co.capital ? formatMoney(co.capital) : undefined}>{co.capital ? compactIQD(co.capital) : '—'}</dd>
+                  </div>
+                </dl>
+
+                <footer className="co-card-foot">
+                  {isEstablished ? (
+                    <span className="co-pill is-ok"><span className="material-symbols-outlined" aria-hidden>check_circle</span>الوديعة أُطلقت</span>
+                  ) : pen ? (
+                    <span className={`co-pill ${pen.level === 'late' ? 'is-bad' : pen.level === 'soon' ? 'is-warn' : 'is-info'}`}>
+                      <span className="material-symbols-outlined" aria-hidden>account_balance</span>
+                      الوديعة: متابعة <span className="num">({pen.daysLeft} يوم)</span>
                     </span>
-                  </div>
-                </div>
-
-                {/* Facts Grid (شبكة البيانات المختصرة 2x2 مع أيقونات ناعمة) */}
-                <div className="grid grid-cols-2 gap-2.5 p-3 rounded-2xl bg-[color:color-mix(in_srgb,var(--surface-2)_80%,transparent)] border border-[var(--border-soft)] text-xs my-2.5">
-                  <div className="flex flex-col min-w-0">
-                    <span className="text-[10px] font-bold text-[var(--text-3)]">رقم الشهادة</span>
-                    <span className="text-[11.5px] font-bold text-[var(--text)] truncate num mt-0.5" dir="ltr" style={{ textAlign: 'right' }}>
-                      {co.cert_no ?? 'غير صادرة'}
+                  ) : (
+                    <span className="co-progress" title={pg.current ? `المحطة الحالية: ${pg.current.label}` : undefined}>
+                      <span className="co-progress-bar"><span style={{ width: `${pg.pct}%` }} /></span>
+                      <span className="num">{pg.done}/{pg.total}</span>
                     </span>
-                  </div>
-                  <div className="flex flex-col min-w-0">
-                    <span className="text-[10px] font-bold text-[var(--text-3)]">تاريخ الشهادة</span>
-                    <span className="text-[11.5px] font-bold text-[var(--text)] truncate num mt-0.5">
-                      {co.cert_date ? formatDate(co.cert_date) : 'قيد التأسيس'}
-                    </span>
-                  </div>
-                  <div className="flex flex-col min-w-0">
-                    <span className="text-[10px] font-bold text-[var(--text-3)]">رأس المال</span>
-                    <span className="text-[12px] font-extrabold text-emerald-600 dark:text-emerald-400 truncate num mt-0.5">
-                      {formatMoney(co.capital)}
-                    </span>
-                  </div>
-                  <div className="flex flex-col min-w-0">
-                    <span className="text-[10px] font-bold text-[var(--text-3)]">المدير المفوض</span>
-                    <span className="text-[11.5px] font-bold text-[var(--text)] truncate mt-0.5" title={activeManager}>
-                      {activeManager}
-                    </span>
-                  </div>
-                </div>
-
-                {/* Dual Compact Indicators (حالة الوديعة + الحسابات الختامية) */}
-                <div className="grid grid-cols-2 gap-2 p-2.5 rounded-2xl bg-[color:color-mix(in_srgb,var(--surface-2)_60%,transparent)] border border-[var(--border-soft)] text-xs items-center mb-2.5">
-                  {/* Deposit status */}
-                  <div className="flex flex-col gap-1 min-w-0">
-                    <span className="text-[10px] font-bold text-[var(--text-3)]">حالة الوديعة</span>
-                    <div className="truncate">
-                      {isEstablished ? (
-                        <span className="inline-flex items-center gap-1 text-[10.5px] font-bold text-emerald-700 dark:text-emerald-300 bg-emerald-500/15 px-2.5 py-0.5 rounded-full border border-emerald-500/20">
-                          <span>✓ أُطلقت</span>
-                        </span>
-                      ) : pen ? (
-                        <span className={`inline-flex items-center text-[10.5px] font-bold px-2.5 py-0.5 rounded-full num truncate ${
-                          pen.level === 'late' ? 'text-rose-600 bg-rose-500/15 border border-rose-500/20' : pen.level === 'soon' ? 'text-amber-700 bg-amber-500/15 border border-amber-500/20' : 'text-[var(--accent)] bg-[var(--accent-soft)] border border-[color:color-mix(in_srgb,var(--accent)_20%,transparent)]'
-                        }`}>
-                          متابعة ({pen.daysLeft}ي)
-                        </span>
-                      ) : (
-                        <span className="inline-flex items-center text-[10.5px] font-semibold text-[var(--text-3)] bg-[var(--surface-3)] px-2.5 py-0.5 rounded-full">
-                          لم تبدأ
-                        </span>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* FS status or Quick Assign Button */}
-                  <div className="flex flex-col gap-1 min-w-0 border-s border-[var(--border-soft)] ps-2">
-                    <span className="text-[10px] font-bold text-[var(--text-3)]">الحسابات الختامية</span>
-                    <div className="truncate">
-                      {(() => {
-                        const currentYear = new Date().getFullYear()
-                        const isFsEnabled = co.financial_statements_enabled || Boolean(co.last_completed_fs_year)
-
-                        if (!isEstablished) {
-                          return (
-                            <span className="inline-flex items-center text-[10px] font-semibold text-[var(--text-3)] bg-[var(--surface-3)] px-2.5 py-0.5 rounded-full" title="الحسابات الختامية ممنوعة للشركات قيد التأسيس">
-                              غير متاح (قيد التأسيس)
-                            </span>
-                          )
-                        }
-
-                        if (!isFsEnabled) {
-                          return (
-                            <button
-                              type="button"
-                              disabled={assigningId === co.id}
-                              onClick={e => handleAssignFS(e, co.id, co.name)}
-                              className="inline-flex items-center gap-1 text-[10.5px] font-bold text-[var(--accent)] hover:text-white bg-[var(--accent-soft)] hover:bg-[var(--accent)] border border-[color:color-mix(in_srgb,var(--accent)_30%,transparent)] px-2.5 py-0.5 rounded-full transition truncate shadow-xs"
-                              title="تكليف المكتب بالحسابات الختامية"
-                            >
-                              <span className="material-symbols-outlined text-[13px]">add_circle</span>
-                              <span>{assigningId === co.id ? 'جاري...' : 'تكليف المكتب'}</span>
-                            </button>
-                          )
-                        }
-
-                        const fsCalc = calculateFSState({ year: currentYear, company_id: co.id })
-                        return (
-                          <span className={`inline-flex items-center text-[10.5px] font-bold px-2.5 py-0.5 rounded-full truncate ${
-                            fsCalc.status === 'penalty_running' || fsCalc.status === 'penalty_max'
-                              ? 'text-rose-600 bg-rose-500/15 border border-rose-500/20'
-                              : fsCalc.status === 'due_soon'
-                              ? 'text-amber-700 bg-amber-500/15 border border-amber-500/20'
-                              : 'text-emerald-700 dark:text-emerald-300 bg-emerald-500/15 border border-emerald-500/20'
-                          }`}>
-                            {fsCalc.statusLabel}
-                          </span>
-                        )
-                      })()}
-                    </div>
-                  </div>
-                </div>
-
-                {/* Lack badge if present */}
-                {co.lacks && (
-                  <div className="flex items-center gap-1.5 p-2 px-3 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-600 dark:text-rose-400 text-[11px] font-bold mb-2.5 animate-pulse">
-                    <span className="material-symbols-outlined text-[14px] shrink-0">warning</span>
-                    <span className="truncate">{co.lacks}</span>
-                  </div>
-                )}
-
-                {/* Footer (النسبة المئوية لسير العمل + أزرار الإجراءات البارزة) */}
-                <div className="pt-2.5 border-t border-[var(--border-soft)] mt-auto flex flex-col gap-2">
-                  {/* Row 1: Workflow Progress & Status Badge */}
-                  <div className="flex items-center justify-between gap-2 min-w-0">
-                    <div className="flex items-center gap-1.5 min-w-0">
-                      <div className="relative w-6 h-6 flex-none flex items-center justify-center">
-                        {pg.current && (
-                          <div className="absolute inset-0 rounded-full bg-amber-500/20 blur-[2px] animate-pulse" />
-                        )}
-                        <svg viewBox="0 0 40 40" className="w-6 h-6 -rotate-90">
-                          <circle className="stroke-[var(--border-soft)]" strokeWidth="4" fill="none" cx="20" cy="20" r="16" />
-                          <circle
-                            className={`${pg.current ? 'stroke-amber-500' : 'stroke-[var(--accent)]'} transition duration-500`}
-                            strokeWidth="4"
-                            strokeLinecap="round"
-                            fill="none"
-                            cx="20"
-                            cy="20"
-                            r="16"
-                            strokeDasharray={100.5}
-                            strokeDashoffset={100.5 * (1 - pg.pct / 100)}
-                          />
-                        </svg>
-                        <span className={`absolute inset-0 flex items-center justify-center text-[10.5px] font-black num ${pg.current ? 'text-amber-500' : 'text-[var(--accent)]'}`}>
-                          {pg.pct}%
-                        </span>
-                      </div>
-
-                      <span className="text-[11px] text-[var(--text-3)] font-bold num truncate" title={pg.current ? `المحطة الحالية: ${pg.current.label}` : undefined}>
-                        {pg.done}/{pg.total} خطوات
-                      </span>
-                    </div>
-
-                    <span className={`tag ${calculatedSt.tagClass} !py-0.5 !px-2 !text-[10px] !font-bold shrink-0`}>{calculatedSt.label}</span>
-                  </div>
-
-                  {/* Row 2: Action Button (الملف الشامل للشركة) */}
-                  <div className="flex justify-end pt-1">
-                    <CompanyFileLink companyId={co.id} stopPropagation />
-                  </div>
-                </div>
-              </div>
+                  )}
+                  {co.lacks && <span className="co-pill is-bad" title={co.lacks}><span className="material-symbols-outlined" aria-hidden>warning</span>نواقص</span>}
+                </footer>
+              </article>
             )
           })}
         </div>
