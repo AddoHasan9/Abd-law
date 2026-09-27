@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { PageHeader } from '@/components/ui/PageHeader'
 import Link from 'next/link'
 import {
   getGeneralSettingsAction,
@@ -205,21 +206,14 @@ export default function SettingsClient() {
         </div>
       )}
 
-      {/* Page Header */}
-      <div className="flex items-center justify-between flex-wrap gap-4 pb-2 border-b border-[var(--line-soft)]">
-        <div className="flex items-center gap-3.5">
-          <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-blue-600 to-[#38BDF8] flex items-center justify-center text-white shadow-lg shadow-blue-500/20 flex-none">
-            <span className="material-symbols-outlined text-[26px]">tune</span>
-          </div>
-          <div>
-            <h1 className="text-xl font-black text-[var(--text)] tracking-tight">إعدادات النظام ومسارات العمل</h1>
-            <p className="text-xs text-[var(--text-3)] font-medium mt-0.5">
-              تخصيص قواعد ومحطات سير العمل لقسم المحدودة، والشركات، وضبط هوية المكتب
-            </p>
-          </div>
-        </div>
-
-        {/* Quick Nav Links to Users & Permissions */}
+      <PageHeader
+        icon="tune"
+        tone="accent"
+        title="الإعدادات العامة"
+        subtitle="تخصيص قواعد ومحطات سير العمل لقسم المحدودة، والشركات، وضبط هوية المكتب"
+        actions={
+          <>
+{/* Quick Nav Links to Users & Permissions */}
         <div className="flex items-center gap-2">
           <Link
             href="/settings/users"
@@ -236,7 +230,9 @@ export default function SettingsClient() {
             <span>الصلاحيات</span>
           </Link>
         </div>
-      </div>
+          </>
+        }
+      />
 
       {/* Tab Navigation */}
       <div className="flex items-center gap-2 p-1.5 bg-[var(--surface-2)] border border-[var(--glass-border)] rounded-2xl w-fit">

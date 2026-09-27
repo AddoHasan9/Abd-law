@@ -1,6 +1,7 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
+import { rethrowDbError } from '@/lib/data/db-guard'
 import { createAdminClient } from '@/lib/supabase/server'
 import { readJsonFile, writeJsonFile } from '@/lib/data/fs-store'
 import { getCurrentUserProfile, requirePermission } from '@/lib/auth/require-permission'
@@ -165,6 +166,7 @@ export async function getWorkflowTemplatesAction(): Promise<{ success: boolean; 
     }
     return { success: true, data: merged }
   } catch (e) {
+    rethrowDbError(e)
     console.error('Failed to get workflow templates:', e)
     return { success: true, data: DEFAULT_WORKFLOW_TEMPLATES }
   }

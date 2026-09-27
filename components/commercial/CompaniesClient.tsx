@@ -1,6 +1,8 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { PageHeader } from '@/components/ui/PageHeader'
+import { runAction } from '@/components/ui/ConfirmDialog'
 import { toast } from 'sonner'
 import { KpiCard } from '@/components/ui/KpiCard'
 import { useRouter, useSearchParams } from 'next/navigation'
@@ -79,7 +81,7 @@ export default function CompaniesClient({ initialCompanies }: Props) {
     toast.success('تم تحديث إعدادات الحسابات الختامية')
 
     const currentYear = new Date().getFullYear()
-    await createFinancialStatementAction({ company_id: companyId, year: currentYear })
+    await runAction(createFinancialStatementAction({ company_id: companyId, year: currentYear }), 'الشركات وتأسيسها · الإضافة')
 
     // Confirmed by the server — safe to reflect immediately, button disappears without a page reload
     setCompaniesList(prev =>
@@ -193,19 +195,14 @@ export default function CompaniesClient({ initialCompanies }: Props) {
         </div>
       )}
 
-      {/* Header & Main Action */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '14px' }}>
-        <div>
-          <h1 style={{ fontSize: '22px', fontWeight: 800, margin: 0, color: 'var(--text)', display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <span className="material-symbols-outlined text-[26px] text-[var(--accent)]">corporate_fare</span>
-            <span>قسم تأسيس الشركات ومسارات العمل</span>
-          </h1>
-          <p style={{ fontSize: '13px', color: 'var(--text-3)', margin: '4px 0 0 0' }}>
-            متابعة شاملة لكافة مراحل تأسيس الشركات وسير العمل والودائع المصرفية
-          </p>
-        </div>
-
-        {canCreateCompany && (
+      <PageHeader
+        icon="corporate_fare"
+        tone="amber"
+        title="تأسيس الشركات ومسارات العمل"
+        subtitle="متابعة شاملة لكافة مراحل تأسيس الشركات وسير العمل والودائع المصرفية"
+        actions={
+          <>
+{canCreateCompany && (
           <button
             type="button"
             className="btn btn-primary"
@@ -216,7 +213,9 @@ export default function CompaniesClient({ initialCompanies }: Props) {
             <span>تأسيس شركة جديدة</span>
           </button>
         )}
-      </div>
+          </>
+        }
+      />
 
       {/* المؤشرات — نفس بطاقة لوحة التحكم */}
       <div className="kpi-grid cols-4">

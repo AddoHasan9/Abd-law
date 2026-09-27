@@ -1,6 +1,7 @@
 'use server'
 
 import { readAuthorizedJsonFile } from '@/lib/auth/scoped-store'
+import { rethrowDbError } from '@/lib/data/db-guard'
 import { requireRecordAccess } from '@/lib/auth/record-access'
 import { revalidatePath } from 'next/cache'
 import { createAdminClient, createClient } from '@/lib/supabase/server'
@@ -75,6 +76,7 @@ export async function getFinancialStatementsAction(companyId?: string) {
     const result = Array.from(map.values()).sort((a, b) => b.year - a.year)
     return { success: true, data: result }
   } catch (err) {
+    rethrowDbError(err)
     console.warn('getFinancialStatementsAction exception, using disk store:', err)
     let items = [...diskFS]
     if (companyId) {
@@ -164,7 +166,8 @@ export async function createFinancialStatementsBatchAction(payload: {
             return { success: false, error: 'ممنوع تسجيل أو تكليف الحسابات الختامية للشركات قيد التأسيس.' }
           }
         }
-      } catch {
+      } catch (dbErr) {
+        rethrowDbError(dbErr)
         // Custom ID or non-UUID
       }
     }
@@ -186,7 +189,8 @@ export async function createFinancialStatementsBatchAction(payload: {
         if (newCo) {
           companyId = newCo.id
         }
-      } catch {
+      } catch (dbErr) {
+        rethrowDbError(dbErr)
         // Fallback store will use custom ID
       }
     }
@@ -205,7 +209,8 @@ export async function createFinancialStatementsBatchAction(payload: {
         .eq('company_id', payload.company_id)
 
       ;(existingRecords || []).forEach(r => existingYears.add(r.year))
-    } catch {}
+    } catch (dbErr) {
+    rethrowDbError(dbErr)}
 
     const duplicates = yearsInPayload.filter(y => existingYears.has(y))
     if (duplicates.length > 0) {
@@ -257,6 +262,7 @@ export async function createFinancialStatementsBatchAction(payload: {
         }))
       }
     } catch (e) {
+      rethrowDbError(e)
       console.error('createFinancialStatementsBatchAction DB error:', e)
     }
 
@@ -363,7 +369,8 @@ export async function updateFinancialStatementAction(
         targetYear = updated.year
         companyName = (updated as unknown as { companies?: { name?: string } | null }).companies?.name || null
       }
-    } catch {}
+    } catch (dbErr) {
+    rethrowDbError(dbErr)}
 
     // Update disk store
     const diskFS = readJsonFile<FinancialStatement[]>('financial_statements.json', [])
@@ -450,7 +457,8 @@ export async function deleteFinancialStatementAction(id: string) {
     try {
       const diskFS = readJsonFile<FinancialStatement[]>('financial_statements.json', [])
       writeJsonFile('financial_statements.json', diskFS.filter(x => x.id !== id))
-    } catch {}
+    } catch (dbErr) {
+    rethrowDbError(dbErr)}
 
     revalidatePath('/commercial/financial-statements')
     revalidatePath('/commercial/companies')
@@ -458,11 +466,13 @@ export async function deleteFinancialStatementAction(id: string) {
     revalidatePath('/dashboard')
 
     return { success: true }
-  } catch {
+  } catch (dbErr) {
+    rethrowDbError(dbErr)
     try {
       const diskFS = readJsonFile<FinancialStatement[]>('financial_statements.json', [])
       writeJsonFile('financial_statements.json', diskFS.filter(x => x.id !== id))
-    } catch {}
+    } catch (dbErr) {
+    rethrowDbError(dbErr)}
     return { success: true }
   }
 }

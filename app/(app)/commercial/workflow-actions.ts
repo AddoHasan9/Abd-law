@@ -42,35 +42,23 @@ export async function updateWorkflowStatusAction(payload: StatusUpdatePayload) {
 
     const extraDetail = [reasonDetail, notesDetail].filter(Boolean).join(' | ')
 
-    // 1. Update Supabase
+    // 1. قاعدة البيانات — أي خطأ يُعاد للواجهة (كان يُتجاهل فلا تُحفظ الحالة)
     try {
       const supabase = createAdminClient()
       if (entityType === 'company') {
-        await supabase
-          .from('companies')
-          .update({
-            status: toStatus,
-          })
-          .eq('id', entityId)
+        const { error } = await supabase.from('companies').update({ status: toStatus }).eq('id', entityId)
+        if (error) throw error
       } else {
-        await supabase
-          .from('transactions')
-          .update({
-            status: toStatus,
-          })
-          .eq('id', entityId)
-
+        const { error } = await supabase.from('transactions').update({ status: toStatus }).eq('id', entityId)
+        if (error) throw error
         if (targetCompanyId) {
-          await supabase
-            .from('companies')
-            .update({
-              status: toStatus,
-            })
-            .eq('id', targetCompanyId)
+          const { error: coErr } = await supabase.from('companies').update({ status: toStatus }).eq('id', targetCompanyId)
+          if (coErr) throw coErr
         }
       }
     } catch (e) {
-      console.warn('updateWorkflowStatusAction Supabase update notice:', e)
+      console.error('updateWorkflowStatusAction DB error:', e)
+      return { success: false, error: 'تعذّر حفظ الحالة في قاعدة البيانات. حاول مجدداً' }
     }
 
     // 2. Update Disk JSON Stores

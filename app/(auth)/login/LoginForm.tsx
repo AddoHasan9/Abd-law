@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { showError } from '@/components/ui/ConfirmDialog'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useForm } from 'react-hook-form'
@@ -56,7 +57,7 @@ export default function LoginForm() {
         } else if (msg.includes('email not confirmed')) {
           arError = 'لم يتم تفعيل هذا الحساب بعد — يرجى مراجعة إدارة المكتب'
         }
-        toast.error(arError)
+        void showError(arError, 'تسجيل الدخول')
         return
       }
 
@@ -64,7 +65,7 @@ export default function LoginForm() {
         .select('active').eq('id', authData.user!.id).maybeSingle()
       if (profileError || profile?.active !== true) {
         await supabase.auth.signOut()
-        toast.error('الحساب معطل أو غير مهيأ. يرجى مراجعة مدير النظام')
+        void showError('الحساب معطل أو غير مهيأ. يرجى مراجعة مدير النظام', 'تسجيل الدخول')
         return
       }
 
@@ -89,7 +90,7 @@ export default function LoginForm() {
 
       window.location.href = '/'
     } catch {
-      toast.error('حدث خطأ في الاتصال بالخادم، يرجى المحاولة لاحقاً')
+      void showError('حدث خطأ في الاتصال بالخادم، يرجى المحاولة لاحقاً', 'تسجيل الدخول')
     }
   }
 

@@ -1,6 +1,7 @@
 'use server'
 
 import { requireRecordAccess } from '@/lib/auth/record-access'
+import { dbWrite, rethrowDbError } from '@/lib/data/db-guard'
 import { revalidatePath } from 'next/cache'
 import { createAdminClient } from '@/lib/supabase/server'
 import { readJsonFile, writeJsonFile } from '@/lib/data/fs-store'
@@ -98,8 +99,9 @@ export async function createLLCTransactionAction(payload: CreateLLCTransactionPa
             }
 
             try {
-              await supabase.from('companies').insert(newCoRecord)
+              await dbWrite(supabase.from('companies').insert(newCoRecord), 'companies')
             } catch (insErr) {
+              rethrowDbError(insErr)
               console.warn('Company auto-insert in DB notice:', insErr)
             }
 
@@ -107,6 +109,7 @@ export async function createLLCTransactionAction(payload: CreateLLCTransactionPa
             writeJsonFile('companies.json', diskCompanies)
           }
         } catch (e) {
+          rethrowDbError(e)
           console.warn('Company auto-linking lookup notice:', e)
           if (!targetCompanyId) {
             targetCompanyId = generateUUID()
@@ -131,8 +134,9 @@ export async function createLLCTransactionAction(payload: CreateLLCTransactionPa
       }
 
       try {
-        await supabase.from('company_managers').insert(mgrObj)
+        await dbWrite(supabase.from('company_managers').insert(mgrObj), 'company_managers')
       } catch (mgrErr) {
+        rethrowDbError(mgrErr)
         console.warn('company_managers insert notice:', mgrErr)
       }
 
@@ -182,8 +186,9 @@ export async function createLLCTransactionAction(payload: CreateLLCTransactionPa
 
     // Save to Supabase DB
     try {
-      await supabase.from('transactions').insert(txRecord)
+      await dbWrite(supabase.from('transactions').insert(txRecord), 'transactions')
     } catch (dbErr) {
+      rethrowDbError(dbErr)
       console.warn('Supabase insert transaction error:', dbErr)
     }
 
@@ -208,7 +213,8 @@ export async function createLLCTransactionAction(payload: CreateLLCTransactionPa
         description: lacks ? `النواقص: ${lacks}` : undefined,
         related_link: '/commercial/llc',
       })
-    } catch {}
+    } catch (dbErr) {
+    rethrowDbError(dbErr)}
 
     revalidatePath('/commercial/llc')
     revalidatePath('/commercial')
@@ -278,8 +284,9 @@ export async function updateLLCTransactionAction(payload: UpdateLLCTransactionPa
 
     // DB update
     try {
-      await supabase.from('transactions').update(updates).eq('id', txId)
+      await dbWrite(supabase.from('transactions').update(updates).eq('id', txId), 'transactions')
     } catch (dbErr) {
+      rethrowDbError(dbErr)
       console.warn('Supabase update transaction error:', dbErr)
     }
 
@@ -314,8 +321,9 @@ export async function updateLLCTransactionAction(payload: UpdateLLCTransactionPa
         created_at: new Date().toISOString(),
       }
       try {
-        await supabase.from('company_managers').insert(mgrObj)
-      } catch {}
+        await dbWrite(supabase.from('company_managers').insert(mgrObj), 'company_managers')
+      } catch (dbErr) {
+    rethrowDbError(dbErr)}
       const diskManagers = readJsonFile<CompanyManager[]>('company_managers.json', [])
       diskManagers.unshift(mgrObj)
       writeJsonFile('company_managers.json', diskManagers)

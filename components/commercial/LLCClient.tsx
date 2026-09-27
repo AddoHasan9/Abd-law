@@ -1,7 +1,8 @@
 'use client'
 
 import { useState, useMemo } from 'react'
-import { confirmAction } from '@/components/ui/ConfirmDialog'
+import { PageHeader } from '@/components/ui/PageHeader'
+import { confirmAction, runAction } from '@/components/ui/ConfirmDialog'
 import { DataPanel } from '@/components/ui/DataPanel'
 import CompanyFileLink from '@/components/commercial/CompanyFileLink'
 import { useRouter } from 'next/navigation'
@@ -71,7 +72,7 @@ export default function LLCClient({ transactions = [], companies = [], lawyers =
 
   const handleDelete = async (txId: string) => {
     if (!(await confirmAction({ title: 'حذف المعاملة', message: 'هل أنت متأكد من حذف هذه المعاملة؟', tone: 'danger' }))) return
-    await deleteTransactionAction(txId)
+    await runAction(deleteTransactionAction(txId), 'قسم المحدودة · الحذف')
     router.refresh()
   }
 
@@ -86,21 +87,16 @@ export default function LLCClient({ transactions = [], companies = [], lawyers =
   }
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', padding: '24px' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
       
-      {/* Header & Main Action */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '16px' }}>
-        <div>
-          <h1 style={{ fontSize: '22px', fontWeight: 800, margin: 0, color: 'var(--text)', display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <span className="material-symbols-outlined text-[26px] text-[var(--accent)]">corporate_fare</span>
-            <span>قسم المحدودة (معاملات الشركات المحدودة)</span>
-          </h1>
-          <p style={{ fontSize: '13px', color: 'var(--text-3)', margin: '4px 0 0 0' }}>
-            إدارة ومتابعة كافة معاملات المحدودة: زيادة رأس المال، بيع الأسهم، تصديق الأوراق، استمرار التعيين، النشاط، نقل المقر، والحسابات الختامية
-          </p>
-        </div>
-
-        <div style={{ display: 'flex', gap: '10px' }}>
+      <PageHeader
+        icon="history_edu"
+        tone="indigo"
+        title="قسم المحدودة"
+        subtitle="إدارة ومتابعة كافة معاملات المحدودة: زيادة رأس المال، بيع الأسهم، تصديق الأوراق، استمرار التعيين، النشاط، نقل المقر، والحسابات الختامية"
+        actions={
+          <>
+<div style={{ display: 'flex', gap: '10px' }}>
           <button
             type="button"
             className="btn btn-primary"
@@ -111,7 +107,9 @@ export default function LLCClient({ transactions = [], companies = [], lawyers =
             <span>معاملة جديدة</span>
           </button>
         </div>
-      </div>
+          </>
+        }
+      />
 
       {/* Search Bar */}
       <div className="card" style={{ padding: '12px 16px' }}>

@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
+import { runAction } from '@/components/ui/ConfirmDialog'
 import { Mi } from '@/components/ui/Mi'
 import { Icon } from '@/components/ui/Icon'
 import { formatDate, formatTime } from '@/lib/constants'
@@ -55,7 +56,7 @@ export default function NotificationCenter({ initialCount = 0 }: Props) {
 
 
   const handleMarkAllRead = async () => {
-    await markAllNotificationsReadAction()
+    await runAction(markAllNotificationsReadAction(), 'الإشعارات · تسجيل التسليم')
     setNotifications(prev => prev.map(n => ({ ...n, is_read: true })))
     setUnreadCount(0)
   }
@@ -252,7 +253,7 @@ export default function NotificationCenter({ initialCount = 0 }: Props) {
                     key={item.id}
                     onClick={async () => {
                       if (!item.is_read) {
-                        await markNotificationReadAction(item.id)
+                        await runAction(markNotificationReadAction(item.id), 'الإشعارات · تسجيل التسليم')
                         setNotifications(prev =>
                           prev.map(n => (n.id === item.id ? { ...n, is_read: true } : n))
                         )

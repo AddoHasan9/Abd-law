@@ -1,6 +1,7 @@
 'use server'
 
 import { readAuthorizedJsonFile } from '@/lib/auth/scoped-store'
+import { dbWrite, rethrowDbError } from '@/lib/data/db-guard'
 import { requireRecordAccess } from '@/lib/auth/record-access'
 import { revalidatePath } from 'next/cache'
 import { createAdminClient, createClient } from '@/lib/supabase/server'
@@ -63,7 +64,8 @@ export async function getTaxAssessmentsAction(companyId?: string): Promise<{ suc
           company_name: d.companies?.name || compMap.get(d.company_id) || null,
         }))
       }
-    } catch {}
+    } catch (dbErr) {
+    rethrowDbError(dbErr)}
 
     const map = new Map<string, TaxAssessment>()
     dbItems.forEach(i => map.set(i.id, i))
@@ -94,6 +96,7 @@ export async function getTaxAssessmentsAction(companyId?: string): Promise<{ suc
 
     return { success: true, data: list }
   } catch (err: unknown) {
+    rethrowDbError(err)
     console.error('getTaxAssessmentsAction exception, using disk store:', err)
     const diskAssessments = await readAuthorizedJsonFile<TaxAssessment[]>('tax_assessments.json', [])
     const list = companyId ? diskAssessments.filter(x => x.company_id === companyId) : diskAssessments
@@ -148,7 +151,8 @@ export async function createTaxAssessmentAction(payload: CreateTaxAssessmentPayl
           error: `يوجد تحاسب ضريبي مسجل مسبقاً في قاعدة البيانات لسنة (${payload.year}) لهذه الشركة.`,
         }
       }
-    } catch {}
+    } catch (dbErr) {
+    rethrowDbError(dbErr)}
 
     const allCompanies = await listCompanies()
     const targetCompany = allCompanies.find(c => c.id === payload.company_id)
@@ -182,7 +186,7 @@ export async function createTaxAssessmentAction(payload: CreateTaxAssessmentPayl
     // Try saving in Supabase
     try {
       const supabase = createAdminClient()
-      await supabase.from('tax_assessments').insert({
+      await dbWrite(supabase.from('tax_assessments').insert({
         id: newRecord.id,
         company_id: newRecord.company_id,
         year: newRecord.year,
@@ -202,8 +206,9 @@ export async function createTaxAssessmentAction(payload: CreateTaxAssessmentPayl
         clearance_date: newRecord.clearance_date,
         notes: newRecord.notes,
         created_at: newRecord.created_at,
-      })
+      }), 'tax_assessments')
     } catch (dbErr) {
+      rethrowDbError(dbErr)
       console.warn('Supabase insert tax_assessment notice:', dbErr)
     }
 
@@ -241,7 +246,7 @@ export async function createTaxAssessmentAction(payload: CreateTaxAssessmentPayl
 
     try {
       const supabase = createAdminClient()
-      await supabase.from('transactions').insert({
+      await dbWrite(supabase.from('transactions').insert({
         id: assessmentId,
         company_id: payload.company_id,
         type: txTypeStr,
@@ -251,8 +256,9 @@ export async function createTaxAssessmentAction(payload: CreateTaxAssessmentPayl
         due_date: newRecord.clearance_date || null,
         description: payload.notes?.trim() || `تحاسب ضريبي لسنة ${newRecord.year}`,
         created_at: createdAt,
-      })
-    } catch {}
+      }), 'transactions')
+    } catch (dbErr) {
+    rethrowDbError(dbErr)}
 
     const diskTxs = readJsonFile<TransactionFull[]>('transactions.json', [])
     diskTxs.unshift(txRecord)
@@ -269,14 +275,16 @@ export async function createTaxAssessmentAction(payload: CreateTaxAssessmentPayl
           related_link: '/commercial/tax-assessment',
         })
       }
-    } catch {}
+    } catch (dbErr) {
+    rethrowDbError(dbErr)}
 
     try {
       revalidatePath('/commercial/tax-assessment')
       revalidatePath('/commercial')
       revalidatePath(`/commercial/companies/${payload.company_id}`)
       revalidatePath('/dashboard')
-    } catch {}
+    } catch (dbErr) {
+    rethrowDbError(dbErr)}
 
     return { success: true, data: newRecord }
   } catch (err: unknown) {
@@ -326,8 +334,9 @@ export async function updateTaxAssessmentAction(
     // Try updating Supabase
     try {
       const supabase = createAdminClient()
-      await supabase.from('tax_assessments').update(updatedRecord).eq('id', id)
-    } catch {}
+      await dbWrite(supabase.from('tax_assessments').update(updatedRecord).eq('id', id), 'tax_assessments')
+    } catch (dbErr) {
+    rethrowDbError(dbErr)}
 
     diskAssessments[idx] = updatedRecord
     writeJsonFile('tax_assessments.json', diskAssessments)
@@ -345,12 +354,13 @@ export async function updateTaxAssessmentAction(
 
     try {
       const supabase = createAdminClient()
-      await supabase.from('transactions').update({
+      await dbWrite(supabase.from('transactions').update({
         status: isCleared ? 'completed' : 'in_progress',
         type: isCleared ? 'tax-clear' : 'tax-assess',
         due_date: updatedRecord.clearance_date || null,
-      }).eq('id', id)
-    } catch {}
+      }).eq('id', id), 'transactions')
+    } catch (dbErr) {
+    rethrowDbError(dbErr)}
 
     if (payload.status === 'tax_cleared' && current.status !== 'tax_cleared') {
       await logTimelineEvent({
@@ -367,7 +377,8 @@ export async function updateTaxAssessmentAction(
       revalidatePath('/commercial')
       revalidatePath(`/commercial/companies/${current.company_id}`)
       revalidatePath('/dashboard')
-    } catch {}
+    } catch (dbErr) {
+    rethrowDbError(dbErr)}
 
     return { success: true, data: updatedRecord }
   } catch (err: unknown) {
@@ -394,14 +405,16 @@ export async function deleteTaxAssessmentAction(id: string): Promise<{ success: 
 
     try {
       const supabase = createAdminClient()
-      await supabase.from('tax_assessments').delete().eq('id', id)
-      await supabase.from('transactions').delete().eq('id', id)
-    } catch {}
+      await dbWrite(supabase.from('tax_assessments').delete().eq('id', id), 'tax_assessments')
+      await dbWrite(supabase.from('transactions').delete().eq('id', id), 'transactions')
+    } catch (dbErr) {
+    rethrowDbError(dbErr)}
 
     try {
       revalidatePath('/commercial/tax-assessment')
       revalidatePath('/commercial')
-    } catch {}
+    } catch (dbErr) {
+    rethrowDbError(dbErr)}
     return { success: true }
   } catch (err: unknown) {
     const msg = err instanceof Error ? err.message : 'فشل حذف سجل التحاسب الضريبي'

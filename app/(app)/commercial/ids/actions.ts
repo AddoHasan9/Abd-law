@@ -1,6 +1,7 @@
 'use server'
 
 import { readAuthorizedJsonFile } from '@/lib/auth/scoped-store'
+import { dbWrite, rethrowDbError } from '@/lib/data/db-guard'
 import { requireRecordAccess } from '@/lib/auth/record-access'
 import { revalidatePath } from 'next/cache'
 import { createAdminClient, createClient } from '@/lib/supabase/server'
@@ -96,6 +97,7 @@ export async function getCompanyIDsAction(companyIdFilter?: string) {
         })
       }
     } catch (e) {
+      rethrowDbError(e)
       console.warn('Supabase getCompanyIDs error:', e)
     }
 
@@ -119,6 +121,7 @@ export async function getCompanyIDsAction(companyIdFilter?: string) {
 
     return { success: true, data: allItems }
   } catch (err) {
+    rethrowDbError(err)
     console.warn('getCompanyIDsAction exception, using disk store:', err)
     const diskIDs = await readAuthorizedJsonFile<CompanyIDRecord[]>('company_ids.json', [])
     const filtered = companyIdFilter ? diskIDs.filter(x => x.company_id === companyIdFilter) : diskIDs
@@ -187,6 +190,7 @@ export async function createCompanyIDAction(payload: {
             targetCompanyId = payload.company_id || generateUUID()
           }
         } catch (e) {
+          rethrowDbError(e)
           if (!targetCompanyId) {
             targetCompanyId = payload.company_id || generateUUID()
           }
@@ -230,7 +234,8 @@ export async function createCompanyIDAction(payload: {
           error: `يوجد سجل (${typeLabel}) مسجل مسبقاً في قاعدة البيانات لهذه الشركة. يرجى تعديل السجل الحالي.`,
         }
       }
-    } catch {}
+    } catch (dbErr) {
+    rethrowDbError(dbErr)}
 
     const recordId = generateUUID()
     const idNumber = payload.id_number?.trim() || null
@@ -269,7 +274,7 @@ export async function createCompanyIDAction(payload: {
 
     // Save to Supabase DB if possible
     try {
-      await supabase.from('company_ids').insert({
+      await dbWrite(supabase.from('company_ids').insert({
         id: recordId,
         company_id: targetCompanyId,
         id_type: payload.id_type,
@@ -279,8 +284,9 @@ export async function createCompanyIDAction(payload: {
         expiry_date: expiryDate,
         tx_start_date: txStartDate,
         grade: grade,
-      })
+      }), 'company_ids')
     } catch (dbErr) {
+      rethrowDbError(dbErr)
       console.warn('Supabase insert company_ids error:', dbErr)
     }
 
@@ -319,7 +325,7 @@ export async function createCompanyIDAction(payload: {
     }
 
     try {
-      await supabase.from('transactions').insert({
+      await dbWrite(supabase.from('transactions').insert({
         id: recordId,
         company_id: targetCompanyId,
         lawyer_id: lawyerId,
@@ -330,8 +336,9 @@ export async function createCompanyIDAction(payload: {
         due_date: expiryDate || null,
         description: payload.notes?.trim() || `إصدار ${ID_TYPE_LABELS[payload.id_type] || payload.id_type}`,
         created_at: createdAt,
-      })
+      }), 'transactions')
     } catch (txDbErr) {
+      rethrowDbError(txDbErr)
       console.warn('transactions insert for company_ids notice:', txDbErr)
     }
 
@@ -352,7 +359,8 @@ export async function createCompanyIDAction(payload: {
           related_link: '/commercial/ids',
         })
       }
-    } catch { }
+    } catch (dbErr) {
+ rethrowDbError(dbErr) }
 
     try {
       revalidatePath('/commercial/ids')
@@ -360,7 +368,8 @@ export async function createCompanyIDAction(payload: {
       revalidatePath(`/commercial/companies/${targetCompanyId}`)
       revalidatePath('/commercial')
       revalidatePath('/dashboard')
-    } catch { }
+    } catch (dbErr) {
+ rethrowDbError(dbErr) }
 
     return { success: true, record: diskRecord }
   } catch (err: unknown) {
@@ -409,8 +418,9 @@ export async function updateCompanyIDAction(
     }
 
     try {
-      await supabase.from('company_ids').update(updateData).eq('id', id)
+      await dbWrite(supabase.from('company_ids').update(updateData).eq('id', id), 'company_ids')
     } catch (dbErr) {
+      rethrowDbError(dbErr)
       console.warn('Supabase update company_ids error:', dbErr)
     }
 
@@ -435,18 +445,20 @@ export async function updateCompanyIDAction(
     }
 
     try {
-      await supabase.from('transactions').update({
+      await dbWrite(supabase.from('transactions').update({
         status: isDone ? 'done' : 'in_progress',
         due_date: payload.expiry_date || null,
-      }).eq('id', id)
-    } catch { }
+      }).eq('id', id), 'transactions')
+    } catch (dbErr) {
+ rethrowDbError(dbErr) }
 
     try {
       revalidatePath('/commercial/ids')
       revalidatePath('/commercial/companies')
       revalidatePath('/commercial')
       revalidatePath('/dashboard')
-    } catch { }
+    } catch (dbErr) {
+ rethrowDbError(dbErr) }
 
     return { success: true, record: updatedRec }
   } catch (err: unknown) {
@@ -483,9 +495,10 @@ export async function deleteCompanyIDAction(id: string) {
   try {
     const supabase = createAdminClient()
     try {
-      await supabase.from('company_ids').delete().eq('id', id)
-      await supabase.from('transactions').delete().eq('id', id)
+      await dbWrite(supabase.from('company_ids').delete().eq('id', id), 'company_ids')
+      await dbWrite(supabase.from('transactions').delete().eq('id', id), 'transactions')
     } catch (dbErr) {
+      rethrowDbError(dbErr)
       console.warn('Supabase delete company_ids error:', dbErr)
     }
 
@@ -502,10 +515,12 @@ export async function deleteCompanyIDAction(id: string) {
       revalidatePath('/commercial/companies')
       revalidatePath('/commercial')
       revalidatePath('/dashboard')
-    } catch { }
+    } catch (dbErr) {
+ rethrowDbError(dbErr) }
 
     return { success: true }
-  } catch {
+  } catch (dbErr) {
+    rethrowDbError(dbErr)
     const diskIDs = readJsonFile<CompanyIDRecord[]>('company_ids.json', [])
     const filtered = diskIDs.filter(x => x.id !== id)
     writeJsonFile('company_ids.json', filtered)

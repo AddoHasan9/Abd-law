@@ -1,6 +1,8 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { PageHeader } from '@/components/ui/PageHeader'
+import { runAction } from '@/components/ui/ConfirmDialog'
 import { Mi } from '@/components/ui/Mi'
 import { useRouter } from 'next/navigation'
 import { Icon } from '@/components/ui/Icon'
@@ -48,7 +50,7 @@ export default function DepositsClient({ deposits = [], companyId }: Props) {
     )
 
     setLoading(true)
-    await updateDepositStageStateAction(stage.id, newState, atDate)
+    await runAction(updateDepositStageStateAction(stage.id, newState, atDate), 'إطلاق الوديعة · الحفظ')
     setLoading(false)
     setEditingStageId(null)
     router.refresh()
@@ -97,7 +99,7 @@ export default function DepositsClient({ deposits = [], companyId }: Props) {
     setLoading(true)
     try {
       const dataUrl = await compressImageFile(file)
-      await uploadCompanyBarcodeAction(stageId, targetCompanyId, dataUrl)
+      await runAction(uploadCompanyBarcodeAction(stageId, targetCompanyId, dataUrl), 'إطلاق الوديعة · رفع الملف')
       
       // Update local optimistic state
       setDepositsList(prev =>
@@ -166,6 +168,8 @@ export default function DepositsClient({ deposits = [], companyId }: Props) {
 
   return (
     <div className="flex flex-col gap-6 w-full animate-fade-in-up">
+      <PageHeader icon="account_balance" tone="blue" title="إطلاق الودائع" subtitle="متابعة مراحل إطلاق الوديعة المصرفية لكل شركة: الإرسال، المشاور، المحاسب، والباركود" />
+
       {/* Notification Toast */}
       {notification && (
         <div

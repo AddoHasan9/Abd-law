@@ -1,6 +1,7 @@
 'use client'
 
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { showError } from '@/components/ui/ConfirmDialog'
 import { toast } from 'sonner'
 import { toolBySlug } from '@/lib/tools/registry'
 import { assemblePdf, imagesToPdf, openPdfjs, renderPage, type PageRef } from '@/lib/tools/pdf'
@@ -51,7 +52,7 @@ export default function PdfEditor() {
       setPages(created)
     } catch (e) {
       setLoading(null)
-      toast.error(errMsg(e))
+      void showError(errMsg(e), 'الأدوات')
     }
   }
 
@@ -70,7 +71,7 @@ export default function PdfEditor() {
       toast.success(`أُضيفت ${created.length} صفحة`)
     } catch (e) {
       setLoading(null)
-      toast.error(errMsg(e))
+      void showError(errMsg(e), 'الأدوات')
     } finally {
       insertAt.current = null
     }
@@ -127,7 +128,7 @@ export default function PdfEditor() {
 
   const save = async (onlySelected: boolean) => {
     const list = onlySelected ? pages.filter(p => selected.has(p.id)) : pages
-    if (!list.length) return toast.error('لا توجد صفحات للحفظ')
+    if (!list.length) return void showError('لا توجد صفحات للحفظ', 'الأدوات')
     try {
       setLoading({ done: 0, total: 1, label: 'إنشاء الملف' })
       const bytes = await assemblePdf(sources.current, list)
@@ -136,7 +137,7 @@ export default function PdfEditor() {
       setOutput([{ name: `${baseName(name)} - ${suffix}.pdf`, blob: toBlob(bytes, 'application/pdf') }])
     } catch (e) {
       setLoading(null)
-      toast.error(errMsg(e))
+      void showError(errMsg(e), 'الأدوات')
     }
   }
 

@@ -3,7 +3,7 @@
 import { useState, useMemo, useEffect } from 'react'
 import { toast } from 'sonner'
 import { Mi } from '@/components/ui/Mi'
-import { confirmAction } from '@/components/ui/ConfirmDialog'
+import { confirmAction, runAction } from '@/components/ui/ConfirmDialog'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { formatMoney, formatDate, formatNumberWithCommas } from '@/lib/constants'
@@ -173,12 +173,12 @@ export default function Company360Client({
       accounting_notes,
     })
 
-    await updateTransactionStatusAction(`tx_${company.id}`, companyStatusVal, company.id)
+    await runAction(updateTransactionStatusAction(`tx_${company.id}`, companyStatusVal, company.id), 'الملف الشامل للشركة · الحفظ')
 
     setLoading(false)
     if (res.success) {
       setMsg({ type: 'ok', text: 'تم حفظ وتحديث بيانات الشركة والتكاليف المالية بنجاح' })
-      await addCompanyAuditLogAction(company.id, `تحديث البيانات الأساسية والمالية للشركة: ${name}`)
+      await runAction(addCompanyAuditLogAction(company.id, `تحديث البيانات الأساسية والمالية للشركة: ${name}`), 'الملف الشامل للشركة · الإضافة')
       router.refresh()
     } else {
       setMsg({ type: 'err', text: res.error || 'فشل التحديث' })
@@ -205,7 +205,7 @@ export default function Company360Client({
       return
     }
 
-    await createFinancialStatementAction({ company_id: company.id, year: currentYear })
+    await runAction(createFinancialStatementAction({ company_id: company.id, year: currentYear }), 'الملف الشامل للشركة · الإضافة')
 
     // Confirmed by the server — safe to reflect immediately, button disappears without a page reload
     setIsFsEnabled(true)
@@ -269,7 +269,7 @@ export default function Company360Client({
   const handleToggleDepositStage = async (stageId: string, newState: 'done' | 'idle') => {
     if (!canReleaseDeposit) return
     setLoading(true)
-    await updateDepositStageStateAction(stageId, newState)
+    await runAction(updateDepositStageStateAction(stageId, newState), 'الملف الشامل للشركة · الحفظ')
     setLoading(false)
     router.refresh()
   }
@@ -316,7 +316,7 @@ export default function Company360Client({
       }
 
       const dataUrl = await compressImage(file)
-      await uploadCompanyBarcodeAction(stageId, company.id, dataUrl)
+      await runAction(uploadCompanyBarcodeAction(stageId, company.id, dataUrl), 'الملف الشامل للشركة · رفع الملف')
       setMsg({ type: 'ok', text: 'تم إطلاق الوديعة بنجاح' })
     } catch {
       setMsg({ type: 'err', text: 'حدث خطأ أثناء رفع الباركود' })

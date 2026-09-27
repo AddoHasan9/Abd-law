@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { toast } from 'sonner'
 import { Mi } from '@/components/ui/Mi'
-import { confirmAction } from '@/components/ui/ConfirmDialog'
+import { confirmAction, runAction } from '@/components/ui/ConfirmDialog'
 import CompanyFileLink from '@/components/commercial/CompanyFileLink'
 import { createPortal } from 'react-dom'
 import { Icon } from '@/components/ui/Icon'
@@ -149,7 +149,7 @@ export default function LLCTransactionDetailsModal({
   const handleDelete = async () => {
     if (!(await confirmAction({ title: 'حذف المعاملة نهائياً', message: 'لا يمكن التراجع عن هذا الإجراء بعد تنفيذه.', tone: 'danger', confirmText: 'حذف نهائي' }))) return
     setDeleting(true)
-    await deleteTransactionAction(transaction.id)
+    await runAction(deleteTransactionAction(transaction.id), 'قسم المحدودة · الحذف')
     setDeleting(false)
     if (onDeleted) onDeleted(transaction.id)
     onClose()

@@ -4,6 +4,7 @@
 'use server'
 
 import { readAuthorizedJsonFile } from '@/lib/auth/scoped-store'
+import { dbWrite, rethrowDbError } from '@/lib/data/db-guard'
 import { requireRecordAccess } from '@/lib/auth/record-access'
 import { revalidatePath } from 'next/cache'
 import { createAdminClient, createClient } from '@/lib/supabase/server'
@@ -201,8 +202,9 @@ export async function createCompanyFormationAction(payload: {
         created_at: new Date().toISOString(),
       }
       try {
-        await supabase.from('company_managers').insert(managerObj)
-      } catch {
+        await dbWrite(supabase.from('company_managers').insert(managerObj), 'company_managers')
+      } catch (dbErr) {
+        rethrowDbError(dbErr)
         // Ignored
       }
       const diskManagers = readJsonFile<CompanyManager[]>('company_managers.json', [])
@@ -220,8 +222,9 @@ export async function createCompanyFormationAction(payload: {
         created_at: new Date().toISOString(),
       }))
       try {
-        await supabase.from('company_shareholders').insert(shObjs)
-      } catch {
+        await dbWrite(supabase.from('company_shareholders').insert(shObjs), 'company_shareholders')
+      } catch (dbErr) {
+        rethrowDbError(dbErr)
         // Ignored
       }
       const diskShs = readJsonFile<CompanyShareholder[]>('company_shareholders.json', [])
@@ -257,7 +260,7 @@ export async function createCompanyFormationAction(payload: {
     }
 
     try {
-      await supabase.from('transactions').insert({
+      await dbWrite(supabase.from('transactions').insert({
         type: 'tasis',
         company_id: company.id,
         lawyer_id: payload.lawyer_id || null,
@@ -270,8 +273,9 @@ export async function createCompanyFormationAction(payload: {
         lacks: txObj.lacks,
         services: txObj.services,
         phone: txObj.phone,
-      })
-    } catch {
+      }), 'transactions')
+    } catch (dbErr) {
+      rethrowDbError(dbErr)
       // Ignored
     }
 
@@ -289,7 +293,8 @@ export async function createCompanyFormationAction(payload: {
         related_company_id: company.id,
         link_url: '/commercial/companies',
       })
-    } catch {
+    } catch (dbErr) {
+      rethrowDbError(dbErr)
       // Ignored
     }
 
@@ -304,7 +309,8 @@ export async function createCompanyFormationAction(payload: {
       revalidatePath('/commercial/companies')
       revalidatePath('/commercial')
       revalidatePath('/dashboard')
-    } catch {}
+    } catch (dbErr) {
+    rethrowDbError(dbErr)}
 
     return { success: true, company }
   } catch (err: unknown) {
@@ -476,12 +482,13 @@ export async function updateCompanyDetailsAction(
 
       try {
         if (!unchanged) {
-          await supabase.from('company_shareholders').delete().eq('company_id', companyId)
+          await dbWrite(supabase.from('company_shareholders').delete().eq('company_id', companyId), 'company_shareholders')
           if (shObjs.length > 0) {
-            await supabase.from('company_shareholders').insert(shObjs)
+            await dbWrite(supabase.from('company_shareholders').insert(shObjs), 'company_shareholders')
           }
         }
       } catch (shErr) {
+        rethrowDbError(shErr)
         console.warn('company_shareholders update notice:', shErr)
       }
 
@@ -551,20 +558,20 @@ export async function advanceCompanyStepAction(stepId: string, currentState: WfS
     if (nextState === 'done') {
       const { error } = await supabase.from('workflow_steps').update({ state: 'done', done_at: today }).eq('id', row.id)
       if (error) throw error
-      await supabase
+      await dbWrite(supabase
         .from('workflow_steps')
         .update({ state: 'doing' })
         .eq('company_id', row.company_id)
         .eq('step_order', row.step_order + 1)
-        .eq('state', 'wait')
+        .eq('state', 'wait'), 'workflow_steps')
     } else {
       const { error } = await supabase.from('workflow_steps').update({ state: 'doing', done_at: null }).eq('id', row.id)
       if (error) throw error
-      await supabase
+      await dbWrite(supabase
         .from('workflow_steps')
         .update({ state: 'wait', done_at: null })
         .eq('company_id', row.company_id)
-        .gt('step_order', row.step_order)
+        .gt('step_order', row.step_order), 'workflow_steps')
     }
 
     const stateLabel = nextState === 'done' ? 'مكتملة والانتقال للخطوة التالية' : 'قيد التنفيذ'
@@ -708,7 +715,7 @@ export async function launchDepositWorkflowAction(companyId: string) {
         )
         if (stagesErr) {
           console.error('launchDepositWorkflowAction stages error:', stagesErr.message)
-          await supabase.from('deposits').delete().eq('id', depositId)
+          await dbWrite(supabase.from('deposits').delete().eq('id', depositId), 'deposits')
           return { success: false, depositId: null, error: 'تعذّر إنشاء مراحل الوديعة. حاول مجدداً' }
         }
 
@@ -741,7 +748,8 @@ export async function launchDepositWorkflowAction(companyId: string) {
         title: 'بدء مسار إطلاق الوديعة والمحطات الإلزامية',
         related_link: '/commercial/deposits',
       })
-    } catch {
+    } catch (dbErr) {
+      rethrowDbError(dbErr)
       // Ignored
     }
 
@@ -851,6 +859,7 @@ export async function getCompany360DataAction(companyId: string) {
         } as CompanyWithWorkflow
       }
     } catch (e) {
+      rethrowDbError(e)
       console.warn('getCompany360DataAction primary fetch warning:', e)
     }
 
@@ -887,12 +896,14 @@ export async function getCompany360DataAction(companyId: string) {
     try {
       const { data } = await supabase.from('company_ids').select('*').eq('company_id', companyId)
       if (data) idsData = data as CompanyIDRecord[]
-    } catch {}
+    } catch (dbErr) {
+    rethrowDbError(dbErr)}
 
     try {
       const { data } = await supabase.from('financial_statements').select('*').eq('company_id', companyId)
       if (data) fsData = data as FinancialStatement[]
-    } catch {}
+    } catch (dbErr) {
+    rethrowDbError(dbErr)}
 
     try {
       const { data: dep } = await supabase.from('deposits').select('*').eq('company_id', companyId).maybeSingle()
@@ -903,26 +914,31 @@ export async function getCompany360DataAction(companyId: string) {
           deposit_stages: stData || [],
         } as unknown as typeof depositData
       }
-    } catch {}
+    } catch (dbErr) {
+    rethrowDbError(dbErr)}
 
     try {
       const { data } = await supabase.from('company_managers').select('*').eq('company_id', companyId).order('created_at', { ascending: false })
       if (data) managersData = data as CompanyManager[]
-    } catch {}
+    } catch (dbErr) {
+    rethrowDbError(dbErr)}
 
     try {
       const { data } = await supabase.from('company_shareholders').select('*').eq('company_id', companyId).order('created_at', { ascending: true })
       if (data) shareholdersData = data as CompanyShareholder[]
-    } catch {}
+    } catch (dbErr) {
+    rethrowDbError(dbErr)}
 
     try {
       const { data } = await supabase.from('documents').select('*').eq('company_id', companyId).order('created_at', { ascending: false })
       if (data) documentsData = data as unknown as typeof documentsData
-    } catch {}
+    } catch (dbErr) {
+    rethrowDbError(dbErr)}
 
     try {
       timelineData = await getCompanyTimeline(companyId)
-    } catch {}
+    } catch (dbErr) {
+    rethrowDbError(dbErr)}
 
     const diskManagers = await readAuthorizedJsonFile<CompanyManager[]>('company_managers.json', [])
     const diskShareholders = await readAuthorizedJsonFile<CompanyShareholder[]>('company_shareholders.json', [])
@@ -956,7 +972,8 @@ export async function getCompany360DataAction(companyId: string) {
         .eq('company_id', companyId)
         .order('year', { ascending: false })
       if (taxDb) taxAssessmentsData = taxDb as TaxAssessment[]
-    } catch {}
+    } catch (dbErr) {
+    rethrowDbError(dbErr)}
 
     const diskTax = await readAuthorizedJsonFile<TaxAssessment[]>('tax_assessments.json', [])
     const diskCompanyTax = diskTax.filter(t => t.company_id === companyId)
@@ -1014,7 +1031,8 @@ export async function deleteCompanyAction(companyId: string) {
         deletedIds.push(companyId)
         writeJsonFile('deleted_company_ids.json', deletedIds)
       }
-    } catch {}
+    } catch (dbErr) {
+    rethrowDbError(dbErr)}
 
     // 2. Delete from Supabase Database (cascade or manual deletion of related records)
     try {
@@ -1022,7 +1040,7 @@ export async function deleteCompanyAction(companyId: string) {
       const { data: depRows } = await supabase.from('deposits').select('id').eq('company_id', companyId)
       if (depRows && depRows.length > 0) {
         const depIds = depRows.map(d => d.id)
-        await supabase.from('deposit_stages').delete().in('deposit_id', depIds)
+        await dbWrite(supabase.from('deposit_stages').delete().in('deposit_id', depIds), 'deposit_stages')
       }
 
       await Promise.allSettled([
@@ -1042,8 +1060,9 @@ export async function deleteCompanyAction(companyId: string) {
       ])
 
       // Finally delete the company row
-      await supabase.from('companies').delete().eq('id', companyId)
+      await dbWrite(supabase.from('companies').delete().eq('id', companyId), 'companies')
     } catch (dbErr) {
+      rethrowDbError(dbErr)
       console.warn('Supabase deleteCompany notice:', dbErr)
     }
 
@@ -1106,6 +1125,7 @@ export async function deleteCompanyAction(companyId: string) {
       const diskTimeline = readJsonFile<Array<Record<string, unknown>>>('timeline_events.json', [])
       writeJsonFile('timeline_events.json', diskTimeline.filter(e => e.company_id !== companyId))
     } catch (diskErr) {
+      rethrowDbError(diskErr)
       console.warn('Disk store cleanup notice:', diskErr)
     }
 
@@ -1118,7 +1138,8 @@ export async function deleteCompanyAction(companyId: string) {
       revalidatePath('/commercial/ids')
       revalidatePath('/commercial')
       revalidatePath('/dashboard')
-    } catch {}
+    } catch (dbErr) {
+    rethrowDbError(dbErr)}
 
     return { success: true }
   } catch (err: unknown) {

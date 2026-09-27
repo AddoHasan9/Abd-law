@@ -14,6 +14,7 @@ import { UserRoleProvider } from '@/lib/context/UserRoleContext'
 import QuickHelpGuide from '@/components/ui/QuickHelpGuide'
 import { NavigationProgressBar } from '@/components/ui/NavigationProgressBar'
 import type { DeadlineItem } from './DeadlineCard'
+import { FSAlertBanner } from './FSAlertBanner'
 import type { Profile } from '@/types/database'
 
 interface Props {
@@ -83,6 +84,7 @@ export default function AppShell({
             onSearch={() => { /* البحث الشامل — يُبنى في مرحلة لاحقة */ }}
           />
           <main id="view-root">
+            <FSAlertBanner deadlines={deadlines} />
             <div className="view">{children}</div>
           </main>
         </div>
