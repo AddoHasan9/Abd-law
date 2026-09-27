@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useState, useRef, useEffect, DragEvent, ChangeEvent } from 'react'
+import { showError } from '@/components/ui/ConfirmDialog'
 import { toast } from 'sonner'
 import { createPortal } from 'react-dom'
 import { useModalBodyLock } from '@/lib/hooks/useModalBodyLock'
@@ -49,7 +50,7 @@ export default function BarcodeUploader({
     const isPdfFile = file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf')
 
     if (!isImage && !isPdfFile) {
-      toast.error('يرجى اختيار ملف صورة أو مستند PDF صالح (PNG, JPG, WebP, PDF)')
+      void showError('يرجى اختيار ملف صورة أو مستند PDF صالح (PNG, JPG, WebP, PDF)', 'رفع الباركود')
       return
     }
 

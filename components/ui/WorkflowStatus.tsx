@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useState, useRef, useEffect } from 'react'
+import { showError } from '@/components/ui/ConfirmDialog'
 import { toast } from 'sonner'
 import { createPortal } from 'react-dom'
 import { useRouter } from 'next/navigation'
@@ -204,11 +205,11 @@ export function WorkflowStatus({
       } else {
         // Rollback on failure
         setCurrentStatusKey(oldKey)
-        toast.error(result.error || 'فشل تحديث الحالة في الخادم')
+        void showError(result.error || 'فشل تحديث الحالة في الخادم', 'حالة سير العمل')
       }
     } catch {
       setCurrentStatusKey(oldKey)
-      toast.error('حدث خطأ أثناء الاتصال بالخادم')
+      void showError('حدث خطأ أثناء الاتصال بالخادم', 'حالة سير العمل')
     } finally {
       setIsUpdating(false)
     }
@@ -304,7 +305,7 @@ export function WorkflowStatus({
         disabled={readOnly || isUpdating}
         onClick={toggleDropdown}
         className={cn(
-          'inline-flex items-center justify-center font-bold rounded-full whitespace-nowrap transition duration-150 select-none shadow-xs border',
+          'wf-status-btn inline-flex items-center justify-center font-bold rounded-full whitespace-nowrap transition duration-150 select-none shadow-xs border',
           sizeClasses[size],
           readOnly ? 'cursor-default' : 'cursor-pointer hover:opacity-90 active:scale-[0.98]',
           isUpdating && 'opacity-60 pointer-events-none'

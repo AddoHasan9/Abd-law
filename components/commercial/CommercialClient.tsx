@@ -1,8 +1,9 @@
 'use client'
 
 import { useState, useMemo, useEffect, useRef } from 'react'
+import { PageHeader } from '@/components/ui/PageHeader'
 import { toast } from 'sonner'
-import { confirmAction } from '@/components/ui/ConfirmDialog'
+import { confirmAction, showError } from '@/components/ui/ConfirmDialog'
 import { DataPanel } from '@/components/ui/DataPanel'
 import { createPortal } from 'react-dom'
 import { useRouter } from 'next/navigation'
@@ -71,7 +72,7 @@ function getPersonInCharge(co?: CompanyWithWorkflow | Company | null): { name: s
   }
 }
 
-export default function CommercialClient({ rows = [], companies = [] }: Props) {
+export default function CommercialClient({ heading = 'المعاملات التجارية', rows = [], companies = [] }: Props) {
   const router = useRouter()
   const [isAddModalOpen, setIsAddModalOpen] = useState(false)
   const [localRows, setLocalRows] = useState<TransactionFull[]>(rows)
@@ -269,7 +270,8 @@ export default function CommercialClient({ rows = [], companies = [] }: Props) {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-      
+      <PageHeader icon="work" tone="indigo" title={heading} subtitle="كل المعاملات التجارية وحالاتها والمحامين المكلفين بها" />
+
       {/* Toast Notification */}
       {toastMsg && (
         <div
@@ -941,7 +943,7 @@ export default function CommercialClient({ rows = [], companies = [] }: Props) {
                   setEditTx(null)
                   router.refresh()
                 } else {
-                  toast.error(res.error || 'فشل التحديث')
+                  void showError(res.error || 'فشل التحديث', 'المعاملات التجارية')
                 }
               }}
               style={{ display: 'flex', flexDirection: 'column', flex: 1, overflow: 'hidden' }}

@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { Mi } from '@/components/ui/Mi'
-import { confirmAction } from '@/components/ui/ConfirmDialog'
+import { confirmAction, runAction } from '@/components/ui/ConfirmDialog'
 import { Icon } from '@/components/ui/Icon'
 import {
   getRemindersAction,
@@ -51,14 +51,14 @@ export default function ReminderCenter() {
     e.stopPropagation()
     const nextState = !item.is_completed
     setReminders(prev => prev.filter(r => r.id !== item.id))
-    await toggleReminderCompleteAction(item.id, nextState)
+    await runAction(toggleReminderCompleteAction(item.id, nextState), 'التذكيرات · تحديث الحالة')
   }
 
   const handleDelete = async (id: string, e: React.MouseEvent) => {
     e.stopPropagation()
     if (!(await confirmAction({ title: 'حذف التذكير', tone: 'danger' }))) return
     setReminders(prev => prev.filter(r => r.id !== id))
-    await deleteReminderAction(id)
+    await runAction(deleteReminderAction(id), 'التذكيرات · الحذف')
   }
 
   const activeReminders = reminders.filter(r => !r.is_completed && !r.is_archived)

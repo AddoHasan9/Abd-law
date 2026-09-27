@@ -4,6 +4,7 @@
 'use server'
 
 import { requireRecordAccess } from '@/lib/auth/record-access'
+import { dbWrite, rethrowDbError } from '@/lib/data/db-guard'
 import { revalidatePath } from 'next/cache'
 import { createAdminClient } from '@/lib/supabase/server'
 import type { TxPriority, CompanyWithWorkflow } from '@/types/database'
@@ -60,8 +61,9 @@ export async function createTransactionAction(formData: FormData) {
           created_at: new Date().toISOString(),
         }
         try {
-          await supabase.from('companies').insert(newCo)
-        } catch {}
+          await dbWrite(supabase.from('companies').insert(newCo), 'companies')
+        } catch (dbErr) {
+    rethrowDbError(dbErr)}
         diskCompanies.unshift(newCo as unknown as CompanyWithWorkflow)
         writeJsonFile('companies.json', diskCompanies)
       }
@@ -95,7 +97,7 @@ export async function createTransactionAction(formData: FormData) {
     }
 
     try {
-      await supabase.from('transactions').insert({
+      await dbWrite(supabase.from('transactions').insert({
         id: txObj.id,
         type: txObj.type,
         priority: txObj.priority,
@@ -106,8 +108,9 @@ export async function createTransactionAction(formData: FormData) {
         phone: txObj.phone,
         lawyer_id: txObj.lawyer_id,
         tx_date: txObj.tx_date,
-      })
-    } catch {
+      }), 'transactions')
+    } catch (dbErr) {
+      rethrowDbError(dbErr)
       // Ignored for disk fallback
     }
 
@@ -131,7 +134,8 @@ export async function createTransactionAction(formData: FormData) {
       revalidatePath('/commercial/companies')
       revalidatePath(`/commercial/companies/${company_id}`)
       revalidatePath('/dashboard')
-    } catch {}
+    } catch (dbErr) {
+    rethrowDbError(dbErr)}
 
     return { success: true, tx: txObj }
   } catch (err: unknown) {
@@ -162,13 +166,14 @@ export async function assignLawyerToTransactionAction(
     const supabase = createAdminClient()
 
     try {
-      await supabase
+      await dbWrite(supabase
         .from('transactions')
         .update({
           lawyer_id: lawyerId,
         })
-        .eq('id', txId)
+        .eq('id', txId), 'transactions')
     } catch (e) {
+      rethrowDbError(e)
       console.warn('Supabase assign lawyer notice:', e)
     }
 
@@ -197,7 +202,8 @@ export async function assignLawyerToTransactionAction(
       revalidatePath('/commercial/companies')
       if (targetCompanyId) revalidatePath(`/commercial/companies/${targetCompanyId}`)
       revalidatePath('/dashboard')
-    } catch {}
+    } catch (dbErr) {
+    rethrowDbError(dbErr)}
 
     return { success: true }
   } catch (err) {
@@ -383,7 +389,8 @@ export async function updateTransactionDetailsAction(
       revalidatePath('/commercial/companies')
       if (targetCompanyId) revalidatePath(`/commercial/companies/${targetCompanyId}`)
       revalidatePath('/dashboard')
-    } catch {}
+    } catch (dbErr) {
+    rethrowDbError(dbErr)}
 
     return { success: true, updatedTx: updatedTxDisk }
   } catch (err: unknown) {
@@ -403,11 +410,12 @@ export async function archiveTransactionAction(txId: string, reason?: string) {
   try {
     const supabase = createAdminClient()
     try {
-      await supabase
+      await dbWrite(supabase
         .from('transactions')
         .update({ status: 'closed' })
-        .eq('id', txId)
-    } catch {}
+        .eq('id', txId), 'transactions')
+    } catch (dbErr) {
+    rethrowDbError(dbErr)}
 
     const diskTxs = readJsonFile<Array<Record<string, unknown>>>('transactions.json', [])
     const idx = diskTxs.findIndex(t => t.id === txId)
@@ -420,7 +428,8 @@ export async function archiveTransactionAction(txId: string, reason?: string) {
     try {
       revalidatePath('/commercial')
       revalidatePath('/dashboard')
-    } catch {}
+    } catch (dbErr) {
+    rethrowDbError(dbErr)}
 
     return { success: true }
   } catch (err) {
@@ -440,8 +449,9 @@ export async function deleteTransactionAction(txId: string) {
   try {
     const supabase = createAdminClient()
     try {
-      await supabase.from('transactions').delete().eq('id', txId)
+      await dbWrite(supabase.from('transactions').delete().eq('id', txId), 'transactions')
     } catch (e) {
+      rethrowDbError(e)
       console.warn('Supabase transaction delete warning:', e)
     }
 
@@ -460,7 +470,8 @@ export async function deleteTransactionAction(txId: string) {
       revalidatePath('/commercial')
       revalidatePath('/commercial/llc')
       revalidatePath('/dashboard')
-    } catch {}
+    } catch (dbErr) {
+    rethrowDbError(dbErr)}
 
     return { success: true }
   } catch (err) {
@@ -477,6 +488,26 @@ export async function updateTransactionStatusAction(txId: string, status: string
     if (access) return access
   }
 
+  // معرّف مولّد في الواجهة (tx_<الشركة>): نعثر على معاملة التأسيس الحقيقية للشركة
+  if (txId.startsWith('tx_') && companyId) {
+    const { data: realTx } = await createAdminClient()
+      .from('transactions')
+      .select('id')
+      .eq('company_id', companyId)
+      .in('type', ['formation', 'tasis'])
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle()
+    if (!realTx) {
+      // لا توجد معاملة تأسيس مسجلة — نحدّث حالة الشركة فقط
+      const { error } = await createAdminClient().from('companies').update({ status: status === 'done' || status === 'completed' ? 'established' : status }).eq('id', companyId)
+      if (error) return { success: false, error: 'تعذّر حفظ حالة الشركة. حاول مجدداً' }
+      revalidatePath(`/commercial/companies/${companyId}`)
+      return { success: true }
+    }
+    txId = realTx.id
+  }
+
   const rowDenied = await requireRecordAccess('transactions', txId)
   if (rowDenied) return rowDenied
 
@@ -487,19 +518,18 @@ export async function updateTransactionStatusAction(txId: string, status: string
     const supabase = createAdminClient()
 
     try {
-      await supabase
-        .from('transactions')
-        .update({ status })
-        .eq('id', txId)
-
+      const { error } = await supabase.from('transactions').update({ status }).eq('id', txId)
+      if (error) throw error
       if (companyId) {
-        await supabase
+        const { error: coErr } = await supabase
           .from('companies')
-          .update({ status: status === 'done' ? 'established' : status })
+          .update({ status: status === 'done' || status === 'completed' ? 'established' : status })
           .eq('id', companyId)
+        if (coErr) throw coErr
       }
     } catch (e) {
-      console.warn('Supabase transaction status update notice:', e)
+      console.error('updateTransactionStatusAction DB error:', e)
+      return { success: false, error: 'تعذّر حفظ الحالة في قاعدة البيانات. حاول مجدداً' }
     }
 
     const diskTxs = readJsonFile<Array<Record<string, unknown>>>('transactions.json', [])
@@ -533,6 +563,7 @@ export async function updateTransactionStatusAction(txId: string, status: string
       }
       revalidatePath('/dashboard')
     } catch (revalErr) {
+      rethrowDbError(revalErr)
       console.warn('revalidatePath notice:', revalErr)
     }
 

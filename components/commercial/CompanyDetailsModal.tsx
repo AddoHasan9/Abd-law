@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { toast } from 'sonner'
 import { Mi } from '@/components/ui/Mi'
-import { confirmAction } from '@/components/ui/ConfirmDialog'
+import { confirmAction, runAction, showError } from '@/components/ui/ConfirmDialog'
 import CompanyFileLink from '@/components/commercial/CompanyFileLink'
 import { useRouter } from 'next/navigation'
 import { createPortal } from 'react-dom'
@@ -427,7 +427,7 @@ export default function CompanyDetailsModal({ company, isOpen, onClose, onDelete
     const res = await advanceCompanyStepAction(stepId, 'doing')
     if (!res.success) {
       setSteps(before)
-      toast.error(res.error || 'تعذّر حفظ الخطوة')
+      void showError(res.error || 'تعذّر حفظ الخطوة', 'نافذة تفاصيل الشركة')
       return
     }
     toast.success(`تم حفظ الخطوة ${stepOrder}`)
@@ -465,7 +465,7 @@ export default function CompanyDetailsModal({ company, isOpen, onClose, onDelete
     const res = await advanceCompanyStepAction(stepId, 'done')
     if (!res.success) {
       setSteps(before)
-      toast.error(res.error || 'تعذّر إعادة فتح الخطوة')
+      void showError(res.error || 'تعذّر إعادة فتح الخطوة', 'نافذة تفاصيل الشركة')
       return
     }
     router.refresh()
@@ -486,10 +486,10 @@ export default function CompanyDetailsModal({ company, isOpen, onClose, onDelete
 
     // Save cert_no & cert_date if provided
     if (certNo || certDate) {
-      await updateCompanyDetailsAction(company.id, {
+      await runAction(updateCompanyDetailsAction(company.id, {
         cert_no: certNo,
         cert_date: certDate,
-      })
+      }), 'نافذة تفاصيل الشركة · الحفظ')
     }
 
     const res = await launchDepositWorkflowAction(company.id)
@@ -1696,7 +1696,7 @@ export default function CompanyDetailsModal({ company, isOpen, onClose, onDelete
                                   type="button"
                                   onClick={async () => {
                                     if (await confirmAction({ title: `حذف هوية «${cat.title}»`, tone: 'danger' })) {
-                                      await deleteCompanyIDAction(rec.id)
+                                      await runAction(deleteCompanyIDAction(rec.id), 'نافذة تفاصيل الشركة · الحذف')
                                       loadCompanyIDs()
                                     }
                                   }}

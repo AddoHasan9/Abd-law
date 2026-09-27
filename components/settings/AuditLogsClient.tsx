@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { PageHeader } from '@/components/ui/PageHeader'
 import type { UserAuditLogEntry } from '@/lib/data/audit'
 import { Badge, Input, Select, GlassCard } from '@/components/ui/Kit'
 import { cn } from '@/lib/utils'
@@ -50,24 +51,22 @@ export default function AuditLogsClient({ initialLogs }: Props) {
   })
 
   return (
-    <div className="flex flex-col gap-6 p-4 sm:p-6 text-right" dir="rtl">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div className="flex flex-col gap-1">
-          <h1 className="text-xl sm:text-2xl font-black text-text tracking-tight">
-            سجل تدقيق العمليات والمستخدمين
-          </h1>
-          <p className="text-xs text-text-3">
-            سجل غير قابل للتعديل يوثق كافة حركات الدخول والخروج والإنشاء والتعديل والحذف في النظام
-          </p>
-        </div>
-
-        <div className="flex items-center gap-2">
+    <div className="flex flex-col gap-6 text-right" dir="rtl">
+      <PageHeader
+        icon="history"
+        tone="accent"
+        title="سجل التدقيق"
+        subtitle="سجل غير قابل للتعديل يوثق كافة حركات الدخول والخروج والإنشاء والتعديل والحذف في النظام"
+        actions={
+          <>
+<div className="flex items-center gap-2">
           <Badge variant="primary" className="text-xs px-3 py-1">
             إجمالي السجلات: {logs.length}
           </Badge>
         </div>
-      </div>
+          </>
+        }
+      />
 
       {/* Filters Card */}
       <GlassCard className="p-4 flex flex-col sm:flex-row items-center gap-3">

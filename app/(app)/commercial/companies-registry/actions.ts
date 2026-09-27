@@ -1,6 +1,7 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
+import { dbWrite, rethrowDbError } from '@/lib/data/db-guard'
 import { createAdminClient } from '@/lib/supabase/server'
 import { readJsonFile, writeJsonFile } from '@/lib/data/fs-store'
 import { logTimelineEvent } from '@/lib/data/timeline'
@@ -112,8 +113,9 @@ export async function createEstablishedCompanyAction(payload: AddEstablishedComp
     }
 
     try {
-      await supabase.from('companies').insert(companyDataToInsert)
+      await dbWrite(supabase.from('companies').insert(companyDataToInsert), 'companies')
     } catch (coDbErr) {
+      rethrowDbError(coDbErr)
       console.warn('Supabase insert company notice:', coDbErr)
     }
 
@@ -129,8 +131,9 @@ export async function createEstablishedCompanyAction(payload: AddEstablishedComp
         created_at: createdAt,
       }
       try {
-        await supabase.from('company_managers').insert(managerRecord)
+        await dbWrite(supabase.from('company_managers').insert(managerRecord), 'company_managers')
       } catch (mgrDbErr) {
+        rethrowDbError(mgrDbErr)
         console.warn('Supabase insert company_manager notice:', mgrDbErr)
       }
 
@@ -158,8 +161,9 @@ export async function createEstablishedCompanyAction(payload: AddEstablishedComp
 
       if (shareholderRecords.length > 0) {
         try {
-          await supabase.from('company_shareholders').insert(shareholderRecords)
+          await dbWrite(supabase.from('company_shareholders').insert(shareholderRecords), 'company_shareholders')
         } catch (shDbErr) {
+          rethrowDbError(shDbErr)
           console.warn('Supabase insert company_shareholders notice:', shDbErr)
         }
 
@@ -180,8 +184,9 @@ export async function createEstablishedCompanyAction(payload: AddEstablishedComp
       }))
 
       try {
-        await supabase.from('financial_statements').insert(fsRecords)
+        await dbWrite(supabase.from('financial_statements').insert(fsRecords), 'financial_statements')
       } catch (fsDbErr) {
+        rethrowDbError(fsDbErr)
         console.warn('Supabase insert financial_statements notice:', fsDbErr)
       }
     }
@@ -207,8 +212,9 @@ export async function createEstablishedCompanyAction(payload: AddEstablishedComp
 
       if (idRecords.length > 0) {
         try {
-          await supabase.from('company_ids').insert(idRecords)
+          await dbWrite(supabase.from('company_ids').insert(idRecords), 'company_ids')
         } catch (idDbErr) {
+          rethrowDbError(idDbErr)
           console.warn('Supabase insert company_ids notice:', idDbErr)
         }
 
@@ -232,8 +238,9 @@ export async function createEstablishedCompanyAction(payload: AddEstablishedComp
     }))
 
     try {
-      await supabase.from('workflow_steps').insert(workflowSteps)
-    } catch {}
+      await dbWrite(supabase.from('workflow_steps').insert(workflowSteps), 'workflow_steps')
+    } catch (dbErr) {
+    rethrowDbError(dbErr)}
 
     // 7. Save Company to Local Disk Store for 100% Guaranteed Availability
     const fullCompanyObject: CompanyWithWorkflow = {
@@ -260,7 +267,8 @@ export async function createEstablishedCompanyAction(payload: AddEstablishedComp
       if (deletedIds.includes(companyId)) {
         writeJsonFile('deleted_company_ids.json', deletedIds.filter(id => id !== companyId))
       }
-    } catch {}
+    } catch (dbErr) {
+    rethrowDbError(dbErr)}
 
     // 8. Log Timeline Event
     try {
@@ -271,7 +279,8 @@ export async function createEstablishedCompanyAction(payload: AddEstablishedComp
         description: `تم إدراج الشركة بكافة بياناتها الرسمية والشهادة والمساهمين والهويات.`,
         related_link: `/commercial/companies/${companyId}`,
       })
-    } catch {}
+    } catch (dbErr) {
+    rethrowDbError(dbErr)}
 
     revalidatePath('/commercial/companies-registry')
     revalidatePath('/commercial/companies')

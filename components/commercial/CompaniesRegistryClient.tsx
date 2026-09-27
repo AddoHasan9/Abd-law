@@ -1,6 +1,8 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { PageHeader } from '@/components/ui/PageHeader'
+import { KpiCard } from '@/components/ui/KpiCard'
 import { DataPanel } from '@/components/ui/DataPanel'
 import CompanyFileLink from '@/components/commercial/CompanyFileLink'
 import { useRouter } from 'next/navigation'
@@ -54,21 +56,16 @@ export default function CompaniesRegistryClient({ companies = [] }: Props) {
   })
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', padding: '24px' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
       
-      {/* Top Banner & Main Action */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '16px' }}>
-        <div>
-          <h1 style={{ fontSize: '22px', fontWeight: 800, margin: 0, color: 'var(--text)', display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <span className="material-symbols-outlined text-[26px] text-[var(--accent)]">corporate_fare</span>
-            <span>دليل وسجل الشركات (قسم الشركات)</span>
-          </h1>
-          <p style={{ fontSize: '13px', color: 'var(--text-3)', margin: '4px 0 0 0' }}>
-            المرجع الموحد للشركات المتأسسة والمسجلة بنظام المكتب — اضغط على أي شركة لفتح وتعديل أو حذف تفاصيلها
-          </p>
-        </div>
-
-        <div style={{ display: 'flex', gap: '10px' }}>
+      <PageHeader
+        icon="domain"
+        tone="emerald"
+        title="سجل الشركات"
+        subtitle="المرجع الموحد للشركات المتأسسة والمسجلة بنظام المكتب — اضغط على أي شركة لفتح وتعديل أو حذف تفاصيلها"
+        actions={
+          <>
+<div style={{ display: 'flex', gap: '10px' }}>
           <button
             type="button"
             className="btn btn-primary"
@@ -79,43 +76,15 @@ export default function CompaniesRegistryClient({ companies = [] }: Props) {
             <span>إضافة شركة</span>
           </button>
         </div>
-      </div>
+          </>
+        }
+      />
 
-      {/* Quick Stats Bar */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '12px' }}>
-        <div className="card" style={{ padding: '14px 18px', display: 'flex', alignItems: 'center', gap: '14px' }}>
-          <div style={{ width: '40px', height: '40px', borderRadius: '12px', background: 'var(--accent-soft)', color: 'var(--accent)', display: 'grid', placeItems: 'center' }}>
-            <Icon name="build2" />
-          </div>
-          <div>
-            <div style={{ fontSize: '11px', color: 'var(--text-3)', fontWeight: 600 }}>إجمالي الشركات المسجلة</div>
-            <div style={{ fontSize: '20px', fontWeight: 800, color: 'var(--text)' }} className="num">{companiesList.length}</div>
-          </div>
-        </div>
-
-        <div className="card" style={{ padding: '14px 18px', display: 'flex', alignItems: 'center', gap: '14px' }}>
-          <div style={{ width: '40px', height: '40px', borderRadius: '12px', background: 'var(--ok-soft)', color: 'var(--ok)', display: 'grid', placeItems: 'center' }}>
-            <Icon name="doc" />
-          </div>
-          <div>
-            <div style={{ fontSize: '11px', color: 'var(--text-3)', fontWeight: 600 }}>مدرجة بالحسابات الختامية</div>
-            <div style={{ fontSize: '20px', fontWeight: 800, color: 'var(--ok)' }} className="num">
-              {companiesList.filter(c => c.financial_statements_enabled || c.last_completed_fs_year).length}
-            </div>
-          </div>
-        </div>
-
-        <div className="card" style={{ padding: '14px 18px', display: 'flex', alignItems: 'center', gap: '14px' }}>
-          <div style={{ width: '40px', height: '40px', borderRadius: '12px', background: 'rgba(59, 130, 246, 0.1)', color: '#3b82f6', display: 'grid', placeItems: 'center' }}>
-            <Icon name="stamp" />
-          </div>
-          <div>
-            <div style={{ fontSize: '11px', color: 'var(--text-3)', fontWeight: 600 }}>شركات محدودة المسؤولية</div>
-            <div style={{ fontSize: '20px', fontWeight: 800, color: '#3b82f6' }} className="num">
-              {companiesList.filter(c => c.kind !== 'فردية').length}
-            </div>
-          </div>
-        </div>
+      {/* المؤشرات — البطاقة الموحدة */}
+      <div className="kpi-grid cols-3">
+        <KpiCard label="الشركات المسجلة" value={companiesList.length} icon="domain" tone="emerald" hint="كل الشركات المؤسسة" />
+        <KpiCard label="مدرجة بالحسابات الختامية" value={companiesList.filter(c => c.financial_statements_enabled || c.last_completed_fs_year).length} icon="receipt_long" tone="indigo" hint="الحسابات الختامية" href="/commercial/financial-statements" />
+        <KpiCard label="محدودة المسؤولية" value={companiesList.filter(c => c.kind !== 'فردية').length} icon="history_edu" tone="blue" hint="قسم المحدودة" href="/commercial/llc" />
       </div>
 
       {/* Search & Filter Toolbar */}

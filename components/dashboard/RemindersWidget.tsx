@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { DataPanel } from '@/components/ui/DataPanel'
 import { Mi } from '@/components/ui/Mi'
-import { confirmAction } from '@/components/ui/ConfirmDialog'
+import { confirmAction, runAction } from '@/components/ui/ConfirmDialog'
 import Link from 'next/link'
 import { Icon } from '@/components/ui/Icon'
 import {
@@ -69,20 +69,20 @@ export default function RemindersWidget({ companies = [], hideIfEmpty = false }:
   const handleToggleComplete = async (item: ReminderItem) => {
     const nextState = !item.is_completed
     setReminders(prev => prev.map(r => (r.id === item.id ? { ...r, is_completed: nextState } : r)))
-    await toggleReminderCompleteAction(item.id, nextState)
+    await runAction(toggleReminderCompleteAction(item.id, nextState), 'التذكيرات · تحديث الحالة')
     fetchReminders()
   }
 
   const handleToggleArchive = async (item: ReminderItem) => {
     const nextState = !item.is_archived
     setReminders(prev => prev.filter(r => r.id !== item.id))
-    await toggleReminderArchiveAction(item.id, nextState)
+    await runAction(toggleReminderArchiveAction(item.id, nextState), 'التذكيرات · تحديث الحالة')
   }
 
   const handleDelete = async (id: string) => {
     if (!(await confirmAction({ title: 'حذف التذكير', tone: 'danger' }))) return
     setReminders(prev => prev.filter(r => r.id !== id))
-    await deleteReminderAction(id)
+    await runAction(deleteReminderAction(id), 'التذكيرات · الحذف')
   }
 
   // Categorize reminders

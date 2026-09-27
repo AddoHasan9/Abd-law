@@ -1,6 +1,7 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
+import { PageHeader } from '@/components/ui/PageHeader'
 import { toast } from 'sonner'
 import { useState, useEffect } from 'react'
 import { Icon } from '@/components/ui/Icon'
@@ -101,20 +102,15 @@ export default function PermissionsClient() {
   const currentRolePerms = perms[selectedRole]
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '22px', padding: '24px' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '22px' }}>
       
-      {/* Header */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '14px' }}>
-        <div>
-          <h1 style={{ fontSize: '22px', fontWeight: 800, margin: 0, color: 'var(--text)' }}>
-            مصفوفة الصلاحيات والأذونات الخماسية
-          </h1>
-          <p style={{ fontSize: '13px', color: 'var(--text-3)', margin: '4px 0 0 0' }}>
-            تخصيص وتحديد أذونات الوصول لكل دور من الأدوار الـ 5 المعتمدة في النظام بشكل ديناميكي ومباشر.
-          </p>
-        </div>
-
-        <button
+      <PageHeader
+        icon="key"
+        title="مصفوفة الصلاحيات"
+        subtitle="تحديد ما يستطيع كل دور رؤيته وتعديله في النظام"
+        actions={
+          <>
+<button
           type="button"
           onClick={handleSave}
           disabled={saving}
@@ -124,7 +120,9 @@ export default function PermissionsClient() {
           <Icon name="check" />
           <span>{saving ? 'جاري الحفظ...' : 'حفظ مصفوفة الصلاحيات'}</span>
         </button>
-      </div>
+          </>
+        }
+      />
 
       {message && (
         <div

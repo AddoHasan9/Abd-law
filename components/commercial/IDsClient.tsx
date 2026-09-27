@@ -1,8 +1,10 @@
 'use client'
 
 import { useState, useEffect, useCallback, useMemo } from 'react'
+import { PageHeader } from '@/components/ui/PageHeader'
+import { KpiCard } from '@/components/ui/KpiCard'
 import { Mi } from '@/components/ui/Mi'
-import { confirmAction } from '@/components/ui/ConfirmDialog'
+import { confirmAction, runAction } from '@/components/ui/ConfirmDialog'
 import { DataPanel } from '@/components/ui/DataPanel'
 import CompanyFileLink from '@/components/commercial/CompanyFileLink'
 import { Icon } from '@/components/ui/Icon'
@@ -71,7 +73,7 @@ export default function IDsClient({ companies = [], initialCompanyId }: Props) {
 
   const handleDelete = async (id: string, name?: string | null) => {
     if (!(await confirmAction({ title: 'حذف سجل الهوية', message: `سيُحذف سجل الهوية لشركة «${name || 'المحددة'}».`, tone: 'danger' }))) return
-    await deleteCompanyIDAction(id)
+    await runAction(deleteCompanyIDAction(id), 'قسم الهويات · الحذف')
     loadData()
   }
 
@@ -148,23 +150,14 @@ export default function IDsClient({ companies = [], initialCompanyId }: Props) {
   return (
     <div className="flex flex-col gap-6 w-full animate-fade-in-up">
       
-      {/* Page Header */}
-      <div className="flex flex-col md:flex-row items-start md:items-center justify-between w-full gap-4 pb-3 border-b border-[var(--line-soft)]">
-        <div className="flex flex-col gap-1">
-          <div className="flex items-center gap-2.5">
-            <div className="w-10 h-10 rounded-2xl bg-[var(--surface-2)] border border-[var(--glass-border)] text-amber-500 flex items-center justify-center shadow-xs">
-              <span className="material-symbols-outlined text-[22px]">badge</span>
-            </div>
-            <div>
-              <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight text-[var(--text)]">وحدة الهويات والتراخيص</h1>
-              <p className="text-xs md:text-sm text-[var(--text-3)]">
-                متابعة دورة حياة إصدار وتجديد هويات الغرفة التجارية، الهوية الضريبية، هوية المستورد، والتخطيط للشركات
-              </p>
-            </div>
-          </div>
-        </div>
-
-        {/* 4 Dedicated ID Action Buttons */}
+      <PageHeader
+        icon="badge"
+        tone="violet"
+        title="الهويات والتراخيص"
+        subtitle="متابعة دورة حياة إصدار وتجديد هويات الغرفة التجارية، الهوية الضريبية، هوية المستورد، والتخطيط للشركات"
+        actions={
+          <>
+{/* 4 Dedicated ID Action Buttons */}
         {canCreateID && (
           <div className="flex items-center gap-2 flex-wrap">
             <button
@@ -204,7 +197,9 @@ export default function IDsClient({ companies = [], initialCompanyId }: Props) {
             </button>
           </div>
         )}
-      </div>
+          </>
+        }
+      />
 
       {/* Focused Company Banner if routed from company */}
       {focusedCompanyId && (
@@ -223,42 +218,12 @@ export default function IDsClient({ companies = [], initialCompanyId }: Props) {
         </div>
       )}
 
-      {/* KPI Stats Grid */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3.5 w-full">
-        <div
-          onClick={() => setStatusFilter('all')}
-          className={`glass-card p-4 rounded-[20px] cursor-pointer transition duration-200 block border ${statusFilter === 'all' ? 'border-[var(--accent)] shadow-md bg-[var(--surface-2)]' : 'border-[var(--glass-border)] bg-[var(--surface)] hover:-translate-y-0.5'}`}
-        >
-          <div className="text-[11.5px] font-bold text-[var(--text-3)] mb-1">إجمالي الهويات المسجلة</div>
-          <div className="text-2xl sm:text-3xl font-extrabold text-[var(--text)] num">{stats.total}</div>
-        </div>
-
-        <div
-          onClick={() => setStatusFilter('in_progress')}
-          className={`glass-card p-4 rounded-[20px] cursor-pointer transition duration-200 block border ${statusFilter === 'in_progress' ? 'border-amber-500 shadow-md bg-amber-500/10' : 'border-[var(--glass-border)] bg-[var(--surface)] hover:-translate-y-0.5'}`}
-        >
-          <div className="text-[11.5px] font-bold text-amber-600 dark:text-amber-400 mb-1 flex items-center gap-1.5">
-            <span className="w-3 h-3 border-2 border-amber-500/40 border-t-amber-400 rounded-full animate-spin inline-block" />
-            <span>قيد الإصدار</span>
-          </div>
-          <div className="text-2xl sm:text-3xl font-extrabold text-amber-600 dark:text-amber-400 num">{stats.inProgress}</div>
-        </div>
-
-        <div
-          onClick={() => setStatusFilter('done')}
-          className={`glass-card p-4 rounded-[20px] cursor-pointer transition duration-200 block border ${statusFilter === 'done' ? 'border-emerald-500 shadow-md bg-emerald-500/10' : 'border-[var(--glass-border)] bg-[var(--surface)] hover:-translate-y-0.5'}`}
-        >
-          <div className="text-[11.5px] font-bold text-emerald-600 dark:text-emerald-400 mb-1">المكتملة والسارية ✓</div>
-          <div className="text-2xl sm:text-3xl font-extrabold text-emerald-600 dark:text-emerald-400 num">{stats.done}</div>
-        </div>
-
-        <div
-          onClick={() => setStatusFilter('expiring')}
-          className={`glass-card p-4 rounded-[20px] cursor-pointer transition duration-200 block border ${statusFilter === 'expiring' ? 'border-rose-500 shadow-md bg-rose-500/10' : 'border-[var(--glass-border)] bg-[var(--surface)] hover:-translate-y-0.5'}`}
-        >
-          <div className="text-[11.5px] font-bold text-rose-600 dark:text-rose-400 mb-1"><Mi n="warning" />تتطلب تجديداً</div>
-          <div className="text-2xl sm:text-3xl font-extrabold text-rose-600 dark:text-rose-400 num">{stats.expiring}</div>
-        </div>
+      {/* المؤشرات — البطاقة الموحدة */}
+      <div className="kpi-grid cols-4">
+        <KpiCard label="إجمالي الهويات" value={stats.total} icon="badge" tone="violet" hint="كل الهويات المسجلة" active={statusFilter === 'all'} onClick={() => setStatusFilter('all')} />
+        <KpiCard label="قيد الإصدار" value={stats.inProgress} icon="pending_actions" tone="amber" hint="بانتظار الإصدار" active={statusFilter === 'in_progress'} onClick={() => setStatusFilter('in_progress')} />
+        <KpiCard label="المكتملة والسارية" value={stats.done} icon="verified" tone="emerald" hint="سارية المفعول" active={statusFilter === 'done'} onClick={() => setStatusFilter('done')} />
+        <KpiCard label="تتطلب تجديداً" value={stats.expiring} icon="event_busy" tone="rose" hint="منتهية أو قريبة الانتهاء" active={statusFilter === 'expiring'} onClick={() => setStatusFilter('expiring')} alert={stats.expiring > 0} />
       </div>
 
       {/* Filters Bar */}

@@ -1,6 +1,7 @@
 'use server'
 
 import { requirePermission } from '@/lib/auth/require-permission'
+import { rethrowDbError } from '@/lib/data/db-guard'
 import { revalidatePath } from 'next/cache'
 import { createAdminClient, createClient } from '@/lib/supabase/server'
 import type { NotificationItem, NotificationType } from '@/types/database'
@@ -28,6 +29,7 @@ export async function getNotificationsAction(): Promise<{ success: boolean; data
 
     return { success: true, data: notifs, unreadCount }
   } catch (err) {
+    rethrowDbError(err)
     console.error('getNotificationsAction error:', err)
     return { success: true, data: [], unreadCount: 0 }
   }
@@ -68,7 +70,8 @@ export async function createNotificationAction(payload: {
     try {
       revalidatePath('/commercial')
       revalidatePath('/dashboard')
-    } catch {}
+    } catch (dbErr) {
+    rethrowDbError(dbErr)}
     return { success: true, data }
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : 'فشل إرسال الإشعار'

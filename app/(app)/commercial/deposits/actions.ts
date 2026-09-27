@@ -4,6 +4,7 @@
 'use server'
 
 import { requireRecordAccess } from '@/lib/auth/record-access'
+import { dbWrite, rethrowDbError } from '@/lib/data/db-guard'
 import { revalidatePath } from 'next/cache'
 import { createAdminClient } from '@/lib/supabase/server'
 import { logTimelineEvent } from '@/lib/data/timeline'
@@ -55,15 +56,16 @@ export async function confirmDepositSubmissionAction(depositId: string) {
     const today = new Date().toISOString().slice(0, 10)
 
     try {
-      await supabase
+      await dbWrite(supabase
         .from('deposit_stages')
         .update({
           state: 'done',
           at_date: today,
         })
         .eq('deposit_id', depositId)
-        .eq('stage_key', 'submit')
-    } catch {}
+        .eq('stage_key', 'submit'), 'deposit_stages')
+    } catch (dbErr) {
+    rethrowDbError(dbErr)}
 
     const diskDeposits = readJsonFile<DiskDeposit[]>('deposits.json', [])
     const targetDep = diskDeposits.find(d => d.id === depositId)
@@ -84,6 +86,7 @@ export async function confirmDepositSubmissionAction(depositId: string) {
 
     return { success: true }
   } catch (err: unknown) {
+    rethrowDbError(err)
     console.error('confirmDepositSubmissionAction exception:', err)
     return { success: true }
   }
@@ -209,27 +212,29 @@ export async function updateDepositStageStateAction(
         // Upgrade Company to established in DB and disk store
         try {
           // 1. Basic status update (guaranteed to succeed across DB schemas)
-          await supabase
+          await dbWrite(supabase
             .from('companies')
             .update({ status: 'established' })
-            .eq('id', finalCompanyId)
+            .eq('id', finalCompanyId), 'companies')
 
           // 2. Extended fields if columns exist
           try {
-            await supabase
+            await dbWrite(supabase
               .from('companies')
               .update({
                 deposit_released: true,
                 deposit_released_at: targetAtDate || new Date().toISOString().slice(0, 10),
               })
-              .eq('id', finalCompanyId)
-          } catch {}
+              .eq('id', finalCompanyId), 'companies')
+          } catch (dbErr) {
+    rethrowDbError(dbErr)}
 
-          await supabase
+          await dbWrite(supabase
             .from('deposits')
             .update({ status: 'released' })
-            .eq('id', targetDep.id)
+            .eq('id', targetDep.id), 'deposits')
         } catch (dbUpErr) {
+          rethrowDbError(dbUpErr)
           console.warn('DB company established update notice:', dbUpErr)
         }
 
@@ -262,7 +267,8 @@ export async function updateDepositStageStateAction(
             title: 'تم إطلاق الوديعة بنجاح وانتقال الشركة إلى قسم الشركات',
             related_link: '/commercial/companies-registry',
           })
-        } catch {}
+        } catch (dbErr) {
+    rethrowDbError(dbErr)}
       }
     }
 
@@ -373,38 +379,39 @@ export async function uploadCompanyBarcodeAction(stageId: string, companyId: str
     // 4. Update Supabase
     try {
       if (stageId && !stageId.startsWith('mem_') && !stageId.startsWith('stage_')) {
-        await supabase
+        await dbWrite(supabase
           .from('deposit_stages')
           .update({
             state: 'done',
             at_date: today,
             notes: barcodeDataUrl,
           })
-          .eq('id', stageId)
+          .eq('id', stageId), 'deposit_stages')
       }
 
       // 1. Basic status update (guaranteed to succeed across DB schemas)
-      await supabase
+      await dbWrite(supabase
         .from('companies')
         .update({ status: 'established' })
-        .eq('id', companyId)
+        .eq('id', companyId), 'companies')
 
       // 2. Extended fields if columns exist
       try {
-        await supabase
+        await dbWrite(supabase
           .from('companies')
           .update({
             deposit_released: true,
             deposit_released_at: today,
             barcode_url: barcodeDataUrl,
           })
-          .eq('id', companyId)
-      } catch {}
+          .eq('id', companyId), 'companies')
+      } catch (dbErr) {
+    rethrowDbError(dbErr)}
 
-      await supabase
+      await dbWrite(supabase
         .from('deposits')
         .update({ status: 'released' })
-        .eq('company_id', companyId)
+        .eq('company_id', companyId), 'deposits')
 
       await logTimelineEvent({
         company_id: companyId,
@@ -421,6 +428,7 @@ export async function uploadCompanyBarcodeAction(stageId: string, companyId: str
         link_url: '/commercial/companies-registry',
       })
     } catch (e) {
+      rethrowDbError(e)
       console.warn('Supabase barcode upload notice:', e)
     }
 
@@ -431,7 +439,8 @@ export async function uploadCompanyBarcodeAction(stageId: string, companyId: str
       revalidatePath(`/commercial/companies/${companyId}`)
       revalidatePath('/commercial')
       revalidatePath('/dashboard')
-    } catch {}
+    } catch (dbErr) {
+    rethrowDbError(dbErr)}
 
     return { success: true }
   } catch (err) {

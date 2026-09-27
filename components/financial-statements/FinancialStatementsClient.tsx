@@ -1,9 +1,11 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
+import { PageHeader } from '@/components/ui/PageHeader'
+import { KpiCard } from '@/components/ui/KpiCard'
 import { toast } from 'sonner'
 import { Mi } from '@/components/ui/Mi'
-import { confirmAction } from '@/components/ui/ConfirmDialog'
+import { confirmAction, runAction, showError } from '@/components/ui/ConfirmDialog'
 import { DataPanel } from '@/components/ui/DataPanel'
 import { Icon } from '@/components/ui/Icon'
 import { formatMoney } from '@/lib/constants'
@@ -198,31 +200,31 @@ export default function FinancialStatementsClient({ companies = [] }: Props) {
     const res = await updateFSContactStatusAction(companyId, year, newStatus)
     if (!res.success) {
       setContactStatuses(prev => ({ ...prev, [key]: previous }))
-      toast.error(res.error || 'تعذّر حفظ حالة التواصل')
+      void showError(res.error || 'تعذّر حفظ حالة التواصل', 'الحسابات الختامية')
     }
   }
 
   const handleDelete = async (id: string) => {
     if (!(await confirmAction({ title: 'حذف سجل الميزانية', tone: 'danger' }))) return
-    await deleteFinancialStatementAction(id)
+    await runAction(deleteFinancialStatementAction(id), 'الحسابات الختامية · الحذف')
     loadData()
   }
 
   const handleMarkSubmitted = async (id: string) => {
     if (!(await confirmAction({ title: 'تسجيل تقديم الميزانية', message: 'سيُسجَّل تقديم الميزانية اليوم لكلا الدائرتين: الضرائب ومسجل الشركات.', tone: 'primary', confirmText: 'تسجيل' }))) return
-    await markStatementSubmittedAction(id)
+    await runAction(markStatementSubmittedAction(id), 'الحسابات الختامية · تسجيل التسليم')
     loadData()
   }
 
   const handleMarkTaxSubmitted = async (id: string) => {
     if (!(await confirmAction({ title: 'تسليم الميزانية للضرائب', message: 'سيُسجَّل تسليم الميزانية اليوم للهيئة العامة للضرائب.', tone: 'primary', confirmText: 'تسجيل' }))) return
-    await markStatementTaxSubmittedAction(id)
+    await runAction(markStatementTaxSubmittedAction(id), 'الحسابات الختامية · تسجيل التسليم')
     loadData()
   }
 
   const handleMarkRegistrarSubmitted = async (id: string) => {
     if (!(await confirmAction({ title: 'تسليم الميزانية لمسجل الشركات', message: 'سيُسجَّل تسليم الميزانية اليوم لدائرة تسجيل الشركات.', tone: 'primary', confirmText: 'تسجيل' }))) return
-    await markStatementRegistrarSubmittedAction(id)
+    await runAction(markStatementRegistrarSubmittedAction(id), 'الحسابات الختامية · تسجيل التسليم')
     loadData()
   }
 
@@ -263,18 +265,14 @@ export default function FinancialStatementsClient({ companies = [] }: Props) {
 
   return (
     <div className="flex flex-col gap-6 w-full animate-fade-in-up">
-      {/* Header Title & Action Button */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <div>
-          <h1 style={{ fontSize: '20px', fontWeight: 800, margin: 0, color: 'var(--text)' }}>
-            إدارة الحسابات الختامية للشركات (ERP Engine)
-          </h1>
-          <p style={{ fontSize: '13px', color: 'var(--text-3)', margin: '4px 0 0 0' }}>
-            متابعة ميزانيات وسجلات الحسابات الختامية وضرائب الشركات
-          </p>
-        </div>
-
-        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+      <PageHeader
+        icon="receipt_long"
+        tone="rose"
+        title="الحسابات الختامية"
+        subtitle="متابعة ميزانيات وسجلات الحسابات الختامية وضرائب الشركات"
+        actions={
+          <>
+<div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
           <button
             type="button"
             onClick={handleExportExcel}
@@ -301,7 +299,9 @@ export default function FinancialStatementsClient({ companies = [] }: Props) {
             </button>
           )}
         </div>
-      </div>
+          </>
+        }
+      />
 
       {/* شريط البحث */}
       <div style={{ position: 'relative', maxWidth: '420px' }}>
@@ -321,39 +321,24 @@ export default function FinancialStatementsClient({ companies = [] }: Props) {
         />
       </div>
 
-      {/* Summary KPI Cards */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '14px' }}>
-        <div style={{ padding: '14px 18px', background: 'var(--surface-2)', border: '1px solid var(--line-soft)', borderRadius: 'var(--r-md)' }}>
-          <div style={{ fontSize: '12px', color: 'var(--text-3)', fontWeight: 600 }}>إجمالي الشركات المعنية</div>
-          <div style={{ fontSize: '22px', fontWeight: 800, color: 'var(--accent)', marginTop: '4px' }}>
-            {groupedCompanies.length} شركة مسجلة
-          </div>
-        </div>
-
-        <div style={{ padding: '14px 18px', background: 'var(--surface-2)', border: '1px solid var(--line-soft)', borderRadius: 'var(--r-md)' }}>
-          <div style={{ fontSize: '12px', color: 'var(--text-3)', fontWeight: 600 }}>الميزانيات المستحقة للعام</div>
-          <div style={{ fontSize: '22px', fontWeight: 800, color: 'var(--accent)', marginTop: '4px' }}>
-            {totalRequired} ميزانية مستحقة
-          </div>
-        </div>
-
-        <div style={{ padding: '14px 18px', background: 'var(--warn-soft)', border: '1px solid var(--warn)', borderRadius: 'var(--r-md)' }}>
-          <div style={{ fontSize: '12px', color: 'var(--warn)', fontWeight: 600 }}>تقترب من المهلة (07/10)</div>
-          <div style={{ fontSize: '22px', fontWeight: 800, color: 'var(--warn)', marginTop: '4px' }}>
-            {nearDeadline.length} شركة
-          </div>
-        </div>
-
-        <div style={{ padding: '14px 18px', background: 'var(--bad-soft)', border: '1px solid var(--bad)', borderRadius: 'var(--r-md)' }}>
-          <div style={{ fontSize: '12px', color: 'var(--bad)', fontWeight: 600 }}>الشركات الخاضعة للغرامة</div>
-          <div style={{ fontSize: '22px', fontWeight: 800, color: 'var(--bad)', marginTop: '4px' }}>
-            {totalPenalties.length} شركة ({formatMoney(totalPenaltyAmount)})
-          </div>
-        </div>
+      {/* المؤشرات — البطاقة الموحدة */}
+      <div className="kpi-grid cols-4">
+        <KpiCard label="الشركات المكلّف بها" value={groupedCompanies.length} icon="corporate_fare" tone="blue" hint="شركات بالحسابات الختامية" onClick={() => setActiveTab('grouped')} />
+        <KpiCard label="ميزانيات مستحقة" value={totalRequired} icon="receipt_long" tone="indigo" hint="للسنة الحالية" onClick={() => setActiveTab('grouped')} />
+        <KpiCard label="تقترب المهلة (7/10)" value={nearDeadline.length} icon="schedule" tone="amber" hint="خلال الأيام القادمة" alert={false} onClick={() => setActiveTab('grouped')} />
+        <KpiCard
+          label="خاضعة للغرامة"
+          value={totalPenalties.length}
+          icon="gavel"
+          tone="rose"
+          alert={totalPenalties.length > 0}
+          hint={totalPenalties.length ? `غرامة: ${formatMoney(totalPenaltyAmount)}` : 'لا غرامات حالياً'}
+          onClick={() => setActiveTab('grouped')}
+        />
       </div>
 
       {/* Tabs Navigation */}
-      <div style={{ display: 'flex', gap: '8px', borderBottom: '1px solid var(--line-soft)', paddingBottom: '8px' }}>
+      <div className="fs-tabs" style={{ display: 'flex', gap: '8px', borderBottom: '1px solid var(--line-soft)', paddingBottom: '8px' }}>
         <button
           type="button"
           onClick={() => setActiveTab('grouped')}

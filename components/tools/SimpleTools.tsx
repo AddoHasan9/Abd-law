@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { showError } from '@/components/ui/ConfirmDialog'
 import { toast } from 'sonner'
 import { toolBySlug } from '@/lib/tools/registry'
 import {
@@ -40,7 +41,7 @@ export function PdfToImages() {
       setOut(outs)
     } catch (e) {
       setProg(null)
-      toast.error(errMsg(e))
+      void showError(errMsg(e), 'الأدوات')
     }
   }
 
@@ -94,7 +95,7 @@ export function ImagesToPdf() {
       setOut([{ name: `${baseName(files[0].file.name)}.pdf`, blob: toBlob(bytes, 'application/pdf') }])
     } catch (e) {
       setProg(null)
-      toast.error('تعذّر قراءة إحدى الصور. صيغ HEIC غير مدعومة؛ صوّرها بصيغة JPG.')
+      void showError('تعذّر قراءة إحدى الصور. صيغ HEIC غير مدعومة؛ صوّرها بصيغة JPG.', 'الأدوات')
     }
   }
 
@@ -151,7 +152,7 @@ export function MergePdf() {
       try {
         const pages = await pdfPageCount(await file.arrayBuffer())
         setFiles(prev => [...prev, { id: Date.now() + i, file, pages }])
-      } catch (e) { toast.error(`${file.name}: ${errMsg(e)}`) }
+      } catch (e) { void showError(`${file.name}: ${errMsg(e)}`, 'الأدوات') }
     }
   }
   const move = (i: number, d: -1 | 1) => setFiles(prev => {
@@ -167,7 +168,7 @@ export function MergePdf() {
       const refs = files.flatMap((f, s) => Array.from({ length: f.pages }, (_, index) => ({ src: s, index, rotation: 0 })))
       const bytes = await assemblePdf(bufs, refs)
       setOut([{ name: `${baseName(files[0].file.name)} - مدمج.pdf`, blob: toBlob(bytes, 'application/pdf') }])
-    } catch (e) { toast.error(errMsg(e)) }
+    } catch (e) { void showError(errMsg(e), 'الأدوات') }
     setBusy(false)
   }
 
@@ -214,7 +215,7 @@ export function SplitPdf() {
 
   const open = async (f: File[]) => {
     try { setFile({ file: f[0], pages: await pdfPageCount(await f[0].arrayBuffer()) }) }
-    catch (e) { toast.error(errMsg(e)) }
+    catch (e) { void showError(errMsg(e), 'الأدوات') }
   }
   const parsed = file ? parseRanges(range, file.pages) : null
 
@@ -224,7 +225,7 @@ export function SplitPdf() {
       const buf = await file.file.arrayBuffer()
       const b = baseName(file.file.name)
       if (mode === 'range') {
-        if (!parsed) return toast.error('اكتب الصفحات بشكل صحيح، مثل: 1-3, 5')
+        if (!parsed) return void showError('اكتب الصفحات بشكل صحيح، مثل: 1-3, 5', 'الأدوات')
         const bytes = await extractPages(buf, parsed)
         setOut([{ name: `${b} - صفحات ${range.replace(/\s+/g, '')}.pdf`, blob: toBlob(bytes, 'application/pdf') }])
       } else {
@@ -236,7 +237,7 @@ export function SplitPdf() {
         setProg(null)
         setOut(outs)
       }
-    } catch (e) { setProg(null); toast.error(errMsg(e)) }
+    } catch (e) { setProg(null); void showError(errMsg(e), 'الأدوات') }
   }
 
   return (
@@ -291,7 +292,7 @@ export function CompressPdf() {
       const blob = toBlob(bytes, 'application/pdf')
       if (blob.size >= file.size) toast.message('الملف مضغوط أصلاً؛ النسخة الجديدة ليست أصغر. احتفظ بالأصل.')
       setOut([{ name: `${baseName(file.name)} - مضغوط.pdf`, blob }])
-    } catch (e) { setProg(null); toast.error(errMsg(e)) }
+    } catch (e) { setProg(null); void showError(errMsg(e), 'الأدوات') }
   }
 
   return (
@@ -339,7 +340,7 @@ export function CompressImages() {
       }
       setProg(null)
       setOut(outs)
-    } catch { setProg(null); toast.error('تعذّر قراءة إحدى الصور. صيغ HEIC غير مدعومة.') }
+    } catch { setProg(null); void showError('تعذّر قراءة إحدى الصور. صيغ HEIC غير مدعومة.', 'الأدوات') }
   }
 
   const original = files.reduce((s, f) => s + f.size, 0)
@@ -415,7 +416,7 @@ export function StampPdf() {
         seal: sealOn && seal ? { file: seal, position: sealPos, widthPt: sealSize, pages: sealPages } : undefined,
       })
       setOut([{ name: `${baseName(file.name)} - مختوم.pdf`, blob: toBlob(bytes, 'application/pdf') }])
-    } catch (e) { toast.error(errMsg(e)) }
+    } catch (e) { void showError(errMsg(e), 'الأدوات') }
     setBusy(false)
   }
 

@@ -1,8 +1,9 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
+import { PageHeader } from '@/components/ui/PageHeader'
 import { toast } from 'sonner'
-import { confirmAction } from '@/components/ui/ConfirmDialog'
+import { confirmAction, showError } from '@/components/ui/ConfirmDialog'
 import { isProtectedAccount } from '@/lib/auth/account-policy'
 import { useState, useMemo, useEffect } from 'react'
 import { createPortal } from 'react-dom'
@@ -195,7 +196,7 @@ export default function UsersClient({ initialProfiles }: Props) {
 
   const openEditModal = (user: ProfileWithStats) => {
     if (protectedUser(user) || !canEditUsers) {
-      toast.error('عذراً، يقتصر تعديل حسابات Super Admin على المدير الأعلى فقط')
+      void showError('عذراً، يقتصر تعديل حسابات Super Admin على المدير الأعلى فقط', 'إدارة المستخدمين')
       return
     }
     setEditingUser(user)
@@ -251,7 +252,7 @@ export default function UsersClient({ initialProfiles }: Props) {
 
   const handleToggleActive = async (user: ProfileWithStats) => {
     if (protectedUser(user) || !canEditUsers) {
-      toast.error('لا يمكن تعطيل حساب Super Admin')
+      void showError('لا يمكن تعطيل حساب Super Admin', 'إدارة المستخدمين')
       return
     }
     const res = await toggleUserActiveAction(user.id)
@@ -266,11 +267,11 @@ export default function UsersClient({ initialProfiles }: Props) {
 
   const handleSoftDeleteUser = async (user: ProfileWithStats) => {
     if (!canDeleteUsers) {
-      toast.error('عذراً، يقتصر تعطيل وأرشفة الحسابات على Super Admin فقط')
+      void showError('عذراً، يقتصر تعطيل وأرشفة الحسابات على Super Admin فقط', 'إدارة المستخدمين')
       return
     }
     if (protectedUser(user)) {
-      toast.error('لا يمكن حذف أو أرشفة حساب Super Admin الرئيسي')
+      void showError('لا يمكن حذف أو أرشفة حساب Super Admin الرئيسي', 'إدارة المستخدمين')
       return
     }
     if (!(await confirmAction({ title: `تعطيل وأرشفة حساب «${user.name}»`, message: 'ستُحفظ جميع المعاملات وسجل التدقيق، ولن تُمسح أي بيانات.', tone: 'warn', confirmText: 'تعطيل وأرشفة' }))) {
@@ -289,11 +290,11 @@ export default function UsersClient({ initialProfiles }: Props) {
 
   const handlePermanentDeleteUser = async (user: ProfileWithStats) => {
     if (!canDeleteUsers) {
-      toast.error('عذراً، يقتصر حذف الحسابات نهائياً على Super Admin فقط')
+      void showError('عذراً، يقتصر حذف الحسابات نهائياً على Super Admin فقط', 'إدارة المستخدمين')
       return
     }
     if (protectedUser(user)) {
-      toast.error('لا يمكن حذف حساب Super Admin الرئيسي نهائياً')
+      void showError('لا يمكن حذف حساب Super Admin الرئيسي نهائياً', 'إدارة المستخدمين')
       return
     }
     if (!(await confirmAction({ title: `حذف المستخدم «${user.name}» نهائياً`, message: 'سيُحذف من النظام ومن حسابات تسجيل الدخول. لا يمكن التراجع عن هذا الإجراء.', tone: 'danger', confirmText: 'حذف نهائي' }))) {
@@ -336,14 +337,14 @@ export default function UsersClient({ initialProfiles }: Props) {
   return (
     <div className="flex flex-col w-full gap-6 relative z-10">
       
-      {/* 1. Page Header & Actions Bar */}
-      <div className="flex flex-col md:flex-row items-start md:items-center justify-between w-full gap-4 mb-1">
-        <div className="flex flex-col gap-1">
-          <h1 className="text-3xl font-extrabold tracking-tight text-[var(--text)]">إدارة المستخدمين والأذونات</h1>
-          <p className="text-base text-[var(--text-3)]">مكتب المحامي عبدالحسن الخزرجي — التحكم بالأدوار الخماسية وتفعيل البروفايلات</p>
-        </div>
-
-        <div className="flex items-center gap-3">
+      <PageHeader
+        icon="group"
+        tone="accent"
+        title="المستخدمون والصلاحيات"
+        subtitle="مكتب المحامي عبدالحسن الخزرجي — التحكم بالأدوار الخماسية وتفعيل البروفايلات"
+        actions={
+          <>
+<div className="flex items-center gap-3">
           {canManagePermissions && (
             <Link
               href="/settings/permissions"
@@ -365,7 +366,9 @@ export default function UsersClient({ initialProfiles }: Props) {
             </button>
           )}
         </div>
-      </div>
+          </>
+        }
+      />
 
       {/* Alert Banner */}
       {message && (

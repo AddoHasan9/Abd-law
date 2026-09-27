@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import { showError } from '@/components/ui/ConfirmDialog'
 import { createContext, useContext, useRef, useState } from 'react'
 import { toast } from 'sonner'
 import type { ToolDef } from '@/lib/tools/registry'
@@ -73,7 +74,7 @@ export function FileDrop({
     if (!list?.length) return
     const all = Array.from(list)
     const ok = all.filter(matches)
-    if (ok.length < all.length) toast.error(`تم تجاهل ${all.length - ok.length} ملف بصيغة غير مدعومة`)
+    if (ok.length < all.length) void showError(`تم تجاهل ${all.length - ok.length} ملف بصيغة غير مدعومة`, 'الأدوات')
     if (ok.length) onFiles(multiple ? ok : ok.slice(0, 1))
   }
 

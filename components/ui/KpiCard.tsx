@@ -1,6 +1,13 @@
 import Link from 'next/link'
 import { RollingNumber } from '@/components/ui/RollingNumber'
 
+function compactMoney(n: number) {
+  const f = (v: number) => (Number.isInteger(v) ? v : Number(v.toFixed(1))).toLocaleString('en-US')
+  if (n >= 1e9) return f(n / 1e9)
+  if (n >= 1e6) return f(n / 1e6)
+  return n.toLocaleString('en-US')
+}
+
 export type KpiTone = 'emerald' | 'amber' | 'blue' | 'indigo' | 'violet' | 'rose' | 'accent'
 
 /**
@@ -18,6 +25,7 @@ export function KpiCard({
   onClick,
   active,
   alert,
+  format,
 }: {
   label: string
   value: number
@@ -29,6 +37,8 @@ export function KpiCard({
   onClick?: () => void
   active?: boolean
   alert?: boolean
+  /** تنسيق الرقم (مثلاً المبالغ) */
+  format?: 'currency' | 'number'
 }) {
   const cls = `kpi-card tone-${tone}${active ? ' is-active' : ''}${alert ? ' is-alert' : ''}`
   const body = (
@@ -37,7 +47,9 @@ export function KpiCard({
       <span className="kpi-icon" aria-hidden>
         <span className="material-symbols-outlined">{icon}</span>
       </span>
-      <RollingNumber value={value} className="kpi-value" />
+      {format === 'currency'
+        ? <span className="kpi-value num" title={`${value.toLocaleString('en-US')} د.ع`}>{compactMoney(value)}<small className="kpi-unit"> {value >= 1e6 ? (value >= 1e9 ? 'مليار' : 'مليون') : ''} د.ع</small></span>
+        : <RollingNumber value={value} className="kpi-value" />}
       {footer ?? (hint && (
         <span className="kpi-hint">
           {hint}
@@ -47,6 +59,7 @@ export function KpiCard({
     </>
   )
   if (href) return <Link href={href} className={cls}>{body}</Link>
+  if (!onClick) return <div className={`${cls} is-static`}>{body}</div>
   return (
     <button type="button" className={cls} onClick={onClick} aria-pressed={active}>
       {body}

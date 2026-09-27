@@ -68,7 +68,7 @@ export async function logUserAuditAction(payload: {
   // 2. التخزين السحابي في Supabase
   try {
     const supabase = createAdminClient()
-    await supabase.from('user_audit_logs').insert({
+    const { error: auditErr } = await supabase.from('user_audit_logs').insert({
       id: logId,
       user_id: payload.userId || null,
       user_name: payload.userName || null,
@@ -83,6 +83,7 @@ export async function logUserAuditAction(payload: {
       ip_address: payload.ipAddress || null,
       created_at: entry.created_at,
     })
+    if (auditErr) console.error('[audit] تعذّر حفظ قيد التدقيق:', auditErr.message)
   } catch (err) {
     console.warn('Audit Supabase insert notice:', err)
   }

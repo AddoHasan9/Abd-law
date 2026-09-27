@@ -1,6 +1,8 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { PageHeader } from '@/components/ui/PageHeader'
+import { KpiCard } from '@/components/ui/KpiCard'
 import { confirmAction } from '@/components/ui/ConfirmDialog'
 import { DataPanel } from '@/components/ui/DataPanel'
 import CompanyFileLink from '@/components/commercial/CompanyFileLink'
@@ -151,21 +153,14 @@ export default function TaxAssessmentClient({ assessments = [], companies = [], 
         </div>
       )}
 
-      {/* Page Header Banner */}
-      <div className="flex items-center justify-between flex-wrap gap-4 pb-2 border-b border-[var(--line-soft)]">
-        <div className="flex items-center gap-3.5">
-          <div className="w-11 h-11 rounded-xl bg-[var(--accent-soft)] border border-[color:color-mix(in_srgb,var(--accent)_20%,transparent)] flex items-center justify-center text-[var(--accent)] shadow-xs flex-none">
-            <span className="material-symbols-outlined text-[24px]">receipt_long</span>
-          </div>
-          <div>
-            <h1 className="text-xl font-black text-[var(--text)] tracking-tight">قسم التحاسب الضريبي</h1>
-            <p className="text-xs text-[var(--text-3)] font-medium mt-0.5">
-              متابعة التحاسب السنوي عن العقود والاستيرادات في الهيئة العامة للضرائب وإصدار براءات الذمة
-            </p>
-          </div>
-        </div>
-
-        {canManage && (
+      <PageHeader
+        icon="request_quote"
+        tone="blue"
+        title="التحاسب الضريبي"
+        subtitle="متابعة التحاسب السنوي عن العقود والاستيرادات في الهيئة العامة للضرائب وإصدار براءات الذمة"
+        actions={
+          <>
+{canManage && (
           <div className="flex items-center gap-3">
             <button
               type="button"
@@ -177,44 +172,16 @@ export default function TaxAssessmentClient({ assessments = [], companies = [], 
             </button>
           </div>
         )}
-      </div>
+          </>
+        }
+      />
 
-      {/* Quick KPI Stats Grid */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3.5 w-full">
-        <div
-          onClick={() => setStatusFilter('all')}
-          className={`p-4 rounded-2xl cursor-pointer transition duration-200 block border ${statusFilter === 'all' ? 'border-[var(--accent)] shadow-xs bg-[var(--surface-2)] ring-2 ring-[color:color-mix(in_srgb,var(--accent)_15%,transparent)]' : 'border-[var(--border)] bg-[var(--surface)] hover:-translate-y-0.5 shadow-2xs'}`}
-        >
-          <div className="text-[11.5px] font-bold text-[var(--text-3)] mb-1">إجمالي ملفات التحاسب</div>
-          <div className="text-2xl sm:text-3xl font-black text-[var(--text)] num">{stats.total}</div>
-        </div>
-
-        <div
-          onClick={() => setStatusFilter('in_progress')}
-          className={`p-4 rounded-2xl cursor-pointer transition duration-200 block border ${statusFilter === 'in_progress' ? 'border-amber-500 shadow-xs bg-amber-500/10 ring-2 ring-amber-500/15' : 'border-[var(--border)] bg-[var(--surface)] hover:-translate-y-0.5 shadow-2xs'}`}
-        >
-          <div className="text-[11.5px] font-bold text-amber-600 dark:text-amber-400 mb-1 flex items-center gap-1.5">
-            <span className="w-2.5 h-2.5 border-2 border-amber-500/40 border-t-amber-500 rounded-full animate-spin inline-block" />
-            <span>قيد المراجعة والإجراء</span>
-          </div>
-          <div className="text-2xl sm:text-3xl font-black text-amber-600 dark:text-amber-400 num">{stats.inProgress}</div>
-        </div>
-
-        <div
-          onClick={() => setStatusFilter('tax_cleared')}
-          className={`p-4 rounded-2xl cursor-pointer transition-all duration-200 block border ${statusFilter === 'tax_cleared' ? 'border-emerald-500 shadow-xs bg-emerald-500/10 ring-2 ring-emerald-500/15' : 'border-[var(--border)] bg-[var(--surface)] hover:-translate-y-0.5 shadow-2xs'}`}
-        >
-          <div className="text-[11.5px] font-bold text-emerald-600 dark:text-emerald-400 mb-1 flex items-center gap-1">
-            <Icon name="check" style={{ width: '14px', height: '14px' }} />
-            <span>براءة ذمة صادرة</span>
-          </div>
-          <div className="text-2xl sm:text-3xl font-black text-emerald-600 dark:text-emerald-400 num">{stats.cleared}</div>
-        </div>
-
-        <div className="p-4 rounded-2xl border border-[var(--border)] bg-[var(--surface)] shadow-2xs">
-          <div className="text-[11.5px] font-bold text-[var(--accent)] mb-1">إجمالي الضرائب المقدرة</div>
-          <div className="text-xl sm:text-2xl font-black text-[var(--accent)] num">{formatMoney(stats.totalTaxAmount)}</div>
-        </div>
+      {/* المؤشرات — البطاقة الموحدة */}
+      <div className="kpi-grid cols-4">
+        <KpiCard label="ملفات التحاسب" value={stats.total} icon="folder_open" tone="blue" hint="كل الملفات" active={statusFilter === 'all'} onClick={() => setStatusFilter('all')} />
+        <KpiCard label="قيد المتابعة" value={stats.inProgress} icon="pending_actions" tone="amber" hint="لم تُحسم بعد" active={statusFilter === 'in_progress'} onClick={() => setStatusFilter('in_progress')} />
+        <KpiCard label="براءة ذمة" value={stats.cleared} icon="task_alt" tone="emerald" hint="صدرت براءة الذمة" active={statusFilter === 'tax_cleared'} onClick={() => setStatusFilter('tax_cleared')} />
+        <KpiCard label="الضرائب المقدّرة" value={stats.totalTaxAmount} icon="payments" tone="indigo" hint="إجمالي المبالغ" format="currency" onClick={() => setStatusFilter('all')} />
       </div>
 
       {/* Search & Filter Toolbar */}
