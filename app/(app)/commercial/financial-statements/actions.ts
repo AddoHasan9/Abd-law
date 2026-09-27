@@ -8,7 +8,7 @@ import type { FinancialStatement } from '@/types/database'
 import { createNotificationAction } from '@/app/(app)/notifications/actions'
 import { logTimelineEvent } from '@/lib/data/timeline'
 import { getCurrentUserProfile, requirePermission } from '@/lib/auth/require-permission'
-import { readJsonFile, writeJsonFile } from '@/lib/data/fs-store'
+import { readJsonFile, writeJsonFile, ALLOW_LOCAL_FALLBACK } from '@/lib/data/fs-store'
 
 export async function getFinancialStatementsAction(companyId?: string) {
   const accessDenied = await requirePermission('financial_statements', 'view')
@@ -256,8 +256,13 @@ export async function createFinancialStatementsBatchAction(payload: {
           created_at: item.created_at,
         }))
       }
-    } catch {}
+    } catch (e) {
+      console.error('createFinancialStatementsBatchAction DB error:', e)
+    }
 
+    if (insertedRecords.length === 0 && !ALLOW_LOCAL_FALLBACK) {
+      return { success: false, error: 'تعذّر الحفظ في قاعدة البيانات. تحقق من الاتصال وحاول مجدداً' }
+    }
     if (insertedRecords.length === 0) {
       for (const r of payload.rows) {
         const item: FinancialStatement = {

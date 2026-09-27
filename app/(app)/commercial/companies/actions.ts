@@ -696,7 +696,7 @@ export async function launchDepositWorkflowAction(companyId: string) {
         writeJsonFile('deposits.json', filteredDeps)
       } else {
         depositId = newDep.id
-        await supabase.from('deposit_stages').insert(
+        const { error: stagesErr } = await supabase.from('deposit_stages').insert(
           stagesPayload.map(s => ({
             deposit_id: depositId,
             stage_key: s.stage_key,
@@ -706,6 +706,11 @@ export async function launchDepositWorkflowAction(companyId: string) {
             state: s.state,
           }))
         )
+        if (stagesErr) {
+          console.error('launchDepositWorkflowAction stages error:', stagesErr.message)
+          await supabase.from('deposits').delete().eq('id', depositId)
+          return { success: false, depositId: null, error: 'تعذّر إنشاء مراحل الوديعة. حاول مجدداً' }
+        }
 
         const newDepItem = {
           id: depositId,

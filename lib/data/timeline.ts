@@ -23,7 +23,7 @@ export async function logTimelineEvent(payload: {
   actor_name?: string
   related_link?: string
 }) {
-  const eventId = 'tl_' + Math.random().toString(36).substring(2, 9)
+  const eventId = crypto.randomUUID() // عمود id في قاعدة البيانات من نوع uuid — المعرّف النصي كان يُرفض فلا يُحفظ أي حدث
   const newEvent: TimelineEvent = {
     id: eventId,
     company_id: payload.company_id,
