@@ -1,0 +1,55 @@
+# نسخة احتياطية ليلية مشفّرة لقاعدة البيانات
+# خطة Supabase المجانية لا تتضمن نسخاً احتياطية — هذا يعوّضها مجاناً.
+# المتطلبات (GitHub ← Settings ← Secrets and variables ← Actions):
+#   SUPABASE_DB_URL     رابط «Session pooler» من Supabase ← Connect
+#   BACKUP_PASSPHRASE   كلمة سر طويلة لتشفير النسخ (احفظها في مكان آمن)
+name: Nightly database backup
+
+on:
+  schedule:
+    - cron: '0 23 * * *' # 02:00 بتوقيت بغداد
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Install PostgreSQL 17 client
+        run: |
+          sudo install -d /usr/share/postgresql-common/pgdg
+          sudo curl -fsSL -o /usr/share/postgresql-common/pgdg/apt.postgresql.org.asc https://www.postgresql.org/media/keys/ACCC4CF8.asc
+          echo "deb [signed-by=/usr/share/postgresql-common/pgdg/apt.postgresql.org.asc] https://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" | sudo tee /etc/apt/sources.list.d/pgdg.list
+          sudo apt-get update -qq && sudo apt-get install -y -qq postgresql-client-17
+
+      - name: Dump and encrypt
+        env:
+          DATABASE_URL: ${{ secrets.SUPABASE_DB_URL }}
+          PASSPHRASE: ${{ secrets.BACKUP_PASSPHRASE }}
+        run: |
+          set -euo pipefail
+          if [ -z "${DATABASE_URL}" ] || [ -z "${PASSPHRASE}" ]; then
+            echo "::error::Missing SUPABASE_DB_URL or BACKUP_PASSPHRASE secret"; exit 1
+          fi
+          STAMP=$(date -u +%Y-%m-%d)
+          /usr/lib/postgresql/17/bin/pg_dump "${DATABASE_URL}" \
+            --schema=public --no-owner --no-privileges --format=custom --file=db.dump
+          # تحقق أن النسخة قابلة للقراءة وتحتوي جداول
+          TABLES=$(/usr/lib/postgresql/17/bin/pg_restore --list db.dump | grep -c "TABLE DATA" || true)
+          echo "Tables with data in backup: ${TABLES}"
+          [ "${TABLES}" -gt 10 ] || { echo "::error::Backup looks incomplete"; exit 1; }
+          gpg --batch --yes --pinentry-mode loopback --passphrase "${PASSPHRASE}" \
+            --symmetric --cipher-algo AES256 --output "backup-${STAMP}.dump.gpg" db.dump
+          rm -f db.dump
+          echo "STAMP=${STAMP}" >> "${GITHUB_ENV}"
+
+      - name: Keep encrypted backup (30 days)
+        uses: actions/upload-artifact@v4
+        with:
+          name: db-backup-${{ env.STAMP }}
+          path: backup-*.dump.gpg
+          retention-days: 30
+          if-no-files-found: error
