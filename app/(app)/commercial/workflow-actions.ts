@@ -5,7 +5,8 @@ import { createAdminClient } from '@/lib/supabase/server'
 import { readJsonFile, writeJsonFile } from '@/lib/data/fs-store'
 import { logTimelineEvent } from '@/lib/data/timeline'
 import { getWorkflowStatusConfig, StatusUpdatePayload, AuditLogItem } from '@/lib/workflow-status'
-import { requirePermission } from '@/lib/auth/require-permission'
+import { getCurrentUserProfile, requirePermission } from '@/lib/auth/require-permission'
+import { logUserAuditAction } from '@/lib/data/audit'
 
 const CLOSING_WORKFLOW_STATUSES = ['completed', 'closed', 'cancelled']
 
@@ -132,35 +133,19 @@ export async function updateWorkflowStatusAction(payload: StatusUpdatePayload) {
       created_at: now.toISOString(),
     }
 
-    try {
-      const diskAudit = readJsonFile<AuditLogItem[]>('audit_logs.json', [])
-      diskAudit.unshift(auditEntry)
-      writeJsonFile('audit_logs.json', diskAudit)
-    } catch (e) {
-      console.warn('Audit log disk write notice:', e)
-    }
-
-    // 5. Automatic Notification Workflow Draft for "Waiting for Client"
-    if (toStatus === 'waiting_client' && targetCompanyId) {
-      try {
-        const drafts = readJsonFile<Array<Record<string, unknown>>>('whatsapp_drafts.json', [])
-        const draftMessage = `مرحباً بك، تود الإدارة إعلامكم بأن معاملتكم قد أصبحت بحالة (بانتظار العميل).\n${
-          extraDetail ? `المطلوب: ${extraDetail}\n` : ''
-        }يرجى تزويدنا بالمطلوب لاستكمال الإجراءات بأسرع وقت.`
-
-        drafts.unshift({
-          id: 'draft_' + Math.random().toString(36).substring(2, 9),
-          company_id: targetCompanyId,
-          type: 'waiting_client_notice',
-          message: draftMessage,
-          status: 'ready_for_review',
-          created_at: now.toISOString(),
-        })
-        writeJsonFile('whatsapp_drafts.json', drafts)
-      } catch (e) {
-        console.warn('WhatsApp draft notice:', e)
-      }
-    }
+    // سجل تدقيق دائم (بدل ملف مؤقت)
+    const actorProfile = await getCurrentUserProfile()
+    await logUserAuditAction({
+      userId: actorProfile?.id ?? null,
+      userName: actorName,
+      userEmail: actorProfile?.email ?? null,
+      userRole: actorProfile?.role ?? null,
+      action: 'update',
+      category: entityType === 'company' ? 'companies' : 'transactions',
+      entityType: entityType === 'company' ? 'شركة' : 'معاملة',
+      entityId,
+      details: `تغيير الحالة: ${auditEntry.previousStatus} ← ${auditEntry.newStatus}${extraDetail ? ` — ${extraDetail}` : ''}`,
+    })
 
     // Revalidate paths across the ERP
     try {

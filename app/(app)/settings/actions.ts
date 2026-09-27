@@ -157,8 +157,9 @@ export async function updateGeneralSettingsAction(payload: Partial<Settings>): P
 export async function getWorkflowTemplatesAction(): Promise<{ success: boolean; data: Record<string, WorkflowTemplate> }> {
   if (!(await getCurrentUserProfile())) return { success: false, data: {} }
   try {
-    const templates = readJsonFile<Record<string, WorkflowTemplate>>('workflow_templates.json', DEFAULT_WORKFLOW_TEMPLATES)
-    const merged: Record<string, WorkflowTemplate> = { ...DEFAULT_WORKFLOW_TEMPLATES, ...templates }
+    const { data } = await createAdminClient().from('settings').select('workflow_templates').eq('id', 1).maybeSingle()
+    const stored = (data?.workflow_templates as Record<string, WorkflowTemplate> | null) ?? readJsonFile<Record<string, WorkflowTemplate>>('workflow_templates.json', {})
+    const merged: Record<string, WorkflowTemplate> = { ...DEFAULT_WORKFLOW_TEMPLATES, ...stored }
     if (merged.formation && merged.formation.steps.some(s => s.id === 'online_submission' || s.id === 'chamber_approval')) {
       merged.formation = DEFAULT_WORKFLOW_TEMPLATES.formation
     }
@@ -176,6 +177,8 @@ export async function saveWorkflowTemplatesAction(
   if (denied) return denied
 
   try {
+    const { error } = await createAdminClient().from('settings').update({ workflow_templates: templates }).eq('id', 1)
+    if (error) throw error
     writeJsonFile('workflow_templates.json', templates)
     revalidatePath('/settings')
     revalidatePath('/commercial/llc')

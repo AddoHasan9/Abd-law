@@ -7,7 +7,7 @@ import { createAdminClient, createClient } from '@/lib/supabase/server'
 import type { FinancialStatement } from '@/types/database'
 import { createNotificationAction } from '@/app/(app)/notifications/actions'
 import { logTimelineEvent } from '@/lib/data/timeline'
-import { requirePermission } from '@/lib/auth/require-permission'
+import { getCurrentUserProfile, requirePermission } from '@/lib/auth/require-permission'
 import { readJsonFile, writeJsonFile } from '@/lib/data/fs-store'
 
 export async function getFinancialStatementsAction(companyId?: string) {
@@ -462,14 +462,16 @@ export async function deleteFinancialStatementAction(id: string) {
   }
 }
 
-// In-Memory store for Contact Status per company & year
-const inMemoryContactStatuses: Record<string, string> = {}
-
+// حالة «متابعة التواصل» لكل شركة وسنة — محفوظة في قاعدة البيانات (كانت في ذاكرة الخادم فتضيع)
 export async function getFSContactStatusesAction() {
   const accessDenied = await requirePermission('financial_statements', 'view')
-  if (accessDenied) return { success: false, data: {}, error: accessDenied.error }
+  if (accessDenied) return { success: false, data: {} as Record<string, string>, error: accessDenied.error }
 
-  return { success: true, data: inMemoryContactStatuses }
+  const { data, error } = await createAdminClient().from('fs_contact_statuses').select('company_id, year, status')
+  if (error) return { success: false, data: {} as Record<string, string>, error: 'تعذّر تحميل حالات التواصل' }
+  const map: Record<string, string> = {}
+  for (const r of data ?? []) map[`${r.company_id}_${r.year}`] = r.status
+  return { success: true, data: map }
 }
 
 export async function updateFSContactStatusAction(companyId: string, year: number, status: string) {
@@ -481,8 +483,11 @@ export async function updateFSContactStatusAction(companyId: string, year: numbe
   const accessDenied = await requirePermission('financial_statements', 'create')
   if (accessDenied) return accessDenied
 
-  const key = `${companyId}_${year}`
-  inMemoryContactStatuses[key] = status
+  const profile = await getCurrentUserProfile()
+  const { error } = await createAdminClient()
+    .from('fs_contact_statuses')
+    .upsert({ company_id: companyId, year, status, updated_at: new Date().toISOString(), updated_by: profile?.id ?? null }, { onConflict: 'company_id,year' })
+  if (error) return { success: false, error: 'تعذّر حفظ حالة التواصل' }
 
   revalidatePath('/commercial/financial-statements')
   return { success: true }

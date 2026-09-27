@@ -270,8 +270,8 @@ export async function updateDepositStageStateAction(
 
     return { success: true }
   } catch (err: unknown) {
-    console.warn('updateDepositStageStateAction exception fallback:', err)
-    return { success: true }
+    console.error('updateDepositStageStateAction exception:', err)
+    return { success: false, error: 'تعذّر الحفظ في قاعدة البيانات. تحقق من الاتصال وحاول مجدداً' }
   }
 }
 
