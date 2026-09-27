@@ -2938,8 +2938,9 @@ input.auth-input {
 @media (max-width: 1279px) { .kpi-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
 @media (max-width: 640px) {
   .kpi-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
-  .kpi-card { padding: 12px 13px; border-radius: 16px; grid-template-areas: "label label" "value value" "hint hint"; }
-  .kpi-icon { display: none; }
+  .kpi-card { padding: 12px 13px; border-radius: 16px; }
+  .kpi-icon { width: 30px; height: 30px; border-radius: 9px; }
+  .kpi-icon .material-symbols-outlined { font-size: 17px; }
   .kpi-value { font-size: 26px; margin-top: 2px; }
   .kpi-hint { font-size: 11px; }
 }
@@ -2982,4 +2983,89 @@ input.auth-input {
   .tool-card.is-wide .tool-sections { grid-template-columns: 1fr; }
   .tool-card.is-wide > .tool-drop { flex-direction: column; text-align: center; }
   .tool-card.is-wide .tool-footer .btn { width: 100%; }
+}
+
+/* ============================================================
+   بطاقة المؤشر الموحّدة: ألوان حسب القسم (الأيقونة والرقم)
+   ============================================================ */
+.kpi-card { --tone: var(--accent); font: inherit; text-align: start; cursor: pointer; width: 100%; }
+.kpi-card.tone-emerald { --tone: #059669; }
+.kpi-card.tone-amber   { --tone: #d97706; }
+.kpi-card.tone-blue    { --tone: #2563eb; }
+.kpi-card.tone-indigo  { --tone: #4f46e5; }
+.kpi-card.tone-violet  { --tone: #7c3aed; }
+.kpi-card.tone-rose    { --tone: #e11d48; }
+html[data-theme="dark"] .kpi-card.tone-emerald { --tone: #34d399; }
+html[data-theme="dark"] .kpi-card.tone-amber   { --tone: #fbbf24; }
+html[data-theme="dark"] .kpi-card.tone-blue    { --tone: #60a5fa; }
+html[data-theme="dark"] .kpi-card.tone-indigo  { --tone: #818cf8; }
+html[data-theme="dark"] .kpi-card.tone-violet  { --tone: #a78bfa; }
+html[data-theme="dark"] .kpi-card.tone-rose    { --tone: #fb7185; }
+.kpi-card .kpi-icon { background: color-mix(in srgb, var(--tone) 13%, transparent); color: var(--tone); }
+.kpi-card .kpi-value { color: var(--tone); }
+@media (hover: hover) {
+  .kpi-card:hover { border-color: color-mix(in srgb, var(--tone) 40%, transparent); box-shadow: 0 10px 24px -16px color-mix(in srgb, var(--tone) 60%, transparent); }
+  .kpi-card:hover .kpi-icon { background: color-mix(in srgb, var(--tone) 20%, transparent); color: var(--tone); }
+  .kpi-card:hover .kpi-hint { color: var(--tone); }
+}
+/* البطاقة المحددة كفلتر */
+.kpi-card.is-active { border-color: var(--tone); box-shadow: 0 0 0 1px var(--tone) inset; background: color-mix(in srgb, var(--tone) 5%, var(--surface)); }
+.kpi-grid.cols-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+@media (max-width: 1023px) { .kpi-grid.cols-4 { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+/* رقائق الفترة (الأسبوع/الشهر/السنة) بنفس ارتفاع سطر التلميح */
+.kpi-chips { grid-area: hint; display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px; }
+.kpi-chips > span { font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 99px; background: color-mix(in srgb, var(--tone) 10%, transparent); color: color-mix(in srgb, var(--tone) 85%, var(--text)); }
+.kpi-chips > span.is-on { background: var(--tone); color: #fff; }
+
+/* ============================================================
+   بطاقة الشركة المختصرة
+   ============================================================ */
+.co-card {
+  --tone: #2563eb;
+  position: relative; display: flex; flex-direction: column; gap: 12px; padding: 14px 16px; min-width: 0; height: 100%;
+  background: var(--surface); border: 1px solid var(--line-soft); border-radius: 18px; cursor: pointer;
+  border-top: 3px solid var(--tone);
+  transition: border-color .15s ease, box-shadow .2s ease, transform .15s ease;
+}
+.co-card.is-est { --tone: #059669; }
+.co-card.is-lack { --tone: #e11d48; }
+.co-card.is-forming { --tone: #d97706; }
+@media (hover: hover) {
+  .co-card:hover { box-shadow: 0 12px 26px -18px rgba(15, 23, 42, .45); transform: translateY(-2px); }
+}
+.co-card:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.co-card-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; }
+.co-card-head h3 {
+  margin: 0; font-size: 14px; font-weight: 800; line-height: 1.55; color: var(--text);
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+}
+.co-card-meta { display: flex; align-items: center; gap: 6px; margin: 3px 0 0; font-size: 11.5px; font-weight: 600; color: var(--text-3); }
+.co-card-status { flex: none; font-size: 11px !important; padding: 2px 10px !important; }
+.co-card-facts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin: 0; padding: 10px 12px; border-radius: 12px; background: var(--surface-2); }
+.co-card-facts > div { min-width: 0; }
+.co-card-facts dt { font-size: 10.5px; font-weight: 700; color: var(--text-3); }
+.co-card-facts dd { margin: 2px 0 0; font-size: 12.5px; font-weight: 800; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.co-card-money { color: #059669 !important; }
+html[data-theme="dark"] .co-card-money { color: #34d399 !important; }
+.co-card-foot { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; margin-top: auto; }
+.co-pill { display: inline-flex; align-items: center; gap: 4px; font-size: 11.5px; font-weight: 700; padding: 3px 10px; border-radius: 99px; white-space: nowrap; }
+.co-pill .material-symbols-outlined { font-size: 15px; }
+.co-pill.is-ok { background: rgba(16, 185, 129, .12); color: #047857; }
+.co-pill.is-warn { background: rgba(245, 158, 11, .14); color: #b45309; }
+.co-pill.is-bad { background: rgba(225, 29, 72, .1); color: #be123c; }
+.co-pill.is-info { background: var(--accent-soft); color: var(--accent); }
+html[data-theme="dark"] .co-pill.is-ok { color: #6ee7b7; }
+html[data-theme="dark"] .co-pill.is-warn { color: #fcd34d; }
+html[data-theme="dark"] .co-pill.is-bad { color: #fda4af; }
+.co-progress { display: inline-flex; align-items: center; gap: 8px; flex: 1; min-width: 140px; font-size: 11.5px; font-weight: 800; color: var(--text-3); }
+.co-progress-bar { flex: 1; height: 6px; border-radius: 99px; background: var(--surface-2); overflow: hidden; }
+.co-progress-bar > span { display: block; height: 100%; border-radius: inherit; background: var(--tone); transition: width .3s ease; }
+@media (max-width: 640px) {
+  .co-card { padding: 12px 14px; gap: 10px; }
+  .co-card-facts { padding: 8px 10px; gap: 6px; }
+  .co-card-facts dd { font-size: 12px; }
+}
+@media (max-width: 640px) {
+  .kpi-label { font-size: 12px; line-height: 1.35; }
+  .kpi-chips > span { font-size: 10.5px; padding: 1px 7px; }
 }

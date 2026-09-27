@@ -40,7 +40,7 @@
     "jspdf": "^4.2.1",
     "jszip": "^3.10.1",
     "lucide-react": "^1.28.0",
-    "next": "^15.5.22",
+    "next": "^15.5.26",
     "pdf-lib": "^1.17.1",
     "pdfjs-dist": "^4.10.38",
     "react": "^19.0.0",
@@ -50,7 +50,6 @@
     "recharts": "^3.10.1",
     "sonner": "^2.0.8",
     "tailwind-merge": "^3.6.0",
-    "xlsx": "^0.18.5",
     "zod": "^3.25.76"
   },
   "devDependencies": {
@@ -60,14 +59,17 @@
     "@types/react-dom": "^19.0.0",
     "autoprefixer": "^10.4.20",
     "eslint": "^9",
-    "eslint-config-next": "15.5.22",
+    "eslint-config-next": "^15.5.26",
     "postcss": "^8.5.25",
     "tailwindcss": "^3.4.17",
     "tailwindcss-animate": "^1.0.7",
     "typescript": "^5.7.2"
   },
   "overrides": {
-    "sharp": "0.35.3"
+    "sharp": "0.35.4",
+    "next": {
+      "postcss": "^8.5.25"
+    }
   },
   "allowScripts": {
     "unrs-resolver@1.12.2": true

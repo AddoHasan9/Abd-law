@@ -24,7 +24,8 @@ export type PdfjsDoc = Awaited<ReturnType<PdfjsLib['getDocument']>['promise']>
 export async function openPdfjs(data: ArrayBuffer): Promise<PdfjsDoc> {
   const lib = await getPdfjs()
   // نسخة من البيانات لأن pdf.js ينقل ملكية الـ buffer إلى الـ worker
-  return lib.getDocument({ data: new Uint8Array(data.slice(0)) }).promise
+  // isEvalSupported=false: لا تنفيذ لكود مولَّد من محتوى ملف PDF (حماية من الملفات الخبيثة)
+  return lib.getDocument({ data: new Uint8Array(data.slice(0)), isEvalSupported: false }).promise
 }
 
 /** رسم صفحة إلى canvas بدقة (نقطة لكل بوصة) محددة */
