@@ -1,6 +1,7 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
+import { ALLOW_LOCAL_FALLBACK } from '@/lib/data/fs-store'
 import { createAdminClient } from '@/lib/supabase/server'
 import type { ReminderItem, ReminderPriority } from '@/types/database'
 import { createNotificationAction } from '@/app/(app)/notifications/actions'
@@ -39,6 +40,10 @@ export async function getRemindersAction(filter?: 'active' | 'completed' | 'arch
 
     let items: ReminderItem[] = []
 
+    if ((error || !data) && !ALLOW_LOCAL_FALLBACK) {
+      console.error('getRemindersAction DB error:', error?.message)
+      return { success: false, data: [] as ReminderItem[] }
+    }
     if (error || !data) {
       console.warn('getRemindersAction warning, using fallback store:', error?.message)
       items = inMemoryReminders.filter(r => {
@@ -50,7 +55,8 @@ export async function getRemindersAction(filter?: 'active' | 'completed' | 'arch
     } else {
       // Merge DB items with memory fallback
       const dbIds = new Set(data.map((r: ReminderItem) => r.id))
-      const extraMem = inMemoryReminders.filter(r => !dbIds.has(r.id))
+      // الذاكرة المؤقتة محلياً فقط — في الإنتاج كانت تُعيد تذكيرات محذوفة
+      const extraMem = ALLOW_LOCAL_FALLBACK ? inMemoryReminders.filter(r => !dbIds.has(r.id)) : []
       items = [...(data as ReminderItem[]), ...extraMem]
     }
 
@@ -65,8 +71,8 @@ export async function getRemindersAction(filter?: 'active' | 'completed' | 'arch
 
     return { success: true, data: items }
   } catch (err) {
-    console.error('getRemindersAction error, using fallback store:', err)
-    return { success: true, data: inMemoryReminders }
+    console.error('getRemindersAction error:', err)
+    return ALLOW_LOCAL_FALLBACK ? { success: true, data: inMemoryReminders } : { success: false, data: [] as ReminderItem[] }
   }
 }
 
@@ -120,10 +126,14 @@ export async function createReminderAction(payload: {
       .select()
       .single()
 
+    if ((error || !data) && !ALLOW_LOCAL_FALLBACK) {
+      console.error('createReminderAction DB error:', error?.message)
+      return { success: false, error: 'تعذّر الحفظ في قاعدة البيانات. تحقق من الاتصال وحاول مجدداً' }
+    }
     if (error || !data) {
       console.warn('Supabase reminders insert failed, saving to fallback memory store:', error?.message)
       inMemoryReminders.unshift(newReminder)
-    } else {
+    } else if (ALLOW_LOCAL_FALLBACK) {
       inMemoryReminders.unshift(data as ReminderItem)
     }
 
@@ -134,6 +144,7 @@ export async function createReminderAction(payload: {
     return { success: true, data: data || newReminder }
   } catch (err: unknown) {
     console.error('createReminderAction error, fallback saving:', err)
+    if (!ALLOW_LOCAL_FALLBACK) return { success: false, error: 'تعذّر الحفظ في قاعدة البيانات. تحقق من الاتصال وحاول مجدداً' }
     const fallbackItem: ReminderItem = {
       id: 'rem_' + Math.random().toString(36).substring(2, 9),
       title: payload.title.trim(),
@@ -188,6 +199,7 @@ export async function updateReminderAction(
       .update(updateData)
       .eq('id', id)
 
+    if (error && !ALLOW_LOCAL_FALLBACK) return { success: false, error: 'تعذّر الحفظ في قاعدة البيانات. تحقق من الاتصال وحاول مجدداً' }
     if (error) {
       console.warn('updateReminderAction error, updating fallback store:', error.message)
       const idx = inMemoryReminders.findIndex(r => r.id === id)
@@ -223,6 +235,7 @@ export async function toggleReminderCompleteAction(id: string, is_completed: boo
       .update({ is_completed })
       .eq('id', id)
 
+    if (error && !ALLOW_LOCAL_FALLBACK) return { success: false, error: 'تعذّر الحفظ في قاعدة البيانات. تحقق من الاتصال وحاول مجدداً' }
     if (error) {
       const idx = inMemoryReminders.findIndex(r => r.id === id)
       if (idx !== -1) inMemoryReminders[idx].is_completed = is_completed
@@ -232,6 +245,7 @@ export async function toggleReminderCompleteAction(id: string, is_completed: boo
     revalidatePath('/reminders')
     return { success: true }
   } catch {
+    if (!ALLOW_LOCAL_FALLBACK) return { success: false, error: 'تعذّر الحفظ في قاعدة البيانات. تحقق من الاتصال وحاول مجدداً' }
     const idx = inMemoryReminders.findIndex(r => r.id === id)
     if (idx !== -1) inMemoryReminders[idx].is_completed = is_completed
     return { success: true }
@@ -251,6 +265,7 @@ export async function toggleReminderArchiveAction(id: string, is_archived: boole
       .update({ is_archived })
       .eq('id', id)
 
+    if (error && !ALLOW_LOCAL_FALLBACK) return { success: false, error: 'تعذّر الحفظ في قاعدة البيانات. تحقق من الاتصال وحاول مجدداً' }
     if (error) {
       const idx = inMemoryReminders.findIndex(r => r.id === id)
       if (idx !== -1) inMemoryReminders[idx].is_archived = is_archived
@@ -260,6 +275,7 @@ export async function toggleReminderArchiveAction(id: string, is_archived: boole
     revalidatePath('/reminders')
     return { success: true }
   } catch {
+    if (!ALLOW_LOCAL_FALLBACK) return { success: false, error: 'تعذّر الحفظ في قاعدة البيانات. تحقق من الاتصال وحاول مجدداً' }
     const idx = inMemoryReminders.findIndex(r => r.id === id)
     if (idx !== -1) inMemoryReminders[idx].is_archived = is_archived
     return { success: true }
@@ -279,6 +295,7 @@ export async function deleteReminderAction(id: string) {
       .delete()
       .eq('id', id)
 
+    if (error && !ALLOW_LOCAL_FALLBACK) return { success: false, error: 'تعذّر الحذف من قاعدة البيانات. حاول مجدداً' }
     if (error) {
       const idx = inMemoryReminders.findIndex(r => r.id === id)
       if (idx !== -1) inMemoryReminders.splice(idx, 1)
@@ -288,6 +305,7 @@ export async function deleteReminderAction(id: string) {
     revalidatePath('/reminders')
     return { success: true }
   } catch {
+    if (!ALLOW_LOCAL_FALLBACK) return { success: false, error: 'تعذّر الحذف من قاعدة البيانات. حاول مجدداً' }
     const idx = inMemoryReminders.findIndex(r => r.id === id)
     if (idx !== -1) inMemoryReminders.splice(idx, 1)
     return { success: true }

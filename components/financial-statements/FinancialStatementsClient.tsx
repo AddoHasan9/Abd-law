@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
+import { toast } from 'sonner'
 import { Mi } from '@/components/ui/Mi'
 import { confirmAction } from '@/components/ui/ConfirmDialog'
 import { DataPanel } from '@/components/ui/DataPanel'
@@ -192,8 +193,13 @@ export default function FinancialStatementsClient({ companies = [] }: Props) {
 
   const handleContactStatusChange = async (companyId: string, year: number, newStatus: FSContactStatus) => {
     const key = `${companyId}_${year}`
+    const previous = contactStatuses[key]
     setContactStatuses(prev => ({ ...prev, [key]: newStatus }))
-    await updateFSContactStatusAction(companyId, year, newStatus)
+    const res = await updateFSContactStatusAction(companyId, year, newStatus)
+    if (!res.success) {
+      setContactStatuses(prev => ({ ...prev, [key]: previous }))
+      toast.error(res.error || 'تعذّر حفظ حالة التواصل')
+    }
   }
 
   const handleDelete = async (id: string) => {

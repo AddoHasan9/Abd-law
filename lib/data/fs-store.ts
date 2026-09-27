@@ -8,6 +8,14 @@ import path from 'path'
  * لذا نسقط تلقائيًا إلى مجلد مؤقت قابل للكتابة بدل رمي أخطاء ENOENT متكررة.
  */
 
+/**
+ * على Vercel لكل نسخة خادم ملفاتها المؤقتة الخاصة وتُمسح عند إعادة التشغيل،
+ * فالبيانات المخزنة هنا تظهر وتختفي وتختلف بين المستخدمين. في الإنتاج نعطّل
+ * هذه الطبقة بالكامل: قاعدة البيانات هي المصدر الوحيد، وأي فشل يُعاد كخطأ.
+ * تبقى فعّالة محلياً فقط لتسهيل التطوير بلا اتصال.
+ */
+export const ALLOW_LOCAL_FALLBACK = !process.env.VERCEL
+
 function resolveDataDir(): string {
   const candidates = [
     path.join(process.cwd(), '.data'),
@@ -33,6 +41,7 @@ function dataDir(): string {
 }
 
 export function readJsonFile<T>(filename: string, defaultValue: T): T {
+  if (!ALLOW_LOCAL_FALLBACK) return defaultValue
   try {
     const filePath = path.join(dataDir(), filename)
     if (!fs.existsSync(filePath)) {
@@ -48,6 +57,7 @@ export function readJsonFile<T>(filename: string, defaultValue: T): T {
 }
 
 export function writeJsonFile<T>(filename: string, data: T): void {
+  if (!ALLOW_LOCAL_FALLBACK) return
   try {
     const filePath = path.join(dataDir(), filename)
     fs.writeFileSync(filePath, JSON.stringify(data, null, 2), 'utf8')

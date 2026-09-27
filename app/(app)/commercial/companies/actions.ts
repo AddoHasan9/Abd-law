@@ -10,7 +10,7 @@ import { createAdminClient, createClient } from '@/lib/supabase/server'
 import { WORKFLOW, sanitizeFormationWorkflowSteps } from '@/lib/constants'
 import type { WfState, CompanyWithWorkflow, CompanyManager, CompanyShareholder, CompanyIDRecord, FinancialStatement, DepositStage, Trademark, TaxAssessment } from '@/types/database'
 import { createNotificationAction } from '@/app/(app)/notifications/actions'
-import { readJsonFile, writeJsonFile } from '@/lib/data/fs-store'
+import { readJsonFile, writeJsonFile, ALLOW_LOCAL_FALLBACK } from '@/lib/data/fs-store'
 import { logTimelineEvent, getCompanyTimeline, type TimelineEvent } from '@/lib/data/timeline'
 import { getCurrentUserProfile, requirePermission } from '@/lib/auth/require-permission'
 
@@ -119,6 +119,10 @@ export async function createCompanyFormationAction(payload: {
       .select('*')
       .single()
 
+    if ((coError || !coData) && !ALLOW_LOCAL_FALLBACK) {
+      console.error('createCompanyFormationAction DB error:', coError?.message)
+      return { success: false, error: 'تعذّر الحفظ في قاعدة البيانات. تحقق من الاتصال وحاول مجدداً' }
+    }
     if (coError || !coData) {
       console.warn('createCompanyFormationAction Supabase notice, using dual-layer fallback:', coError?.message)
       const fallbackCompanyId = generateUUID()
@@ -413,7 +417,8 @@ export async function updateCompanyDetailsAction(
     }
 
     if (error) {
-      console.warn('updateCompanyDetailsAction non-fatal Supabase notice:', error.message)
+      console.error('updateCompanyDetailsAction DB error:', error.message)
+      return { success: false, error: 'تعذّر الحفظ في قاعدة البيانات. تحقق من الاتصال وحاول مجدداً' }
     }
 
     // تفعيل وتحديث المدير المفوض في جدول company_managers بشكل مستقل (دون مساس بحقل manager في جدول الشركات)
@@ -667,6 +672,10 @@ export async function launchDepositWorkflowAction(companyId: string) {
         .select()
         .single()
 
+      if ((depErr || !newDep) && !ALLOW_LOCAL_FALLBACK) {
+        console.error('launchDepositWorkflowAction DB error:', depErr?.message)
+        return { success: false, depositId: null, error: 'تعذّر الحفظ في قاعدة البيانات. تحقق من الاتصال وحاول مجدداً' }
+      }
       if (depErr || !newDep) {
         console.warn('launchDepositWorkflowAction Supabase notice, using dual-layer fallback:', depErr?.message)
         depositId = newDepId
@@ -687,7 +696,7 @@ export async function launchDepositWorkflowAction(companyId: string) {
         writeJsonFile('deposits.json', filteredDeps)
       } else {
         depositId = newDep.id
-        await supabase.from('deposit_stages').insert(
+        const { error: stagesErr } = await supabase.from('deposit_stages').insert(
           stagesPayload.map(s => ({
             deposit_id: depositId,
             stage_key: s.stage_key,
@@ -697,6 +706,11 @@ export async function launchDepositWorkflowAction(companyId: string) {
             state: s.state,
           }))
         )
+        if (stagesErr) {
+          console.error('launchDepositWorkflowAction stages error:', stagesErr.message)
+          await supabase.from('deposits').delete().eq('id', depositId)
+          return { success: false, depositId: null, error: 'تعذّر إنشاء مراحل الوديعة. حاول مجدداً' }
+        }
 
         const newDepItem = {
           id: depositId,
@@ -739,8 +753,8 @@ export async function launchDepositWorkflowAction(companyId: string) {
 
     return { success: true, depositId, error: undefined as string | undefined }
   } catch (err: unknown) {
-    console.warn('launchDepositWorkflowAction exception fallback:', err)
-    return { success: true, depositId: null, error: undefined as string | undefined }
+    console.error('launchDepositWorkflowAction exception:', err)
+    return { success: false, depositId: null, error: 'تعذّر الحفظ في قاعدة البيانات. تحقق من الاتصال وحاول مجدداً' as string | undefined }
   }
 }
 

@@ -8,7 +8,7 @@ import { revalidatePath } from 'next/cache'
 import { createAdminClient } from '@/lib/supabase/server'
 import { logTimelineEvent } from '@/lib/data/timeline'
 import { createNotificationAction } from '@/app/(app)/notifications/actions'
-import { readJsonFile, writeJsonFile } from '@/lib/data/fs-store'
+import { readJsonFile, writeJsonFile, ALLOW_LOCAL_FALLBACK } from '@/lib/data/fs-store'
 import type { CompanyWithWorkflow } from '@/types/database'
 import { requirePermission } from '@/lib/auth/require-permission'
 
@@ -119,16 +119,20 @@ export async function updateDepositStageStateAction(
     // 1. Update in Supabase
     try {
       if (stageId && !stageId.startsWith('mem_') && !stageId.startsWith('stage_')) {
-        await supabase
+        const { error: stErr } = await supabase
           .from('deposit_stages')
           .update({
             state: newState,
             at_date: targetAtDate,
           })
           .eq('id', stageId)
+        if (stErr) throw stErr
+      } else if (!ALLOW_LOCAL_FALLBACK) {
+        return { success: false, error: 'مرحلة الوديعة غير محفوظة في قاعدة البيانات. أعد إطلاق مسار الوديعة من ملف الشركة' }
       }
     } catch (dbErr) {
-      console.warn('updateDepositStageStateAction DB notice:', dbErr)
+      console.error('updateDepositStageStateAction DB error:', dbErr)
+      if (!ALLOW_LOCAL_FALLBACK) return { success: false, error: 'تعذّر الحفظ في قاعدة البيانات. تحقق من الاتصال وحاول مجدداً' }
     }
 
     // 2. Update in local deposits.json
@@ -270,8 +274,8 @@ export async function updateDepositStageStateAction(
 
     return { success: true }
   } catch (err: unknown) {
-    console.warn('updateDepositStageStateAction exception fallback:', err)
-    return { success: true }
+    console.error('updateDepositStageStateAction exception:', err)
+    return { success: false, error: 'تعذّر الحفظ في قاعدة البيانات. تحقق من الاتصال وحاول مجدداً' }
   }
 }
 
