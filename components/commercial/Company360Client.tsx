@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useMemo, useEffect } from 'react'
+import dynamic from 'next/dynamic'
 import { toast } from 'sonner'
 import { Mi } from '@/components/ui/Mi'
 import { confirmAction, runAction } from '@/components/ui/ConfirmDialog'
@@ -23,13 +24,15 @@ import { updateDepositStageStateAction, uploadCompanyBarcodeAction } from '@/app
 import { updateCompanyFSSettingsAction, createFinancialStatementAction } from '@/app/(app)/commercial/financial-statements/actions'
 import { updateTransactionStatusAction } from '@/app/(app)/commercial/actions'
 import { createTrademarkAction } from '@/app/(app)/commercial/trademarks/actions'
-import AddFinancialStatementModal from '@/components/financial-statements/AddFinancialStatementModal'
-import AddIDModal from '@/components/commercial/AddIDModal'
 import ReminderModal from '@/components/reminders/ReminderModal'
 import BarcodeUploader from '@/components/commercial/BarcodeUploader'
 import WorkflowTimelineMotion from '@/components/commercial/WorkflowTimelineMotion'
 import { usePermissions } from '@/lib/context/UserRoleContext'
 import { useDragScroll } from '@/lib/hooks/useDragScroll'
+// نافذة كبيرة: تُحمَّل عند الحاجة فقط (لا تثقل تحميل الصفحة)
+const AddIDModal = dynamic(() => import('@/components/commercial/AddIDModal'), { ssr: false })
+// نافذة كبيرة: تُحمَّل عند الحاجة فقط (لا تثقل تحميل الصفحة)
+const AddFinancialStatementModal = dynamic(() => import('@/components/financial-statements/AddFinancialStatementModal'), { ssr: false })
 
 interface Props {
   company: CompanyWithWorkflow
@@ -672,7 +675,7 @@ export default function Company360Client({
             </div>
           ) : (
             <div className="overflow-x-auto w-full">
-              <table className="w-full border-collapse text-right text-xs">
+              <table className="stackable w-full border-collapse text-right text-xs">
                 <thead>
                   <tr className="border-b border-[var(--border)] bg-[color:color-mix(in_srgb,var(--surface-2)_80%,transparent)] text-xs text-[var(--text-2)] font-bold">
                     <th className="py-3 px-4 text-right">اسم المساهم</th>

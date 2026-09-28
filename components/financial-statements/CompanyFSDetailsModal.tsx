@@ -248,7 +248,7 @@ export default function CompanyFSDetailsModal({
 
             <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
               <div style={{ overflowX: 'auto' }}>
-                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px' }}>
+                <table className="stackable" style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px' }}>
                   <thead>
                     <tr style={{ background: 'var(--surface-2)', borderBottom: '1px solid var(--line)' }}>
                       <th style={{ padding: '10px 14px', textAlign: 'center' }}>السنة</th>

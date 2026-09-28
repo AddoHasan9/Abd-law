@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import dynamic from 'next/dynamic'
 import { PageHeader } from '@/components/ui/PageHeader'
 import { KpiCard } from '@/components/ui/KpiCard'
 import { DataPanel } from '@/components/ui/DataPanel'
@@ -9,9 +10,11 @@ import { useRouter } from 'next/navigation'
 import { Icon } from '@/components/ui/Icon'
 import { Empty } from '@/components/ui/Empty'
 import type { CompanyWithWorkflow } from '@/types/database'
-import AddEstablishedCompanyModal from './AddEstablishedCompanyModal'
-import CompanyDetailsModal from './CompanyDetailsModal'
 import { formatDate, formatMoney } from '@/lib/constants'
+// نافذة كبيرة: تُحمَّل عند الحاجة فقط (لا تثقل تحميل الصفحة)
+const AddEstablishedCompanyModal = dynamic(() => import('./AddEstablishedCompanyModal'), { ssr: false })
+// نافذة كبيرة: تُحمَّل عند الحاجة فقط (لا تثقل تحميل الصفحة)
+const CompanyDetailsModal = dynamic(() => import('./CompanyDetailsModal'), { ssr: false })
 
 interface Props {
   companies: CompanyWithWorkflow[]
@@ -152,7 +155,7 @@ export default function CompaniesRegistryClient({ companies = [] }: Props) {
           </div>
         ) : (
           <div className="w-full overflow-x-auto">
-            <table className="w-full border-collapse text-right text-xs table-auto">
+            <table className="stackable w-full border-collapse text-right text-xs table-auto">
               <thead>
                 <tr className="border-b border-[var(--border-soft)] bg-[color:color-mix(in_srgb,var(--surface-2)_90%,transparent)] text-xs text-[var(--text-2)] font-bold">
                   <th className="py-3 px-3 text-right">اسم الشركة</th>

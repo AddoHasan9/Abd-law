@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import dynamic from 'next/dynamic'
 import { PageHeader } from '@/components/ui/PageHeader'
 import { runAction } from '@/components/ui/ConfirmDialog'
 import { toast } from 'sonner'
@@ -12,13 +13,15 @@ import { calculateCompanyStatus } from '@/lib/status-engine'
 import { WorkflowStatus } from '@/components/ui/WorkflowStatus'
 import { Icon } from '@/components/ui/Icon'
 import { Empty } from '@/components/ui/Empty'
-import CompanyDetailsModal from './CompanyDetailsModal'
-import NewCompanyModal from './NewCompanyModal'
 import { usePermissions } from '@/lib/context/UserRoleContext'
 import type { CompanyWithWorkflow } from '@/types/database'
 import { updateCompanyFSSettingsAction, createFinancialStatementAction } from '@/app/(app)/commercial/financial-statements/actions'
 import { useDragScroll } from '@/lib/hooks/useDragScroll'
 import { AnimatedTabs } from '@/components/ui/AnimatedTabs'
+// نافذة كبيرة: تُحمَّل عند الحاجة فقط (لا تثقل تحميل الصفحة)
+const NewCompanyModal = dynamic(() => import('./NewCompanyModal'), { ssr: false })
+// نافذة كبيرة: تُحمَّل عند الحاجة فقط (لا تثقل تحميل الصفحة)
+const CompanyDetailsModal = dynamic(() => import('./CompanyDetailsModal'), { ssr: false })
 
 interface Props {
   initialCompanies: CompanyWithWorkflow[]

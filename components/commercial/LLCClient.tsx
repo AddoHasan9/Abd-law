@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useMemo } from 'react'
+import dynamic from 'next/dynamic'
 import { PageHeader } from '@/components/ui/PageHeader'
 import { confirmAction, runAction } from '@/components/ui/ConfirmDialog'
 import { DataPanel } from '@/components/ui/DataPanel'
@@ -11,9 +12,10 @@ import { Empty } from '@/components/ui/Empty'
 import { WorkflowStatus } from '@/components/ui/WorkflowStatus'
 import type { TransactionFull, Company, CompanyWithWorkflow } from '@/types/database'
 import AddLLCTransactionModal, { LLC_TX_TYPES } from './AddLLCTransactionModal'
-import LLCTransactionDetailsModal from './LLCTransactionDetailsModal'
 import { formatDate, formatMoney } from '@/lib/constants'
 import { deleteTransactionAction } from '@/app/(app)/commercial/actions'
+// نافذة كبيرة: تُحمَّل عند الحاجة فقط (لا تثقل تحميل الصفحة)
+const LLCTransactionDetailsModal = dynamic(() => import('./LLCTransactionDetailsModal'), { ssr: false })
 
 interface Props {
   transactions: TransactionFull[]
@@ -140,7 +142,7 @@ export default function LLCClient({ transactions = [], companies = [], lawyers =
           </div>
         ) : (
           <div className="overflow-x-auto w-full">
-            <table className="w-full border-collapse text-right text-xs table-auto">
+            <table className="stackable w-full border-collapse text-right text-xs table-auto">
               <thead>
                 <tr className="border-b border-[var(--border-soft)] bg-[color:color-mix(in_srgb,var(--surface-2)_80%,transparent)] text-xs text-[var(--text-2)] font-bold">
                   <th className="py-3 px-3 text-right">الشركة</th>

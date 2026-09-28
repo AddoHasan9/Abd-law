@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
+import dynamic from 'next/dynamic'
 import { isFSComplete } from '@/lib/financial-statements/completion'
 import { PageHeader } from '@/components/ui/PageHeader'
 import { KpiCard } from '@/components/ui/KpiCard'
@@ -26,9 +27,11 @@ import {
 } from '@/lib/financial-statements/erp'
 import { calculateFSState } from '@/lib/financial-statements/calc'
 import type { Company, FinancialStatement, FSContactStatus } from '@/types/database'
-import AddFinancialStatementModal from '@/components/financial-statements/AddFinancialStatementModal'
-import CompanyFSDetailsModal from '@/components/financial-statements/CompanyFSDetailsModal'
 import { usePermissions } from '@/lib/context/UserRoleContext'
+// نافذة كبيرة: تُحمَّل عند الحاجة فقط (لا تثقل تحميل الصفحة)
+const CompanyFSDetailsModal = dynamic(() => import('@/components/financial-statements/CompanyFSDetailsModal'), { ssr: false })
+// نافذة كبيرة: تُحمَّل عند الحاجة فقط (لا تثقل تحميل الصفحة)
+const AddFinancialStatementModal = dynamic(() => import('@/components/financial-statements/AddFinancialStatementModal'), { ssr: false })
 
 interface Props {
   companies: Company[]
@@ -387,7 +390,7 @@ export default function FinancialStatementsClient({ companies = [] }: Props) {
             </div>
           ) : (
             <div style={{ overflowX: 'auto' }}>
-              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px' }}>
+              <table className="stackable" style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px' }}>
                 <thead>
                   <tr style={{ background: 'var(--surface-2)', borderBottom: '1px solid var(--line)' }}>
                     <th style={{ padding: '10px 14px', textAlign: 'right' }}>الشركة</th>
@@ -478,7 +481,7 @@ export default function FinancialStatementsClient({ companies = [] }: Props) {
           </div>
 
           <div style={{ overflowX: 'auto' }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px' }}>
+            <table className="stackable" style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px' }}>
               <thead>
                 <tr style={{ background: 'var(--surface-2)', borderBottom: '1px solid var(--line)' }}>
                   <th style={{ padding: '10px 14px', textAlign: 'right' }}>الشركة المعنية</th>

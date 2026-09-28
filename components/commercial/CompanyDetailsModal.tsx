@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
+import dynamic from 'next/dynamic'
 import { toast } from 'sonner'
 import { Mi } from '@/components/ui/Mi'
 import { confirmAction, runAction, showError } from '@/components/ui/ConfirmDialog'
@@ -13,13 +14,14 @@ import { updateCompanyDetailsAction, launchDepositWorkflowAction, advanceCompany
 import { updateCompanyFSSettingsAction } from '@/app/(app)/commercial/financial-statements/actions'
 import { getCompanyIDsAction, deleteCompanyIDAction, type CompanyIDRecord } from '@/app/(app)/commercial/ids/actions'
 import { getTaxAssessmentsAction } from '@/app/(app)/commercial/tax-assessment/actions'
-import AddIDModal from '@/components/commercial/AddIDModal'
 import WorkflowTimelineMotion from '@/components/commercial/WorkflowTimelineMotion'
 import type { CompanyWithWorkflow, TaxAssessment } from '@/types/database'
 import { useModalBodyLock } from '@/lib/hooks/useModalBodyLock'
 import { IRAQ_GOVERNORATES, WORKFLOW, formatNumberWithCommas, sanitizeFormationWorkflowSteps } from '@/lib/constants'
 import { usePermissions } from '@/lib/context/UserRoleContext'
 import { useDragScroll } from '@/lib/hooks/useDragScroll'
+// نافذة كبيرة: تُحمَّل عند الحاجة فقط (لا تثقل تحميل الصفحة)
+const AddIDModal = dynamic(() => import('@/components/commercial/AddIDModal'), { ssr: false })
 
 interface Props {
   company: CompanyWithWorkflow | null
