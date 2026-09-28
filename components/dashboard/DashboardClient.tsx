@@ -129,7 +129,7 @@ export default function DashboardClient({ stats, profiles = [], companies = [] }
               </div>
             ) : (
               <div className="overflow-x-auto">
-                <table className="stackable w-full text-xs text-right border-collapse">
+                <table className="w-full text-xs text-right border-collapse">
                   <thead>
                     <tr className="border-b border-[var(--line-soft)] text-[var(--text-3)] bg-[color:color-mix(in_srgb,var(--surface-2)_50%,transparent)] text-[11px]">
                       <th className="py-2 px-2.5 font-bold">الشركة / المعاملة</th>
