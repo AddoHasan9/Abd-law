@@ -351,7 +351,7 @@ export default function CompanyDetailsModal({ company, isOpen, onClose, onDelete
         }
       }
     }
-  }, [company, isOpen, initialTab])
+  }, [company, isOpen, initialTab, isCompanyEstablished])
 
   useModalBodyLock(isOpen)
 

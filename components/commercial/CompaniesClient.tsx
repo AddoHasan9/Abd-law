@@ -353,6 +353,19 @@ export default function CompaniesClient({ initialCompanies }: Props) {
                       <span className="num">{pg.done}/{pg.total}</span>
                     </span>
                   )}
+                  {isEstablished && !co.financial_statements_enabled && (
+                    <button
+                      type="button"
+                      className="co-pill is-info co-assign"
+                      disabled={assigningId === co.id}
+                      onClick={e => handleAssignFS(e, co.id, co.name)}
+                      onKeyDown={e => e.stopPropagation()}
+                      title="تكليف المكتب بالحسابات الختامية لهذه الشركة"
+                    >
+                      <span className="material-symbols-outlined" aria-hidden>add_circle</span>
+                      {assigningId === co.id ? 'جارٍ التكليف…' : 'تكليف بالحسابات الختامية'}
+                    </button>
+                  )}
                   {co.lacks && <span className="co-pill is-bad" title={co.lacks}><span className="material-symbols-outlined" aria-hidden>warning</span>نواقص</span>}
                 </footer>
               </article>

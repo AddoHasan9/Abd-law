@@ -4,6 +4,7 @@
 'use server'
 
 import { readAuthorizedJsonFile } from '@/lib/auth/scoped-store'
+import { findCompanyByName } from '@/lib/data/company-name'
 import { dbWrite, rethrowDbError } from '@/lib/data/db-guard'
 import { requireRecordAccess } from '@/lib/auth/record-access'
 import { revalidatePath } from 'next/cache'
@@ -73,12 +74,8 @@ export async function createCompanyFormationAction(payload: {
     const name = payload.name.trim()
     const lawyer_id = payload.lawyer_id?.trim() || 'db13125d-3aa1-46ab-9159-8fad18746623'
 
-    // منع تكرار الشركات بالاسم نفسه
-    const inMemoryCompanies = readJsonFile<CompanyWithWorkflow[]>('companies.json', [])
-    const deletedCompanyIds = new Set(readJsonFile<string[]>('deleted_company_ids.json', []))
-    const existingActive = inMemoryCompanies.find(
-      c => !deletedCompanyIds.has(c.id) && c.name?.trim().toLowerCase() === name.toLowerCase()
-    )
+    // منع تكرار الشركات بالاسم نفسه — من قاعدة البيانات (الملفات المؤقتة معطّلة في الإنتاج فكان الفحص لا يعمل)
+    const existingActive = await findCompanyByName(name)
     if (existingActive) {
       return {
         success: false,
@@ -1052,10 +1049,8 @@ export async function deleteCompanyAction(companyId: string) {
         supabase.from('deposits').delete().eq('company_id', companyId),
         supabase.from('transactions').delete().eq('company_id', companyId),
         supabase.from('documents').delete().eq('company_id', companyId),
-        supabase.from('timeline_events').delete().eq('company_id', companyId),
         supabase.from('company_timeline').delete().eq('company_id', companyId),
         supabase.from('trademarks').delete().eq('company_id', companyId),
-        supabase.from('cases').delete().eq('company_id', companyId),
         supabase.from('notifications').delete().eq('related_company_id', companyId),
       ])
 

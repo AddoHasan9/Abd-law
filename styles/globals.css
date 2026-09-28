@@ -3216,3 +3216,7 @@ html[data-theme="dark"] .page-head.tone-violet { --tone: #a78bfa; } html[data-th
   /* الغلاف القابل للتمرير الأفقي لم يعد لازماً */
   .table-wrap:has(> table.stackable), div:has(> table.stackable) { overflow-x: visible !important; }
 }
+.co-assign { border: 1px solid color-mix(in srgb, var(--accent) 30%, transparent); cursor: pointer; }
+.co-assign:hover { background: var(--accent); color: #fff; }
+.co-assign:disabled { opacity: .6; cursor: wait; }
+@media (pointer: coarse) { .co-assign { min-height: 34px; } }
