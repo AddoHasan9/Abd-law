@@ -105,7 +105,9 @@ export function calculateFSState(
   }
 
   // 2. تسليم الهيئة العامة للضرائب (General Commission of Taxes - 31/7)
-  const taxDateSubmitted = fs.date_submitted_tax || (fs.tax_submitted ? (fs.date_submitted || new Date().toISOString().slice(0, 10)) : null)
+  // سجل قديم بتاريخ تسليم عام فقط (قبل فصل الدائرتين) = مسلّم للدائرتين — نفس قاعدة isFSComplete
+  const legacyGeneral = Boolean(fs.date_submitted) && !fs.date_submitted_tax && !fs.date_submitted_registrar && !fs.registrar_submitted
+  const taxDateSubmitted = fs.date_submitted_tax || (legacyGeneral ? fs.date_submitted : null) || (fs.tax_submitted ? (fs.date_submitted || new Date().toISOString().slice(0, 10)) : null)
   const isTaxSubmitted = Boolean(taxDateSubmitted)
 
   const taxDeadlineObj = new Date(submissionYear, 6, 31) // 31 July
@@ -173,6 +175,12 @@ export function calculateFSState(
     status = registrarStatus
     statusLabel = `مسلّمة للضرائب — بانتظار مسجل الشركات (${daysLate > 0 ? `غرامة: ${formatMoney(penaltyAmount)}` : 'مهلة 7/10'})`
     tagClass = registrarTagClass
+  }
+  else if (!isRegistrarSubmitted && !isTaxSubmitted && taxStatus === 'overdue' && registrarStatus !== 'penalty_running' && registrarStatus !== 'penalty_max') {
+    // لم تُسلَّم لأي دائرة: تأخر الضرائب يظهر حتى لو كانت مهلة المسجل ما زالت قائمة
+    status = 'overdue'
+    statusLabel = `متأخرة عن الضرائب ${taxDaysLate} يوم${daysLeft > 0 ? ` — ومهلة المسجل بعد ${daysLeft} يوم` : ''}`
+    tagClass = 'tag-bad'
   }
 
   return {

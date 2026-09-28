@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { isFSComplete } from '@/lib/financial-statements/completion'
 import { Mi } from '@/components/ui/Mi'
 import { createPortal } from 'react-dom'
 import { Icon } from '@/components/ui/Icon'
@@ -52,7 +53,7 @@ export default function CompanyFSDetailsModal({
   if (!mounted || !isOpen || !company) return null
 
   // Calculate Company History Stats
-  const completedStatements = statements.filter(s => s.date_submitted || s.date_submitted_registrar)
+  const completedStatements = statements.filter(s => isFSComplete(s))
   const completedYearsCount = completedStatements.length
   const totalRequiredCount = requiredItems.length + completedYearsCount
   const pendingCount = requiredItems.length

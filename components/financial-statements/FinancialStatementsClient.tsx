@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
+import { isFSComplete } from '@/lib/financial-statements/completion'
 import { PageHeader } from '@/components/ui/PageHeader'
 import { KpiCard } from '@/components/ui/KpiCard'
 import { toast } from 'sonner'
@@ -140,22 +141,27 @@ export default function FinancialStatementsClient({ companies = [] }: Props) {
     const latestYear = years.length > 0 ? Math.max(...years) : (group.companyObj?.last_completed_fs_year || '—')
 
     let totalPenalty = 0
-    let hasOverdue = false
     let hasPenalty = false
+    let hasLate = false
+    let hasOpen = false // سنة غير مكتملة (غير مسلّمة للدائرتين)
 
+    const rowYears = new Set(group.statements.map(s => s.year))
     group.statements.forEach(s => {
       const calc = calculateFSState(s)
       totalPenalty += calc.penaltyAmount
+      if (isFSComplete(s)) return
+      hasOpen = true
       if (calc.status === 'penalty_running' || calc.status === 'penalty_max') hasPenalty = true
-      if (calc.status === 'overdue') hasOverdue = true
+      else if (calc.status === 'overdue') hasLate = true
     })
 
-    // Also include penalty from pending required years for this company
-    const coRequired = requiredItems.filter(r => r.companyId === group.companyId)
+    // السنوات المطلوبة التي لا سجل لها بعد (المسجّلة حُسبت أعلاه — لا تكرار للغرامة)
+    const coRequired = requiredItems.filter(r => r.companyId === group.companyId && !rowYears.has(r.requiredYear))
     coRequired.forEach(r => {
       totalPenalty += r.penaltyAmount
+      hasOpen = true
       if (r.status === 'penalty_running' || r.status === 'penalty_max') hasPenalty = true
-      if (r.status === 'due_soon') hasOverdue = true
+      else if (r.status === 'overdue') hasLate = true
     })
 
     let overallStatusLabel = 'منجزة ✓'
@@ -164,7 +170,10 @@ export default function FinancialStatementsClient({ companies = [] }: Props) {
     if (hasPenalty) {
       overallStatusLabel = 'خاضعة للغرامة'
       overallTagClass = 'tag-bad'
-    } else if (hasOverdue) {
+    } else if (hasLate) {
+      overallStatusLabel = 'متأخرة'
+      overallTagClass = 'tag-bad'
+    } else if (hasOpen) {
       overallStatusLabel = 'قيد المتابعة'
       overallTagClass = 'tag-warn'
     } else if (yearsCount === 0) {
@@ -190,7 +199,7 @@ export default function FinancialStatementsClient({ companies = [] }: Props) {
   // Overall KPI Metrics
   const totalRequired = requiredItems.length
   const totalPenalties = requiredItems.filter(x => x.status === 'penalty_running' || x.status === 'penalty_max')
-  const nearDeadline = requiredItems.filter(x => x.status === 'due_soon')
+  const nearDeadline = requiredItems.filter(x => x.status === 'due_soon' || x.status === 'overdue')
   const totalPenaltyAmount = requiredItems.reduce((acc, curr) => acc + curr.penaltyAmount, 0)
 
   const handleContactStatusChange = async (companyId: string, year: number, newStatus: FSContactStatus) => {

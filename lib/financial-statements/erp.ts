@@ -1,5 +1,6 @@
 import { formatMoney } from '@/lib/constants'
-import { FS_DAILY_PENALTY, FS_MAX_PENALTY } from '@/lib/financial-statements/calc'
+import { FS_DAILY_PENALTY, FS_MAX_PENALTY, calculateFSState } from '@/lib/financial-statements/calc'
+import { isFSComplete } from '@/lib/financial-statements/completion'
 import type { Company, FinancialStatement, FSContactStatus, RequiredFSItem } from '@/types/database'
 
 export const FS_CONTACT_STATUS_LABELS: Record<FSContactStatus, { label: string; tagClass: string }> = {
@@ -68,11 +69,13 @@ export function calculateRequiredFSForCompanies(
   const results: RequiredFSItem[] = []
 
   // الخريطة السريعة للميزانيات المسجلة فعلياً
+  // المنجز فعلاً فقط (مسلّم للدائرتين). السجل غير المكتمل يبقى مطلوباً ويُحسب بحالته الحقيقية
   const submittedSet = new Set<string>()
+  const rowByKey = new Map<string, FinancialStatement>()
   statements.forEach(fs => {
-    if (fs.date_submitted || fs.year) {
-      submittedSet.add(`${fs.company_id}_${fs.year}`)
-    }
+    const k = `${fs.company_id}_${fs.year}`
+    rowByKey.set(k, fs)
+    if (isFSComplete(fs)) submittedSet.add(k)
   })
 
   companies.forEach(company => {
@@ -88,7 +91,9 @@ export function calculateRequiredFSForCompanies(
     }
 
     // الشركة الجديدة لا تطالَب بحسابات ختامية إلا بعد مرور سنة كاملة من تاريخ تأسيسها
-    if (isCompanyNewAndExempt(company, today)) {
+    // — إلا إذا أضاف المكتب لها ميزانية بنفسه (فيجب متابعتها)
+    const hasOpenRows = statements.some(fs => fs.company_id === company.id && !isFSComplete(fs))
+    if (isCompanyNewAndExempt(company, today) && !hasOpenRows) {
       return
     }
 
@@ -110,6 +115,12 @@ export function calculateRequiredFSForCompanies(
         }
       }
     }
+
+    // «آخر سنة منجزة» اليدوية لا تتغلّب على سجل فعلي غير مكتمل لسنة سابقة
+    const incompleteYears = statements
+      .filter(fs => fs.company_id === company.id && !isFSComplete(fs))
+      .map(fs => fs.year)
+    if (incompleteYears.length) startYear = Math.min(startYear, ...incompleteYears)
 
     // الفحص التلقائي لجميع السنوات المالية المستحقة من سنة البداية حتى السنة المالية السابقة (N - 1)
     const maxRequiredYear = currentYear - 1
@@ -163,6 +174,19 @@ export function calculateRequiredFSForCompanies(
           statusLabel = `تتراكم الغرامة (${formatMoney(penaltyAmount)})`
           tagClass = 'tag-bad'
         }
+      }
+
+      // سجل موجود لكنه غير مكتمل: نأخذ حالته الحقيقية (تأخر الضرائب، تسليم جزئي، الغرامة)
+      const existing = rowByKey.get(key)
+      if (existing) {
+        const real = calculateFSState(existing)
+        daysLeft = real.daysLeft
+        daysLate = real.daysLate
+        penaltyAmount = real.penaltyAmount
+        isCapped = real.isCapped
+        status = real.status
+        statusLabel = real.statusLabel
+        tagClass = real.tagClass
       }
 
       const contactStatus = contactStatusMap[key] || 'not_contacted'

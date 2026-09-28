@@ -14,8 +14,7 @@ import { countsByType } from '@/lib/data/transactions'
 import { listCompanies, submittedMap } from '@/lib/data/companies'
 import { penaltyState, DEFAULT_PENALTY } from '@/lib/constants'
 import { getActiveExpiryAlerts } from '@/lib/notification-engine'
-import { calculateFSState } from '@/lib/financial-statements/calc'
-import { isCompanyNewAndExempt } from '@/lib/financial-statements/erp'
+import { computeFSDeadlines, loadFSRows } from '@/lib/financial-statements/deadlines'
 import type { DeadlineItem } from '@/components/nav/DeadlineCard'
 
 // كل صفحات التطبيق تقرأ جلسة المستخدم من الكوكيز — لا يجوز توليدها ثابتاً
@@ -28,13 +27,14 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   if (!verifiedProfile) redirect('/login?error=account_unavailable')
   const permissions = await readPermissions().then(s => s.matrix).catch(() => emptyPermissionsMatrix())
   // تُجلب على التوازي لتقليل زمن الاستجابة
-  const [profile, settings, txCounts, companies, submitted, expiryAlerts] = await Promise.all([
+  const [profile, settings, txCounts, companies, submitted, expiryAlerts, fsRows] = await Promise.all([
     Promise.resolve(verifiedProfile),
     getSettings(),
     countsByType().catch(() => ({})),
     listCompanies().catch(() => []),
     submittedMap().catch(() => ({})),
     getActiveExpiryAlerts().catch(() => []),
+    loadFSRows().catch(() => []),
   ])
 
   const cfg = settings
@@ -89,48 +89,21 @@ export default async function AppLayout({ children }: { children: React.ReactNod
     })
   })
 
-  // 3. غرامات ومهل الحسابات الختامية (ضرائب الشركات 31/7 + مسجل الشركات 7/10)
-  const currentYear = new Date().getFullYear()
-  companies.forEach(c => {
-    if (!c.financial_statements_enabled) return // فقط الشركات التي تم تكليف المكتب بحساباتها
-    if (isCompanyNewAndExempt(c)) return // الشركات الجديدة معفاة حتى إكمال سنة كاملة من التأسيس
-    const lastYear = c.last_completed_fs_year || (c.establishment_date ? parseInt(c.establishment_date.slice(0, 4)) - 1 : currentYear - 2)
-    const pendingYear = lastYear + 1
-    if (pendingYear < currentYear) {
-      const fsState = calculateFSState({ company_id: c.id, year: pendingYear })
-
-      // أ) مهلة تسليم ضرائب الشركات 31/7
-      if ((fsState.taxDaysLeft && fsState.taxDaysLeft <= 30 && fsState.taxDaysLeft > 0) || (fsState.taxDaysLate && fsState.taxDaysLate > 0)) {
-        allDeadlines.push({
-          id: `fs_tax_${c.id}_${pendingYear}`,
-          companyId: c.id,
-          companyName: c.name,
-          title: `تسليم ضرائب الشركات 31/7 (حسابات ${pendingYear})`,
-          category: 'financial_statement',
-          categoryLabel: 'ضرائب 31/7',
-          due: fsState.taxDeadlineDate || '',
-          daysLeft: fsState.taxDaysLeft && fsState.taxDaysLeft > 0 ? fsState.taxDaysLeft : -(fsState.taxDaysLate || 0),
-          amount: 0,
-          total: 60,
-          linkUrl: `/commercial/financial-statements?companyId=${c.id}`,
-        })
-      }
-
-      // ب) مهلة مسجل الشركات 7/10
-      allDeadlines.push({
-        id: `fs_reg_${c.id}_${pendingYear}`,
-        companyId: c.id,
-        companyName: c.name,
-        title: `مسجل الشركات 7/10 (ميزانية ${pendingYear})`,
-        category: 'financial_statement',
-        categoryLabel: 'مسجل الشركات 7/10',
-        due: fsState.deadlineDate,
-        daysLeft: fsState.daysLeft > 0 ? fsState.daysLeft : -fsState.daysLate,
-        amount: fsState.penaltyAmount,
-        total: 365,
-        linkUrl: `/commercial/financial-statements?companyId=${c.id}`,
-      })
-    }
+  // 3. مهل الحسابات الختامية — من المحرك الموحّد والسجلات الفعلية
+  computeFSDeadlines(companies, fsRows).forEach(d => {
+    allDeadlines.push({
+      id: d.id,
+      companyId: d.companyId,
+      companyName: d.companyName,
+      title: d.title,
+      category: 'financial_statement',
+      categoryLabel: d.kind === 'tax' ? 'ضرائب 31/7' : 'مسجل الشركات 7/10',
+      due: d.due,
+      daysLeft: d.daysLeft,
+      amount: d.penalty,
+      total: d.kind === 'tax' ? 60 : 365,
+      linkUrl: `/commercial/financial-statements?companyId=${d.companyId}`,
+    })
   })
 
   // ترتيب المهل تصاعدياً بالأكثر إلحاحاً وتأخيراً
