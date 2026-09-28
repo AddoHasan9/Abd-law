@@ -10,7 +10,7 @@ import { WORKFLOW_STATUS_LIST, normalizeWorkflowStatus } from '@/lib/workflow-st
 
 import type { ViewDashboardAlert } from '@/types/database'
 import { getActiveExpiryAlerts, type ExpiryAlertItem } from '@/lib/notification-engine'
-import { calculateFSState } from '@/lib/financial-statements/calc'
+import { computeFSDeadlines, loadFSRows } from '@/lib/financial-statements/deadlines'
 
 export interface DashboardStats {
   activeTxCount: number
@@ -169,43 +169,19 @@ export async function getDashboardStats(): Promise<DashboardStats> {
     })
   })
 
-  // 3. الحسابات الختامية (فقط للشركات المكلّف بها المكتب بحساباتها)
-  const currentYear = new Date().getFullYear()
-  companies.forEach(c => {
-    if (!c.financial_statements_enabled) return
-    const lastYear = c.last_completed_fs_year || (c.establishment_date ? parseInt(c.establishment_date.slice(0, 4)) - 1 : currentYear - 2)
-    const pendingYear = lastYear + 1
-    if (pendingYear < currentYear) {
-      const fsState = calculateFSState({ company_id: c.id, year: pendingYear })
-      
-      // مهلة الضرائب 31/7
-      if ((fsState.taxDaysLeft && fsState.taxDaysLeft <= 30 && fsState.taxDaysLeft > 0) || (fsState.taxDaysLate && fsState.taxDaysLate > 0)) {
-        urgentDeadlines.push({
-          companyId: c.id,
-          companyName: c.name,
-          title: `تسليم ضرائب الشركات 31/7 (حسابات ${pendingYear})`,
-          daysLeft: fsState.taxDaysLeft && fsState.taxDaysLeft > 0 ? fsState.taxDaysLeft : -(fsState.taxDaysLate || 0),
-          daysLate: fsState.taxDaysLate || 0,
-          amount: 0,
-          due: fsState.taxDeadlineDate || '',
-          level: (fsState.taxDaysLate && fsState.taxDaysLate > 0) ? 'late' : 'soon',
-        })
-      }
-
-      // مهلة مسجل الشركات 7/10
-      if (fsState.status === 'due_soon' || fsState.status === 'penalty_running' || fsState.status === 'penalty_max') {
-        urgentDeadlines.push({
-          companyId: c.id,
-          companyName: c.name,
-          title: `مسجل الشركات 7/10 (ميزانية ${pendingYear})`,
-          daysLeft: fsState.daysLeft > 0 ? fsState.daysLeft : -fsState.daysLate,
-          daysLate: fsState.daysLate,
-          amount: fsState.penaltyAmount,
-          due: fsState.deadlineDate,
-          level: fsState.daysLate > 0 ? 'late' : 'soon',
-        })
-      }
-    }
+  // 3. الحسابات الختامية — نفس المحرك الموحّد (تنبيه ضمن 30 يوماً أو متأخر)
+  computeFSDeadlines(companies, await loadFSRows()).forEach(d => {
+    if (d.daysLeft > 30) return
+    urgentDeadlines.push({
+      companyId: d.companyId,
+      companyName: d.companyName,
+      title: d.title,
+      daysLeft: d.daysLeft,
+      daysLate: d.daysLeft < 0 ? -d.daysLeft : 0,
+      amount: d.penalty,
+      due: d.due,
+      level: d.daysLeft < 0 ? 'late' : 'soon',
+    })
   })
 
   urgentDeadlines.sort((a, b) => a.daysLeft - b.daysLeft)
