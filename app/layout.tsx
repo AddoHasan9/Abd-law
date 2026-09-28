@@ -16,6 +16,8 @@ const cairo = Cairo({
 export const metadata: Metadata = {
   title: 'مكتب المحامي عبدالحسن الخزرجي | Legal ERP',
   description: 'نظام إدارة معاملات ومهام المكتب القانوني والمؤسسات',
+  // الاسم الظاهر تحت الأيقونة عند الإضافة لشاشة آيفون الرئيسية
+  appleWebApp: { capable: true, title: 'مكتب الخزرجي', statusBarStyle: 'default' },
 }
 
 export const viewport: Viewport = {
