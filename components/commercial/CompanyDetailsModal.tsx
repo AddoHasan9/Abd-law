@@ -616,7 +616,9 @@ export default function CompanyDetailsModal({ company, isOpen, onClose, onDelete
                   color: isActive ? 'var(--accent)' : 'var(--text-2)',
                   fontWeight: isActive ? 800 : 600,
                   fontSize: '13.5px',
-                  flex: 'none',
+                  // تتوزع التبويبات على عرض النافذة كاملاً (ولا تنضغط أصغر من نصها)
+                  flex: '1 0 auto',
+                  justifyContent: 'center',
                   cursor: 'pointer',
                   display: 'flex',
                   alignItems: 'center',
