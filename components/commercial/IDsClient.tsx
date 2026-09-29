@@ -1,13 +1,13 @@
 'use client'
 
 import { useState, useEffect, useCallback, useMemo } from 'react'
+import Link from 'next/link'
 import dynamic from 'next/dynamic'
 import { PageHeader } from '@/components/ui/PageHeader'
 import { KpiCard } from '@/components/ui/KpiCard'
 import { Mi } from '@/components/ui/Mi'
 import { confirmAction, runAction } from '@/components/ui/ConfirmDialog'
 import { DataPanel } from '@/components/ui/DataPanel'
-import CompanyFileLink from '@/components/commercial/CompanyFileLink'
 import { Icon } from '@/components/ui/Icon'
 import { Empty } from '@/components/ui/Empty'
 import {
@@ -16,7 +16,6 @@ import {
   CompanyIDRecord,
 } from '@/app/(app)/commercial/ids/actions'
 import { usePermissions } from '@/lib/context/UserRoleContext'
-import { AnimatedTabs } from '@/components/ui/AnimatedTabs'
 import type { Company } from '@/types/database'
 // نافذة كبيرة: تُحمَّل عند الحاجة فقط (لا تثقل تحميل الصفحة)
 const AddIDModal = dynamic(() => import('@/components/commercial/AddIDModal'), { ssr: false })
@@ -231,22 +230,8 @@ export default function IDsClient({ companies = [], initialCompanyId }: Props) {
       {/* Filters Bar */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 p-3.5 rounded-2xl bg-[var(--surface)] border border-[var(--glass-border)] shadow-xs">
         
-        {/* Status Tabs with Fluid Motion */}
-        <AnimatedTabs<'all' | 'in_progress' | 'done' | 'expiring'>
-          layoutId="ids-status-tabs"
-          size="sm"
-          activeTab={statusFilter}
-          onChange={setStatusFilter}
-          tabs={[
-            { id: 'all', label: 'الكل', count: stats.total },
-            { id: 'in_progress', label: 'قيد الإصدار', count: stats.inProgress },
-            { id: 'done', label: 'المكتملة ✓', count: stats.done },
-            { id: 'expiring', label: 'تتطلب تجديداً', count: stats.expiring },
-          ]}
-        />
-
         {/* Type & Search */}
-        <div className="flex items-center gap-2.5 flex-wrap w-full sm:w-auto">
+        <div className="flex items-center gap-2.5 flex-wrap w-full">
           <select
             className="input text-xs"
             value={typeFilter}
@@ -266,7 +251,7 @@ export default function IDsClient({ companies = [], initialCompanyId }: Props) {
             value={searchQuery}
             onChange={e => setSearchQuery(e.target.value)}
             placeholder="بحث باسم الشركة، الرقم، أو المدير..."
-            style={{ width: '220px' }}
+            style={{ flex: '1 1 220px', minWidth: 0 }}
           />
         </div>
       </div>
@@ -295,9 +280,7 @@ export default function IDsClient({ companies = [], initialCompanyId }: Props) {
                   <th className="py-3 px-2 text-center">نوع الهوية</th>
                   <th className="py-3 px-2 text-center">المدير المفوض</th>
                   <th className="py-3 px-2 text-center">الدرجة</th>
-                  <th className="py-3 px-2 text-center">بدء المعاملة</th>
-                  <th className="py-3 px-2 text-center">رقم الهوية</th>
-                  <th className="py-3 px-2 text-center">الإصدار والانتهاء</th>
+                  <th className="py-3 px-2 text-center">بدء المعاملة</th>                  <th className="py-3 px-2 text-center">رقم الهوية والانتهاء</th>
                   <th className="py-3 px-2 text-center">الحالة</th>
                   <th className="py-3 px-3 text-left whitespace-nowrap">إجراءات</th>
                 </tr>
@@ -313,7 +296,9 @@ export default function IDsClient({ companies = [], initialCompanyId }: Props) {
                   return (
                     <tr
                       key={r.id}
-                      className="hover:bg-blue-500/[0.04] dark:hover:bg-blue-500/[0.08] transition-colors duration-200"
+                      className="id-row hover:bg-blue-500/[0.04] dark:hover:bg-blue-500/[0.08] transition-colors duration-200"
+                      onClick={e => { if (!(e.target as HTMLElement).closest('a,button')) openEditModal(r) }}
+                      title="فتح الهوية"
                     >
                       {/* Company Name */}
                       <td className="py-3.5 px-4">
@@ -321,9 +306,17 @@ export default function IDsClient({ companies = [], initialCompanyId }: Props) {
                           <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[var(--accent-soft)] to-blue-500/10 border border-[color:color-mix(in_srgb,var(--accent)_20%,transparent)] text-[var(--accent)] flex items-center justify-center shrink-0 shadow-xs">
                             <span className="material-symbols-outlined text-[19px]">domain</span>
                           </div>
-                          <span className="font-bold text-[13.5px] text-[var(--text)] leading-snug">
-                            {r.company_name || 'شركة غير معرفة'}
-                          </span>
+                          {r.company_id ? (
+                            <Link
+                              href={`/commercial/companies/${r.company_id}`}
+                              className="id-co-link font-bold text-[13.5px] text-[var(--text)] leading-snug"
+                              title="فتح الملف الشامل للشركة"
+                            >
+                              {r.company_name || 'شركة غير معرفة'}
+                            </Link>
+                          ) : (
+                            <span className="font-bold text-[13.5px] text-[var(--text)] leading-snug">{r.company_name || 'شركة غير معرفة'}</span>
+                          )}
                         </div>
                       </td>
 
@@ -353,30 +346,19 @@ export default function IDsClient({ companies = [], initialCompanyId }: Props) {
                         {r.tx_start_date || r.created_at.slice(0, 10)}
                       </td>
 
-                      {/* ID Number */}
-                      <td className="py-3.5 px-3 text-center align-middle">
-                        {r.id_number ? (
-                          <span className="num font-bold text-xs bg-[var(--surface-2)] text-[var(--text)] px-2.5 py-1 rounded-md border border-[var(--border)]">
-                            {r.id_number}
-                          </span>
-                        ) : (
-                          <span className="text-[var(--text-3)] text-xs font-medium whitespace-nowrap">قيد الإجراء</span>
-                        )}
-                      </td>
-
-                      {/* Issue & Expiry Dates */}
+                      {/* رقم الهوية والانتهاء — خلية واحدة («قيد الإصدار» تظهر في عمود الحالة فقط) */}
                       <td className="py-3.5 px-3 text-center align-middle text-xs">
-                        {r.issue_date || r.expiry_date ? (
+                        {r.id_number || r.expiry_date ? (
                           <div className="flex flex-col gap-0.5 items-center">
-                            {r.issue_date && <span>إصدار: <strong className="num text-[var(--text)]">{r.issue_date}</strong></span>}
+                            {r.id_number && <span className="num font-bold text-[var(--text)]">{r.id_number}</span>}
                             {r.expiry_date && (
-                              <span className={isExpired ? 'text-rose-600 font-bold' : isExpiringSoon ? 'text-amber-600 font-bold' : 'text-[var(--text-2)]'}>
-                                انتهاء: <strong className="num">{r.expiry_date}</strong>
+                              <span className={`num whitespace-nowrap ${isExpired ? 'text-rose-600 font-bold' : isExpiringSoon ? 'text-amber-600 font-bold' : 'text-[var(--text-3)]'}`}>
+                                ينتهي {r.expiry_date}
                               </span>
                             )}
                           </div>
                         ) : (
-                          <span className="text-[var(--text-3)] text-xs font-medium whitespace-nowrap">قيد الإجراء</span>
+                          <span className="text-[var(--text-3)]">—</span>
                         )}
                       </td>
 
@@ -410,41 +392,21 @@ export default function IDsClient({ companies = [], initialCompanyId }: Props) {
                         )}
                       </td>
 
-                      {/* Actions */}
-                      <td className="py-3.5 px-4 text-left align-middle whitespace-nowrap">
-                        <div className="flex items-center gap-1.5">
-                          {!isDone && (
-                            <button
-                              type="button"
-                              onClick={() => openEditModal(r)}
-                              className="btn btn-primary !py-1 !px-2.5 !text-xs !font-bold"
-                              title="إكمال بيانات الهوية وتاريخ الإصدار والانتهاء"
-                            >
-                              <span>إكمال الهوية ✓</span>
+                      {/* الإجراءات: زر واحد يفتح الهوية + حذف */}
+                      <td className="py-3.5 px-3 text-left align-middle whitespace-nowrap">
+                        <div className="id-actions">
+                          {!isDone ? (
+                            <button type="button" onClick={() => openEditModal(r)} className="btn btn-sm btn-primary" title="إكمال بيانات الهوية">
+                              إكمال
+                            </button>
+                          ) : (
+                            <button type="button" onClick={() => openEditModal(r)} className="id-icon-btn" title="تعديل الهوية" aria-label="تعديل الهوية">
+                              <span className="material-symbols-outlined" aria-hidden>edit</span>
                             </button>
                           )}
-                          <button
-                            type="button"
-                            onClick={() => openEditModal(r)}
-                            className="btn btn-ghost !py-1 !px-2.5 !text-xs !font-bold"
-                            title="تعديل تفاصيل الهوية"
-                          >
-                            <span className="material-symbols-outlined text-[14px]">edit</span>
-                            <span>تعديل</span>
-                          </button>
-
-                          {r.company_id && (
-                            <CompanyFileLink companyId={r.company_id} />
-                          )}
-
                           {canDeleteID && (
-                            <button
-                              type="button"
-                              onClick={() => handleDelete(r.id, r.company_name)}
-                              className="btn btn-ghost !py-1 !px-2 text-rose-600 dark:text-rose-400 hover:bg-rose-500/10"
-                              title="حذف الهوية"
-                            >
-                              <span className="material-symbols-outlined text-[15px]">delete</span>
+                            <button type="button" onClick={() => handleDelete(r.id, r.company_name)} className="id-icon-btn is-danger" title="حذف الهوية" aria-label="حذف الهوية">
+                              <span className="material-symbols-outlined" aria-hidden>delete</span>
                             </button>
                           )}
                         </div>
