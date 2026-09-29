@@ -84,7 +84,7 @@ export default function CompaniesClient({ initialCompanies }: Props) {
     toast.success('تم تحديث إعدادات الحسابات الختامية')
 
     const currentYear = new Date().getFullYear()
-    await runAction(createFinancialStatementAction({ company_id: companyId, year: currentYear }), 'الشركات وتأسيسها · الإضافة')
+    await runAction(createFinancialStatementAction({ company_id: companyId, year: currentYear }), 'تأسيس الشركات · الإضافة')
 
     // Confirmed by the server — safe to reflect immediately, button disappears without a page reload
     setCompaniesList(prev =>
@@ -201,7 +201,7 @@ export default function CompaniesClient({ initialCompanies }: Props) {
       <PageHeader
         icon="corporate_fare"
         tone="amber"
-        title="تأسيس الشركات ومسارات العمل"
+        title="تأسيس الشركات"
         subtitle="متابعة شاملة لكافة مراحل تأسيس الشركات وسير العمل والودائع المصرفية"
         actions={
           <>

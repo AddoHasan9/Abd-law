@@ -101,7 +101,8 @@ export async function createEstablishedCompanyAction(payload: AddEstablishedComp
       address,
       phone,
       status: 'established',
-      external: false,
+      // شركة قائمة أُضيفت من قسم الشركات — ليست من مسار التأسيس فلا تظهر في «تأسيس الشركات»
+      external: true,
       deposit_released: true,
       deposit_released_at: createdAt.slice(0, 10),
       financial_statements_enabled: isFsEnabled,

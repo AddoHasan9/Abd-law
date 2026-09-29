@@ -1,4 +1,5 @@
 import { listCompanies } from '@/lib/data/companies'
+import { isEstablishedCompany } from '@/lib/company-status'
 import { listProfiles } from '@/lib/data/profiles'
 import { getTaxAssessmentsAction } from './actions'
 import TaxAssessmentClient from '@/components/commercial/TaxAssessmentClient'
@@ -23,7 +24,7 @@ export default async function TaxAssessmentPage() {
   return (
     <TaxAssessmentClient
       assessments={assessmentsRes.data || []}
-      companies={companies}
+      companies={companies.filter(isEstablishedCompany)}
       lawyers={lawyers}
     />
   )

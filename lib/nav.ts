@@ -51,7 +51,7 @@ export const NAV: NavGroup[] = [
     href: '/commercial',
     items: [
       { key: 'companies-registry', label: 'الشركات', href: '/commercial/companies-registry', icon: 'build2' },
-      { key: 'companies', label: 'الشركات وتأسيسها', href: '/commercial/companies', icon: 'build' },
+      { key: 'companies', label: 'تأسيس الشركات', href: '/commercial/companies', icon: 'build' },
       { key: 'deposits',  label: 'اطلاق الوديعة',    href: '/commercial/deposits',  icon: 'vault' },
       { key: 'llc',       label: 'قسم المحدودة',    href: '/commercial/llc',       icon: 'badge' },
       { key: 'company-ids', label: 'قسم الهويات',   href: '/commercial/ids',       icon: 'stamp' },

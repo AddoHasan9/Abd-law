@@ -1,4 +1,5 @@
 import { listTransactions } from '@/lib/data/transactions'
+import { isEstablishedCompany } from '@/lib/company-status'
 import { listCompanies } from '@/lib/data/companies'
 import LLCClient from '@/components/commercial/LLCClient'
 
@@ -16,5 +17,5 @@ export default async function LLCPage() {
     listCompanies(),
   ])
 
-  return <LLCClient transactions={transactions} companies={companies} />
+  return <LLCClient transactions={transactions} companies={companies.filter(isEstablishedCompany)} />
 }
