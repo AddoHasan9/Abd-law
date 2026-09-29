@@ -128,14 +128,15 @@ export default function Topbar({ profile, title, subtitle, notifCount = 0, onMen
     setDark(!dark)
   }
 
-  async function handleSignout() {
+  // نموذج POST حقيقي: المتصفح يتبع التحويل مرة واحدة ويفتح صفحة الدخول مباشرة
+  // (الطريقة السابقة كانت تحمّل صفحة الدخول مرتين)
+  function handleSignout() {
     setLoggingOut(true)
-    try {
-      const res = await fetch('/auth/signout', { method: 'POST' })
-      window.location.href = res.redirected ? res.url : '/login'
-    } catch {
-      window.location.href = '/login'
-    }
+    const form = document.createElement('form')
+    form.method = 'POST'
+    form.action = '/auth/signout'
+    document.body.appendChild(form)
+    form.submit()
   }
 
   // التجهيز الديناميكي للبيانات

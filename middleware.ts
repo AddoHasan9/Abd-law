@@ -32,7 +32,8 @@ export async function middleware(request: NextRequest) {
   }
 
   // إذا كان الطلب لصفحة تسجيل الدخول، نمرره فوراً دون انتظار خادم المصادقة لتسريع التحميل
-  if (isPublic && path === '/login') {
+  // صفحة الدخول ومسار الخروج لا يحتاجان التحقق من الجلسة مع خادم المصادقة (طلب شبكة إضافي)
+  if (path === '/login' || path === '/auth/signout') {
     return NextResponse.next({ request })
   }
 

@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import dynamic from 'next/dynamic'
 import { PageHeader } from '@/components/ui/PageHeader'
 import { KpiCard } from '@/components/ui/KpiCard'
 import { confirmAction } from '@/components/ui/ConfirmDialog'
@@ -11,10 +12,11 @@ import { Icon } from '@/components/ui/Icon'
 import { Empty } from '@/components/ui/Empty'
 import { formatDate, formatMoney } from '@/lib/constants'
 import { usePermissions } from '@/lib/context/UserRoleContext'
-import AddTaxAssessmentModal from './AddTaxAssessmentModal'
 import { deleteTaxAssessmentAction } from '@/app/(app)/commercial/tax-assessment/actions'
 import { AnimatedTabs } from '@/components/ui/AnimatedTabs'
 import type { TaxAssessment, Company } from '@/types/database'
+// نافذة كبيرة: تُحمَّل عند الحاجة فقط (لا تثقل تحميل الصفحة)
+const AddTaxAssessmentModal = dynamic(() => import('./AddTaxAssessmentModal'), { ssr: false })
 
 interface Props {
   assessments: TaxAssessment[]
@@ -238,7 +240,7 @@ export default function TaxAssessmentClient({ assessments = [], companies = [], 
           </div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full border-collapse text-xs">
+            <table className="stackable w-full border-collapse text-xs">
               <thead>
                 <tr className="bg-[var(--surface-2)] border-b border-[var(--line)] text-[var(--text-3)] font-black text-xs">
                   <th className="p-4 text-right">اسم الشركة</th>

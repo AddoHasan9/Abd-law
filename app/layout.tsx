@@ -3,6 +3,7 @@ import { Cairo } from 'next/font/google'
 import { Toaster } from '@/components/ui/Toaster'
 import { ConfirmHost } from '@/components/ui/ConfirmDialog'
 import { ModalManager } from '@/components/ui/ModalManager'
+import { TableStacker } from '@/components/ui/TableStacker'
 import { QueryProvider } from '@/components/providers/QueryProvider'
 import '@/styles/globals.css'
 
@@ -69,6 +70,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <Toaster />
           <ConfirmHost />
           <ModalManager />
+            <TableStacker />
           {children}
         </QueryProvider>
       </body>

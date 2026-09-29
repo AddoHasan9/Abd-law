@@ -109,7 +109,7 @@ export default function AuditLogsClient({ initialLogs }: Props) {
       {/* Logs Table */}
       <div className="rounded-2xl border border-border-glass bg-surface shadow-md overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full text-right text-xs">
+          <table className="stackable w-full text-right text-xs">
             <thead className="bg-surface-2/60 border-b border-border-soft text-text-3 font-bold">
               <tr>
                 <th className="px-4 py-3">الوقت والتاريخ</th>

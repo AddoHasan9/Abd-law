@@ -3176,3 +3176,47 @@ html[data-theme="dark"] .page-head.tone-violet { --tone: #a78bfa; } html[data-th
   .modal select { min-height: 42px; }
   .modal-foot .btn, .modal-foot button { min-height: 42px; }
 }
+
+/* ============================================================
+   الجداول على الموبايل ← بطاقات
+   الخانة الأولى = عنوان البطاقة، كل خانة معها اسم عمودها، الأزرار في الأسفل
+   ============================================================ */
+@media (max-width: 640px) {
+  table.stackable { display: block; width: 100% !important; min-width: 0 !important; border: 0; background: none; }
+  table.stackable thead { display: none; }
+  table.stackable tbody { display: flex; flex-direction: column; gap: 10px; }
+  table.stackable tr {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 8px 12px;
+    padding: 12px 14px; border-radius: 16px;
+    background: var(--surface); border: 1px solid var(--line-soft) !important;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, .04);
+  }
+  table.stackable td {
+    display: flex; flex-direction: column; align-items: flex-start; gap: 3px;
+    padding: 0 !important; border: 0 !important; min-width: 0; text-align: start !important;
+    white-space: normal !important; background: none !important;
+  }
+  table.stackable td[data-label]::before {
+    content: attr(data-label);
+    font-size: 10.5px; font-weight: 700; color: var(--text-3); line-height: 1.3;
+  }
+  /* الخانة الأولى: عنوان البطاقة بعرض كامل وبلا تسمية */
+  table.stackable td:first-child { grid-column: 1 / -1; padding-bottom: 8px !important; border-bottom: 1px solid var(--line-soft) !important; }
+  table.stackable td:first-child::before { display: none; }
+  table.stackable td:first-child, table.stackable td:first-child * { font-size: 13.5px; }
+  /* خانة الإجراءات (أزرار) بعرض كامل في الأسفل */
+  table.stackable td:last-child:has(button, a.btn) { grid-column: 1 / -1; flex-direction: row; flex-wrap: wrap; justify-content: flex-start; padding-top: 8px !important; border-top: 1px solid var(--line-soft) !important; }
+  table.stackable td:last-child:has(button, a.btn)::before { display: none; }
+  table.stackable td:last-child:has(button, a.btn) > * { flex: 1 1 auto; justify-content: center; }
+  /* صف رسالة فارغة أو تحميل (colspan كامل) */
+  table.stackable td[data-full] { grid-column: 1 / -1; align-items: center; text-align: center !important; border: 0 !important; padding: 16px 0 !important; }
+  table.stackable tr:has(> td[data-full]:only-child) { display: block; box-shadow: none; }
+  /* عمود فارغ من البيانات (مثل «—») يبقى صغيراً */
+  table.stackable td:empty { display: none; }
+  /* الغلاف القابل للتمرير الأفقي لم يعد لازماً */
+  .table-wrap:has(> table.stackable), div:has(> table.stackable) { overflow-x: visible !important; }
+}
+.co-assign { border: 1px solid color-mix(in srgb, var(--accent) 30%, transparent); cursor: pointer; }
+.co-assign:hover { background: var(--accent); color: #fff; }
+.co-assign:disabled { opacity: .6; cursor: wait; }
+@media (pointer: coarse) { .co-assign { min-height: 34px; } }

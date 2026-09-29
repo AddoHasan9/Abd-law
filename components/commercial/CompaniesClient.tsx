@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import dynamic from 'next/dynamic'
 import { PageHeader } from '@/components/ui/PageHeader'
 import { runAction } from '@/components/ui/ConfirmDialog'
 import { toast } from 'sonner'
@@ -12,13 +13,15 @@ import { calculateCompanyStatus } from '@/lib/status-engine'
 import { WorkflowStatus } from '@/components/ui/WorkflowStatus'
 import { Icon } from '@/components/ui/Icon'
 import { Empty } from '@/components/ui/Empty'
-import CompanyDetailsModal from './CompanyDetailsModal'
-import NewCompanyModal from './NewCompanyModal'
 import { usePermissions } from '@/lib/context/UserRoleContext'
 import type { CompanyWithWorkflow } from '@/types/database'
 import { updateCompanyFSSettingsAction, createFinancialStatementAction } from '@/app/(app)/commercial/financial-statements/actions'
 import { useDragScroll } from '@/lib/hooks/useDragScroll'
 import { AnimatedTabs } from '@/components/ui/AnimatedTabs'
+// نافذة كبيرة: تُحمَّل عند الحاجة فقط (لا تثقل تحميل الصفحة)
+const NewCompanyModal = dynamic(() => import('./NewCompanyModal'), { ssr: false })
+// نافذة كبيرة: تُحمَّل عند الحاجة فقط (لا تثقل تحميل الصفحة)
+const CompanyDetailsModal = dynamic(() => import('./CompanyDetailsModal'), { ssr: false })
 
 interface Props {
   initialCompanies: CompanyWithWorkflow[]
@@ -349,6 +352,19 @@ export default function CompaniesClient({ initialCompanies }: Props) {
                       <span className="co-progress-bar"><span style={{ width: `${pg.pct}%` }} /></span>
                       <span className="num">{pg.done}/{pg.total}</span>
                     </span>
+                  )}
+                  {isEstablished && !co.financial_statements_enabled && (
+                    <button
+                      type="button"
+                      className="co-pill is-info co-assign"
+                      disabled={assigningId === co.id}
+                      onClick={e => handleAssignFS(e, co.id, co.name)}
+                      onKeyDown={e => e.stopPropagation()}
+                      title="تكليف المكتب بالحسابات الختامية لهذه الشركة"
+                    >
+                      <span className="material-symbols-outlined" aria-hidden>add_circle</span>
+                      {assigningId === co.id ? 'جارٍ التكليف…' : 'تكليف بالحسابات الختامية'}
+                    </button>
                   )}
                   {co.lacks && <span className="co-pill is-bad" title={co.lacks}><span className="material-symbols-outlined" aria-hidden>warning</span>نواقص</span>}
                 </footer>

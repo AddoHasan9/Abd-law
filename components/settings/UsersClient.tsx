@@ -454,7 +454,7 @@ export default function UsersClient({ initialProfiles }: Props) {
       {/* 3. Modern Glassmorphism Users Table */}
       <div className="glass-card rounded-[28px] shadow-xl w-full border border-[var(--glass-border)]">
         <div className="overflow-x-auto">
-          <table className="w-full text-right text-sm border-collapse">
+          <table className="stackable w-full text-right text-sm border-collapse">
             <thead>
               <tr className="bg-[var(--surface-2)] text-[var(--text-3)] text-xs font-bold uppercase tracking-wider border-b border-[var(--glass-border)]">
                 <th className="py-4 px-6">الاسم الكامل (Full Name)</th>

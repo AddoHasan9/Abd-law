@@ -1,6 +1,7 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
+import { findCompanyByName } from '@/lib/data/company-name'
 import { dbWrite, rethrowDbError } from '@/lib/data/db-guard'
 import { createAdminClient } from '@/lib/supabase/server'
 import { readJsonFile, writeJsonFile } from '@/lib/data/fs-store'
@@ -65,12 +66,8 @@ export async function createEstablishedCompanyAction(payload: AddEstablishedComp
     const name = payload.name.trim()
     const lawyerId = payload.lawyer_id?.trim() || 'db13125d-3aa1-46ab-9159-8fad18746623'
 
-    // منع تكرار الشركات بالاسم نفسه
-    const diskCompanies = readJsonFile<CompanyWithWorkflow[]>('companies.json', [])
-    const deletedCompanyIds = new Set(readJsonFile<string[]>('deleted_company_ids.json', []))
-    const existingActive = diskCompanies.find(
-      c => !deletedCompanyIds.has(c.id) && c.name?.trim().toLowerCase() === name.toLowerCase()
-    )
+    // منع تكرار الشركات بالاسم نفسه — من قاعدة البيانات
+    const existingActive = await findCompanyByName(name)
     if (existingActive) {
       return {
         success: false,
