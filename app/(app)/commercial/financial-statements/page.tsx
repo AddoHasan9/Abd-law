@@ -1,4 +1,5 @@
 import { listCompanies } from '@/lib/data/companies'
+import { isEstablishedCompany } from '@/lib/company-status'
 import FinancialStatementsClient from '@/components/financial-statements/FinancialStatementsClient'
 
 export const dynamic = 'force-dynamic'
@@ -12,6 +13,6 @@ export const metadata = {
 export default async function FinancialStatementsPage() {
   const allCompanies = await listCompanies()
   // تصفية الشركات لعرض الشركات المؤسسة فقط، واستبعاد الشركات قيد التأسيس من الحسابات الختامية تماماً
-  const companies = allCompanies.filter(c => c.status === 'established' || Boolean(c.deposit_released) || Boolean(c.cert_date) || Boolean(c.cert_no))
+  const companies = allCompanies.filter(isEstablishedCompany)
   return <FinancialStatementsClient companies={companies} />
 }

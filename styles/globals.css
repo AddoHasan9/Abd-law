@@ -3220,3 +3220,62 @@ html[data-theme="dark"] .page-head.tone-violet { --tone: #a78bfa; } html[data-th
 .co-assign:hover { background: var(--accent); color: #fff; }
 .co-assign:disabled { opacity: .6; cursor: wait; }
 @media (pointer: coarse) { .co-assign { min-height: 34px; } }
+
+/* شريط التبويبات: بلا شريط تمرير ظاهر — على الشاشات الضيقة يُسحب بالإصبع أو الماوس */
+.tabs-strip { scrollbar-width: none; }
+.tabs-strip::-webkit-scrollbar { display: none; }
+
+/* ============================================================
+   عنصر التذكير المختصر
+   ============================================================ */
+.rem-item {
+  --rem-tone: var(--line);
+  display: flex; align-items: center; gap: 10px; min-width: 0;
+  padding: 8px 10px 8px 6px;
+  background: var(--surface); border: 1px solid var(--line-soft);
+  border-inline-start: 3px solid var(--rem-tone);
+  border-radius: 10px;
+  transition: background-color .15s ease;
+}
+.rem-item:hover { background: var(--surface-2); }
+.rem-item.is-done .rem-title span:first-child { text-decoration: line-through; opacity: .6; }
+.rem-check { width: 16px; height: 16px; flex: none; cursor: pointer; accent-color: var(--ok); }
+.rem-body { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.rem-title { display: flex; align-items: center; gap: 6px; min-width: 0; font-size: 13px; font-weight: 700; color: var(--text); line-height: 1.4; }
+.rem-high { flex: none; font-size: 10px; font-weight: 800; padding: 0 6px; border-radius: 5px; background: var(--bad); color: #fff; line-height: 16px; }
+.rem-meta { display: flex; align-items: center; gap: 6px; min-width: 0; font-size: 11px; color: var(--text-3); line-height: 1.4; }
+.rem-meta > * + *::before { content: '·'; margin-inline-end: 6px; color: var(--text-3); }
+.rem-co { color: var(--accent); font-weight: 700; text-decoration: none; max-width: 55%; }
+.rem-co:hover { text-decoration: underline; }
+.rem-notes { max-width: 40%; }
+.rem-actions { display: flex; align-items: center; gap: 0; flex: none; }
+.rem-actions button {
+  width: 28px; height: 28px; display: grid; place-items: center; border: 0; background: none;
+  border-radius: 7px; color: var(--text-3); cursor: pointer; transition: background-color .15s ease, color .15s ease;
+}
+.rem-actions button .material-symbols-outlined { font-size: 17px; }
+.rem-actions button:hover { background: var(--surface-3, var(--surface-2)); color: var(--text); }
+.rem-actions button.is-danger:hover { color: var(--bad); background: color-mix(in srgb, var(--bad) 10%, transparent); }
+/* على أجهزة الماوس: الأزرار تظهر عند المرور فقط (أهدأ) */
+@media (hover: hover) {
+  .rem-actions { opacity: .35; transition: opacity .15s ease; }
+  .rem-item:hover .rem-actions, .rem-item:focus-within .rem-actions { opacity: 1; }
+}
+@media (pointer: coarse) { .rem-actions button { width: 34px; height: 34px; } }
+
+/* ============================================================
+   جداول الأقسام: صف قابل للضغط + رابط الشركة + أزرار أيقونية صغيرة
+   ============================================================ */
+.id-row { cursor: pointer; }
+.id-co-link { text-decoration: none; }
+.id-co-link:hover { color: var(--accent) !important; text-decoration: underline; }
+.id-actions { display: inline-flex; align-items: center; gap: 4px; }
+.id-icon-btn {
+  width: 32px; height: 32px; display: grid; place-items: center; border-radius: 9px;
+  border: 1px solid var(--line-soft); background: var(--surface); color: var(--text-2); cursor: pointer;
+  transition: background-color .15s ease, color .15s ease, border-color .15s ease;
+}
+.id-icon-btn .material-symbols-outlined { font-size: 17px; }
+.id-icon-btn:hover { background: var(--surface-2); color: var(--text); }
+.id-icon-btn.is-danger:hover { color: #e11d48; border-color: color-mix(in srgb, #e11d48 30%, transparent); background: color-mix(in srgb, #e11d48 7%, var(--surface)); }
+@media (pointer: coarse) { .id-icon-btn { width: 38px; height: 38px; } }

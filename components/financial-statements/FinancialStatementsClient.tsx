@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
+import Link from 'next/link'
 import dynamic from 'next/dynamic'
 import { isFSComplete } from '@/lib/financial-statements/completion'
 import { PageHeader } from '@/components/ui/PageHeader'
@@ -403,14 +404,15 @@ export default function FinancialStatementsClient({ companies = [] }: Props) {
                 </thead>
                 <tbody>
                   {visibleGrouped.map(item => (
-                    <tr key={item.companyId || item.companyName} style={{ borderBottom: '1px solid var(--line-soft)' }}>
+                    <tr
+                      key={item.companyId || item.companyName}
+                      className="id-row"
+                      style={{ borderBottom: '1px solid var(--line-soft)' }}
+                      onClick={e => { if (!(e.target as HTMLElement).closest('a,button')) setSelectedFSCompany(item) }}
+                      title="عرض سجل الحسابات الختامية"
+                    >
                       <td style={{ padding: '14px 16px', fontWeight: 700 }}>
-                        <button
-                          type="button"
-                          onClick={() => setSelectedFSCompany(item)}
-                          style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, textAlign: 'right', display: 'flex', alignItems: 'center', gap: '10px' }}
-                          className="group"
-                        >
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                           <div
                             style={{
                               width: '32px',
@@ -425,10 +427,14 @@ export default function FinancialStatementsClient({ companies = [] }: Props) {
                           >
                             <span className="material-symbols-outlined text-[18px]">domain</span>
                           </div>
-                          <span style={{ color: 'var(--text)', fontWeight: 800, fontSize: '13.5px' }} className="group-hover:text-[var(--accent)] transition-colors">
-                            {item.companyName}
-                          </span>
-                        </button>
+                          {item.companyId ? (
+                            <Link href={`/commercial/companies/${item.companyId}`} className="id-co-link" style={{ color: 'var(--text)', fontWeight: 800, fontSize: '13.5px' }} title="فتح الملف الشامل للشركة">
+                              {item.companyName}
+                            </Link>
+                          ) : (
+                            <span style={{ color: 'var(--text)', fontWeight: 800, fontSize: '13.5px' }}>{item.companyName}</span>
+                          )}
+                        </div>
                       </td>
 
                       <td style={{ padding: '12px 14px', textAlign: 'center', fontWeight: 700 }}>
@@ -450,13 +456,8 @@ export default function FinancialStatementsClient({ companies = [] }: Props) {
                       </td>
 
                       <td style={{ padding: '12px 14px', textAlign: 'left' }}>
-                        <button
-                          type="button"
-                          onClick={() => setSelectedFSCompany(item)}
-                          className="btn btn-ghost"
-                          style={{ padding: '4px 10px', fontSize: '12px', color: 'var(--accent)', fontWeight: 700 }}
-                        >
-                          عرض التفاصيل والسجل ←
+                        <button type="button" onClick={() => setSelectedFSCompany(item)} className="id-icon-btn" title="عرض سجل الحسابات الختامية" aria-label="عرض سجل الحسابات الختامية">
+                          <span className="material-symbols-outlined" aria-hidden>chevron_left</span>
                         </button>
                       </td>
                     </tr>

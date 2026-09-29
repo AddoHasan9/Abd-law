@@ -1,11 +1,11 @@
 'use client'
 
 import { useState, useMemo } from 'react'
+import Link from 'next/link'
 import dynamic from 'next/dynamic'
 import { PageHeader } from '@/components/ui/PageHeader'
 import { confirmAction, runAction } from '@/components/ui/ConfirmDialog'
 import { DataPanel } from '@/components/ui/DataPanel'
-import CompanyFileLink from '@/components/commercial/CompanyFileLink'
 import { useRouter } from 'next/navigation'
 import { Icon } from '@/components/ui/Icon'
 import { Empty } from '@/components/ui/Empty'
@@ -173,23 +173,24 @@ export default function LLCClient({ transactions = [], companies = [], lawyers =
                   return (
                     <tr
                       key={tx.id}
-                      className="hover:bg-blue-500/[0.04] dark:hover:bg-blue-500/[0.08] transition-colors duration-200"
+                      className="id-row hover:bg-blue-500/[0.04] dark:hover:bg-blue-500/[0.08] transition-colors duration-200"
+                      onClick={e => { if (!(e.target as HTMLElement).closest('a,button,[role="menu"],[role="listbox"]')) openEditModal(tx) }}
+                      title="فتح المعاملة"
                     >
                       {/* Company Name (Clickable to open Details Modal) */}
                       <td className="py-3.5 px-4">
-                        <button
-                          type="button"
-                          onClick={() => openEditModal(tx)}
-                          className="flex items-center gap-3 text-right group w-full bg-transparent border-0 p-0 cursor-pointer"
-                          title="اضغط لعرض وتعديل تفاصيل المعاملة"
-                        >
+                        <div className="flex items-center gap-3">
                           <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[var(--accent-soft)] to-blue-500/10 border border-[color:color-mix(in_srgb,var(--accent)_20%,transparent)] text-[var(--accent)] flex items-center justify-center shrink-0 shadow-xs group-hover:scale-105 transition-transform">
                             <span className="material-symbols-outlined text-[19px]">domain</span>
                           </div>
-                          <span className="font-bold text-[13.5px] text-[var(--text)] group-hover:text-[var(--accent)] transition-colors leading-snug">
-                            {tx.companies?.name || 'شركة محدودة'}
-                          </span>
-                        </button>
+                          {tx.company_id ? (
+                            <Link href={`/commercial/companies/${tx.company_id}`} className="id-co-link font-bold text-[13.5px] text-[var(--text)] leading-snug" title="فتح الملف الشامل للشركة">
+                              {tx.companies?.name || 'شركة محدودة'}
+                            </Link>
+                          ) : (
+                            <span className="font-bold text-[13.5px] text-[var(--text)] leading-snug">{tx.companies?.name || 'شركة محدودة'}</span>
+                          )}
+                        </div>
                       </td>
 
                       {/* Tx Type */}
@@ -250,20 +251,14 @@ export default function LLCClient({ transactions = [], companies = [], lawyers =
                         {tx.fee ? formatMoney(tx.fee) : '—'}
                       </td>
 
-                      {/* Actions */}
-                      <td className="py-3.5 px-4 text-left align-middle whitespace-nowrap">
-                        <div className="flex items-center gap-2">
-                          {tx.company_id && (
-                            <CompanyFileLink companyId={tx.company_id} />
-                          )}
-
-                          <button
-                            type="button"
-                            onClick={() => handleDelete(tx.id)}
-                            className="btn btn-ghost !py-1 !px-2 text-rose-600 dark:text-rose-400 hover:bg-rose-500/10"
-                            title="حذف المعاملة"
-                          >
-                            <span className="material-symbols-outlined text-[16px]">delete</span>
+                      {/* الإجراءات: فتح المعاملة + حذف */}
+                      <td className="py-3.5 px-3 text-left align-middle whitespace-nowrap">
+                        <div className="id-actions">
+                          <button type="button" onClick={() => openEditModal(tx)} className="id-icon-btn" title="فتح المعاملة" aria-label="فتح المعاملة">
+                            <span className="material-symbols-outlined" aria-hidden>edit</span>
+                          </button>
+                          <button type="button" onClick={() => handleDelete(tx.id)} className="id-icon-btn is-danger" title="حذف المعاملة" aria-label="حذف المعاملة">
+                            <span className="material-symbols-outlined" aria-hidden>delete</span>
                           </button>
                         </div>
                       </td>

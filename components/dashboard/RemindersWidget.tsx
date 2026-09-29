@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { DataPanel } from '@/components/ui/DataPanel'
-import { Mi } from '@/components/ui/Mi'
 import { confirmAction, runAction } from '@/components/ui/ConfirmDialog'
 import Link from 'next/link'
 import { Icon } from '@/components/ui/Icon'
@@ -344,9 +343,8 @@ export default function RemindersWidget({ companies = [], hideIfEmpty = false }:
   )
 }
 
-function ReminderItemCard({
+export function ReminderItemCard({
   item,
-  badgeColor,
   borderColor,
   onToggleComplete,
   onEdit,
@@ -354,104 +352,40 @@ function ReminderItemCard({
   onArchive,
 }: {
   item: ReminderItem
-  badgeColor: string
+  badgeColor?: string
   borderColor: string
   onToggleComplete: () => void
   onEdit: () => void
   onDelete: () => void
   onArchive: () => void
 }) {
+  // تذكير مختصر: سطر للعنوان وسطر للتفاصيل، ولون القسم خط رفيع جانبي بدل خلفية كاملة
   return (
-    <div
-      style={{
-        padding: '10px 14px',
-        background: badgeColor,
-        border: `1px solid ${borderColor}`,
-        borderRadius: 'var(--r-md)',
-        display: 'flex',
-        alignItems: 'center',
-        gap: '12px',
-        transition: 'all 0.15s ease',
-      }}
-    >
-      <input
-        type="checkbox"
-        checked={item.is_completed}
-        onChange={onToggleComplete}
-        style={{ width: '16px', height: '16px', cursor: 'pointer', accentColor: 'var(--ok)' }}
-      />
-
-      <div style={{ flex: 1, minWidth: 0 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <span
-            style={{
-              fontSize: '13px',
-              fontWeight: 700,
-              color: 'var(--text)',
-              textDecoration: item.is_completed ? 'line-through' : 'none',
-              opacity: item.is_completed ? 0.7 : 1,
-            }}
-          >
-            {item.title}
-          </span>
-          {item.priority === 'high' && (
-            <span style={{ fontSize: '10.5px', background: 'var(--bad)', color: '#fff', padding: '1px 6px', borderRadius: '4px', fontWeight: 700 }}>
-              عالية
-            </span>
-          )}
+    <div className={`rem-item${item.is_completed ? ' is-done' : ''}`} style={{ ['--rem-tone' as string]: borderColor }}>
+      <input type="checkbox" className="rem-check" checked={item.is_completed} onChange={onToggleComplete} aria-label="تم" />
+      <div className="rem-body">
+        <div className="rem-title">
+          <span className="truncate">{item.title}</span>
+          {item.priority === 'high' && <span className="rem-high">عالية</span>}
         </div>
-
-        {item.notes && (
-          <div style={{ fontSize: '11.5px', color: 'var(--text-2)', marginTop: '2px' }}>
-            {item.notes}
-          </div>
-        )}
-
-        <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '8px', marginTop: '4px', fontSize: '10.5px', color: 'var(--text-3)' }}>
+        <div className="rem-meta">
           {item.due_date && (
-            <span><Mi n="event" />{item.due_date}{item.due_time && <><Mi n="schedule" className="ms-2" />{item.due_time}</>}</span>
+            <span className="num">{item.due_date}{item.due_time ? ` · ${item.due_time}` : ''}</span>
           )}
           {item.company_id ? (
-            <Link
-              href={`/commercial/companies/${item.company_id}`}
-              className="inline-flex items-center gap-1 font-bold text-[var(--accent)] hover:underline bg-[color:color-mix(in_srgb,var(--accent-soft)_60%,transparent)] px-1.5 py-0.5 rounded text-[10.5px] transition-colors"
-            >
-              <span><Mi n="domain" /></span>
-              <span>{item.company_name || 'ملف الشركة'}</span>
-              <span>←</span>
+            <Link href={`/commercial/companies/${item.company_id}`} className="rem-co truncate" title={item.company_name || undefined}>
+              {item.company_name || 'ملف الشركة'}
             </Link>
           ) : item.company_name ? (
-            <span><Mi n="domain" />{item.company_name}</span>
+            <span className="truncate">{item.company_name}</span>
           ) : null}
+          {item.notes && <span className="rem-notes truncate" title={item.notes}>{item.notes}</span>}
         </div>
       </div>
-
-      {/* Item Action Buttons */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-        <button
-          type="button"
-          onClick={onEdit}
-          style={{ border: 'none', background: 'none', color: 'var(--text-2)', cursor: 'pointer', padding: '4px' }}
-          title="تعديل"
-        >
-          <Mi n="edit" />
-        </button>
-        <button
-          type="button"
-          onClick={onArchive}
-          style={{ border: 'none', background: 'none', color: 'var(--text-3)', cursor: 'pointer', padding: '4px' }}
-          title={item.is_archived ? 'إلغاء الأرشفة' : 'أرشفة'}
-        >
-          <Mi n="archive" />
-        </button>
-        <button
-          type="button"
-          onClick={onDelete}
-          style={{ border: 'none', background: 'none', color: 'var(--bad)', cursor: 'pointer', padding: '4px' }}
-          title="حذف"
-        >
-          <Mi n="delete" />
-        </button>
+      <div className="rem-actions">
+        <button type="button" onClick={onEdit} title="تعديل" aria-label="تعديل"><span className="material-symbols-outlined" aria-hidden>edit</span></button>
+        <button type="button" onClick={onArchive} title={item.is_archived ? 'إلغاء الأرشفة' : 'أرشفة'} aria-label={item.is_archived ? 'إلغاء الأرشفة' : 'أرشفة'}><span className="material-symbols-outlined" aria-hidden>{item.is_archived ? 'unarchive' : 'archive'}</span></button>
+        <button type="button" onClick={onDelete} title="حذف" aria-label="حذف" className="is-danger"><span className="material-symbols-outlined" aria-hidden>delete</span></button>
       </div>
     </div>
   )

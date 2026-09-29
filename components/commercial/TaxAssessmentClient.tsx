@@ -1,12 +1,12 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import Link from 'next/link'
 import dynamic from 'next/dynamic'
 import { PageHeader } from '@/components/ui/PageHeader'
 import { KpiCard } from '@/components/ui/KpiCard'
-import { confirmAction } from '@/components/ui/ConfirmDialog'
+import { confirmAction, runAction } from '@/components/ui/ConfirmDialog'
 import { DataPanel } from '@/components/ui/DataPanel'
-import CompanyFileLink from '@/components/commercial/CompanyFileLink'
 import { useRouter } from 'next/navigation'
 import { Icon } from '@/components/ui/Icon'
 import { Empty } from '@/components/ui/Empty'
@@ -101,13 +101,14 @@ export default function TaxAssessmentClient({ assessments = [], companies = [], 
 
   const handleDelete = async (id: string, coName: string) => {
     if (!(await confirmAction({ title: 'حذف سجل التحاسب الضريبي', message: `سيُحذف سجل التحاسب الضريبي لشركة «${coName}».`, tone: 'danger' }))) return
+    const before = items
     setItems(prev => prev.filter(i => i.id !== id))
-    const res = await deleteTaxAssessmentAction(id)
-    if (res.success) {
+    const res = await runAction(deleteTaxAssessmentAction(id), 'التحاسب الضريبي · الحذف')
+    if (res?.success) {
       triggerToast('تم حذف ملف التحاسب الضريبي بنجاح')
       router.refresh()
     } else {
-      triggerToast(res.error || 'فشل حذف السجل', 'err')
+      setItems(before) // فشل الحذف: يعود الملف للجدول (نافذة الخطأ تظهر تلقائياً)
     }
   }
 
@@ -263,26 +264,27 @@ export default function TaxAssessmentClient({ assessments = [], companies = [], 
                   return (
                     <tr
                       key={item.id}
-                      className="border-b border-[var(--line-soft)] hover:bg-[color:color-mix(in_srgb,var(--surface-2)_60%,transparent)] transition-colors"
+                      className="id-row border-b border-[var(--line-soft)] hover:bg-[color:color-mix(in_srgb,var(--surface-2)_60%,transparent)] transition-colors"
+                      onClick={e => { if (!(e.target as HTMLElement).closest('a,button')) openEditModal(item) }}
+                      title="فتح ملف التحاسب"
                     >
                       {/* Company Name (Opens Tax Assessment Details directly) */}
                       <td className="p-3.5 font-bold">
-                        <button
-                          type="button"
-                          onClick={() => openEditModal(item)}
-                          className="flex items-center gap-2.5 text-[var(--text)] hover:text-amber-500 transition-colors text-right cursor-pointer group"
-                          title="عرض وتعديل تفاصيل التحاسب الضريبي"
-                        >
-                          <div className="w-8 h-8 rounded-lg bg-amber-500/15 text-amber-500 flex items-center justify-center flex-none group-hover:scale-105 transition-transform">
+                        <div className="flex items-center gap-2.5">
+                          <div className="w-8 h-8 rounded-lg bg-amber-500/15 text-amber-600 flex items-center justify-center flex-none">
                             <span className="material-symbols-outlined text-[18px]">receipt_long</span>
                           </div>
-                          <span className="font-black text-[13px] group-hover:underline">{coName}</span>
-                        </button>
+                          {item.company_id ? (
+                            <Link href={`/commercial/companies/${item.company_id}`} className="id-co-link font-black text-[13px] text-[var(--text)]" title="فتح الملف الشامل للشركة">{coName}</Link>
+                          ) : (
+                            <span className="font-black text-[13px] text-[var(--text)]">{coName}</span>
+                          )}
+                        </div>
                       </td>
 
                       {/* Assessment Year */}
                       <td className="p-3.5 text-center font-black num">
-                        <span className="px-3 py-1 rounded-xl bg-blue-500/10 text-blue-400 border border-blue-500/20">
+                        <span className="px-3 py-1 rounded-xl bg-blue-500/10 text-blue-700 dark:text-blue-300 border border-blue-500/20">
                           {item.year}
                         </span>
                       </td>
@@ -291,12 +293,12 @@ export default function TaxAssessmentClient({ assessments = [], companies = [], 
                       <td className="p-3.5 text-center">
                         <div className="flex flex-col gap-1 items-center">
                           {item.contracts_info && (
-                            <span className="text-[11px] text-amber-400" title={item.contracts_info}>
+                            <span className="text-[11px] text-amber-700 dark:text-amber-300" title={item.contracts_info}>
                               عقود: {item.contracts_amount ? `${formatMoney(item.contracts_amount)}` : 'مثبتة'}
                             </span>
                           )}
                           {item.imports_info && (
-                            <span className="text-[11px] text-cyan-400" title={item.imports_info}>
+                            <span className="text-[11px] text-cyan-700 dark:text-cyan-300" title={item.imports_info}>
                               استيرادات: {item.imports_amount ? `${formatMoney(item.imports_amount)}` : 'مثبتة'}
                             </span>
                           )}
@@ -330,13 +332,13 @@ export default function TaxAssessmentClient({ assessments = [], companies = [], 
                       <td className="p-3.5 text-center">
                         {isCleared ? (
                           <span className="badge-completed">
-                            ✓ براءة ذمة صادرة
+                            ✓ براءة ذمة
                           </span>
                         ) : (
-                          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-extrabold bg-amber-500/15 text-amber-400 border border-amber-500/30 shadow-[0_0_12px_rgba(245,158,11,0.15)]">
+                          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-extrabold bg-amber-500/15 text-amber-700 dark:text-amber-300 whitespace-nowrap border border-amber-500/30 shadow-[0_0_12px_rgba(245,158,11,0.15)]">
                             <span className="w-3.5 h-3.5 border-2 border-amber-400/30 border-t-amber-400 rounded-full animate-spin flex-none" />
                             <span>
-                              {item.status === 'auditing' ? 'قيد التدقيق والتخمين' : item.status === 'assessed' ? 'تم التخمين' : 'قيد الإجراء والمراجعة'}
+                              {item.status === 'auditing' ? 'قيد التدقيق' : item.status === 'assessed' ? 'تم التخمين' : 'قيد المراجعة'}
                             </span>
                           </span>
                         )}
@@ -346,21 +348,26 @@ export default function TaxAssessmentClient({ assessments = [], companies = [], 
                       <td className="p-3.5 text-center">
                         {isCleared ? (
                           <div className="flex flex-col gap-0.5 items-center text-[11px]">
-                            {item.clearance_letter_no && <span>كتاب: <strong className="num text-emerald-400">{item.clearance_letter_no}</strong></span>}
+                            {item.clearance_letter_no && <span>كتاب: <strong className="num text-emerald-700 dark:text-emerald-300">{item.clearance_letter_no}</strong></span>}
                             {item.clearance_date && <span className="text-[var(--text-3)] num">{formatDate(item.clearance_date)}</span>}
                           </div>
                         ) : item.tax_amount_assessed ? (
-                          <span className="text-amber-400 font-bold num">{formatMoney(item.tax_amount_assessed)}</span>
+                          <span className="text-amber-700 dark:text-amber-300 font-bold num">{formatMoney(item.tax_amount_assessed)}</span>
                         ) : (
                           <span className="text-[var(--text-3)]">—</span>
                         )}
                       </td>
 
-                      {/* Actions */}
+                      {/* الإجراءات: فتح الملف + حذف */}
                       <td className="p-3.5 text-left whitespace-nowrap">
-                        <div className="flex items-center gap-2">
-                          {item.company_id && (
-                            <CompanyFileLink companyId={item.company_id} />
+                        <div className="id-actions">
+                          <button type="button" onClick={() => openEditModal(item)} className="id-icon-btn" title="فتح ملف التحاسب" aria-label="فتح ملف التحاسب">
+                            <span className="material-symbols-outlined" aria-hidden>edit</span>
+                          </button>
+                          {canDelete && (
+                            <button type="button" onClick={() => handleDelete(item.id, coName)} className="id-icon-btn is-danger" title="حذف ملف التحاسب" aria-label="حذف ملف التحاسب">
+                              <span className="material-symbols-outlined" aria-hidden>delete</span>
+                            </button>
                           )}
                         </div>
                       </td>

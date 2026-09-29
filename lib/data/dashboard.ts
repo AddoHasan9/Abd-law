@@ -4,6 +4,7 @@
  * تجميع المؤشرات، المهل الحاضرة، الغرامات المتراكمة، وتوزيع المعاملات.
  */
 import { readAuthorizedJsonFile } from '@/lib/auth/scoped-store'
+import { createAdminClient } from '@/lib/supabase/server'
 import { createClient } from '@/lib/supabase/server'
 import { penaltyState, DEFAULT_PENALTY, txType } from '@/lib/constants'
 import { WORKFLOW_STATUS_LIST, normalizeWorkflowStatus } from '@/lib/workflow-status'
@@ -96,8 +97,9 @@ export async function getDashboardStats(): Promise<DashboardStats> {
     console.error('getDashboardStats deposits failed:', depositsResult.reason)
   }
 
-  const diskIDs = await readAuthorizedJsonFile<Array<unknown>>('company_ids.json', [])
-  const totalIDsCount = diskIDs.length || 0
+  // عدد الهويات من قاعدة البيانات (كان من ملف مؤقت فارغ فيظهر 0 دائماً)
+  const { count: idsCount } = await createAdminClient().from('company_ids').select('id', { count: 'exact', head: true })
+  const totalIDsCount = idsCount ?? 0
 
   const establishedCompaniesCount = companies.filter(
     c => c.status === 'established' || c.status === 'done' || c.deposit_released || c.external

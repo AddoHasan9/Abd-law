@@ -263,7 +263,7 @@ export default function DepositsClient({ deposits = [], companyId }: Props) {
           <Empty
             icon="vault"
             title="لا توجد ودائع في هذا القسم"
-            text="يمكنك إطلاق الوديعة لأي شركة صادرة الشهادة من صفحة «الشركات وتأسيسها»."
+            text="يمكنك إطلاق الوديعة لأي شركة صادرة الشهادة من صفحة «تأسيس الشركات»."
           />
         </div>
       ) : (

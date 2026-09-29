@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
+import { isEstablishedCompany } from '@/lib/company-status'
 import { Mi } from '@/components/ui/Mi'
 import { useRouter } from 'next/navigation'
 import { createPortal } from 'react-dom'
@@ -157,7 +158,7 @@ export default function AddFinancialStatementModal({
 
   // إتاحة الشركات المؤسسة فقط، واستبعاد الشركات قيد التأسيس من قائمة اختيار الحسابات الختامية
   const availableCompanies = (loadedCompanies.length > 0 ? loadedCompanies : companies).filter(
-    c => c.status === 'established' || Boolean(c.deposit_released) || Boolean(c.cert_date) || Boolean(c.cert_no)
+    c => isEstablishedCompany(c)
   )
 
   // Filter companies based on search input

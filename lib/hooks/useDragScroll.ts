@@ -1,6 +1,6 @@
 'use client'
 
-import { useRef, useEffect, useCallback } from 'react'
+import { useRef, useEffect, useCallback, useState } from 'react'
 
 interface DragScrollOptions {
   speed?: number
@@ -19,7 +19,9 @@ export function useDragScroll<T extends HTMLElement = HTMLDivElement>({
   friction = 0.92,
   enableWheel = true,
 }: DragScrollOptions = {}) {
-  const ref = useRef<T | null>(null)
+  // مرجع قائم على الحالة: يُعاد الربط كلما ظهر العنصر (مثلاً عند فتح نافذة كانت مغلقة)
+  const [node, setNode] = useState<T | null>(null)
+  const ref = useCallback((el: T | null) => setNode(el), [])
   const isDown = useRef(false)
   const isDragging = useRef(false)
   const startX = useRef(0)
@@ -37,7 +39,7 @@ export function useDragScroll<T extends HTMLElement = HTMLDivElement>({
   }, [])
 
   useEffect(() => {
-    const slider = ref.current
+    const slider = node
     if (!slider) return
 
     slider.style.userSelect = 'none'
@@ -153,7 +155,7 @@ export function useDragScroll<T extends HTMLElement = HTMLDivElement>({
       slider.removeEventListener('click', handleClickCapture, true)
       slider.removeEventListener('wheel', handleWheel)
     }
-  }, [speed, friction, enableWheel, stopMomentum])
+  }, [node, speed, friction, enableWheel, stopMomentum])
 
   return ref
 }

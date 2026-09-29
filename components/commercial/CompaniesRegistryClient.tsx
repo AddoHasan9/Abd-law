@@ -1,11 +1,11 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import Link from 'next/link'
 import dynamic from 'next/dynamic'
 import { PageHeader } from '@/components/ui/PageHeader'
 import { KpiCard } from '@/components/ui/KpiCard'
 import { DataPanel } from '@/components/ui/DataPanel'
-import CompanyFileLink from '@/components/commercial/CompanyFileLink'
 import { useRouter } from 'next/navigation'
 import { Icon } from '@/components/ui/Icon'
 import { Empty } from '@/components/ui/Empty'
@@ -176,8 +176,8 @@ export default function CompaniesRegistryClient({ companies = [] }: Props) {
                   return (
                     <tr
                       key={co.id}
-                      onClick={() => openDetails(co)}
-                      className="hover:bg-blue-500/[0.04] dark:hover:bg-blue-500/[0.08] transition-colors duration-150 cursor-pointer"
+                      onClick={e => { if (!(e.target as HTMLElement).closest('a,button')) openDetails(co) }}
+                      className="id-row hover:bg-blue-500/[0.04] dark:hover:bg-blue-500/[0.08] transition-colors duration-150"
                       title="اضغط لعرض وتعديل أو حذف تفاصيل الشركة"
                     >
                       {/* Company Name */}
@@ -186,9 +186,9 @@ export default function CompaniesRegistryClient({ companies = [] }: Props) {
                           <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[var(--accent-soft)] to-blue-500/10 border border-[color:color-mix(in_srgb,var(--accent)_20%,transparent)] text-[var(--accent)] flex items-center justify-center shrink-0 shadow-xs">
                             <span className="material-symbols-outlined text-[17px]">domain</span>
                           </div>
-                          <span className="font-bold text-[13.5px] text-[var(--text)] leading-snug break-words whitespace-normal" title={co.name}>
+                          <Link href={`/commercial/companies/${co.id}`} className="id-co-link font-bold text-[13.5px] text-[var(--text)] leading-snug break-words whitespace-normal" title="فتح الملف الشامل للشركة">
                             {co.name}
-                          </span>
+                          </Link>
                         </div>
                       </td>
 
@@ -249,8 +249,10 @@ export default function CompaniesRegistryClient({ companies = [] }: Props) {
 
                       {/* Actions */}
                       <td className="py-2.5 px-3 text-left align-middle whitespace-nowrap">
-                        <div className="flex items-center gap-1.5 justify-end">
-                          <CompanyFileLink companyId={co.id} stopPropagation />
+                        <div className="id-actions">
+                          <button type="button" onClick={() => openDetails(co)} className="id-icon-btn" title="تعديل بيانات الشركة" aria-label="تعديل بيانات الشركة">
+                            <span className="material-symbols-outlined" aria-hidden>edit</span>
+                          </button>
                         </div>
                       </td>
                     </tr>
