@@ -6,7 +6,7 @@
  */
 import { readAuthorizedJsonFile } from '@/lib/auth/scoped-store'
 import { requirePermission } from '@/lib/auth/require-permission'
-import { createClient } from '@/lib/supabase/server'
+import { createAdminClient, createClient } from '@/lib/supabase/server'
 import type { TransactionFull, Company } from '@/types/database'
 import { listCompanies } from '@/lib/data/companies'
 
@@ -117,6 +117,8 @@ export async function listTransactions(filters?: {
     companies.forEach(co => {
       if (deletedCompanyIds.has(co.id)) return
       if (co.id.startsWith('test_co_') || co.id.startsWith('dup_co_')) return
+      // الشركات القائمة المضافة من قسم الشركات ليست معاملات تأسيس
+      if (co.external) return
       if (!activeCoIdsWithTasis.has(co.id)) {
         const isEstablished = co.status === 'established' || co.status === 'done' || co.deposit_released
         const tStatus = isEstablished ? 'done' : (co.status || 'progress')
@@ -147,7 +149,11 @@ export async function listTransactions(filters?: {
     })
 
     // 5. Synthesize Government IDs
-    const diskIDs = await readAuthorizedJsonFile<Array<{ id: string; company_id?: string; company_name?: string; id_type?: string; id_number?: string; issue_date?: string; expiry_date?: string; tx_start_date?: string; status?: string; notes?: string; lawyer_id?: string; created_at?: string }>>('company_ids.json', [])
+    // الهويات من قاعدة البيانات (الملف المؤقت فارغ دائماً في الإنتاج)
+    type IdRow = { id: string; company_id?: string; company_name?: string; id_type?: string; id_number?: string; issue_date?: string; expiry_date?: string; tx_start_date?: string; status?: string; notes?: string; lawyer_id?: string; created_at?: string }
+    const { data: dbIDs } = await createAdminClient().from('company_ids').select('*')
+    const diskIDs: IdRow[] = [...((dbIDs ?? []) as IdRow[]), ...(await readAuthorizedJsonFile<IdRow[]>('company_ids.json', []))]
+      .filter((r, i, all) => all.findIndex(x => x.id === r.id) === i)
     diskIDs.forEach(idRec => {
       if (deletedTxIds.has(idRec.id)) return
       if (idRec.company_id && (deletedCompanyIds.has(idRec.company_id) || !validCompanyIds.has(idRec.company_id))) return
@@ -180,7 +186,11 @@ export async function listTransactions(filters?: {
     })
 
     // 6. Synthesize Tax Assessments
-    const diskTax = await readAuthorizedJsonFile<Array<{ id: string; company_id?: string; company_name?: string; year?: number; status?: string; tx_start_date?: string; clearance_date?: string; tax_amount_assessed?: number; lawyer_id?: string; assigned_lawyer_name?: string; created_at?: string }>>('tax_assessments.json', [])
+    // ملفات التحاسب من قاعدة البيانات (كانت من ملف مؤقت فلا تظهر في قائمة المعاملات)
+    type TaxRow = { id: string; company_id?: string; company_name?: string; year?: number; status?: string; tx_start_date?: string; clearance_date?: string; tax_amount_assessed?: number; lawyer_id?: string; assigned_lawyer_name?: string; created_at?: string }
+    const { data: dbTax } = await createAdminClient().from('tax_assessments').select('*')
+    const diskTax: TaxRow[] = [...((dbTax ?? []) as TaxRow[]), ...(await readAuthorizedJsonFile<TaxRow[]>('tax_assessments.json', []))]
+      .filter((r, i, all) => all.findIndex(x => x.id === r.id) === i)
     diskTax.forEach(taxRec => {
       if (deletedTxIds.has(taxRec.id)) return
       if (taxRec.company_id && (deletedCompanyIds.has(taxRec.company_id) || !validCompanyIds.has(taxRec.company_id))) return

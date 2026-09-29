@@ -192,9 +192,14 @@ export async function getCompany(id: string): Promise<CompanyWithWorkflow | null
 
     const workflowSteps = sanitizeFormationWorkflowSteps(rawSteps, id, isEst, rawCompany.created_at)
 
-    const managers: CompanyManager[] = diskManagers.length > 0 ? diskManagers : (rawCompany.managers || [])
+    // المدير والشركاء من قاعدة البيانات (كانت من ملف مؤقت فقط فتظهر فارغة في الإنتاج)
+    const [{ data: dbManagers }, { data: dbShareholders }] = await Promise.all([
+      supabase.from('company_managers').select('*').eq('company_id', id).order('start_date', { ascending: false }),
+      supabase.from('company_shareholders').select('*').eq('company_id', id),
+    ])
+    const managers: CompanyManager[] = (dbManagers?.length ? dbManagers : diskManagers.length > 0 ? diskManagers : (rawCompany.managers || [])) as CompanyManager[]
     const activeManager = managers.find((m: CompanyManager) => m.active)?.name || managers[0]?.name || rawCompany.manager || null
-    const shareholders: CompanyShareholder[] = diskShareholders.length > 0 ? diskShareholders : (rawCompany.shareholders || [])
+    const shareholders: CompanyShareholder[] = (dbShareholders?.length ? dbShareholders : diskShareholders.length > 0 ? diskShareholders : (rawCompany.shareholders || [])) as CompanyShareholder[]
 
     return {
       ...rawCompany,

@@ -576,8 +576,8 @@ export default function CompanyDetailsModal({ company, isOpen, onClose, onDelete
           style={{
             display: 'flex',
             borderBottom: '2px solid var(--line-soft)',
-            padding: '8px 24px 0 24px',
-            gap: '8px',
+            padding: '8px 12px 0 12px',
+            gap: '2px',
             overflowX: 'auto',
             background: 'var(--surface-2)',
             alignItems: 'flex-end',
@@ -588,31 +588,35 @@ export default function CompanyDetailsModal({ company, isOpen, onClose, onDelete
             boxShadow: '0 4px 14px rgba(0,0,0,0.03)',
             userSelect: 'none',
           }}
-          className="scrollbar-none"
+          className="tabs-strip"
         >
           {[
             { id: 'info', label: 'البيانات الأساسية', icon: 'build' },
-            { id: 'workflow', label: 'مخطط سير العمل (8 محطات)', icon: 'steps' },
+            { id: 'workflow', label: 'سير العمل', icon: 'steps' },
             { id: 'cert', label: 'الشهادة والوديعة', icon: 'vault' },
             { id: 'tax', label: 'التحاسب الضريبي', icon: 'scale' },
             ...(isCompanyEstablished ? [{ id: 'financial', label: 'الحسابات الختامية', icon: 'doc' }] : []),
-            { id: 'ids', label: 'الهويات والرقيمات', icon: 'badge' },
-            { id: 'notes', label: 'النواقص والملاحظات', icon: 'doc' },
+            { id: 'ids', label: 'الهويات', icon: 'badge' },
+            { id: 'notes', label: 'النواقص', icon: 'doc' },
           ].map(tab => {
             const isActive = activeTab === tab.id
             return (
               <button
                 key={tab.id}
                 type="button"
-                onClick={() => setActiveTab(tab.id as typeof activeTab)}
+                onClick={e => {
+                  setActiveTab(tab.id as typeof activeTab)
+                  e.currentTarget.scrollIntoView({ inline: 'nearest', block: 'nearest', behavior: 'smooth' })
+                }}
                 style={{
-                  padding: '13px 22px',
+                  padding: '12px 12px',
                   border: 'none',
                   background: isActive ? 'var(--surface)' : 'transparent',
                   borderBottom: isActive ? '3px solid var(--accent)' : '3px solid transparent',
                   color: isActive ? 'var(--accent)' : 'var(--text-2)',
                   fontWeight: isActive ? 800 : 600,
-                  fontSize: '14px',
+                  fontSize: '13.5px',
+                  flex: 'none',
                   cursor: 'pointer',
                   display: 'flex',
                   alignItems: 'center',

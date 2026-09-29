@@ -3220,3 +3220,10 @@ html[data-theme="dark"] .page-head.tone-violet { --tone: #a78bfa; } html[data-th
 .co-assign:hover { background: var(--accent); color: #fff; }
 .co-assign:disabled { opacity: .6; cursor: wait; }
 @media (pointer: coarse) { .co-assign { min-height: 34px; } }
+
+/* شريط تبويبات قابل للتمرير: شريط رفيع ظاهر + تظليل الحافة التي فيها تبويبات مخفية + سحب بالماوس */
+.tabs-strip { scrollbar-width: thin; scrollbar-color: color-mix(in srgb, var(--text-3) 45%, transparent) transparent; cursor: grab; }
+.tabs-strip:active { cursor: grabbing; }
+.tabs-strip::-webkit-scrollbar { height: 5px; }
+.tabs-strip::-webkit-scrollbar-thumb { background: color-mix(in srgb, var(--text-3) 40%, transparent); border-radius: 99px; }
+.tabs-strip::-webkit-scrollbar-track { background: transparent; }
