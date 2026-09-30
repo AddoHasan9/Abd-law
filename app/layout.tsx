@@ -4,6 +4,7 @@ import { Toaster } from '@/components/ui/Toaster'
 import { ConfirmHost } from '@/components/ui/ConfirmDialog'
 import { ModalManager } from '@/components/ui/ModalManager'
 import { TableStacker } from '@/components/ui/TableStacker'
+import { BoosthisScript } from '@/components/BoosthisScript'
 import { QueryProvider } from '@/components/providers/QueryProvider'
 import '@/styles/globals.css'
 
@@ -71,6 +72,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <ConfirmHost />
           <ModalManager />
             <TableStacker />
+            <BoosthisScript />
           {children}
         </QueryProvider>
       </body>
