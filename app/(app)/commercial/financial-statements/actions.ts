@@ -95,6 +95,9 @@ export async function createFinancialStatementAction(payload: {
   date_submitted_registrar?: string
   notes?: string
 }) {
+  // فحص الصلاحية على الخادم (لا يكفي إخفاء الزر في الواجهة)
+  const denied = await requirePermission('financial_statements', 'create')
+  if (denied) return denied
   return createFinancialStatementsBatchAction({
     company_id: payload.company_id,
     rows: [
@@ -425,16 +428,25 @@ export async function updateFinancialStatementAction(
 }
 
 export async function markStatementTaxSubmittedAction(id: string, dateSubmitted?: string) {
+  // فحص الصلاحية على الخادم (لا يكفي إخفاء الزر في الواجهة)
+  const denied = await requirePermission('financial_statements', 'submit')
+  if (denied) return denied
   const submitDate = dateSubmitted || new Date().toISOString().slice(0, 10)
   return updateFinancialStatementAction(id, { date_submitted_tax: submitDate, tax_submitted: true })
 }
 
 export async function markStatementRegistrarSubmittedAction(id: string, dateSubmitted?: string) {
+  // فحص الصلاحية على الخادم (لا يكفي إخفاء الزر في الواجهة)
+  const denied = await requirePermission('financial_statements', 'submit')
+  if (denied) return denied
   const submitDate = dateSubmitted || new Date().toISOString().slice(0, 10)
   return updateFinancialStatementAction(id, { date_submitted_registrar: submitDate, date_submitted: submitDate, registrar_submitted: true })
 }
 
 export async function markStatementSubmittedAction(id: string, dateSubmitted?: string) {
+  // فحص الصلاحية على الخادم (لا يكفي إخفاء الزر في الواجهة)
+  const denied = await requirePermission('financial_statements', 'submit')
+  if (denied) return denied
   const submitDate = dateSubmitted || new Date().toISOString().slice(0, 10)
   return updateFinancialStatementAction(id, {
     date_submitted_registrar: submitDate,

@@ -1,3 +1,5 @@
+import { getCurrentUserProfile } from '@/lib/auth/require-permission'
+import { redirect } from 'next/navigation'
 import { getAuditLogs } from '@/lib/data/audit'
 import AuditLogsClient from '@/components/settings/AuditLogsClient'
 
@@ -9,6 +11,9 @@ export const metadata = {
 export const dynamic = 'force-dynamic'
 
 export default async function SettingsAuditPage() {
+  // الصفحة لمدراء النظام فقط — كتابة الرابط يدوياً لا تكفي للدخول
+  const me = await getCurrentUserProfile()
+  if (!me || !['super_admin', 'admin'].includes(me.role)) redirect('/dashboard')
   const initialLogs = await getAuditLogs({ limit: 150 })
   return <AuditLogsClient initialLogs={initialLogs} />
 }
