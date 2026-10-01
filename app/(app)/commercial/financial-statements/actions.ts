@@ -561,7 +561,7 @@ export async function updateCompanyFSSettingsAction(companyId: string, payload: 
 
     if (error) {
       console.error('updateCompanyFSSettingsAction error:', error.message)
-      return { success: false, error: error.message }
+      return { success: false, error: 'تعذر إتمام العملية — حاول مرة أخرى' }
     }
 
     if (payload.financial_statements_enabled) {

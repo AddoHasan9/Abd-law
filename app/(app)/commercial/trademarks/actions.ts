@@ -78,7 +78,7 @@ export async function deleteTrademarkAction(id: string, companyId: string) {
 
     if (error) {
       console.error('deleteTrademarkAction error:', error.message)
-      return { success: false, error: error.message }
+      return { success: false, error: 'تعذر إتمام العملية — حاول مرة أخرى' }
     }
 
     revalidatePath(`/commercial/companies/${companyId}`)

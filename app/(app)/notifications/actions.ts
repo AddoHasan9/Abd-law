@@ -67,7 +67,7 @@ export async function createNotificationAction(payload: {
 
     if (error) {
       console.error('createNotificationAction insert error:', error.message)
-      return { success: false, error: error.message }
+      return { success: false, error: 'تعذر إتمام العملية — حاول مرة أخرى' }
     }
 
     try {
@@ -100,7 +100,7 @@ export async function markNotificationReadAction(id: string) {
 
     if (error) {
       console.error('markNotificationReadAction error:', error.message)
-      return { success: false, error: error.message }
+      return { success: false, error: 'تعذر إتمام العملية — حاول مرة أخرى' }
     }
 
     revalidatePath('/commercial')
@@ -129,7 +129,7 @@ export async function markAllNotificationsReadAction() {
 
     if (error) {
       console.error('markAllNotificationsReadAction error:', error.message)
-      return { success: false, error: error.message }
+      return { success: false, error: 'تعذر إتمام العملية — حاول مرة أخرى' }
     }
 
     revalidatePath('/commercial')

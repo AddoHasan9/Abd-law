@@ -144,7 +144,7 @@ export async function updateMyProfileAction(payload: {
     const fields = z.object({
       name: z.string().trim().min(1).max(200), phone: z.string().max(40).nullable().optional(),
       age: z.union([z.number(), z.string()]).nullable().optional(), gender: z.enum(['male', 'female', '']).nullable().optional(),
-      birth_date: z.string().nullable().optional(), avatar_url: z.string().max(2000000).nullable().optional(),
+      birth_date: z.string().nullable().optional(), avatar_url: z.string().max(2000000).regex(/^data:image\/(png|jpeg|webp|gif);base64,[A-Za-z0-9+/=]+$/, 'صورة غير صالحة').nullable().optional(),
     }).parse(payload)
     // Explicit non-security fields only. Role, ID and active status never come from the browser.
     const { data, error } = await createAdminClient().from('profiles').update(fields).eq('id', actor.id).select('*').single()
