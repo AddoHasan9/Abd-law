@@ -3,7 +3,6 @@
  * ------------------------------------------------------------
  * تجميع المؤشرات، المهل الحاضرة، الغرامات المتراكمة، وتوزيع المعاملات.
  */
-import { readAuthorizedJsonFile } from '@/lib/auth/scoped-store'
 import { createAdminClient } from '@/lib/supabase/server'
 import { createClient } from '@/lib/supabase/server'
 import { penaltyState, DEFAULT_PENALTY, txType } from '@/lib/constants'

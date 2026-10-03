@@ -1,12 +1,10 @@
 'use server'
 
-import { readAuthorizedJsonFile } from '@/lib/auth/scoped-store'
 import { dbWrite, rethrowDbError } from '@/lib/data/db-guard'
 import { requireRecordAccess } from '@/lib/auth/record-access'
 import { revalidatePath } from 'next/cache'
 import { createAdminClient, createClient } from '@/lib/supabase/server'
 import { logTimelineEvent } from '@/lib/data/timeline'
-import { readJsonFile, writeJsonFile } from '@/lib/data/fs-store'
 import type { CompanyWithWorkflow, CompanyIDRecord, CompanyIDStatus, TransactionFull, Company } from '@/types/database'
 import { requirePermission } from '@/lib/auth/require-permission'
 
@@ -43,7 +41,7 @@ export async function getCompanyIDsAction(companyIdFilter?: string) {
   if (accessDenied) return { success: false, data: [], error: accessDenied.error }
 
   try {
-    const diskIDs = await readAuthorizedJsonFile<CompanyIDRecord[]>('company_ids.json', [])
+    const diskIDs = ([] as CompanyIDRecord[])
     const supabase = await createClient()
 
     let dbIDs: CompanyIDRecord[] = []
@@ -123,7 +121,7 @@ export async function getCompanyIDsAction(companyIdFilter?: string) {
   } catch (err) {
     rethrowDbError(err)
     console.warn('getCompanyIDsAction exception, using disk store:', err)
-    const diskIDs = await readAuthorizedJsonFile<CompanyIDRecord[]>('company_ids.json', [])
+    const diskIDs = ([] as CompanyIDRecord[])
     const filtered = companyIdFilter ? diskIDs.filter(x => x.company_id === companyIdFilter) : diskIDs
     return { success: true, data: filtered }
   }
@@ -167,7 +165,7 @@ export async function createCompanyIDAction(payload: {
     const isValidUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(targetCompanyId)
 
     // Check disk companies first
-    const diskCompanies = readJsonFile<CompanyWithWorkflow[]>('companies.json', [])
+    const diskCompanies = ([] as CompanyWithWorkflow[])
 
     if ((!targetCompanyId || !isValidUUID) && compName) {
       // Look up existing company by name in disk or DB
@@ -204,7 +202,7 @@ export async function createCompanyIDAction(payload: {
 
     // --- CHECK DUPLICATION (DB + Disk) ---
     // If the same company already has an active or in-progress record for this ID type, prevent accidental duplicate
-    const diskIDs = readJsonFile<CompanyIDRecord[]>('company_ids.json', [])
+    const diskIDs = ([] as CompanyIDRecord[])
     const existingDuplicate = diskIDs.find(
       x => x.company_id === targetCompanyId && x.id_type === payload.id_type
     )
@@ -292,7 +290,6 @@ export async function createCompanyIDAction(payload: {
 
     // Save to Disk Store (Guarantees immediate persistence)
     diskIDs.unshift(diskRecord)
-    writeJsonFile('company_ids.json', diskIDs)
 
     // Sync to Commercial Transactions Feed
     const isRenew = Boolean(payload.notes?.includes('تجديد'))
@@ -342,9 +339,8 @@ export async function createCompanyIDAction(payload: {
       console.warn('transactions insert for company_ids notice:', txDbErr)
     }
 
-    const diskTxs = readJsonFile<TransactionFull[]>('transactions.json', [])
+    const diskTxs = ([] as TransactionFull[])
     diskTxs.unshift(txRecord)
-    writeJsonFile('transactions.json', diskTxs)
 
     // Log timeline event for real companies only
     try {
@@ -425,23 +421,21 @@ export async function updateCompanyIDAction(
     }
 
     // Update disk store
-    const diskIDs = readJsonFile<CompanyIDRecord[]>('company_ids.json', [])
+    const diskIDs = ([] as CompanyIDRecord[])
     const idx = diskIDs.findIndex(x => x.id === id)
     let updatedRec: CompanyIDRecord | undefined = undefined
     if (idx !== -1) {
       Object.assign(diskIDs[idx], updateData)
       updatedRec = diskIDs[idx]
-      writeJsonFile('company_ids.json', diskIDs)
     }
 
     // Update corresponding commercial transaction
     const isDone = payload.status === 'done' || Boolean(payload.id_number || payload.issue_date)
-    const diskTxs = readJsonFile<TransactionFull[]>('transactions.json', [])
+    const diskTxs = ([] as TransactionFull[])
     const txIdx = diskTxs.findIndex(t => t.id === id)
     if (txIdx !== -1) {
       diskTxs[txIdx].status = isDone ? 'done' : 'in_progress'
       if (payload.expiry_date) diskTxs[txIdx].due_date = payload.expiry_date
-      writeJsonFile('transactions.json', diskTxs)
     }
 
     try {
@@ -505,13 +499,11 @@ export async function deleteCompanyIDAction(id: string) {
       console.warn('Supabase delete company_ids error:', dbErr)
     }
 
-    const diskIDs = readJsonFile<CompanyIDRecord[]>('company_ids.json', [])
+    const diskIDs = ([] as CompanyIDRecord[])
     const filtered = diskIDs.filter(x => x.id !== id)
-    writeJsonFile('company_ids.json', filtered)
 
-    const diskTxs = readJsonFile<TransactionFull[]>('transactions.json', [])
+    const diskTxs = ([] as TransactionFull[])
     const filteredTxs = diskTxs.filter(x => x.id !== id)
-    writeJsonFile('transactions.json', filteredTxs)
 
     try {
       revalidatePath('/commercial/ids')
@@ -524,13 +516,11 @@ export async function deleteCompanyIDAction(id: string) {
     return { success: true }
   } catch (dbErr) {
     rethrowDbError(dbErr)
-    const diskIDs = readJsonFile<CompanyIDRecord[]>('company_ids.json', [])
+    const diskIDs = ([] as CompanyIDRecord[])
     const filtered = diskIDs.filter(x => x.id !== id)
-    writeJsonFile('company_ids.json', filtered)
 
-    const diskTxs = readJsonFile<TransactionFull[]>('transactions.json', [])
+    const diskTxs = ([] as TransactionFull[])
     const filteredTxs = diskTxs.filter(x => x.id !== id)
-    writeJsonFile('transactions.json', filteredTxs)
     return { success: true }
   }
 }

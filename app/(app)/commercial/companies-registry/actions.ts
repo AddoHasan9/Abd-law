@@ -4,7 +4,6 @@ import { revalidatePath } from 'next/cache'
 import { findCompanyByName } from '@/lib/data/company-name'
 import { dbWrite, rethrowDbError } from '@/lib/data/db-guard'
 import { createAdminClient } from '@/lib/supabase/server'
-import { readJsonFile, writeJsonFile } from '@/lib/data/fs-store'
 import { logTimelineEvent } from '@/lib/data/timeline'
 import { WORKFLOW } from '@/lib/constants'
 import type { CompanyWithWorkflow, CompanyManager, CompanyShareholder, CompanyIDRecord, WorkflowStep } from '@/types/database'
@@ -135,9 +134,8 @@ export async function createEstablishedCompanyAction(payload: AddEstablishedComp
         console.warn('Supabase insert company_manager notice:', mgrDbErr)
       }
 
-      const diskManagers = readJsonFile<CompanyManager[]>('company_managers.json', [])
+      const diskManagers = ([] as CompanyManager[])
       diskManagers.unshift(managerRecord)
-      writeJsonFile('company_managers.json', diskManagers)
     }
 
     // 3. Insert Shareholders in company_shareholders table
@@ -165,9 +163,8 @@ export async function createEstablishedCompanyAction(payload: AddEstablishedComp
           console.warn('Supabase insert company_shareholders notice:', shDbErr)
         }
 
-        const diskShareholders = readJsonFile<CompanyShareholder[]>('company_shareholders.json', [])
+        const diskShareholders = ([] as CompanyShareholder[])
         diskShareholders.push(...shareholderRecords)
-        writeJsonFile('company_shareholders.json', diskShareholders)
       }
     }
 
@@ -216,9 +213,8 @@ export async function createEstablishedCompanyAction(payload: AddEstablishedComp
           console.warn('Supabase insert company_ids notice:', idDbErr)
         }
 
-        const diskIDs = readJsonFile<CompanyIDRecord[]>('company_ids.json', [])
+        const diskIDs = ([] as CompanyIDRecord[])
         diskIDs.unshift(...idRecords)
-        writeJsonFile('company_ids.json', diskIDs)
       }
     }
 
@@ -256,14 +252,12 @@ export async function createEstablishedCompanyAction(payload: AddEstablishedComp
       shareholders: shareholderRecords,
     }
 
-    const currentDiskCompanies = readJsonFile<CompanyWithWorkflow[]>('companies.json', [])
+    const currentDiskCompanies = ([] as CompanyWithWorkflow[])
     currentDiskCompanies.unshift(fullCompanyObject)
-    writeJsonFile('companies.json', currentDiskCompanies)
 
     try {
-      const deletedIds = readJsonFile<string[]>('deleted_company_ids.json', [])
+      const deletedIds = ([] as string[])
       if (deletedIds.includes(companyId)) {
-        writeJsonFile('deleted_company_ids.json', deletedIds.filter(id => id !== companyId))
       }
     } catch (dbErr) {
     rethrowDbError(dbErr)}

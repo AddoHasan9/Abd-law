@@ -7,7 +7,6 @@
  * 3. كتاب المحاسب (accountant)
  * 4. رفع باركود / QR الشركة أو PDF (barcode)
  */
-import { readAuthorizedJsonFile } from '@/lib/auth/scoped-store'
 import { requirePermission } from '@/lib/auth/require-permission'
 import { createClient } from '@/lib/supabase/server'
 import type { DepositWithStages, DepositStage, Company } from '@/types/database'
@@ -46,9 +45,9 @@ export async function listDeposits(): Promise<DepositWithStages[]> {
   if (accessDenied) return []
 
   try {
-    const deletedCompanyIds = await readAuthorizedJsonFile<string[]>('deleted_company_ids.json', [])
-    const diskDeposits = await readAuthorizedJsonFile<RawDepositItem[]>('deposits.json', [])
-    const diskCompanies = await readAuthorizedJsonFile<Company[]>('companies.json', [])
+    const deletedCompanyIds = ([] as string[])
+    const diskDeposits = ([] as RawDepositItem[])
+    const diskCompanies = ([] as Company[])
 
     // Try fetching from Supabase
     let dbDeposits: RawDepositItem[] = []
@@ -165,8 +164,8 @@ export async function listDeposits(): Promise<DepositWithStages[]> {
     return result
   } catch (e) {
     console.error('Exception in listDeposits:', e)
-    const diskDeposits = await readAuthorizedJsonFile<RawDepositItem[]>('deposits.json', [])
-    const diskCompanies = await readAuthorizedJsonFile<Company[]>('companies.json', [])
+    const diskDeposits = ([] as RawDepositItem[])
+    const diskCompanies = ([] as Company[])
     return diskDeposits.map(d => ({
       ...d,
       companies: d.companies || diskCompanies.find(c => c.id === d.company_id) || null

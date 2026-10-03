@@ -4,7 +4,6 @@
  * ملاحظة أمنية: لا حاجة لتصفية معاملات المحامي يدوياً —
  * سياسة RLS تتكفّل بذلك على مستوى القاعدة.
  */
-import { readAuthorizedJsonFile } from '@/lib/auth/scoped-store'
 import { txType } from '@/lib/constants'
 import { requirePermission } from '@/lib/auth/require-permission'
 import { createAdminClient, createClient } from '@/lib/supabase/server'
@@ -23,9 +22,9 @@ export async function listTransactions(filters?: {
   const accessDenied = await requirePermission('transactions', 'view')
   if (accessDenied) return []
 
-  const diskTxs = await readAuthorizedJsonFile<TransactionFull[]>('transactions.json', [])
-  const deletedTxIds = new Set(await readAuthorizedJsonFile<string[]>('deleted_transaction_ids.json', []))
-  const deletedCompanyIds = new Set(await readAuthorizedJsonFile<string[]>('deleted_company_ids.json', []))
+  const diskTxs = ([] as TransactionFull[])
+  const deletedTxIds = new Set(([] as string[]))
+  const deletedCompanyIds = new Set(([] as string[]))
   const supabase = await createClient()
 
   let dbTxs: TransactionFull[] = []
@@ -153,7 +152,7 @@ export async function listTransactions(filters?: {
     // الهويات من قاعدة البيانات (الملف المؤقت فارغ دائماً في الإنتاج)
     type IdRow = { id: string; company_id?: string; company_name?: string; id_type?: string; id_number?: string; issue_date?: string; expiry_date?: string; tx_start_date?: string; status?: string; notes?: string; lawyer_id?: string; created_at?: string }
     const { data: dbIDs } = await createAdminClient().from('company_ids').select('*')
-    const diskIDs: IdRow[] = [...((dbIDs ?? []) as IdRow[]), ...(await readAuthorizedJsonFile<IdRow[]>('company_ids.json', []))]
+    const diskIDs: IdRow[] = [...((dbIDs ?? []) as IdRow[]), ...(([] as IdRow[]))]
       .filter((r, i, all) => all.findIndex(x => x.id === r.id) === i)
     diskIDs.forEach(idRec => {
       if (deletedTxIds.has(idRec.id)) return
@@ -190,7 +189,7 @@ export async function listTransactions(filters?: {
     // ملفات التحاسب من قاعدة البيانات (كانت من ملف مؤقت فلا تظهر في قائمة المعاملات)
     type TaxRow = { id: string; company_id?: string; company_name?: string; year?: number; status?: string; tx_start_date?: string; clearance_date?: string; tax_amount_assessed?: number; lawyer_id?: string; assigned_lawyer_name?: string; created_at?: string }
     const { data: dbTax } = await createAdminClient().from('tax_assessments').select('*')
-    const diskTax: TaxRow[] = [...((dbTax ?? []) as TaxRow[]), ...(await readAuthorizedJsonFile<TaxRow[]>('tax_assessments.json', []))]
+    const diskTax: TaxRow[] = [...((dbTax ?? []) as TaxRow[]), ...(([] as TaxRow[]))]
       .filter((r, i, all) => all.findIndex(x => x.id === r.id) === i)
     diskTax.forEach(taxRec => {
       if (deletedTxIds.has(taxRec.id)) return
@@ -269,7 +268,7 @@ export async function getTransaction(id: string): Promise<TransactionFull | null
   const accessDenied = await requirePermission('transactions', 'view')
   if (accessDenied) return null
 
-  const diskTxs = await readAuthorizedJsonFile<TransactionFull[]>('transactions.json', [])
+  const diskTxs = ([] as TransactionFull[])
   const foundDisk = diskTxs.find(t => t.id === id)
   if (foundDisk) return foundDisk
 

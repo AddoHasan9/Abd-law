@@ -3,7 +3,6 @@
  */
 'use server'
 
-import { readAuthorizedJsonFile } from '@/lib/auth/scoped-store'
 import { findCompanyByName } from '@/lib/data/company-name'
 import { dbWrite, rethrowDbError } from '@/lib/data/db-guard'
 import { requireRecordAccess } from '@/lib/auth/record-access'
@@ -12,19 +11,8 @@ import { createAdminClient, createClient } from '@/lib/supabase/server'
 import { WORKFLOW, sanitizeFormationWorkflowSteps } from '@/lib/constants'
 import type { WfState, CompanyWithWorkflow, CompanyManager, CompanyShareholder, CompanyIDRecord, FinancialStatement, DepositStage, Trademark, TaxAssessment } from '@/types/database'
 import { createNotificationAction } from '@/app/(app)/notifications/actions'
-import { readJsonFile, writeJsonFile, ALLOW_LOCAL_FALLBACK } from '@/lib/data/fs-store'
 import { logTimelineEvent, getCompanyTimeline, type TimelineEvent } from '@/lib/data/timeline'
 import { getCurrentUserProfile, requirePermission } from '@/lib/auth/require-permission'
-
-// Memory store fallback for companies
-const inMemoryCompanies: CompanyWithWorkflow[] = []
-
-export async function getInMemoryCompaniesAction() {
-  const accessDenied = await requirePermission('companies', 'view')
-  if (accessDenied) return []
-
-  return (await getCurrentUserProfile())?.role === 'super_admin' ? inMemoryCompanies : []
-}
 
 function generateUUID() {
   if (typeof crypto !== 'undefined' && crypto.randomUUID) {
@@ -117,77 +105,33 @@ export async function createCompanyFormationAction(payload: {
       .select('*')
       .single()
 
-    if ((coError || !coData) && !ALLOW_LOCAL_FALLBACK) {
+    if ((coError || !coData)) {
       console.error('createCompanyFormationAction DB error:', coError?.message)
       return { success: false, error: 'تعذّر الحفظ في قاعدة البيانات. تحقق من الاتصال وحاول مجدداً' }
     }
-    if (coError || !coData) {
-      console.warn('createCompanyFormationAction Supabase notice, using dual-layer fallback:', coError?.message)
-      const fallbackCompanyId = generateUUID()
-      const fallbackSteps = WORKFLOW.map((wf, idx) => ({
-        id: generateUUID(),
-        company_id: fallbackCompanyId,
-        step_key: wf.id,
-        step_order: idx + 1,
-        label: wf.label,
-        owner_kind: wf.owner,
-        state: (idx === 0 ? 'doing' : 'wait') as WfState,
-        done_by: null,
-        done_at: null,
-      }))
+    // 2. توليد خطوات سير العمل للشركة الجديدة في قاعدة البيانات
+    const stepsPayload = WORKFLOW.map((wf, idx) => ({
+      company_id: coData.id,
+      step_key: wf.id,
+      step_order: idx + 1,
+      label: wf.label,
+      owner_kind: wf.owner,
+      state: (idx === 0 ? 'doing' : 'wait') as WfState,
+    }))
 
-      company = {
-        id: fallbackCompanyId,
-        task_no: String(Math.floor(1000 + Math.random() * 9000)),
-        client_id: null,
-        name,
-        name_en: null,
-        kind,
-        capital,
-        manager,
-        activity,
-        phone,
-        address,
-        has_reservation_letter,
-        reservation_letter_governorate,
-        lacks,
-        external: false,
-        status,
-        cert_no: null,
-        cert_date: null,
-        establishment_date: new Date().toISOString().slice(0, 10),
-        last_completed_fs_year: null,
-        fs_first_method: 'standard',
-        created_at: new Date().toISOString(),
-        workflow_steps: fallbackSteps as unknown as CompanyWithWorkflow['workflow_steps'],
-      }
-      inMemoryCompanies.unshift(company)
-    } else {
-      // 2. توليد خطوات سير العمل للشركة الجديدة في قاعدة البيانات
-      const stepsPayload = WORKFLOW.map((wf, idx) => ({
-        company_id: coData.id,
-        step_key: wf.id,
-        step_order: idx + 1,
-        label: wf.label,
-        owner_kind: wf.owner,
-        state: (idx === 0 ? 'doing' : 'wait') as WfState,
-      }))
+    const { data: stepsData, error: stepsErr } = await supabase
+      .from('workflow_steps')
+      .insert(stepsPayload)
+      .select()
 
-      const { data: stepsData, error: stepsErr } = await supabase
-        .from('workflow_steps')
-        .insert(stepsPayload)
-        .select()
-
-      if (stepsErr) {
-        console.error('workflow_steps insert error:', stepsErr.message)
-      }
-
-      company = {
-        ...coData,
-        workflow_steps: (stepsData || stepsPayload) as unknown as CompanyWithWorkflow['workflow_steps'],
-      } as CompanyWithWorkflow
-      inMemoryCompanies.unshift(company)
+    if (stepsErr) {
+      console.error('workflow_steps insert error:', stepsErr.message)
     }
+
+    company = {
+      ...coData,
+      workflow_steps: (stepsData || stepsPayload) as unknown as CompanyWithWorkflow['workflow_steps'],
+    } as CompanyWithWorkflow
 
     // إضافة المدير المفوض في جدول company_managers بشكل مستقل (مصدر الحقيقة الموحد)
     if (company && manager) {
@@ -204,9 +148,8 @@ export async function createCompanyFormationAction(payload: {
         rethrowDbError(dbErr)
         // Ignored
       }
-      const diskManagers = readJsonFile<CompanyManager[]>('company_managers.json', [])
+      const diskManagers = ([] as CompanyManager[])
       diskManagers.unshift(managerObj)
-      writeJsonFile('company_managers.json', diskManagers)
     }
 
     // إضافة المساهمين في جدول company_shareholders عند وجود مساهمين
@@ -224,17 +167,15 @@ export async function createCompanyFormationAction(payload: {
         rethrowDbError(dbErr)
         // Ignored
       }
-      const diskShs = readJsonFile<CompanyShareholder[]>('company_shareholders.json', [])
+      const diskShs = ([] as CompanyShareholder[])
       diskShs.push(...shObjs)
-      writeJsonFile('company_shareholders.json', diskShs)
     }
 
     // حفظ الشركة في القرص المحلي (ضمان التخزين وعدم اختفاء البيانات إطلاقاً)
     if (company) {
-      const diskCompanies = readJsonFile<CompanyWithWorkflow[]>('companies.json', [])
+      const diskCompanies = ([] as CompanyWithWorkflow[])
       const filtered = diskCompanies.filter(c => c.id !== company!.id)
       filtered.unshift(company)
-      writeJsonFile('companies.json', filtered)
     }
 
     // 3. إضافة معاملة تأسيس الشركة وسعرها والخدمات المشمولة
@@ -277,9 +218,8 @@ export async function createCompanyFormationAction(payload: {
     }
 
     // حفظ المعاملة قرصياً في الفايل
-    const diskTxs = readJsonFile<Array<Record<string, unknown>>>('transactions.json', [])
+    const diskTxs = ([] as Array<Record<string, unknown>>)
     diskTxs.unshift(txObj)
-    writeJsonFile('transactions.json', diskTxs)
 
     // إرسال إشعار تلقائي للقسم التجاري
     try {
@@ -412,11 +352,10 @@ export async function updateCompanyDetailsAction(
     }
 
     // Update disk JSON store with the complete rich payload (including tax_no, registrar_no, reservation letter)
-    const diskCompanies = readJsonFile<CompanyWithWorkflow[]>('companies.json', [])
+    const diskCompanies = ([] as CompanyWithWorkflow[])
     const diskIdx = diskCompanies.findIndex(c => c.id === companyId)
     if (diskIdx !== -1) {
       Object.assign(diskCompanies[diskIdx], updateData)
-      writeJsonFile('companies.json', diskCompanies)
     }
 
     if (error) {
@@ -489,17 +428,15 @@ export async function updateCompanyDetailsAction(
         console.warn('company_shareholders update notice:', shErr)
       }
 
-      const diskShs = readJsonFile<CompanyShareholder[]>('company_shareholders.json', [])
+      const diskShs = ([] as CompanyShareholder[])
       const filteredDiskShs = diskShs.filter(s => s.company_id !== companyId)
       filteredDiskShs.push(...shObjs)
-      writeJsonFile('company_shareholders.json', filteredDiskShs)
 
       // تحديث قائمة المساهمين داخل كائن الشركة في ملف companies.json
-      const diskCompanies = readJsonFile<CompanyWithWorkflow[]>('companies.json', [])
+      const diskCompanies = ([] as CompanyWithWorkflow[])
       const coIdx = diskCompanies.findIndex(c => c.id === companyId)
       if (coIdx !== -1) {
         diskCompanies[coIdx].shareholders = shObjs
-        writeJsonFile('companies.json', diskCompanies)
       }
     }
 
@@ -590,32 +527,6 @@ export async function advanceCompanyStepAction(stepId: string, currentState: WfS
   }
 }
 
-// Memory store fallback for deposits
-const inMemoryDeposits: Array<{
-  id: string
-  company_id: string
-  companies: CompanyWithWorkflow | null
-  started_at: string
-  created_at: string
-  deposit_stages: Array<{
-    id: string
-    deposit_id: string
-    stage_key: string
-    stage_order: number
-    label: string
-    critical: boolean
-    state: 'idle' | 'progress' | 'done'
-    at_date: string | null
-  }>
-}> = []
-
-export async function getInMemoryDepositsAction() {
-  const accessDenied = await requirePermission('deposits', 'view')
-  if (accessDenied) return []
-
-  return (await getCurrentUserProfile())?.role === 'super_admin' ? inMemoryDeposits : []
-}
-
 export async function launchDepositWorkflowAction(companyId: string) {
   const rowDenied = await requireRecordAccess('companies', companyId)
   if (rowDenied) return rowDenied
@@ -627,33 +538,13 @@ export async function launchDepositWorkflowAction(companyId: string) {
     const supabase = createAdminClient()
 
     // جلب معلومات الشركة لربط السجل حتماً بنفس الشركة الموجودة
-    let targetCompany: CompanyWithWorkflow | null = inMemoryCompanies.find(c => c.id === companyId) || null
-    if (!targetCompany) {
-      const { data: coData } = await supabase
-        .from('companies')
-        .select('*')
-        .eq('id', companyId)
-        .single()
-      if (coData) targetCompany = coData as CompanyWithWorkflow
-    }
+    // الشركة من قاعدة البيانات دائماً (لا نسخة قديمة من ذاكرة الخادم)
+    const { data: targetCompany } = await supabase.from('companies').select('id').eq('id', companyId).single()
+    if (!targetCompany) return { success: false, depositId: null, error: 'لم يتم العثور على الشركة' }
 
-    // 1. التحقق إن كانت الوديعة موجودة مسبقاً في قاعدة البيانات أو الذاكرة
-    let depositId: string | null = null
-    const existingMem = inMemoryDeposits.find(d => d.company_id === companyId)
-
-    if (existingMem) {
-      depositId = existingMem.id
-      if (!existingMem.companies && targetCompany) {
-        existingMem.companies = targetCompany
-      }
-    } else {
-      const { data: existing } = await supabase
-        .from('deposits')
-        .select('id')
-        .eq('company_id', companyId)
-        .single()
-      depositId = existing?.id || null
-    }
+    // 1. هل للشركة وديعة مسجلة مسبقاً؟
+    const { data: existing } = await supabase.from('deposits').select('id').eq('company_id', companyId).maybeSingle()
+    let depositId: string | null = existing?.id || null
 
     if (!depositId) {
       const newDepId = generateUUID()
@@ -676,59 +567,27 @@ export async function launchDepositWorkflowAction(companyId: string) {
         .select()
         .single()
 
-      if ((depErr || !newDep) && !ALLOW_LOCAL_FALLBACK) {
+      if ((depErr || !newDep)) {
         console.error('launchDepositWorkflowAction DB error:', depErr?.message)
         return { success: false, depositId: null, error: 'تعذّر الحفظ في قاعدة البيانات. تحقق من الاتصال وحاول مجدداً' }
       }
-      if (depErr || !newDep) {
-        console.warn('launchDepositWorkflowAction Supabase notice, using dual-layer fallback:', depErr?.message)
-        depositId = newDepId
-        const newDepItem = {
-          id: newDepId,
-          company_id: companyId,
-          companies: targetCompany,
-          started_at: startedAt,
-          created_at: new Date().toISOString(),
-          deposit_stages: stagesPayload,
-        }
-        inMemoryDeposits.unshift(newDepItem)
-
-        // حفظ الوديعة في القرص المحلي (ضمان التظهير التام فوراً)
-        const diskDeps = readJsonFile<Array<Record<string, unknown>>>('deposits.json', [])
-        const filteredDeps = diskDeps.filter(d => d.company_id !== companyId)
-        filteredDeps.unshift(newDepItem)
-        writeJsonFile('deposits.json', filteredDeps)
-      } else {
-        depositId = newDep.id
-        const { error: stagesErr } = await supabase.from('deposit_stages').insert(
-          stagesPayload.map(s => ({
-            deposit_id: depositId,
-            stage_key: s.stage_key,
-            stage_order: s.stage_order,
-            label: s.label,
-            critical: s.critical,
-            state: s.state,
-          }))
-        )
-        if (stagesErr) {
-          console.error('launchDepositWorkflowAction stages error:', stagesErr.message)
-          await dbWrite(supabase.from('deposits').delete().eq('id', depositId), 'deposits')
-          return { success: false, depositId: null, error: 'تعذّر إنشاء مراحل الوديعة. حاول مجدداً' }
-        }
-
-        const newDepItem = {
-          id: depositId,
-          company_id: companyId,
-          companies: targetCompany,
-          started_at: startedAt,
-          created_at: new Date().toISOString(),
-          deposit_stages: stagesPayload,
-        }
-        const diskDeps = readJsonFile<Array<Record<string, unknown>>>('deposits.json', [])
-        const filteredDeps = diskDeps.filter(d => d.company_id !== companyId)
-        filteredDeps.unshift(newDepItem)
-        writeJsonFile('deposits.json', filteredDeps)
+      depositId = newDep.id
+      const { error: stagesErr } = await supabase.from('deposit_stages').insert(
+        stagesPayload.map(s => ({
+          deposit_id: depositId,
+          stage_key: s.stage_key,
+          stage_order: s.stage_order,
+          label: s.label,
+          critical: s.critical,
+          state: s.state,
+        }))
+      )
+      if (stagesErr) {
+        console.error('launchDepositWorkflowAction stages error:', stagesErr.message)
+        await dbWrite(supabase.from('deposits').delete().eq('id', depositId), 'deposits')
+        return { success: false, depositId: null, error: 'تعذّر إنشاء مراحل الوديعة. حاول مجدداً' }
       }
+
     }
 
     try {
@@ -868,12 +727,6 @@ export async function getCompany360DataAction(companyId: string) {
     }
 
     if (!company) {
-      const diskCompanies = await readAuthorizedJsonFile<CompanyWithWorkflow[]>('companies.json', [])
-      const inMemCompanies = await getInMemoryCompaniesAction()
-      company = diskCompanies.find(c => c.id === companyId) || inMemCompanies.find(c => c.id === companyId) || null
-    }
-
-    if (!company) {
       return { success: false, error: 'لم يتم العثور على الشركة' }
     }
 
@@ -937,8 +790,8 @@ export async function getCompany360DataAction(companyId: string) {
     } catch (dbErr) {
     rethrowDbError(dbErr)}
 
-    const diskManagers = await readAuthorizedJsonFile<CompanyManager[]>('company_managers.json', [])
-    const diskShareholders = await readAuthorizedJsonFile<CompanyShareholder[]>('company_shareholders.json', [])
+    const diskManagers = ([] as CompanyManager[])
+    const diskShareholders = ([] as CompanyShareholder[])
 
     const finalManagers = (managersData && managersData.length > 0)
       ? managersData
@@ -953,7 +806,7 @@ export async function getCompany360DataAction(companyId: string) {
         : diskShareholders.filter(s => s.company_id === companyId)
 
     if (!depositData) {
-      const diskDeps = await readAuthorizedJsonFile<Array<Record<string, unknown>>>('deposits.json', [])
+      const diskDeps = ([] as Array<Record<string, unknown>>)
       const foundDep = diskDeps.find(d => d.company_id === companyId)
       if (foundDep) {
         depositData = foundDep as unknown as typeof depositData
@@ -972,7 +825,7 @@ export async function getCompany360DataAction(companyId: string) {
     } catch (dbErr) {
     rethrowDbError(dbErr)}
 
-    const diskTax = await readAuthorizedJsonFile<TaxAssessment[]>('tax_assessments.json', [])
+    const diskTax = ([] as TaxAssessment[])
     const diskCompanyTax = diskTax.filter(t => t.company_id === companyId)
     const taxMap = new Map<string, TaxAssessment>()
     taxAssessmentsData.forEach(t => taxMap.set(t.id, t))
@@ -1023,10 +876,9 @@ export async function deleteCompanyAction(companyId: string) {
 
     // 1. Persistent blacklist of deleted company IDs
     try {
-      const deletedIds = readJsonFile<string[]>('deleted_company_ids.json', [])
+      const deletedIds = ([] as string[])
       if (!deletedIds.includes(companyId)) {
         deletedIds.push(companyId)
-        writeJsonFile('deleted_company_ids.json', deletedIds)
       }
     } catch (dbErr) {
     rethrowDbError(dbErr)}
@@ -1061,36 +913,25 @@ export async function deleteCompanyAction(companyId: string) {
       console.warn('Supabase deleteCompany notice:', dbErr)
     }
 
-    // In-memory cache cleanup
-    const inMemIdx = inMemoryCompanies.findIndex(c => c.id === companyId)
-    if (inMemIdx !== -1) inMemoryCompanies.splice(inMemIdx, 1)
-
-    const inDepIdx = inMemoryDeposits.findIndex(d => d.company_id === companyId)
-    if (inDepIdx !== -1) inMemoryDeposits.splice(inDepIdx, 1)
-
     // 3. Clean up from all local Disk JSON files
     try {
       // Companies
-      const diskCompanies = readJsonFile<Array<Record<string, unknown>>>('companies.json', [])
+      const diskCompanies = ([] as Array<Record<string, unknown>>)
       const updatedCompanies = diskCompanies.filter(c => c.id !== companyId)
-      writeJsonFile('companies.json', updatedCompanies)
 
       // Managers
-      const diskManagers = readJsonFile<Array<Record<string, unknown>>>('company_managers.json', [])
-      writeJsonFile('company_managers.json', diskManagers.filter(m => m.company_id !== companyId))
+      const diskManagers = ([] as Array<Record<string, unknown>>)
 
       // Shareholders
-      const diskShareholders = readJsonFile<Array<Record<string, unknown>>>('company_shareholders.json', [])
-      writeJsonFile('company_shareholders.json', diskShareholders.filter(s => s.company_id !== companyId))
+      const diskShareholders = ([] as Array<Record<string, unknown>>)
 
       // IDs
-      const diskIDs = readJsonFile<Array<Record<string, unknown>>>('company_ids.json', [])
-      writeJsonFile('company_ids.json', diskIDs.filter(i => i.company_id !== companyId))
+      const diskIDs = ([] as Array<Record<string, unknown>>)
 
       // Transactions & blacklist their IDs
-      const diskTxs = readJsonFile<Array<Record<string, unknown>>>('transactions.json', [])
+      const diskTxs = ([] as Array<Record<string, unknown>>)
       const txsToDelete = diskTxs.filter(t => t.company_id === companyId || t.id === `tx_${companyId}` || t.id === `tx_tasis_${companyId}`)
-      const deletedTxIds = readJsonFile<string[]>('deleted_transaction_ids.json', [])
+      const deletedTxIds = ([] as string[])
       txsToDelete.forEach(t => {
         if (typeof t.id === 'string' && !deletedTxIds.includes(t.id)) {
           deletedTxIds.push(t.id)
@@ -1098,27 +939,20 @@ export async function deleteCompanyAction(companyId: string) {
       })
       if (!deletedTxIds.includes(`tx_${companyId}`)) deletedTxIds.push(`tx_${companyId}`)
       if (!deletedTxIds.includes(`tx_tasis_${companyId}`)) deletedTxIds.push(`tx_tasis_${companyId}`)
-      writeJsonFile('deleted_transaction_ids.json', deletedTxIds)
-      writeJsonFile('transactions.json', diskTxs.filter(t => t.company_id !== companyId && t.id !== `tx_${companyId}` && t.id !== `tx_tasis_${companyId}`))
 
       // Tax Assessments
-      const diskTax = readJsonFile<Array<Record<string, unknown>>>('tax_assessments.json', [])
-      writeJsonFile('tax_assessments.json', diskTax.filter(t => t.company_id !== companyId))
+      const diskTax = ([] as Array<Record<string, unknown>>)
 
       // Deposits
-      const diskDeposits = readJsonFile<Array<Record<string, unknown>>>('deposits.json', [])
-      writeJsonFile('deposits.json', diskDeposits.filter(d => d.company_id !== companyId))
+      const diskDeposits = ([] as Array<Record<string, unknown>>)
 
       // Financial statements
-      const diskFS = readJsonFile<Array<Record<string, unknown>>>('financial_statements.json', [])
-      writeJsonFile('financial_statements.json', diskFS.filter(f => f.company_id !== companyId))
+      const diskFS = ([] as Array<Record<string, unknown>>)
 
       // Company Timeline & timeline events
-      const diskCompanyTimeline = readJsonFile<Array<Record<string, unknown>>>('company_timeline.json', [])
-      writeJsonFile('company_timeline.json', diskCompanyTimeline.filter(e => e.company_id !== companyId))
+      const diskCompanyTimeline = ([] as Array<Record<string, unknown>>)
 
-      const diskTimeline = readJsonFile<Array<Record<string, unknown>>>('timeline_events.json', [])
-      writeJsonFile('timeline_events.json', diskTimeline.filter(e => e.company_id !== companyId))
+      const diskTimeline = ([] as Array<Record<string, unknown>>)
     } catch (diskErr) {
       rethrowDbError(diskErr)
       console.warn('Disk store cleanup notice:', diskErr)

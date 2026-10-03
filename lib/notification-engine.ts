@@ -12,7 +12,6 @@
  * ⚫ < 0 أيام     ← منتهية الصلاحية (Expired).
  */
 
-import { readAuthorizedJsonFile } from '@/lib/auth/scoped-store'
 import { requirePermission } from '@/lib/auth/require-permission'
 import { createClient } from '@/lib/supabase/server'
 import type { CompanyIDRecord, Company } from '@/types/database'
@@ -221,8 +220,8 @@ export async function getActiveExpiryAlerts(): Promise<ExpiryAlertItem[]> {
 
     // 2. فحص التخزين القرصي المساعد (company_ids.json & companies.json)
     try {
-      const diskIDs = await readAuthorizedJsonFile<CompanyIDRecord[]>('company_ids.json', [])
-      const diskCompanies = await readAuthorizedJsonFile<Company[]>('companies.json', [])
+      const diskIDs = ([] as CompanyIDRecord[])
+      const diskCompanies = ([] as Company[])
       const compMap = new Map<string, string>()
       diskCompanies.forEach(c => compMap.set(c.id, c.name))
 

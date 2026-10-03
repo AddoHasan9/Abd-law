@@ -4,7 +4,6 @@
  * تحلّ محل App.data في نموذج HTML. كل دالة تعيد بيانات مصفّاة
  * بسياسات RLS تلقائياً حسب دور المستخدم.
  */
-import { readAuthorizedJsonFile } from '@/lib/auth/scoped-store'
 import { requirePermission } from '@/lib/auth/require-permission'
 import { createClient } from '@/lib/supabase/server'
 import type { CompanyWithWorkflow, Company, CompanyManager, CompanyShareholder, WorkflowStep } from '@/types/database'
@@ -16,14 +15,14 @@ export async function listCompanies(): Promise<CompanyWithWorkflow[]> {
   if (accessDenied) return []
 
   try {
-    const diskCompanies = await readAuthorizedJsonFile<CompanyWithWorkflow[]>('companies.json', [])
-    const diskManagers = await readAuthorizedJsonFile<CompanyManager[]>('company_managers.json', [])
-    const diskShareholders = await readAuthorizedJsonFile<CompanyShareholder[]>('company_shareholders.json', [])
+    const diskCompanies = ([] as CompanyWithWorkflow[])
+    const diskManagers = ([] as CompanyManager[])
+    const diskShareholders = ([] as CompanyShareholder[])
 
     const supabase = await createClient()
 
     // Check deposits state to accurately promote companies upon deposit release
-    const diskDeposits = await readAuthorizedJsonFile<Array<{ company_id: string; status?: string; deposit_stages?: Array<{ state?: string; stage_key?: string }> }>>('deposits.json', [])
+    const diskDeposits = ([] as Array<{ company_id: string; status?: string; deposit_stages?: Array<{ state?: string; stage_key?: string }> }>)
     const releasedCompanyIds = new Set(
       diskDeposits
         .filter(d => d.status === 'released' || (Array.isArray(d.deposit_stages) && d.deposit_stages.length >= 4 && d.deposit_stages.every(s => s.state === 'done')))
@@ -36,7 +35,7 @@ export async function listCompanies(): Promise<CompanyWithWorkflow[]> {
       .select('*')
       .order('created_at', { ascending: false })
 
-    const deletedIds = new Set(await readAuthorizedJsonFile<string[]>('deleted_company_ids.json', []))
+    const deletedIds = new Set(([] as string[]))
     const map = new Map<string, CompanyWithWorkflow>()
 
     // First load from disk store
@@ -153,8 +152,8 @@ export async function listCompanies(): Promise<CompanyWithWorkflow[]> {
     )
   } catch (e) {
     console.error('Exception in listCompanies:', e)
-    const deletedIds = new Set(await readAuthorizedJsonFile<string[]>('deleted_company_ids.json', []))
-    const diskCompanies = await readAuthorizedJsonFile<CompanyWithWorkflow[]>('companies.json', [])
+    const deletedIds = new Set(([] as string[]))
+    const diskCompanies = ([] as CompanyWithWorkflow[])
     const dedup = new Map<string, CompanyWithWorkflow>()
     diskCompanies.filter(c => !deletedIds.has(c.id)).forEach(c => {
       const norm = c.name?.trim().toLowerCase() || c.id
@@ -170,10 +169,10 @@ export async function getCompany(id: string): Promise<CompanyWithWorkflow | null
   if (accessDenied) return null
 
   try {
-    const diskCompanies = await readAuthorizedJsonFile<CompanyWithWorkflow[]>('companies.json', [])
+    const diskCompanies = ([] as CompanyWithWorkflow[])
     const foundDisk = diskCompanies.find(c => c.id === id)
-    const diskManagers = (await readAuthorizedJsonFile<CompanyManager[]>('company_managers.json', [])).filter(m => m.company_id === id)
-    const diskShareholders = (await readAuthorizedJsonFile<CompanyShareholder[]>('company_shareholders.json', [])).filter(s => s.company_id === id)
+    const diskManagers = (([] as CompanyManager[])).filter(m => m.company_id === id)
+    const diskShareholders = (([] as CompanyShareholder[])).filter(s => s.company_id === id)
 
     const supabase = await createClient()
     const { data } = await supabase
@@ -209,7 +208,7 @@ export async function getCompany(id: string): Promise<CompanyWithWorkflow | null
       workflow_steps: workflowSteps,
     } as CompanyWithWorkflow
   } catch {
-    const diskCompanies = await readAuthorizedJsonFile<CompanyWithWorkflow[]>('companies.json', [])
+    const diskCompanies = ([] as CompanyWithWorkflow[])
     return diskCompanies.find(c => c.id === id) || null
   }
 }

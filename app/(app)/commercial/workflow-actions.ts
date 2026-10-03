@@ -2,7 +2,6 @@
 
 import { revalidatePath } from 'next/cache'
 import { createAdminClient } from '@/lib/supabase/server'
-import { readJsonFile, writeJsonFile } from '@/lib/data/fs-store'
 import { logTimelineEvent } from '@/lib/data/timeline'
 import { getWorkflowStatusConfig, StatusUpdatePayload, AuditLogItem } from '@/lib/workflow-status'
 import { getCurrentUserProfile, requirePermission } from '@/lib/auth/require-permission'
@@ -63,7 +62,7 @@ export async function updateWorkflowStatusAction(payload: StatusUpdatePayload) {
 
     // 2. Update Disk JSON Stores
     if (entityType === 'transaction') {
-      const diskTxs = readJsonFile<Array<Record<string, unknown>>>('transactions.json', [])
+      const diskTxs = ([] as Array<Record<string, unknown>>)
       const idx = diskTxs.findIndex(t => t.id === entityId || (targetCompanyId && t.company_id === targetCompanyId))
       if (idx !== -1) {
         diskTxs[idx].status = toStatus
@@ -77,16 +76,14 @@ export async function updateWorkflowStatusAction(payload: StatusUpdatePayload) {
           updated_at: now.toISOString(),
         })
       }
-      writeJsonFile('transactions.json', diskTxs)
     }
 
     if (targetCompanyId) {
-      const diskCompanies = readJsonFile<Array<Record<string, unknown>>>('companies.json', [])
+      const diskCompanies = ([] as Array<Record<string, unknown>>)
       const cIdx = diskCompanies.findIndex(c => c.id === targetCompanyId)
       if (cIdx !== -1) {
         diskCompanies[cIdx].status = toStatus
         if (extraDetail) diskCompanies[cIdx].status_reason = extraDetail
-        writeJsonFile('companies.json', diskCompanies)
       }
     }
 

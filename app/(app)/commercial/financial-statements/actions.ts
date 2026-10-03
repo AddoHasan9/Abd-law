@@ -1,6 +1,5 @@
 'use server'
 
-import { readAuthorizedJsonFile } from '@/lib/auth/scoped-store'
 import { rethrowDbError } from '@/lib/data/db-guard'
 import { requireRecordAccess } from '@/lib/auth/record-access'
 import { revalidatePath } from 'next/cache'
@@ -9,13 +8,12 @@ import type { FinancialStatement } from '@/types/database'
 import { createNotificationAction } from '@/app/(app)/notifications/actions'
 import { logTimelineEvent } from '@/lib/data/timeline'
 import { getCurrentUserProfile, requirePermission } from '@/lib/auth/require-permission'
-import { readJsonFile, writeJsonFile, ALLOW_LOCAL_FALLBACK } from '@/lib/data/fs-store'
 
 export async function getFinancialStatementsAction(companyId?: string) {
   const accessDenied = await requirePermission('financial_statements', 'view')
   if (accessDenied) return { success: false, data: [], error: accessDenied.error }
 
-  const diskFS = await readAuthorizedJsonFile<FinancialStatement[]>('financial_statements.json', [])
+  const diskFS = ([] as FinancialStatement[])
   try {
     const supabase = await createClient()
     let query = supabase
@@ -200,7 +198,7 @@ export async function createFinancialStatementsBatchAction(payload: {
 
     // Check existing years in database or disk for this company
     const existingYears = new Set<number>()
-    const diskFS = readJsonFile<FinancialStatement[]>('financial_statements.json', [])
+    const diskFS = ([] as FinancialStatement[])
     diskFS
       .filter(x => x.company_id === payload.company_id)
       .forEach(x => existingYears.add(x.year))
@@ -269,33 +267,13 @@ export async function createFinancialStatementsBatchAction(payload: {
       console.error('createFinancialStatementsBatchAction DB error:', e)
     }
 
-    if (insertedRecords.length === 0 && !ALLOW_LOCAL_FALLBACK) {
-      return { success: false, error: 'تعذّر الحفظ في قاعدة البيانات. تحقق من الاتصال وحاول مجدداً' }
-    }
     if (insertedRecords.length === 0) {
-      for (const r of payload.rows) {
-        const item: FinancialStatement = {
-          id: 'fs_' + Math.random().toString(36).substring(2, 9),
-          company_id: payload.company_id,
-          company_name: companyName,
-          year: r.year,
-          date_received: r.date_received || null,
-          date_submitted: r.date_submitted || r.date_submitted_registrar || null,
-          date_submitted_tax: r.date_submitted_tax || null,
-          date_submitted_registrar: r.date_submitted_registrar || r.date_submitted || null,
-          tax_submitted: Boolean(r.date_submitted_tax),
-          registrar_submitted: Boolean(r.date_submitted_registrar || r.date_submitted),
-          notes: r.notes?.trim() || null,
-          created_at: new Date().toISOString(),
-        }
-        insertedRecords.push(item)
-      }
+      return { success: false, error: 'تعذّر الحفظ في قاعدة البيانات. تحقق من الاتصال وحاول مجدداً' }
     }
 
     // Persist to disk store
-    const currentDisk = readJsonFile<FinancialStatement[]>('financial_statements.json', [])
+    const currentDisk = ([] as FinancialStatement[])
     insertedRecords.forEach(rec => currentDisk.unshift(rec))
-    writeJsonFile('financial_statements.json', currentDisk)
 
     // Send summary notification for created batch
     await createNotificationAction({
@@ -376,7 +354,7 @@ export async function updateFinancialStatementAction(
     rethrowDbError(dbErr)}
 
     // Update disk store
-    const diskFS = readJsonFile<FinancialStatement[]>('financial_statements.json', [])
+    const diskFS = ([] as FinancialStatement[])
     const idx = diskFS.findIndex(x => x.id === id)
     if (idx !== -1) {
       if (payload.year !== undefined) diskFS[idx].year = payload.year
@@ -394,7 +372,6 @@ export async function updateFinancialStatementAction(
       if (payload.tax_submitted !== undefined) diskFS[idx].tax_submitted = payload.tax_submitted
       if (payload.registrar_submitted !== undefined) diskFS[idx].registrar_submitted = payload.registrar_submitted
       if (payload.notes !== undefined) diskFS[idx].notes = payload.notes.trim() || null
-      writeJsonFile('financial_statements.json', diskFS)
 
       targetCompanyId = targetCompanyId || diskFS[idx].company_id
       targetYear = targetYear || diskFS[idx].year
@@ -467,8 +444,7 @@ export async function deleteFinancialStatementAction(id: string) {
   try {
     const supabase = createAdminClient()
     try {
-      const diskFS = readJsonFile<FinancialStatement[]>('financial_statements.json', [])
-      writeJsonFile('financial_statements.json', diskFS.filter(x => x.id !== id))
+      const diskFS = ([] as FinancialStatement[])
     } catch (dbErr) {
     rethrowDbError(dbErr)}
 
@@ -481,8 +457,7 @@ export async function deleteFinancialStatementAction(id: string) {
   } catch (dbErr) {
     rethrowDbError(dbErr)
     try {
-      const diskFS = readJsonFile<FinancialStatement[]>('financial_statements.json', [])
-      writeJsonFile('financial_statements.json', diskFS.filter(x => x.id !== id))
+      const diskFS = ([] as FinancialStatement[])
     } catch (dbErr) {
     rethrowDbError(dbErr)}
     return { success: true }

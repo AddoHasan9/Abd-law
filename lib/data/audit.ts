@@ -4,9 +4,7 @@
  * يسجّل كافة عمليات الدخول، الخروج، الإنشاء، التعديل، والحذف
  * في قاعدة بيانات Supabase والتخزين المحلي المزدوج بدقة تامة.
  */
-import { readAuthorizedJsonFile } from '@/lib/auth/scoped-store'
 import { createAdminClient, createClient } from '@/lib/supabase/server'
-import { readJsonFile, writeJsonFile } from '@/lib/data/fs-store'
 
 export interface UserAuditLogEntry {
   id: string
@@ -56,11 +54,10 @@ export async function logUserAuditAction(payload: {
 
   // 1. التخزين المحلي المزدوج (Disk JSON)
   try {
-    const diskLogs = readJsonFile<UserAuditLogEntry[]>('user_audit_logs.json', [])
+    const diskLogs = ([] as UserAuditLogEntry[])
     diskLogs.unshift(entry)
     // الاحتفاظ بآخر 2000 سجل لضمان سرعة الأداء
     if (diskLogs.length > 2000) diskLogs.length = 2000
-    writeJsonFile('user_audit_logs.json', diskLogs)
   } catch (err) {
     console.warn('Audit disk write notice:', err)
   }
@@ -97,7 +94,7 @@ export async function getAuditLogs(filters?: {
   userId?: string
   limit?: number
 }): Promise<UserAuditLogEntry[]> {
-  const diskLogs = await readAuthorizedJsonFile<UserAuditLogEntry[]>('user_audit_logs.json', [])
+  const diskLogs = ([] as UserAuditLogEntry[])
 
   try {
     const supabase = await createClient()

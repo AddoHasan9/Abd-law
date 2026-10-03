@@ -4,7 +4,6 @@ import { requireRecordAccess } from '@/lib/auth/record-access'
 import { dbWrite, rethrowDbError } from '@/lib/data/db-guard'
 import { revalidatePath } from 'next/cache'
 import { createAdminClient } from '@/lib/supabase/server'
-import { readJsonFile, writeJsonFile } from '@/lib/data/fs-store'
 import { logTimelineEvent } from '@/lib/data/timeline'
 import type { CompanyWithWorkflow, CompanyManager } from '@/types/database'
 import { requirePermission } from '@/lib/auth/require-permission'
@@ -66,7 +65,7 @@ export async function createLLCTransactionAction(payload: CreateLLCTransactionPa
     }
 
     const isValidUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(targetCompanyId)
-    const diskCompanies = readJsonFile<CompanyWithWorkflow[]>('companies.json', [])
+    const diskCompanies = ([] as CompanyWithWorkflow[])
 
     // Handle company lookup or creation if typed manually
     if ((!targetCompanyId || !isValidUUID) && compName) {
@@ -106,7 +105,6 @@ export async function createLLCTransactionAction(payload: CreateLLCTransactionPa
             }
 
             diskCompanies.unshift(newCoRecord as unknown as CompanyWithWorkflow)
-            writeJsonFile('companies.json', diskCompanies)
           }
         } catch (e) {
           rethrowDbError(e)
@@ -140,9 +138,8 @@ export async function createLLCTransactionAction(payload: CreateLLCTransactionPa
         console.warn('company_managers insert notice:', mgrErr)
       }
 
-      const diskManagers = readJsonFile<CompanyManager[]>('company_managers.json', [])
+      const diskManagers = ([] as CompanyManager[])
       diskManagers.unshift(mgrObj)
-      writeJsonFile('company_managers.json', diskManagers)
     }
 
     // Prepare Transaction Object
@@ -193,7 +190,7 @@ export async function createLLCTransactionAction(payload: CreateLLCTransactionPa
     }
 
     // Save to Local Disk Store for 100% Reliability
-    const diskTxs = readJsonFile<Array<Record<string, unknown>>>('transactions.json', [])
+    const diskTxs = ([] as Array<Record<string, unknown>>)
     diskTxs.unshift({
       ...txRecord,
       companies: {
@@ -202,7 +199,6 @@ export async function createLLCTransactionAction(payload: CreateLLCTransactionPa
         manager: payload.manager_name || null,
       },
     })
-    writeJsonFile('transactions.json', diskTxs)
 
     // Log Timeline Event
     try {
@@ -264,7 +260,7 @@ export async function updateLLCTransactionAction(payload: UpdateLLCTransactionPa
     const txId = payload.id
     if (!txId) return { success: false, error: 'معرف المعاملة مفقود' }
 
-    const diskTxs = readJsonFile<Array<Record<string, unknown>>>('transactions.json', [])
+    const diskTxs = ([] as Array<Record<string, unknown>>)
     const index = diskTxs.findIndex(t => t.id === txId)
 
     const updates: Record<string, unknown> = {}
@@ -307,7 +303,6 @@ export async function updateLLCTransactionAction(payload: UpdateLLCTransactionPa
         ...updates,
         companies: existingCompany,
       }
-      writeJsonFile('transactions.json', diskTxs)
     }
 
     // Update manager if provided
@@ -324,9 +319,8 @@ export async function updateLLCTransactionAction(payload: UpdateLLCTransactionPa
         await dbWrite(supabase.from('company_managers').insert(mgrObj), 'company_managers')
       } catch (dbErr) {
     rethrowDbError(dbErr)}
-      const diskManagers = readJsonFile<CompanyManager[]>('company_managers.json', [])
+      const diskManagers = ([] as CompanyManager[])
       diskManagers.unshift(mgrObj)
-      writeJsonFile('company_managers.json', diskManagers)
     }
 
     revalidatePath('/commercial/llc')

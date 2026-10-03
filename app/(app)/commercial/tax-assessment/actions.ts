@@ -1,12 +1,10 @@
 'use server'
 
-import { readAuthorizedJsonFile } from '@/lib/auth/scoped-store'
 import { dbWrite, rethrowDbError } from '@/lib/data/db-guard'
 import { requireRecordAccess } from '@/lib/auth/record-access'
 import { revalidatePath } from 'next/cache'
 import { createAdminClient, createClient } from '@/lib/supabase/server'
 import { logTimelineEvent } from '@/lib/data/timeline'
-import { readJsonFile, writeJsonFile } from '@/lib/data/fs-store'
 import { listCompanies } from '@/lib/data/companies'
 import type { Company, TaxAssessment, TransactionFull } from '@/types/database'
 import { requirePermission } from '@/lib/auth/require-permission'
@@ -50,7 +48,7 @@ export async function getTaxAssessmentsAction(companyId?: string): Promise<{ suc
   try {
     const allCompanies = await listCompanies()
     const compMap = new Map<string, string>(allCompanies.map(c => [c.id, c.name]))
-    const diskAssessments = await readAuthorizedJsonFile<TaxAssessment[]>('tax_assessments.json', [])
+    const diskAssessments = ([] as TaxAssessment[])
 
     let dbItems: TaxAssessment[] = []
     try {
@@ -98,7 +96,7 @@ export async function getTaxAssessmentsAction(companyId?: string): Promise<{ suc
   } catch (err: unknown) {
     rethrowDbError(err)
     console.error('getTaxAssessmentsAction exception, using disk store:', err)
-    const diskAssessments = await readAuthorizedJsonFile<TaxAssessment[]>('tax_assessments.json', [])
+    const diskAssessments = ([] as TaxAssessment[])
     const list = companyId ? diskAssessments.filter(x => x.company_id === companyId) : diskAssessments
     return { success: true, data: list }
   }
@@ -125,7 +123,7 @@ export async function createTaxAssessmentAction(payload: CreateTaxAssessmentPayl
     }
 
     // Check duplicate tax assessment for same company + year (Disk + DB)
-    const diskAssessments = readJsonFile<TaxAssessment[]>('tax_assessments.json', [])
+    const diskAssessments = ([] as TaxAssessment[])
     const existingTax = diskAssessments.find(
       t => t.company_id === payload.company_id && Number(t.year) === Number(payload.year)
     )
@@ -214,7 +212,6 @@ export async function createTaxAssessmentAction(payload: CreateTaxAssessmentPayl
 
     // Save to Local Disk Store
     diskAssessments.unshift(newRecord)
-    writeJsonFile('tax_assessments.json', diskAssessments)
 
     // Sync to Commercial Transactions Feed
     const txTypeStr = newRecord.status === 'tax_cleared' ? 'tax-clear' : 'tax-assess'
@@ -260,9 +257,8 @@ export async function createTaxAssessmentAction(payload: CreateTaxAssessmentPayl
     } catch (dbErr) {
     rethrowDbError(dbErr)}
 
-    const diskTxs = readJsonFile<TransactionFull[]>('transactions.json', [])
+    const diskTxs = ([] as TransactionFull[])
     diskTxs.unshift(txRecord)
-    writeJsonFile('transactions.json', diskTxs)
 
     // Log Timeline Event for real companies only
     try {
@@ -304,7 +300,7 @@ export async function updateTaxAssessmentAction(
   if (denied) return denied
 
   try {
-    const diskAssessments = readJsonFile<TaxAssessment[]>('tax_assessments.json', [])
+    const diskAssessments = ([] as TaxAssessment[])
     const idx = diskAssessments.findIndex(a => a.id === id)
     if (idx === -1) {
       return { success: false, error: 'سجل التحاسب الضريبي غير موجود' }
@@ -339,17 +335,15 @@ export async function updateTaxAssessmentAction(
     rethrowDbError(dbErr)}
 
     diskAssessments[idx] = updatedRecord
-    writeJsonFile('tax_assessments.json', diskAssessments)
 
     // Update corresponding transaction in transactions.json
     const isCleared = updatedRecord.status === 'tax_cleared'
-    const diskTxs = readJsonFile<TransactionFull[]>('transactions.json', [])
+    const diskTxs = ([] as TransactionFull[])
     const txIdx = diskTxs.findIndex(t => t.id === id)
     if (txIdx !== -1) {
       diskTxs[txIdx].status = isCleared ? 'completed' : 'in_progress'
       diskTxs[txIdx].type = isCleared ? 'tax-clear' : 'tax-assess'
       if (updatedRecord.clearance_date) diskTxs[txIdx].due_date = updatedRecord.clearance_date
-      writeJsonFile('transactions.json', diskTxs)
     }
 
     try {
@@ -395,13 +389,11 @@ export async function deleteTaxAssessmentAction(id: string): Promise<{ success: 
   if (denied) return denied
 
   try {
-    const diskAssessments = readJsonFile<TaxAssessment[]>('tax_assessments.json', [])
+    const diskAssessments = ([] as TaxAssessment[])
     const filtered = diskAssessments.filter(a => a.id !== id)
-    writeJsonFile('tax_assessments.json', filtered)
 
-    const diskTxs = readJsonFile<TransactionFull[]>('transactions.json', [])
+    const diskTxs = ([] as TransactionFull[])
     const filteredTxs = diskTxs.filter(t => t.id !== id)
-    writeJsonFile('transactions.json', filteredTxs)
 
     try {
       const supabase = createAdminClient()

@@ -9,7 +9,6 @@ import { revalidatePath } from 'next/cache'
 import { createAdminClient } from '@/lib/supabase/server'
 import { logTimelineEvent } from '@/lib/data/timeline'
 import { createNotificationAction } from '@/app/(app)/notifications/actions'
-import { readJsonFile, writeJsonFile, ALLOW_LOCAL_FALLBACK } from '@/lib/data/fs-store'
 import type { CompanyWithWorkflow } from '@/types/database'
 import { requirePermission } from '@/lib/auth/require-permission'
 
@@ -67,7 +66,7 @@ export async function confirmDepositSubmissionAction(depositId: string) {
     } catch (dbErr) {
     rethrowDbError(dbErr)}
 
-    const diskDeposits = readJsonFile<DiskDeposit[]>('deposits.json', [])
+    const diskDeposits = ([] as DiskDeposit[])
     const targetDep = diskDeposits.find(d => d.id === depositId)
     if (targetDep && Array.isArray(targetDep.deposit_stages)) {
       const submitStage = targetDep.deposit_stages.find(s => s.stage_key === 'submit')
@@ -75,7 +74,6 @@ export async function confirmDepositSubmissionAction(depositId: string) {
         submitStage.state = 'done'
         submitStage.at_date = today
       }
-      writeJsonFile('deposits.json', diskDeposits)
     }
 
     revalidatePath('/commercial/deposits')
@@ -130,16 +128,16 @@ export async function updateDepositStageStateAction(
           })
           .eq('id', stageId)
         if (stErr) throw stErr
-      } else if (!ALLOW_LOCAL_FALLBACK) {
+      } else {
         return { success: false, error: 'مرحلة الوديعة غير محفوظة في قاعدة البيانات. أعد إطلاق مسار الوديعة من ملف الشركة' }
       }
     } catch (dbErr) {
       console.error('updateDepositStageStateAction DB error:', dbErr)
-      if (!ALLOW_LOCAL_FALLBACK) return { success: false, error: 'تعذّر الحفظ في قاعدة البيانات. تحقق من الاتصال وحاول مجدداً' }
+      return { success: false, error: 'تعذّر الحفظ في قاعدة البيانات. تحقق من الاتصال وحاول مجدداً' }
     }
 
     // 2. Update in local deposits.json
-    const diskDeposits = readJsonFile<DiskDeposit[]>('deposits.json', [])
+    const diskDeposits = ([] as DiskDeposit[])
     let targetDep = diskDeposits.find(d => d.id === depositId || (companyId && d.company_id === companyId))
     if (!targetDep) {
       targetDep = diskDeposits.find(d => 
@@ -199,7 +197,6 @@ export async function updateDepositStageStateAction(
     }
 
     // 3. Save deposits.json immediately!
-    writeJsonFile('deposits.json', diskDeposits)
 
     // 4. Check if all stages are done to complete release
     const finalCompanyId = companyId || targetDep?.company_id
@@ -207,7 +204,6 @@ export async function updateDepositStageStateAction(
       const allStagesDone = targetDep.deposit_stages.every(s => s.state === 'done')
       if (allStagesDone && finalCompanyId) {
         targetDep.status = 'released'
-        writeJsonFile('deposits.json', diskDeposits)
 
         // Upgrade Company to established in DB and disk store
         try {
@@ -238,17 +234,16 @@ export async function updateDepositStageStateAction(
           console.warn('DB company established update notice:', dbUpErr)
         }
 
-        const diskCompanies = readJsonFile<CompanyWithWorkflow[]>('companies.json', [])
+        const diskCompanies = ([] as CompanyWithWorkflow[])
         const coIdx = diskCompanies.findIndex(c => c.id === finalCompanyId)
         if (coIdx !== -1) {
           diskCompanies[coIdx].status = 'established'
           diskCompanies[coIdx].deposit_released = true
           diskCompanies[coIdx].deposit_released_at = targetAtDate || new Date().toISOString().slice(0, 10)
-          writeJsonFile('companies.json', diskCompanies)
         }
 
         // Update corresponding formation transaction in transactions.json
-        const diskTxs = readJsonFile<Array<Record<string, unknown>>>('transactions.json', [])
+        const diskTxs = ([] as Array<Record<string, unknown>>)
         let txUpdated = false
         diskTxs.forEach(tx => {
           if (tx.company_id === finalCompanyId && (tx.type === 'formation' || tx.type === 'tasis')) {
@@ -257,7 +252,6 @@ export async function updateDepositStageStateAction(
           }
         })
         if (txUpdated) {
-          writeJsonFile('transactions.json', diskTxs)
         }
 
         try {
@@ -310,7 +304,7 @@ export async function uploadCompanyBarcodeAction(stageId: string, companyId: str
     const today = new Date().toISOString().slice(0, 10)
 
     // 1. Update deposits.json on disk
-    const diskDeposits = readJsonFile<DiskDeposit[]>('deposits.json', [])
+    const diskDeposits = ([] as DiskDeposit[])
     const depIdx = diskDeposits.findIndex(d => d.company_id === companyId)
     if (depIdx === -1) {
       const newDep: DiskDeposit = {
@@ -358,21 +352,19 @@ export async function uploadCompanyBarcodeAction(stageId: string, companyId: str
         }
       }
     }
-    writeJsonFile('deposits.json', diskDeposits)
 
     // 2. Update company in companies.json
-    const diskCompanies = readJsonFile<CompanyWithWorkflow[]>('companies.json', [])
+    const diskCompanies = ([] as CompanyWithWorkflow[])
     const coIdx = diskCompanies.findIndex(c => c.id === companyId)
     if (coIdx !== -1) {
       diskCompanies[coIdx].status = 'established'
       diskCompanies[coIdx].deposit_released = true
       diskCompanies[coIdx].deposit_released_at = today
       diskCompanies[coIdx].barcode_url = barcodeDataUrl
-      writeJsonFile('companies.json', diskCompanies)
     }
 
     // 3. Update transactions.json
-    const diskTxs = readJsonFile<Array<Record<string, unknown>>>('transactions.json', [])
+    const diskTxs = ([] as Array<Record<string, unknown>>)
     let txUpdated = false
     diskTxs.forEach(tx => {
       if (tx.company_id === companyId && (tx.type === 'formation' || tx.type === 'tasis')) {
@@ -381,7 +373,6 @@ export async function uploadCompanyBarcodeAction(stageId: string, companyId: str
       }
     })
     if (txUpdated) {
-      writeJsonFile('transactions.json', diskTxs)
     }
 
     // 4. Update Supabase

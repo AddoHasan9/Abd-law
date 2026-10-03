@@ -3,7 +3,6 @@
 import { revalidatePath } from 'next/cache'
 import { rethrowDbError } from '@/lib/data/db-guard'
 import { createAdminClient } from '@/lib/supabase/server'
-import { readJsonFile, writeJsonFile } from '@/lib/data/fs-store'
 import { getCurrentUserProfile, requirePermission } from '@/lib/auth/require-permission'
 import type { Settings } from '@/types/database'
 
@@ -106,7 +105,7 @@ export async function getGeneralSettingsAction(): Promise<{ success: boolean; da
     const { data, error } = await supabase.from('settings').select('*').eq('id', 1).single()
 
     if (error || !data) {
-      const fallback = readJsonFile<Settings>('general_settings.json', {
+      const fallback = ({
         id: 1,
         office_name: 'مكتب المحامي عبد الحسن الخزرجي',
         penalty_days: 37,
@@ -115,7 +114,7 @@ export async function getGeneralSettingsAction(): Promise<{ success: boolean; da
         penalty_max: 5000000,
         currency: 'IQD',
         updated_at: new Date().toISOString(),
-      })
+      } as Settings)
       return { success: true, data: fallback }
     }
 
@@ -143,7 +142,6 @@ export async function updateGeneralSettingsAction(payload: Partial<Settings>): P
     }
 
     // Update local store
-    writeJsonFile('general_settings.json', updateData)
 
     revalidatePath('/settings')
     revalidatePath('/dashboard')
@@ -159,7 +157,7 @@ export async function getWorkflowTemplatesAction(): Promise<{ success: boolean; 
   if (!(await getCurrentUserProfile())) return { success: false, data: {} }
   try {
     const { data } = await createAdminClient().from('settings').select('workflow_templates').eq('id', 1).maybeSingle()
-    const stored = (data?.workflow_templates as Record<string, WorkflowTemplate> | null) ?? readJsonFile<Record<string, WorkflowTemplate>>('workflow_templates.json', {})
+    const stored = (data?.workflow_templates as Record<string, WorkflowTemplate> | null) ?? ({} as Record<string, WorkflowTemplate>)
     const merged: Record<string, WorkflowTemplate> = { ...DEFAULT_WORKFLOW_TEMPLATES, ...stored }
     if (merged.formation && merged.formation.steps.some(s => s.id === 'online_submission' || s.id === 'chamber_approval')) {
       merged.formation = DEFAULT_WORKFLOW_TEMPLATES.formation
@@ -181,7 +179,6 @@ export async function saveWorkflowTemplatesAction(
   try {
     const { error } = await createAdminClient().from('settings').update({ workflow_templates: templates }).eq('id', 1)
     if (error) throw error
-    writeJsonFile('workflow_templates.json', templates)
     revalidatePath('/settings')
     revalidatePath('/commercial/llc')
     revalidatePath('/commercial')

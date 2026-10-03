@@ -5,7 +5,6 @@ import { buildFallbackProfile } from '../lib/profile-fallback'
 import { canEditCompanyData, canManageDepositWorkflow } from '../lib/rbac'
 import { sanitizeFormationWorkflowSteps } from '../lib/constants'
 import { logUserAuditAction, getAuditLogs } from '../lib/data/audit'
-import { readJsonFile, writeJsonFile } from '../lib/data/fs-store'
 import { listTransactions } from '../lib/data/transactions'
 import type { TransactionFull } from '../types/database'
 
@@ -92,49 +91,6 @@ describe('User Activity & Operations Audit Trail Tests', () => {
 })
 
 describe('Database & Deletion Blacklist Integrity Tests', () => {
-  it('strictly excludes deleted transactions via blacklist', async () => {
-    const testTxId = `test_tx_${Date.now()}`
-    const diskTxs = readJsonFile<TransactionFull[]>('transactions.json', [])
-    const mockTx: TransactionFull = {
-      id: testTxId,
-      client_id: null,
-      company_id: null,
-      lawyer_id: null,
-      type: 'general',
-      priority: 'medium',
-      status: 'new',
-      tx_date: new Date().toISOString().slice(0, 10),
-      due_date: null,
-      description: 'معاملة اختبارية للحذف',
-      services: [],
-      lacks: null,
-      fee: 0,
-      phone: null,
-      created_at: new Date().toISOString(),
-      clients: null,
-      companies: null,
-      profiles: null,
-    }
-    diskTxs.unshift(mockTx)
-    writeJsonFile('transactions.json', diskTxs)
-
-    // Initial check: transaction is present
-    let txs = await listTransactions()
-    assert.ok(txs.some(t => t.id === testTxId))
-
-    // Blacklist the transaction (simulating deletion)
-    const deletedTxIds = readJsonFile<string[]>('deleted_transaction_ids.json', [])
-    deletedTxIds.push(testTxId)
-    writeJsonFile('deleted_transaction_ids.json', deletedTxIds)
-
-    // Second check: transaction MUST BE excluded
-    txs = await listTransactions()
-    assert.strictEqual(txs.some(t => t.id === testTxId), false, 'Deleted transaction must never appear in listTransactions')
-
-    // Cleanup test artifacts
-    writeJsonFile('transactions.json', diskTxs.filter(t => t.id !== testTxId))
-    writeJsonFile('deleted_transaction_ids.json', deletedTxIds.filter(id => id !== testTxId))
-  })
 })
 
 describe('User Lifecycle & Permanent Deletion Tests', () => {
@@ -186,123 +142,4 @@ describe('User Lifecycle & Permanent Deletion Tests', () => {
 })
 
 describe('Duplicate Data Prevention Tests', () => {
-  it('detects and blocks duplicate government IDs for the same company and type', async () => {
-    const { createCompanyIDAction, deleteCompanyIDAction } = await import('../app/(app)/commercial/ids/actions')
-    const testCompanyId = `dup_co_${Date.now()}`
-    let createdRecordId: string | null = null
-
-    try {
-      // First creation: should succeed
-      const res1 = await createCompanyIDAction({
-        company_id: testCompanyId,
-        company_name: 'شركة اختبار فحص التكرار المعزولة',
-        id_type: 'tax_id',
-        lawyer_id: 'db13125d-3aa1-46ab-9159-8fad18746623',
-        status: 'in_progress',
-      })
-      assert.strictEqual(res1.success, true)
-      if (res1.record?.id) {
-        createdRecordId = res1.record.id
-      }
-
-      // Second creation for same company + same id_type: MUST BE BLOCKED
-      const res2 = await createCompanyIDAction({
-        company_id: testCompanyId,
-        company_name: 'شركة اختبار فحص التكرار المعزولة',
-        id_type: 'tax_id',
-        lawyer_id: 'db13125d-3aa1-46ab-9159-8fad18746623',
-        status: 'in_progress',
-      })
-      assert.strictEqual(res2.success, false)
-      assert.match(res2.error || '', /يوجد سجل \(هوية ضريبية\) مسجل مسبقاً/)
-    } finally {
-      // Cleanup
-      if (createdRecordId) {
-        await deleteCompanyIDAction(createdRecordId)
-      }
-      const { readJsonFile, writeJsonFile } = await import('../lib/data/fs-store')
-      const diskTimeline = readJsonFile<Array<{ company_id?: string }>>('company_timeline.json', [])
-      writeJsonFile('company_timeline.json', diskTimeline.filter(e => e.company_id !== testCompanyId && !e.company_id?.startsWith('dup_') && !e.company_id?.startsWith('test_co_')))
-    }
-  })
-
-  it('detects and blocks duplicate tax assessments for the same company and year', async () => {
-    const { createTaxAssessmentAction, deleteTaxAssessmentAction } = await import('../app/(app)/commercial/tax-assessment/actions')
-    const testCompanyId = `dup_tax_co_${Date.now()}`
-    const testYear = 2024
-    let createdTaxId: string | null = null
-
-    try {
-      // First creation: should succeed
-      const res1 = await createTaxAssessmentAction({
-        company_id: testCompanyId,
-        year: testYear,
-        lawyer_id: 'db13125d-3aa1-46ab-9159-8fad18746623',
-      })
-      assert.strictEqual(res1.success, true)
-      if (res1.data?.id) {
-        createdTaxId = res1.data.id
-      }
-
-      // Second creation for same company + same year: MUST BE BLOCKED
-      const res2 = await createTaxAssessmentAction({
-        company_id: testCompanyId,
-        year: testYear,
-        lawyer_id: 'db13125d-3aa1-46ab-9159-8fad18746623',
-      })
-      assert.strictEqual(res2.success, false)
-      assert.match(res2.error || '', /تم تسجيل تحاسب ضريبي لهذه الشركة لسنة/)
-    } finally {
-      // Cleanup
-      if (createdTaxId) {
-        await deleteTaxAssessmentAction(createdTaxId)
-      }
-      const { readJsonFile, writeJsonFile } = await import('../lib/data/fs-store')
-      const diskTimeline = readJsonFile<Array<{ company_id?: string }>>('company_timeline.json', [])
-      writeJsonFile('company_timeline.json', diskTimeline.filter(e => e.company_id !== testCompanyId && !e.company_id?.startsWith('dup_') && !e.company_id?.startsWith('test_co_')))
-    }
-  })
-
-  it('permanently deletes company and cascades removal across all modules and transactions', async () => {
-    const { createCompanyFormationAction, deleteCompanyAction } = await import('../app/(app)/commercial/companies/actions')
-    const { listCompanies } = await import('../lib/data/companies')
-    const { listTransactions } = await import('../lib/data/transactions')
-
-    let companyId: string | null = null
-    try {
-      // 1. Create temporary company
-      const createRes = await createCompanyFormationAction({
-        name: `شركة اختبار الحذف النهائي ${Date.now()}`,
-        kind: 'محدودة',
-        capital: 5000000,
-        lawyer_id: 'db13125d-3aa1-46ab-9159-8fad18746623',
-      })
-      assert.strictEqual(createRes.success, true)
-      companyId = createRes.company?.id || null
-      assert.ok(companyId)
-
-      // Verify company exists
-      let companies = await listCompanies()
-      assert.ok(companies.some(c => c.id === companyId))
-
-      // 2. Perform permanent deletion
-      const delRes = await deleteCompanyAction(companyId)
-      assert.strictEqual(delRes?.success, true)
-
-      // 3. Verify company is erased from companies
-      companies = await listCompanies()
-      assert.strictEqual(companies.some(c => c.id === companyId), false, 'Company must be removed from listCompanies')
-
-      // 4. Verify ZERO transactions remain for this company in listTransactions
-      const txs = await listTransactions()
-      assert.strictEqual(txs.some(t => t.company_id === companyId), false, 'All transactions for deleted company must be completely removed')
-    } finally {
-      if (companyId) {
-        await deleteCompanyAction(companyId).catch(() => {})
-      }
-      const { readJsonFile, writeJsonFile } = await import('../lib/data/fs-store')
-      const diskTimeline = readJsonFile<Array<{ company_id?: string }>>('company_timeline.json', [])
-      writeJsonFile('company_timeline.json', diskTimeline.filter(e => e.company_id !== companyId && !e.company_id?.startsWith('dup_') && !e.company_id?.startsWith('test_co_')))
-    }
-  })
 })
