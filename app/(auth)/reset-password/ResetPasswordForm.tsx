@@ -57,8 +57,8 @@ export default function ResetPasswordForm() {
     e.preventDefault()
     setError(null)
 
-    if (password.length < 8) {
-      setError('كلمة المرور يجب أن تكون 8 أحرف على الأقل')
+    if (password.length < 12) {
+      setError('كلمة المرور يجب أن تكون 12 حرفاً على الأقل')
       return
     }
 

@@ -4,6 +4,7 @@ import { Toaster } from '@/components/ui/Toaster'
 import { ConfirmHost } from '@/components/ui/ConfirmDialog'
 import { ModalManager } from '@/components/ui/ModalManager'
 import { TableStacker } from '@/components/ui/TableStacker'
+import { BoosthisScript } from '@/components/BoosthisScript'
 import { QueryProvider } from '@/components/providers/QueryProvider'
 import '@/styles/globals.css'
 
@@ -31,7 +32,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="ar" dir="rtl" data-theme="light" data-scroll-behavior="smooth" className={cairo.variable} suppressHydrationWarning>
       <head>
-        <meta id="theme-color-meta" name="theme-color" content="#FFFFFF" />
+        <meta id="theme-color-meta" name="theme-color" content="#EEF2F6" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
 
@@ -54,7 +55,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               } else {
                 document.documentElement.classList.remove('dark');
               }
-              var color = t === 'dark' ? '#0F131A' : '#FFFFFF';
+              var color = t === 'dark' ? '#0F131A' : '#EEF2F6';
+              document.documentElement.style.colorScheme = t;
               var meta = document.getElementById('theme-color-meta');
               if (meta) { meta.setAttribute('content', color); }
               var allMetas = document.querySelectorAll('meta[name="theme-color"]');
@@ -71,6 +73,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <ConfirmHost />
           <ModalManager />
             <TableStacker />
+            <BoosthisScript />
           {children}
         </QueryProvider>
       </body>

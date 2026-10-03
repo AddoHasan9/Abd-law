@@ -42,6 +42,9 @@ export async function createNotificationAction(payload: {
   related_company_id?: string
   link_url?: string
 }) {
+  // عملية خادم قابلة للاستدعاء من المتصفح: لحساب فعّال فقط، والروابط داخلية فقط (منع روابط الاحتيال)
+  if (!(await getCurrentUserProfile())) return { success: false as const, error: 'الحساب غير مخول' }
+  if (payload.link_url && !/^\/(?!\/)/.test(payload.link_url)) payload = { ...payload, link_url: undefined }
   const profile = await getCurrentUserProfile()
   if (!profile) {
     return { success: false, error: 'يجب تسجيل الدخول لإرسال إشعار' }
@@ -64,7 +67,7 @@ export async function createNotificationAction(payload: {
 
     if (error) {
       console.error('createNotificationAction insert error:', error.message)
-      return { success: false, error: error.message }
+      return { success: false, error: 'تعذر إتمام العملية — حاول مرة أخرى' }
     }
 
     try {
@@ -97,7 +100,7 @@ export async function markNotificationReadAction(id: string) {
 
     if (error) {
       console.error('markNotificationReadAction error:', error.message)
-      return { success: false, error: error.message }
+      return { success: false, error: 'تعذر إتمام العملية — حاول مرة أخرى' }
     }
 
     revalidatePath('/commercial')
@@ -126,7 +129,7 @@ export async function markAllNotificationsReadAction() {
 
     if (error) {
       console.error('markAllNotificationsReadAction error:', error.message)
-      return { success: false, error: error.message }
+      return { success: false, error: 'تعذر إتمام العملية — حاول مرة أخرى' }
     }
 
     revalidatePath('/commercial')

@@ -42,7 +42,7 @@ export async function sendCompanyWhatsAppAction(payload: {
 
     if (error) {
       console.error('sendCompanyWhatsAppAction comms insert error:', error.message)
-      return { success: false, error: error.message }
+      return { success: false, error: 'تعذر إتمام العملية — حاول مرة أخرى' }
     }
 
     revalidatePath(`/commercial/companies/${payload.company_id}`)

@@ -20,6 +20,10 @@ export default function NotificationCenter({ initialCount = 0 }: Props) {
   const [isOpen, setIsOpen] = useState(false)
   const [notifications, setNotifications] = useState<NotificationItem[]>([])
   const [unreadCount, setUnreadCount] = useState(initialCount)
+  // مصدر واحد للعدد: يُبلَّغ به الشريط العلوي (قائمة الحساب) حتى لا يظهر رقمان مختلفان
+  useEffect(() => {
+    window.dispatchEvent(new CustomEvent('notif-count', { detail: unreadCount }))
+  }, [unreadCount])
   const [filter, setFilter] = useState<'all' | 'unread'>('all')
   const [loading, setLoading] = useState(false)
 

@@ -9,11 +9,12 @@ const isDev = process.env.NODE_ENV !== 'production'
 const supabase = 'https://*.supabase.co'
 const csp = [
   "default-src 'self'",
-  `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ''} https://vercel.live`,
+  // www.boosthis.com: سكربت قياس الأداء واتصالاته
+  `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ''} https://vercel.live https://www.boosthis.com`,
   "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
   "font-src 'self' data: https://fonts.gstatic.com",
-  `img-src 'self' data: blob: ${supabase}`,
-  `connect-src 'self' ${supabase} wss://*.supabase.co https://vercel.live wss://ws-us3.pusher.com`,
+  `img-src 'self' data: blob: ${supabase} https://www.boosthis.com`,
+  `connect-src 'self' ${supabase} wss://*.supabase.co https://vercel.live wss://ws-us3.pusher.com https://www.boosthis.com`,
   "worker-src 'self' blob:",
   // معاينة ملفات الباركود (PDF محفوظ كـ data:) وشريط معاينة Vercel
   "frame-src 'self' data: blob: https://vercel.live",

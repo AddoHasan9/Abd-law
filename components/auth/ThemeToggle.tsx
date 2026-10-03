@@ -1,43 +1,20 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { applyTheme, currentTheme, onThemeChange } from '@/lib/theme'
 import { Sun, Moon } from 'lucide-react'
 
 export function ThemeToggle() {
   const [dark, setDark] = useState(false)
   const [mounted, setMounted] = useState(false)
 
-  const applyTheme = (isDark: boolean) => {
-    const themeStr = isDark ? 'dark' : 'light'
-    document.documentElement.dataset.theme = themeStr
-    if (isDark) {
-      document.documentElement.classList.add('dark')
-    } else {
-      document.documentElement.classList.remove('dark')
-    }
-    const color = isDark ? '#0B0E14' : '#EEF2F6' // نفس خلفية صفحة الدخول
-    const meta = document.getElementById('theme-color-meta') || document.querySelector('meta[name="theme-color"]')
-    if (meta) meta.setAttribute('content', color)
-    document.querySelectorAll('meta[name="theme-color"]').forEach(m => m.setAttribute('content', color))
-    try {
-      localStorage.setItem('theme', themeStr)
-    } catch {}
-  }
-
   useEffect(() => {
     setMounted(true)
-    const savedTheme = localStorage.getItem('theme')
-    const currentAttr = document.documentElement.dataset.theme
-    const isDark = savedTheme ? savedTheme === 'dark' : currentAttr === 'dark' || document.documentElement.classList.contains('dark')
-    setDark(isDark)
-    applyTheme(isDark)
+    setDark(currentTheme() === 'dark')
+    return onThemeChange(t => setDark(t === 'dark'))
   }, [])
 
-  const toggle = () => {
-    const next = !dark
-    setDark(next)
-    applyTheme(next)
-  }
+  const toggle = () => applyTheme(dark ? 'light' : 'dark')
 
   if (!mounted) {
     return (

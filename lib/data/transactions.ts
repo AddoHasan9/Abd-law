@@ -5,6 +5,7 @@
  * سياسة RLS تتكفّل بذلك على مستوى القاعدة.
  */
 import { readAuthorizedJsonFile } from '@/lib/auth/scoped-store'
+import { txType } from '@/lib/constants'
 import { requirePermission } from '@/lib/auth/require-permission'
 import { createAdminClient, createClient } from '@/lib/supabase/server'
 import type { TransactionFull, Company } from '@/types/database'
@@ -172,7 +173,7 @@ export async function listTransactions(filters?: {
           priority: 'medium',
           tx_date: idRec.tx_start_date || (idRec.created_at ? idRec.created_at.slice(0, 10) : ''),
           due_date: idRec.expiry_date || null,
-          description: `إصدار ${idTypeStr}: ${compName}`,
+          description: `${txType(idTypeStr).label}: ${compName}`,
           services: [idTypeStr],
           lacks: null,
           fee: null,

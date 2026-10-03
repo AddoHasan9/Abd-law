@@ -12,7 +12,7 @@ const PUBLIC_PATHS = ['/login', '/auth', '/reset-password']
 
 export async function middleware(request: NextRequest) {
   const path = request.nextUrl.pathname
-  const isPublic = PUBLIC_PATHS.some(p => path.startsWith(p))
+  const isPublic = PUBLIC_PATHS.some(p => path === p || path.startsWith(p + '/'))
 
   // Fast cookie detection — if no auth tokens exist in cookies, skip network roundtrips
   const allCookies = request.cookies.getAll()

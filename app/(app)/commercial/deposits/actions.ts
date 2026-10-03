@@ -297,6 +297,14 @@ export async function uploadCompanyBarcodeAction(stageId: string, companyId: str
   const denied = await requirePermission('deposits', 'release')
   if (denied) return denied
 
+  // التحقق من الملف على الخادم: صورة أو PDF فقط، وحد أقصى للحجم (لا نثق بفحص المتصفح وحده)
+  if (!/^data:(image\/(png|jpeg|webp|gif)|application\/pdf);base64,[A-Za-z0-9+/=]+$/.test(barcodeDataUrl || '')) {
+    return { success: false as const, error: 'الملف غير صالح: يُقبل PNG أو JPG أو WebP أو PDF فقط' }
+  }
+  if (barcodeDataUrl.length > 7_000_000) {
+    return { success: false as const, error: 'حجم الملف كبير جداً (الحد الأقصى 5 ميغابايت)' }
+  }
+
   try {
     const supabase = createAdminClient()
     const today = new Date().toISOString().slice(0, 10)

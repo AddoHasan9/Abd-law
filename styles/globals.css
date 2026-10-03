@@ -3279,3 +3279,10 @@ html[data-theme="dark"] .page-head.tone-violet { --tone: #a78bfa; } html[data-th
 .id-icon-btn:hover { background: var(--surface-2); color: var(--text); }
 .id-icon-btn.is-danger:hover { color: #e11d48; border-color: color-mix(in srgb, #e11d48 30%, transparent); background: color-mix(in srgb, #e11d48 7%, var(--surface)); }
 @media (pointer: coarse) { .id-icon-btn { width: 38px; height: 38px; } }
+
+/* «دليل الاستخدام» في الشريط الجانبي (بدل الزر العائم) */
+.side-help { width: 100%; border: 0; background: none; font: inherit; cursor: pointer; margin-top: 6px; }
+/* اختصارات لوحة المفاتيح لا معنى لها على اللمس */
+@media (pointer: coarse) { .kbd { display: none !important; } }
+/* شرائح الأسبوع/الشهر/السنة: مسافة ثابتة بين الكلمة والرقم */
+.kpi-chips > span { display: inline-flex; align-items: center; gap: 5px; }

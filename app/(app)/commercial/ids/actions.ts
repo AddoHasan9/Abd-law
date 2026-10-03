@@ -476,6 +476,9 @@ export async function completeCompanyIDAction(
     grade?: string
   }
 ) {
+  // فحص الصلاحية على الخادم (لا يكفي إخفاء الزر في الواجهة)
+  const denied = await requirePermission('government_ids', 'create')
+  if (denied) return denied
   return updateCompanyIDAction(id, {
     id_number: payload.id_number,
     issue_date: payload.issue_date,
