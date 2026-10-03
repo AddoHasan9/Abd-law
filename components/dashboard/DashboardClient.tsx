@@ -307,7 +307,7 @@ export default function DashboardClient({ stats, profiles = [], companies = [] }
                     <div className="space-y-1 pt-1 border-t border-[color:color-mix(in_srgb,var(--line-soft)_50%,transparent)]">
                       <div className="flex items-center justify-between text-[10.5px] font-bold">
                         <span className="text-[var(--text-3)]">نسبة الإشغال:</span>
-                        <span className={`font-mono ${isFree ? 'text-emerald-600 dark:text-emerald-400' : 'text-[var(--accent)]'}`}>
+                        <span className={`num ${isFree ? 'text-emerald-600 dark:text-emerald-400' : 'text-[var(--accent)]'}`}>
                           {isFree ? '0% (طاقة شاغرة)' : `${percent}% من الطاقة الاستيعابية`}
                         </span>
                       </div>
@@ -323,7 +323,7 @@ export default function DashboardClient({ stats, profiles = [], companies = [] }
 
                     {/* Bottom Micro Details: Direct Contact / Email */}
                     {(lawyer.email || lawyer.phone) && (
-                      <div className="flex items-center justify-between text-[10.5px] text-[var(--text-3)] font-mono pt-1 border-t border-[color:color-mix(in_srgb,var(--line-soft)_40%,transparent)] truncate">
+                      <div className="flex items-center justify-between text-[10.5px] text-[var(--text-3)] num pt-1 border-t border-[color:color-mix(in_srgb,var(--line-soft)_40%,transparent)] truncate">
                         <span className="truncate" dir="ltr">
                           {lawyer.phone || lawyer.email}
                         </span>
@@ -342,7 +342,7 @@ export default function DashboardClient({ stats, profiles = [], companies = [] }
 
         {/* Workflow Status Distribution (Span 6) */}
         <div className="lg:col-span-6 flex flex-col gap-3">
-          <DataPanel className="h-full flex flex-col" icon="pie_chart" title="حالات سير العمل في النظام" subtitle="توزيع الشركات والمعاملات حسب المرحلة" count={stats.totalCompaniesCount + stats.activeTxCount} unit="بند">
+          <DataPanel className="h-full flex flex-col" icon="pie_chart" title="حالات سير العمل في النظام" subtitle="توزيع المعاملات حسب المرحلة" count={stats.statusDistribution.reduce((a, x) => a + x.count, 0)} unit="بند">
             <div className="p-3 sm:p-4 flex flex-col gap-3 flex-1">
             
 

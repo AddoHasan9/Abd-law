@@ -50,6 +50,9 @@ const SERVICE_TYPE_STYLES: Record<string, { label: string; bg: string; color: st
   'importer-id-new': { label: 'إصدار هوية مستورد', bg: 'rgba(6, 182, 212, 0.08)', color: '#0891b2', border: '1px solid rgba(6, 182, 212, 0.25)' },
   'importer-id-renew': { label: 'تجديد هوية مستورد', bg: 'rgba(6, 182, 212, 0.08)', color: '#0891b2', border: '1px solid rgba(6, 182, 212, 0.25)' },
   'importer_id': { label: 'هوية مستورد', bg: 'rgba(6, 182, 212, 0.08)', color: '#0891b2', border: '1px solid rgba(6, 182, 212, 0.25)' },
+  'tax_id': { label: 'هوية ضريبية', bg: 'rgba(16, 185, 129, 0.08)', color: '#059669', border: '1px solid rgba(16, 185, 129, 0.25)' },
+  'chamber_id': { label: 'هوية الغرفة التجارية', bg: 'rgba(249, 115, 22, 0.08)', color: '#ea580c', border: '1px solid rgba(249, 115, 22, 0.25)' },
+  'planning_id': { label: 'هوية التخطيط', bg: 'rgba(245, 158, 11, 0.08)', color: '#d97706', border: '1px solid rgba(245, 158, 11, 0.25)' },
 }
 
 function getPersonInCharge(co?: CompanyWithWorkflow | Company | null): { name: string; roleLabel: string } {

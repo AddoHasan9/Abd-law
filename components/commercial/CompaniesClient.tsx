@@ -321,7 +321,9 @@ export default function CompaniesClient({ initialCompanies }: Props) {
                       <span>{co.kind ?? 'شركة'}</span>
                     </p>
                   </div>
-                  <span className={`co-pill co-card-status ${isEstablished ? 'is-ok' : 'is-warn'}`}>{isEstablished ? 'مؤسسة' : 'قيد التأسيس'}</span>
+                  <span className={`co-pill co-card-status ${isEstablished ? 'is-ok' : co.cert_date ? 'is-info' : 'is-warn'}`}>
+                    {isEstablished ? 'مؤسسة' : co.cert_date ? 'إطلاق الوديعة' : 'قيد التأسيس'}
+                  </span>
                 </header>
 
                 <dl className="co-card-facts">

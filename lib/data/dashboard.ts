@@ -197,13 +197,7 @@ export async function getDashboardStats(): Promise<DashboardStats> {
     priorityCounts[t.priority] = (priorityCounts[t.priority] || 0) + 1
   }
 
-  // Also include companies status if needed
-  for (const c of companies) {
-    if (c.status) {
-      const canonical = normalizeWorkflowStatus(c.status)
-      statusCounts[canonical] = (statusCounts[canonical] || 0) + 1
-    }
-  }
+  // المعاملات فقط — مراحل الشركات معروضة في «تأسيس الشركات» (خلطهما كان يعطي مجموعاً لا يطابق أي رقم)
 
   const statusDistribution = WORKFLOW_STATUS_LIST.map(cfg => {
     let count = statusCounts[cfg.key] || 0

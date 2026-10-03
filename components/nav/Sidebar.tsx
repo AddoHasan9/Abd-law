@@ -219,6 +219,14 @@ export default function Sidebar({
       <nav className="side-nav" aria-label="أقسام التطبيق">
         {NAV.map(renderGroup)}
         <DeadlineCard deadlines={deadlines} item={deadline} />
+        <button
+          type="button"
+          className="nav-item side-help hover:-translate-x-0.5 transition duration-150"
+          onClick={() => { window.dispatchEvent(new Event('open-help')); onNavigate?.() }}
+        >
+          <Icon name="info" className="icon shrink-0" />
+          <span className="truncate flex-1 text-right">دليل الاستخدام</span>
+        </button>
       </nav>
     </aside>
   )

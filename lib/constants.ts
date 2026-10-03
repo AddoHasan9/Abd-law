@@ -42,6 +42,10 @@ export const TX_TYPES: TxType[] = [
   { id: 'importer-id-new', label: 'إصدار هوية مستورد', identity: 'new' },
   { id: 'importer-id-renew', label: 'تجديد هوية مستورد', identity: 'renew' },
   { id: 'importer_id',   label: 'هوية مستورد',       identity: 'new' },
+  // أنواع سجلات قسم الهويات كما تُخزَّن (كانت تظهر «سجل غير مكتمل» في قائمة المعاملات)
+  { id: 'tax_id',        label: 'هوية ضريبية',       identity: 'new' },
+  { id: 'chamber_id',    label: 'هوية الغرفة التجارية', identity: 'new' },
+  { id: 'planning_id',   label: 'هوية التخطيط',      identity: 'new' },
   { id: 'contract-tax',  label: 'تحاسب عقد غير متحاسب' },
   { id: 'ss-include',    label: 'شمول ضمان' },
   { id: 'ss-statement',  label: 'كشف ضمان اجتماعي' },

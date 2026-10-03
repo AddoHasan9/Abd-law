@@ -263,18 +263,7 @@ export default function QuickHelpGuide() {
 
   return (
     <>
-      {/* Floating Help Trigger Button */}
-      <button
-        type="button"
-        onClick={() => setIsOpen(true)}
-        className="help-fab fixed bottom-6 left-6 z-40 w-12 h-12 rounded-full bg-gradient-to-tr from-[#2563EB] to-[#38BDF8] text-white font-black text-xl shadow-[0_8px_25px_rgba(37,99,235,0.45)] border-2 border-white/25 flex items-center justify-center hover:scale-110 active:scale-95 transition-all duration-300 group cursor-pointer"
-        aria-label="دليل الاستخدام والمساعدة"
-        title="دليل الصفحة واستخدام النظام"
-      >
-        <span className="material-symbols-outlined text-[24px] group-hover:rotate-12 transition-transform">help</span>
-        <span className="absolute -top-0.5 -right-0.5 w-3 h-3 rounded-full bg-emerald-400 border-2 border-[#070D18] animate-pulse" />
-      </button>
-
+      {/* يُفتح من «دليل الاستخدام» في الشريط الجانبي (حدث open-help) — لا زر عائم يغطي المحتوى */}
       {/* Guide Modal Overlay */}
       {isOpen && (
         <div
