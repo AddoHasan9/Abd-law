@@ -2844,8 +2844,8 @@ input.auth-input {
   font-size: 13px; font-weight: 700; color: var(--text-2); transition: background-color .15s ease, color .15s ease, border-color .15s ease;
 }
 .tools-filter button .num { font-size: 11px; min-width: 18px; height: 18px; padding: 0 5px; display: grid; place-items: center; border-radius: 99px; background: var(--surface-2); color: var(--text-3); }
-.tools-filter button.is-on { background: var(--text); border-color: var(--text); color: var(--surface); }
-.tools-filter button.is-on .num { background: color-mix(in srgb, var(--surface) 20%, transparent); color: var(--surface); }
+.tools-filter button.is-on { background: var(--accent); border-color: var(--accent); color: #fff; }
+.tools-filter button.is-on .num { background: rgba(255,255,255,.25); color: #fff; }
 
 .tools-cards { display: grid; gap: 16px; grid-template-columns: repeat(3, minmax(0, 1fr)); align-items: stretch; }
 .tool-card.is-wide { grid-column: 1 / -1; }
@@ -3286,3 +3286,6 @@ html[data-theme="dark"] .page-head.tone-violet { --tone: #a78bfa; } html[data-th
 @media (pointer: coarse) { .kbd { display: none !important; } }
 /* شرائح الأسبوع/الشهر/السنة: مسافة ثابتة بين الكلمة والرقم */
 .kpi-chips > span { display: inline-flex; align-items: center; gap: 5px; }
+
+/* عدّاد داخل زر أزرق (مثل «الكل» في الودائع): كان أزرق على أزرق فلا يُقرأ */
+.btn-primary .nav-num { background: rgba(255,255,255,.25) !important; color: #fff !important; }
