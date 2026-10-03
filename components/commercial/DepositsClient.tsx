@@ -230,7 +230,6 @@ export default function DepositsClient({ deposits = [], companyId }: Props) {
 
       <div className="page-head" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px' }}>
         <div>
-          <h2 className="page-title">إدارة إطلاق الوديعة والمحطات الأربع الإلزامية</h2>
           <span className="count-note num">إجمالي الودائع المسجلة: {depositsList.length} شركة</span>
         </div>
 
@@ -342,7 +341,7 @@ export default function DepositsClient({ deposits = [], companyId }: Props) {
                         {company?.name ?? '—'}
                       </div>
                       <div style={{ fontSize: '11px', color: 'var(--text-3)', marginTop: '3px' }}>
-                        أُطلقت بتاريخ <span className="num">{formatDate(dep.started_at)}</span>
+                        بدأت المتابعة <span className="num">{formatDate(dep.started_at)}</span>
                       </div>
                     </div>
                   </div>
