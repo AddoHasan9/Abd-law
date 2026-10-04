@@ -12,7 +12,7 @@ import { WORKFLOW, sanitizeFormationWorkflowSteps } from '@/lib/constants'
 import type { WfState, CompanyWithWorkflow, CompanyManager, CompanyShareholder, CompanyIDRecord, FinancialStatement, DepositStage, Trademark, TaxAssessment } from '@/types/database'
 import { createNotificationAction } from '@/app/(app)/notifications/actions'
 import { logTimelineEvent, getCompanyTimeline, type TimelineEvent } from '@/lib/data/timeline'
-import { getCurrentUserProfile, requirePermission } from '@/lib/auth/require-permission'
+import { requirePermission } from '@/lib/auth/require-permission'
 
 function generateUUID() {
   if (typeof crypto !== 'undefined' && crypto.randomUUID) {
@@ -60,7 +60,6 @@ export async function createCompanyFormationAction(payload: {
     const supabase = createAdminClient()
 
     const name = payload.name.trim()
-    const lawyer_id = payload.lawyer_id?.trim() || 'db13125d-3aa1-46ab-9159-8fad18746623'
 
     // منع تكرار الشركات بالاسم نفسه — من قاعدة البيانات (الملفات المؤقتة معطّلة في الإنتاج فكان الفحص لا يعمل)
     const existingActive = await findCompanyByName(name)
@@ -148,8 +147,6 @@ export async function createCompanyFormationAction(payload: {
         rethrowDbError(dbErr)
         // Ignored
       }
-      const diskManagers = ([] as CompanyManager[])
-      diskManagers.unshift(managerObj)
     }
 
     // إضافة المساهمين في جدول company_shareholders عند وجود مساهمين
@@ -167,15 +164,6 @@ export async function createCompanyFormationAction(payload: {
         rethrowDbError(dbErr)
         // Ignored
       }
-      const diskShs = ([] as CompanyShareholder[])
-      diskShs.push(...shObjs)
-    }
-
-    // حفظ الشركة في القرص المحلي (ضمان التخزين وعدم اختفاء البيانات إطلاقاً)
-    if (company) {
-      const diskCompanies = ([] as CompanyWithWorkflow[])
-      const filtered = diskCompanies.filter(c => c.id !== company!.id)
-      filtered.unshift(company)
     }
 
     // 3. إضافة معاملة تأسيس الشركة وسعرها والخدمات المشمولة
@@ -216,10 +204,6 @@ export async function createCompanyFormationAction(payload: {
       rethrowDbError(dbErr)
       // Ignored
     }
-
-    // حفظ المعاملة قرصياً في الفايل
-    const diskTxs = ([] as Array<Record<string, unknown>>)
-    diskTxs.unshift(txObj)
 
     // إرسال إشعار تلقائي للقسم التجاري
     try {
@@ -351,13 +335,6 @@ export async function updateCompanyDetailsAction(
       error = retry.error
     }
 
-    // Update disk JSON store with the complete rich payload (including tax_no, registrar_no, reservation letter)
-    const diskCompanies = ([] as CompanyWithWorkflow[])
-    const diskIdx = diskCompanies.findIndex(c => c.id === companyId)
-    if (diskIdx !== -1) {
-      Object.assign(diskCompanies[diskIdx], updateData)
-    }
-
     if (error) {
       console.error('updateCompanyDetailsAction DB error:', error.message)
       return { success: false, error: 'تعذّر الحفظ في قاعدة البيانات. تحقق من الاتصال وحاول مجدداً' }
@@ -426,17 +403,6 @@ export async function updateCompanyDetailsAction(
       } catch (shErr) {
         rethrowDbError(shErr)
         console.warn('company_shareholders update notice:', shErr)
-      }
-
-      const diskShs = ([] as CompanyShareholder[])
-      const filteredDiskShs = diskShs.filter(s => s.company_id !== companyId)
-      filteredDiskShs.push(...shObjs)
-
-      // تحديث قائمة المساهمين داخل كائن الشركة في ملف companies.json
-      const diskCompanies = ([] as CompanyWithWorkflow[])
-      const coIdx = diskCompanies.findIndex(c => c.id === companyId)
-      if (coIdx !== -1) {
-        diskCompanies[coIdx].shareholders = shObjs
       }
     }
 
@@ -790,28 +756,8 @@ export async function getCompany360DataAction(companyId: string) {
     } catch (dbErr) {
     rethrowDbError(dbErr)}
 
-    const diskManagers = ([] as CompanyManager[])
-    const diskShareholders = ([] as CompanyShareholder[])
-
-    const finalManagers = (managersData && managersData.length > 0)
-      ? managersData
-      : (company.managers && company.managers.length > 0)
-        ? company.managers
-        : diskManagers.filter(m => m.company_id === companyId)
-
-    const finalShareholders = (shareholdersData && shareholdersData.length > 0)
-      ? shareholdersData
-      : (company.shareholders && company.shareholders.length > 0)
-        ? company.shareholders
-        : diskShareholders.filter(s => s.company_id === companyId)
-
-    if (!depositData) {
-      const diskDeps = ([] as Array<Record<string, unknown>>)
-      const foundDep = diskDeps.find(d => d.company_id === companyId)
-      if (foundDep) {
-        depositData = foundDep as unknown as typeof depositData
-      }
-    }
+    const finalManagers = managersData?.length ? managersData : (company.managers || [])
+    const finalShareholders = shareholdersData?.length ? shareholdersData : (company.shareholders || [])
 
     // 8. Fetch Tax Assessments for Company
     let taxAssessmentsData: TaxAssessment[] = []
@@ -825,12 +771,7 @@ export async function getCompany360DataAction(companyId: string) {
     } catch (dbErr) {
     rethrowDbError(dbErr)}
 
-    const diskTax = ([] as TaxAssessment[])
-    const diskCompanyTax = diskTax.filter(t => t.company_id === companyId)
-    const taxMap = new Map<string, TaxAssessment>()
-    taxAssessmentsData.forEach(t => taxMap.set(t.id, t))
-    diskCompanyTax.forEach(t => taxMap.set(t.id, { ...(taxMap.get(t.id) || {}), ...t }))
-    const finalTaxAssessments = Array.from(taxMap.values()).sort((a, b) => b.year - a.year)
+    const finalTaxAssessments = [...taxAssessmentsData].sort((a, b) => b.year - a.year)
 
     return {
       success: true,
@@ -874,16 +815,7 @@ export async function deleteCompanyAction(companyId: string) {
   try {
     const supabase = createAdminClient()
 
-    // 1. Persistent blacklist of deleted company IDs
-    try {
-      const deletedIds = ([] as string[])
-      if (!deletedIds.includes(companyId)) {
-        deletedIds.push(companyId)
-      }
-    } catch (dbErr) {
-    rethrowDbError(dbErr)}
-
-    // 2. Delete from Supabase Database (cascade or manual deletion of related records)
+    // 1. الحذف من قاعدة البيانات (cascade or manual deletion of related records)
     try {
       // Find deposits for this company to delete deposit stages first
       const { data: depRows } = await supabase.from('deposits').select('id').eq('company_id', companyId)
@@ -913,52 +845,7 @@ export async function deleteCompanyAction(companyId: string) {
       console.warn('Supabase deleteCompany notice:', dbErr)
     }
 
-    // 3. Clean up from all local Disk JSON files
-    try {
-      // Companies
-      const diskCompanies = ([] as Array<Record<string, unknown>>)
-      const updatedCompanies = diskCompanies.filter(c => c.id !== companyId)
-
-      // Managers
-      const diskManagers = ([] as Array<Record<string, unknown>>)
-
-      // Shareholders
-      const diskShareholders = ([] as Array<Record<string, unknown>>)
-
-      // IDs
-      const diskIDs = ([] as Array<Record<string, unknown>>)
-
-      // Transactions & blacklist their IDs
-      const diskTxs = ([] as Array<Record<string, unknown>>)
-      const txsToDelete = diskTxs.filter(t => t.company_id === companyId || t.id === `tx_${companyId}` || t.id === `tx_tasis_${companyId}`)
-      const deletedTxIds = ([] as string[])
-      txsToDelete.forEach(t => {
-        if (typeof t.id === 'string' && !deletedTxIds.includes(t.id)) {
-          deletedTxIds.push(t.id)
-        }
-      })
-      if (!deletedTxIds.includes(`tx_${companyId}`)) deletedTxIds.push(`tx_${companyId}`)
-      if (!deletedTxIds.includes(`tx_tasis_${companyId}`)) deletedTxIds.push(`tx_tasis_${companyId}`)
-
-      // Tax Assessments
-      const diskTax = ([] as Array<Record<string, unknown>>)
-
-      // Deposits
-      const diskDeposits = ([] as Array<Record<string, unknown>>)
-
-      // Financial statements
-      const diskFS = ([] as Array<Record<string, unknown>>)
-
-      // Company Timeline & timeline events
-      const diskCompanyTimeline = ([] as Array<Record<string, unknown>>)
-
-      const diskTimeline = ([] as Array<Record<string, unknown>>)
-    } catch (diskErr) {
-      rethrowDbError(diskErr)
-      console.warn('Disk store cleanup notice:', diskErr)
-    }
-
-    // 3. Revalidate all relevant application pages
+    // 2. تحديث الصفحات
     try {
       revalidatePath('/commercial/companies-registry')
       revalidatePath('/commercial/companies')

@@ -9,39 +9,8 @@ import { revalidatePath } from 'next/cache'
 import { createAdminClient } from '@/lib/supabase/server'
 import { logTimelineEvent } from '@/lib/data/timeline'
 import { createNotificationAction } from '@/app/(app)/notifications/actions'
-import type { CompanyWithWorkflow } from '@/types/database'
 import { requirePermission } from '@/lib/auth/require-permission'
 
-interface DiskStage {
-  id: string
-  deposit_id?: string
-  stage_key: string
-  stage_order: number
-  label: string
-  critical?: boolean
-  state: 'done' | 'idle' | 'progress'
-  at_date?: string | null
-  notes?: string | null
-  by_id?: string | null
-  created_at?: string
-}
-
-interface DiskDeposit {
-  id: string
-  company_id: string
-  status?: string
-  started_at?: string
-  created_at?: string
-  deposit_stages?: DiskStage[]
-  companies?: unknown
-}
-
-const STANDARD_STAGES_CONFIG = [
-  { stage_key: 'submit', stage_order: 1, label: 'أُرسلت على النظام (حاسمة)', critical: true },
-  { stage_key: 'advisor', stage_order: 2, label: 'كتاب المشاور مكتمل', critical: false },
-  { stage_key: 'accountant', stage_order: 3, label: 'كتاب المحاسب مكتمل', critical: false },
-  { stage_key: 'barcode', stage_order: 4, label: 'رفع باركود / QR الشركة (أو PDF)', critical: false },
-]
 
 export async function confirmDepositSubmissionAction(depositId: string) {
   const rowDenied = await requireRecordAccess('deposits', depositId)
@@ -65,16 +34,6 @@ export async function confirmDepositSubmissionAction(depositId: string) {
         .eq('stage_key', 'submit'), 'deposit_stages')
     } catch (dbErr) {
     rethrowDbError(dbErr)}
-
-    const diskDeposits = ([] as DiskDeposit[])
-    const targetDep = diskDeposits.find(d => d.id === depositId)
-    if (targetDep && Array.isArray(targetDep.deposit_stages)) {
-      const submitStage = targetDep.deposit_stages.find(s => s.stage_key === 'submit')
-      if (submitStage) {
-        submitStage.state = 'done'
-        submitStage.at_date = today
-      }
-    }
 
     revalidatePath('/commercial/deposits')
     revalidatePath('/commercial/companies')
@@ -136,122 +95,29 @@ export async function updateDepositStageStateAction(
       return { success: false, error: 'تعذّر الحفظ في قاعدة البيانات. تحقق من الاتصال وحاول مجدداً' }
     }
 
-    // 2. Update in local deposits.json
-    const diskDeposits = ([] as DiskDeposit[])
-    let targetDep = diskDeposits.find(d => d.id === depositId || (companyId && d.company_id === companyId))
-    if (!targetDep) {
-      targetDep = diskDeposits.find(d => 
-        Array.isArray(d.deposit_stages) && d.deposit_stages.some(s => s.id === stageId)
-      )
-    }
+    // 2. هل اكتملت المحطات الأربع كلها؟ (من قاعدة البيانات) ← إطلاق الوديعة وترقية الشركة
+    //    (كانت تُفحص على نسخة وهمية كل محطاتها «انتظار» فلا يتحقق الإطلاق من هنا أبداً)
+    if (newState === 'done') {
+      const { data: stageRow } = await supabase.from('deposit_stages').select('deposit_id').eq('id', stageId).single()
+      const depId = depositId || stageRow?.deposit_id
+      const { data: dep } = depId
+        ? await supabase.from('deposits').select('id, company_id, status, deposit_stages(state)').eq('id', depId).single()
+        : { data: null }
+      const stages = ((dep?.deposit_stages ?? []) as Array<{ state: string }>)
+      const finalCompanyId = companyId || dep?.company_id
+      const allStagesDone = stages.length >= 4 && stages.every(s => s.state === 'done')
 
-    if (!targetDep && (depositId || companyId)) {
-      targetDep = {
-        id: depositId || `dep_${companyId}`,
-        company_id: companyId || '',
-        status: 'active',
-        started_at: new Date().toISOString().slice(0, 10),
-        created_at: new Date().toISOString(),
-        deposit_stages: STANDARD_STAGES_CONFIG.map(c => ({
-          id: `stage_${c.stage_key}_${depositId || companyId}`,
-          deposit_id: depositId || `dep_${companyId}`,
-          stage_key: c.stage_key,
-          stage_order: c.stage_order,
-          label: c.label,
-          state: 'idle' as const,
-          at_date: null,
-          notes: null,
-          by_id: null,
-          created_at: new Date().toISOString(),
-        }))
-      }
-      diskDeposits.push(targetDep)
-    }
-
-    if (targetDep) {
-      // Ensure all 4 stages exist
-      if (!Array.isArray(targetDep.deposit_stages) || targetDep.deposit_stages.length < 4) {
-        const existing = Array.isArray(targetDep.deposit_stages) ? targetDep.deposit_stages : []
-        targetDep.deposit_stages = STANDARD_STAGES_CONFIG.map(c => {
-          const ex = existing.find(s => s.stage_key === c.stage_key || (c.stage_key === 'advisor' && s.stage_key === 'consultant'))
-          return {
-            id: ex?.id || `stage_${c.stage_key}_${targetDep?.id}`,
-            deposit_id: targetDep?.id,
-            stage_key: c.stage_key,
-            stage_order: c.stage_order,
-            label: c.label,
-            state: ex?.state || 'idle',
-            at_date: ex?.at_date || null,
-            notes: ex?.notes || null,
-            by_id: ex?.by_id || null,
-            created_at: ex?.created_at || new Date().toISOString(),
-          }
-        })
-      }
-
-      const stageIdx = targetDep.deposit_stages.findIndex(s => s.id === stageId || (stageId.includes(s.stage_key)))
-      if (stageIdx !== -1) {
-        targetDep.deposit_stages[stageIdx].state = newState
-        targetDep.deposit_stages[stageIdx].at_date = targetAtDate
-      }
-    }
-
-    // 3. Save deposits.json immediately!
-
-    // 4. Check if all stages are done to complete release
-    const finalCompanyId = companyId || targetDep?.company_id
-    if (targetDep && Array.isArray(targetDep.deposit_stages) && newState === 'done') {
-      const allStagesDone = targetDep.deposit_stages.every(s => s.state === 'done')
-      if (allStagesDone && finalCompanyId) {
-        targetDep.status = 'released'
-
-        // Upgrade Company to established in DB and disk store
+      if (dep && finalCompanyId && dep.status !== 'released' && allStagesDone) {
+        const releasedAt = targetAtDate || new Date().toISOString().slice(0, 10)
         try {
-          // 1. Basic status update (guaranteed to succeed across DB schemas)
           await dbWrite(supabase
             .from('companies')
-            .update({ status: 'established' })
+            .update({ status: 'established', deposit_released: true, deposit_released_at: releasedAt })
             .eq('id', finalCompanyId), 'companies')
-
-          // 2. Extended fields if columns exist
-          try {
-            await dbWrite(supabase
-              .from('companies')
-              .update({
-                deposit_released: true,
-                deposit_released_at: targetAtDate || new Date().toISOString().slice(0, 10),
-              })
-              .eq('id', finalCompanyId), 'companies')
-          } catch (dbErr) {
-    rethrowDbError(dbErr)}
-
-          await dbWrite(supabase
-            .from('deposits')
-            .update({ status: 'released' })
-            .eq('id', targetDep.id), 'deposits')
+          await dbWrite(supabase.from('deposits').update({ status: 'released' }).eq('id', dep.id), 'deposits')
         } catch (dbUpErr) {
           rethrowDbError(dbUpErr)
           console.warn('DB company established update notice:', dbUpErr)
-        }
-
-        const diskCompanies = ([] as CompanyWithWorkflow[])
-        const coIdx = diskCompanies.findIndex(c => c.id === finalCompanyId)
-        if (coIdx !== -1) {
-          diskCompanies[coIdx].status = 'established'
-          diskCompanies[coIdx].deposit_released = true
-          diskCompanies[coIdx].deposit_released_at = targetAtDate || new Date().toISOString().slice(0, 10)
-        }
-
-        // Update corresponding formation transaction in transactions.json
-        const diskTxs = ([] as Array<Record<string, unknown>>)
-        let txUpdated = false
-        diskTxs.forEach(tx => {
-          if (tx.company_id === finalCompanyId && (tx.type === 'formation' || tx.type === 'tasis')) {
-            tx.status = 'done'
-            txUpdated = true
-          }
-        })
-        if (txUpdated) {
         }
 
         try {
@@ -262,7 +128,8 @@ export async function updateDepositStageStateAction(
             related_link: '/commercial/companies-registry',
           })
         } catch (dbErr) {
-    rethrowDbError(dbErr)}
+          rethrowDbError(dbErr)
+        }
       }
     }
 
@@ -303,79 +170,7 @@ export async function uploadCompanyBarcodeAction(stageId: string, companyId: str
     const supabase = createAdminClient()
     const today = new Date().toISOString().slice(0, 10)
 
-    // 1. Update deposits.json on disk
-    const diskDeposits = ([] as DiskDeposit[])
-    const depIdx = diskDeposits.findIndex(d => d.company_id === companyId)
-    if (depIdx === -1) {
-      const newDep: DiskDeposit = {
-        id: `dep_${companyId}`,
-        company_id: companyId,
-        status: 'released',
-        started_at: today,
-        created_at: new Date().toISOString(),
-        deposit_stages: STANDARD_STAGES_CONFIG.map(c => ({
-          id: `stage_${c.stage_key}_dep_${companyId}`,
-          deposit_id: `dep_${companyId}`,
-          stage_key: c.stage_key,
-          stage_order: c.stage_order,
-          label: c.label,
-          state: 'done' as const,
-          at_date: today,
-          notes: c.stage_key === 'barcode' ? barcodeDataUrl : null,
-          by_id: null,
-          created_at: new Date().toISOString(),
-        }))
-      }
-      diskDeposits.push(newDep)
-    } else {
-      diskDeposits[depIdx].status = 'released'
-      if (!Array.isArray(diskDeposits[depIdx].deposit_stages) || (diskDeposits[depIdx].deposit_stages?.length ?? 0) < 4) {
-        diskDeposits[depIdx].deposit_stages = STANDARD_STAGES_CONFIG.map(c => ({
-          id: `stage_${c.stage_key}_${diskDeposits[depIdx].id}`,
-          deposit_id: diskDeposits[depIdx].id,
-          stage_key: c.stage_key,
-          stage_order: c.stage_order,
-          label: c.label,
-          state: 'done' as const,
-          at_date: today,
-          notes: c.stage_key === 'barcode' ? barcodeDataUrl : null,
-          by_id: null,
-          created_at: new Date().toISOString(),
-        }))
-      } else {
-        const stages = diskDeposits[depIdx].deposit_stages || []
-        const bStage = stages.find(s => s.stage_key === 'barcode' || s.id === stageId)
-        if (bStage) {
-          bStage.state = 'done'
-          bStage.at_date = today
-          bStage.notes = barcodeDataUrl
-        }
-      }
-    }
-
-    // 2. Update company in companies.json
-    const diskCompanies = ([] as CompanyWithWorkflow[])
-    const coIdx = diskCompanies.findIndex(c => c.id === companyId)
-    if (coIdx !== -1) {
-      diskCompanies[coIdx].status = 'established'
-      diskCompanies[coIdx].deposit_released = true
-      diskCompanies[coIdx].deposit_released_at = today
-      diskCompanies[coIdx].barcode_url = barcodeDataUrl
-    }
-
-    // 3. Update transactions.json
-    const diskTxs = ([] as Array<Record<string, unknown>>)
-    let txUpdated = false
-    diskTxs.forEach(tx => {
-      if (tx.company_id === companyId && (tx.type === 'formation' || tx.type === 'tasis')) {
-        tx.status = 'done'
-        txUpdated = true
-      }
-    })
-    if (txUpdated) {
-    }
-
-    // 4. Update Supabase
+    // تحديث قاعدة البيانات
     try {
       if (stageId && !stageId.startsWith('mem_') && !stageId.startsWith('stage_')) {
         await dbWrite(supabase

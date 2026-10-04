@@ -7,7 +7,7 @@
 import { requirePermission } from '@/lib/auth/require-permission'
 import { createClient } from '@/lib/supabase/server'
 import type { CompanyWithWorkflow, Company, CompanyManager, CompanyShareholder, WorkflowStep } from '@/types/database'
-import { WORKFLOW, sanitizeFormationWorkflowSteps } from '@/lib/constants'
+import { sanitizeFormationWorkflowSteps } from '@/lib/constants'
 
 /** كل الشركات مع مخططاتها، مرتّبة بالأحدث */
 export async function listCompanies(): Promise<CompanyWithWorkflow[]> {
@@ -15,151 +15,63 @@ export async function listCompanies(): Promise<CompanyWithWorkflow[]> {
   if (accessDenied) return []
 
   try {
-    const diskCompanies = ([] as CompanyWithWorkflow[])
-    const diskManagers = ([] as CompanyManager[])
-    const diskShareholders = ([] as CompanyShareholder[])
-
     const supabase = await createClient()
-
-    // Check deposits state to accurately promote companies upon deposit release
-    const diskDeposits = ([] as Array<{ company_id: string; status?: string; deposit_stages?: Array<{ state?: string; stage_key?: string }> }>)
-    const releasedCompanyIds = new Set(
-      diskDeposits
-        .filter(d => d.status === 'released' || (Array.isArray(d.deposit_stages) && d.deposit_stages.length >= 4 && d.deposit_stages.every(s => s.state === 'done')))
-        .map(d => d.company_id)
-    )
-
-    // Fetch primary company records
     const { data: companiesData } = await supabase
       .from('companies')
       .select('*')
       .order('created_at', { ascending: false })
+    if (!companiesData?.length) return []
 
-    const deletedIds = new Set(([] as string[]))
-    const map = new Map<string, CompanyWithWorkflow>()
+    // الجداول المرتبطة بطلبات منفصلة (تفادي التداخل العميق في الاستعلام)
+    const companyIds = companiesData.map(c => c.id)
+    const [stepsRes, managersRes, shareholdersRes] = await Promise.all([
+      supabase.from('workflow_steps').select('*').in('company_id', companyIds),
+      supabase.from('company_managers').select('*').in('company_id', companyIds),
+      supabase.from('company_shareholders').select('*').in('company_id', companyIds),
+    ])
+    const group = <T extends { company_id: string }>(rows: T[] | null) => {
+      const m = new Map<string, T[]>()
+      for (const r of rows || []) {
+        if (!m.has(r.company_id)) m.set(r.company_id, [])
+        m.get(r.company_id)!.push(r)
+      }
+      return m
+    }
+    const stepsMap = group<WorkflowStep>(stepsRes.data)
+    const managersMap = group<CompanyManager>(managersRes.data)
+    const shareholdersMap = group<CompanyShareholder>(shareholdersRes.data)
 
-    // First load from disk store
-    diskCompanies.forEach(c => {
-      if (deletedIds.has(c.id)) return
-      const isDepositReleased = releasedCompanyIds.has(c.id) || Boolean(c.deposit_released) || c.status === 'established' || c.status === 'registered' || c.status === 'active'
+    const companies = companiesData.map(c => {
+      const isDepositReleased = Boolean(c.deposit_released) || ['established', 'registered', 'active'].includes(c.status)
       const status = isDepositReleased ? 'established' : (c.status || 'forming')
-      const isEstablished = status === 'established'
-      const workflowSteps = sanitizeFormationWorkflowSteps(c.workflow_steps, c.id, isEstablished, c.created_at)
-      const managers = diskManagers.filter(m => m.company_id === c.id)
-      const activeManager = managers.find(m => m.active)?.name || managers[0]?.name || c.manager
-      const shareholders = diskShareholders.filter(s => s.company_id === c.id)
-      map.set(c.id, {
+      const rawSteps = (stepsMap.get(c.id) || []).sort((a, b) => (a.step_order || 0) - (b.step_order || 0))
+      const managers = managersMap.get(c.id) || []
+      return {
         ...c,
         status,
         deposit_released: isDepositReleased,
-        workflow_steps: workflowSteps,
-        manager: activeManager,
-        managers: managers.length > 0 ? managers : c.managers,
-        shareholders: shareholders.length > 0 ? shareholders : c.shareholders,
-      })
+        manager: managers.find(m => m.active)?.name || managers[0]?.name || c.manager || null,
+        managers,
+        shareholders: shareholdersMap.get(c.id) || [],
+        workflow_steps: sanitizeFormationWorkflowSteps(rawSteps, c.id, status === 'established', c.created_at),
+      } as CompanyWithWorkflow
     })
 
-    if (companiesData && companiesData.length > 0) {
-      const companyIds = companiesData.map(c => c.id)
-
-      // Fetch related tables individually to prevent deep nesting serialization errors
-      const [stepsRes, managersRes, shareholdersRes] = await Promise.all([
-        supabase.from('workflow_steps').select('*').in('company_id', companyIds),
-        supabase.from('company_managers').select('*').in('company_id', companyIds),
-        supabase.from('company_shareholders').select('*').in('company_id', companyIds),
-      ])
-
-      const stepsMap = new Map<string, WorkflowStep[]>()
-      ;(stepsRes.data || []).forEach(step => {
-        if (!stepsMap.has(step.company_id)) stepsMap.set(step.company_id, [])
-        stepsMap.get(step.company_id)!.push(step)
-      })
-
-      const managersMap = new Map<string, CompanyManager[]>()
-      ;(managersRes.data || []).forEach(m => {
-        if (!managersMap.has(m.company_id)) managersMap.set(m.company_id, [])
-        managersMap.get(m.company_id)!.push(m)
-      })
-
-      const shareholdersMap = new Map<string, CompanyShareholder[]>()
-      ;(shareholdersRes.data || []).forEach(s => {
-        if (!shareholdersMap.has(s.company_id)) shareholdersMap.set(s.company_id, [])
-        shareholdersMap.get(s.company_id)!.push(s)
-      })
-
-      companiesData.forEach(c => {
-        if (deletedIds.has(c.id)) return
-
-        const diskCo = diskCompanies.find(dc => dc.id === c.id)
-        const isDepositReleased = releasedCompanyIds.has(c.id) || Boolean(c.deposit_released) || Boolean(diskCo?.deposit_released) || c.status === 'established' || diskCo?.status === 'established' || c.status === 'registered' || c.status === 'active'
-        const status = isDepositReleased ? 'established' : (c.status || diskCo?.status || 'forming')
-        const isEstablished = status === 'established'
-
-        const rawSteps = (stepsMap.get(c.id) || []).sort(
-          (a, b) => (a.step_order || 0) - (b.step_order || 0)
-        )
-        const effectiveSteps = rawSteps.length > 0 ? rawSteps : (diskCo?.workflow_steps || [])
-        const workflowSteps = sanitizeFormationWorkflowSteps(effectiveSteps, c.id, isEstablished, c.created_at)
-
-        const managers = (managersMap.get(c.id) || []).length > 0
-          ? managersMap.get(c.id)!
-          : diskManagers.filter(m => m.company_id === c.id)
-        const activeManager = managers.find(m => m.active)?.name || managers[0]?.name || c.manager || null
-        const shareholders = (shareholdersMap.get(c.id) || []).length > 0
-          ? shareholdersMap.get(c.id)!
-          : diskShareholders.filter(s => s.company_id === c.id)
-
-        map.set(c.id, {
-          ...diskCo,
-          ...c,
-          status,
-          deposit_released: isDepositReleased,
-          manager: activeManager,
-          managers,
-          shareholders,
-          workflow_steps: workflowSteps,
-        } as CompanyWithWorkflow)
-      })
+    // منع التكرار بالاسم: عند التطابق تُفضَّل الشركة المؤسسة
+    const byName = new Map<string, CompanyWithWorkflow>()
+    for (const c of companies) {
+      const key = c.name?.trim().toLowerCase() || c.id
+      const existing = byName.get(key)
+      if (!existing || ((c.status === 'established' || c.deposit_released) && existing.status !== 'established')) {
+        byName.set(key, c)
+      }
     }
-
-    // Strict deduplication by normalized company name and ID
-    const deduplicatedNameMap = new Map<string, CompanyWithWorkflow>()
-    const sortedAll = Array.from(map.values())
-      .filter(c => !deletedIds.has(c.id))
-      .sort(
-        (a, b) => new Date(b.created_at || '').getTime() - new Date(a.created_at || '').getTime()
-      )
-
-    sortedAll.forEach(c => {
-      const normName = c.name?.trim().toLowerCase()
-      if (!normName) {
-        deduplicatedNameMap.set(c.id, c)
-        return
-      }
-      const existing = deduplicatedNameMap.get(normName)
-      if (!existing) {
-        deduplicatedNameMap.set(normName, c)
-      } else {
-        // If duplicate company name exists, prefer the established one or the one with deposit released
-        if ((c.status === 'established' || c.deposit_released) && existing.status !== 'established') {
-          deduplicatedNameMap.set(normName, c)
-        }
-      }
-    })
-
-    return Array.from(deduplicatedNameMap.values()).sort(
+    return Array.from(byName.values()).sort(
       (a, b) => new Date(b.created_at || '').getTime() - new Date(a.created_at || '').getTime()
     )
   } catch (e) {
     console.error('Exception in listCompanies:', e)
-    const deletedIds = new Set(([] as string[]))
-    const diskCompanies = ([] as CompanyWithWorkflow[])
-    const dedup = new Map<string, CompanyWithWorkflow>()
-    diskCompanies.filter(c => !deletedIds.has(c.id)).forEach(c => {
-      const norm = c.name?.trim().toLowerCase() || c.id
-      if (!dedup.has(norm)) dedup.set(norm, c)
-    })
-    return Array.from(dedup.values())
+    return []
   }
 }
 
@@ -169,47 +81,25 @@ export async function getCompany(id: string): Promise<CompanyWithWorkflow | null
   if (accessDenied) return null
 
   try {
-    const diskCompanies = ([] as CompanyWithWorkflow[])
-    const foundDisk = diskCompanies.find(c => c.id === id)
-    const diskManagers = (([] as CompanyManager[])).filter(m => m.company_id === id)
-    const diskShareholders = (([] as CompanyShareholder[])).filter(s => s.company_id === id)
-
     const supabase = await createClient()
-    const { data } = await supabase
-      .from('companies')
-      .select('*, workflow_steps(*)')
-      .eq('id', id)
-      .single()
-
-    const rawCompany = data ? { ...foundDisk, ...data } : foundDisk
-    if (!rawCompany) return null
-
-    const isEst = rawCompany.status === 'established' || Boolean(rawCompany.deposit_released) || Boolean(rawCompany.cert_date)
-    const rawSteps = (rawCompany.workflow_steps && rawCompany.workflow_steps.length > 0)
-      ? rawCompany.workflow_steps
-      : (foundDisk?.workflow_steps || [])
-
-    const workflowSteps = sanitizeFormationWorkflowSteps(rawSteps, id, isEst, rawCompany.created_at)
-
-    // المدير والشركاء من قاعدة البيانات (كانت من ملف مؤقت فقط فتظهر فارغة في الإنتاج)
-    const [{ data: dbManagers }, { data: dbShareholders }] = await Promise.all([
+    const [{ data: rawCompany }, { data: dbManagers }, { data: dbShareholders }] = await Promise.all([
+      supabase.from('companies').select('*, workflow_steps(*)').eq('id', id).single(),
       supabase.from('company_managers').select('*').eq('company_id', id).order('start_date', { ascending: false }),
       supabase.from('company_shareholders').select('*').eq('company_id', id),
     ])
-    const managers: CompanyManager[] = (dbManagers?.length ? dbManagers : diskManagers.length > 0 ? diskManagers : (rawCompany.managers || [])) as CompanyManager[]
-    const activeManager = managers.find((m: CompanyManager) => m.active)?.name || managers[0]?.name || rawCompany.manager || null
-    const shareholders: CompanyShareholder[] = (dbShareholders?.length ? dbShareholders : diskShareholders.length > 0 ? diskShareholders : (rawCompany.shareholders || [])) as CompanyShareholder[]
+    if (!rawCompany) return null
 
+    const isEst = rawCompany.status === 'established' || Boolean(rawCompany.deposit_released) || Boolean(rawCompany.cert_date)
+    const managers = (dbManagers ?? []) as CompanyManager[]
     return {
       ...rawCompany,
-      manager: activeManager,
+      manager: managers.find(m => m.active)?.name || managers[0]?.name || rawCompany.manager || null,
       managers,
-      shareholders,
-      workflow_steps: workflowSteps,
+      shareholders: (dbShareholders ?? []) as CompanyShareholder[],
+      workflow_steps: sanitizeFormationWorkflowSteps(rawCompany.workflow_steps || [], id, isEst, rawCompany.created_at),
     } as CompanyWithWorkflow
   } catch {
-    const diskCompanies = ([] as CompanyWithWorkflow[])
-    return diskCompanies.find(c => c.id === id) || null
+    return null
   }
 }
 

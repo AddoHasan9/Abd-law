@@ -22,9 +22,6 @@ export async function listTransactions(filters?: {
   const accessDenied = await requirePermission('transactions', 'view')
   if (accessDenied) return []
 
-  const diskTxs = ([] as TransactionFull[])
-  const deletedTxIds = new Set(([] as string[]))
-  const deletedCompanyIds = new Set(([] as string[]))
   const supabase = await createClient()
 
   let dbTxs: TransactionFull[] = []
@@ -66,31 +63,10 @@ export async function listTransactions(filters?: {
 
   const map = new Map<string, TransactionFull>()
 
-  // 1. Process disk transactions (filter out deleted ones and orphan company transactions)
-  diskTxs.forEach(t => {
-    if (deletedTxIds.has(t.id)) return
-    if (t.company_id && (deletedCompanyIds.has(t.company_id) || !validCompanyIds.has(t.company_id))) return
-    map.set(t.id, t)
-  })
-
-  // 2. Process DB transactions (filter out deleted ones and orphan company transactions)
+  // 1. معاملات قاعدة البيانات (باستثناء المرتبطة بشركة لم تعد موجودة)
   dbTxs.forEach(t => {
-    if (deletedTxIds.has(t.id)) return
-    if (t.company_id && (deletedCompanyIds.has(t.company_id) || !validCompanyIds.has(t.company_id))) return
-    const existing = map.get(t.id)
-    if (existing) {
-      map.set(t.id, {
-        ...existing,
-        ...t,
-        capital_before: t.capital_before ?? existing.capital_before,
-        capital_after: t.capital_after ?? existing.capital_after,
-        seller_name: t.seller_name ?? existing.seller_name,
-        buyer_name: t.buyer_name ?? existing.buyer_name,
-        companies: t.companies || existing.companies,
-      })
-    } else {
-      map.set(t.id, t)
-    }
+    if (t.company_id && !validCompanyIds.has(t.company_id)) return
+    map.set(t.id, t)
   })
 
   // 3. Attach company objects & synthesize missing module transactions
@@ -115,15 +91,13 @@ export async function listTransactions(filters?: {
     })
 
     companies.forEach(co => {
-      if (deletedCompanyIds.has(co.id)) return
-      if (co.id.startsWith('test_co_') || co.id.startsWith('dup_co_')) return
       // الشركات القائمة المضافة من قسم الشركات ليست معاملات تأسيس
       if (co.external) return
       if (!activeCoIdsWithTasis.has(co.id)) {
         const isEstablished = co.status === 'established' || co.status === 'done' || co.deposit_released
         const tStatus = isEstablished ? 'done' : (co.status || 'progress')
         const tId = `tx_tasis_${co.id}`
-        if (!map.has(tId) && !deletedTxIds.has(tId)) {
+        if (!map.has(tId)) {
           map.set(tId, {
             id: tId,
             company_id: co.id,
@@ -152,11 +126,8 @@ export async function listTransactions(filters?: {
     // الهويات من قاعدة البيانات (الملف المؤقت فارغ دائماً في الإنتاج)
     type IdRow = { id: string; company_id?: string; company_name?: string; id_type?: string; id_number?: string; issue_date?: string; expiry_date?: string; tx_start_date?: string; status?: string; notes?: string; lawyer_id?: string; created_at?: string }
     const { data: dbIDs } = await createAdminClient().from('company_ids').select('*')
-    const diskIDs: IdRow[] = [...((dbIDs ?? []) as IdRow[]), ...(([] as IdRow[]))]
-      .filter((r, i, all) => all.findIndex(x => x.id === r.id) === i)
-    diskIDs.forEach(idRec => {
-      if (deletedTxIds.has(idRec.id)) return
-      if (idRec.company_id && (deletedCompanyIds.has(idRec.company_id) || !validCompanyIds.has(idRec.company_id))) return
+    ;((dbIDs ?? []) as IdRow[]).forEach(idRec => {
+      if (idRec.company_id && !validCompanyIds.has(idRec.company_id)) return
       if (!map.has(idRec.id)) {
         const comp = idRec.company_id ? compMap.get(idRec.company_id) : null
         const compName = comp?.name || idRec.company_name || 'شركة'
@@ -189,12 +160,8 @@ export async function listTransactions(filters?: {
     // ملفات التحاسب من قاعدة البيانات (كانت من ملف مؤقت فلا تظهر في قائمة المعاملات)
     type TaxRow = { id: string; company_id?: string; company_name?: string; year?: number; status?: string; tx_start_date?: string; clearance_date?: string; tax_amount_assessed?: number; lawyer_id?: string; assigned_lawyer_name?: string; created_at?: string }
     const { data: dbTax } = await createAdminClient().from('tax_assessments').select('*')
-    const diskTax: TaxRow[] = [...((dbTax ?? []) as TaxRow[]), ...(([] as TaxRow[]))]
-      .filter((r, i, all) => all.findIndex(x => x.id === r.id) === i)
-    diskTax.forEach(taxRec => {
-      if (deletedTxIds.has(taxRec.id)) return
-      if (taxRec.company_id && (deletedCompanyIds.has(taxRec.company_id) || !validCompanyIds.has(taxRec.company_id))) return
-      if (taxRec.company_id?.startsWith('dup_tax_co_') || taxRec.company_id?.startsWith('test_co_')) return
+    ;((dbTax ?? []) as TaxRow[]).forEach(taxRec => {
+      if (taxRec.company_id && !validCompanyIds.has(taxRec.company_id)) return
       if (!map.has(taxRec.id)) {
         const comp = taxRec.company_id ? compMap.get(taxRec.company_id) : null
         const compName = comp?.name || taxRec.company_name || 'شركة'
@@ -267,10 +234,6 @@ export async function listTransactions(filters?: {
 export async function getTransaction(id: string): Promise<TransactionFull | null> {
   const accessDenied = await requirePermission('transactions', 'view')
   if (accessDenied) return null
-
-  const diskTxs = ([] as TransactionFull[])
-  const foundDisk = diskTxs.find(t => t.id === id)
-  if (foundDisk) return foundDisk
 
   const supabase = await createClient()
   const selectQueries = [SELECT_PRIMARY, SELECT_WITH_RELATIONS, SELECT_FALLBACK]

@@ -50,7 +50,7 @@ export function WorkflowStatus({
   entityType = 'transaction',
   companyId,
   readOnly = false,
-  actorName = 'محمد أحمد',
+  actorName,
   size = 'md',
   onStatusChange,
   style,

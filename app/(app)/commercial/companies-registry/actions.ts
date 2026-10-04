@@ -63,7 +63,6 @@ export async function createEstablishedCompanyAction(payload: AddEstablishedComp
 
     const companyId = generateUUID()
     const name = payload.name.trim()
-    const lawyerId = payload.lawyer_id?.trim() || 'db13125d-3aa1-46ab-9159-8fad18746623'
 
     // منع تكرار الشركات بالاسم نفسه — من قاعدة البيانات
     const existingActive = await findCompanyByName(name)
@@ -134,8 +133,6 @@ export async function createEstablishedCompanyAction(payload: AddEstablishedComp
         console.warn('Supabase insert company_manager notice:', mgrDbErr)
       }
 
-      const diskManagers = ([] as CompanyManager[])
-      diskManagers.unshift(managerRecord)
     }
 
     // 3. Insert Shareholders in company_shareholders table
@@ -163,8 +160,6 @@ export async function createEstablishedCompanyAction(payload: AddEstablishedComp
           console.warn('Supabase insert company_shareholders notice:', shDbErr)
         }
 
-        const diskShareholders = ([] as CompanyShareholder[])
-        diskShareholders.push(...shareholderRecords)
       }
     }
 
@@ -213,8 +208,6 @@ export async function createEstablishedCompanyAction(payload: AddEstablishedComp
           console.warn('Supabase insert company_ids notice:', idDbErr)
         }
 
-        const diskIDs = ([] as CompanyIDRecord[])
-        diskIDs.unshift(...idRecords)
       }
     }
 
@@ -236,7 +229,7 @@ export async function createEstablishedCompanyAction(payload: AddEstablishedComp
     } catch (dbErr) {
     rethrowDbError(dbErr)}
 
-    // 7. Save Company to Local Disk Store for 100% Guaranteed Availability
+    // 7. الشركة كاملة لإرجاعها للواجهة
     const fullCompanyObject: CompanyWithWorkflow = {
       ...companyDataToInsert,
       task_no: String(Math.floor(1000 + Math.random() * 9000)),
@@ -251,16 +244,6 @@ export async function createEstablishedCompanyAction(payload: AddEstablishedComp
       managers: managerRecord ? [managerRecord] : [],
       shareholders: shareholderRecords,
     }
-
-    const currentDiskCompanies = ([] as CompanyWithWorkflow[])
-    currentDiskCompanies.unshift(fullCompanyObject)
-
-    try {
-      const deletedIds = ([] as string[])
-      if (deletedIds.includes(companyId)) {
-      }
-    } catch (dbErr) {
-    rethrowDbError(dbErr)}
 
     // 8. Log Timeline Event
     try {

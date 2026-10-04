@@ -5,7 +5,7 @@ import { requireRecordAccess } from '@/lib/auth/record-access'
 import { revalidatePath } from 'next/cache'
 import { createAdminClient, createClient } from '@/lib/supabase/server'
 import { logTimelineEvent } from '@/lib/data/timeline'
-import type { CompanyWithWorkflow, CompanyIDRecord, CompanyIDStatus, TransactionFull, Company } from '@/types/database'
+import type { CompanyIDRecord, CompanyIDStatus } from '@/types/database'
 import { requirePermission } from '@/lib/auth/require-permission'
 
 export type { CompanyIDRecord, CompanyIDStatus }
@@ -41,7 +41,6 @@ export async function getCompanyIDsAction(companyIdFilter?: string) {
   if (accessDenied) return { success: false, data: [], error: accessDenied.error }
 
   try {
-    const diskIDs = ([] as CompanyIDRecord[])
     const supabase = await createClient()
 
     let dbIDs: CompanyIDRecord[] = []
@@ -99,31 +98,15 @@ export async function getCompanyIDsAction(companyIdFilter?: string) {
       console.warn('Supabase getCompanyIDs error:', e)
     }
 
-    // Merge disk and DB records
-    const map = new Map<string, CompanyIDRecord>()
-    diskIDs.forEach(idRec => {
-      if (!companyIdFilter || idRec.company_id === companyIdFilter) {
-        const isDone = Boolean(idRec.id_number || idRec.issue_date)
-        const computedStatus: CompanyIDStatus = idRec.status || (isDone ? 'done' : 'in_progress')
-        map.set(idRec.id, { ...idRec, status: computedStatus })
-      }
-    })
-
-    dbIDs.forEach(idRec => {
-      map.set(idRec.id, idRec)
-    })
-
-    const allItems = Array.from(map.values()).sort(
+    const allItems = [...dbIDs].sort(
       (a, b) => new Date(b.created_at || '').getTime() - new Date(a.created_at || '').getTime()
     )
 
     return { success: true, data: allItems }
   } catch (err) {
     rethrowDbError(err)
-    console.warn('getCompanyIDsAction exception, using disk store:', err)
-    const diskIDs = ([] as CompanyIDRecord[])
-    const filtered = companyIdFilter ? diskIDs.filter(x => x.company_id === companyIdFilter) : diskIDs
-    return { success: true, data: filtered }
+    console.warn('getCompanyIDsAction exception:', err)
+    return { success: false, data: [] as CompanyIDRecord[], error: 'تعذّر تحميل الهويات' }
   }
 }
 
@@ -164,15 +147,9 @@ export async function createCompanyIDAction(payload: {
 
     const isValidUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(targetCompanyId)
 
-    // Check disk companies first
-    const diskCompanies = ([] as CompanyWithWorkflow[])
-
     if ((!targetCompanyId || !isValidUUID) && compName) {
       // Look up existing company by name in disk or DB
-      const foundInDisk = diskCompanies.find(c => c.name.toLowerCase() === compName.toLowerCase())
-      if (foundInDisk) {
-        targetCompanyId = foundInDisk.id
-      } else {
+      {
         // Auto-create company in DB and disk so it connects properly
         try {
           const { data: dbCo } = await supabase
@@ -202,10 +179,14 @@ export async function createCompanyIDAction(payload: {
 
     // --- CHECK DUPLICATION (DB + Disk) ---
     // If the same company already has an active or in-progress record for this ID type, prevent accidental duplicate
-    const diskIDs = ([] as CompanyIDRecord[])
-    const existingDuplicate = diskIDs.find(
-      x => x.company_id === targetCompanyId && x.id_type === payload.id_type
-    )
+    // (من قاعدة البيانات — كان يُفحص في ملف مؤقت فارغ فلا يمنع التكرار)
+    const { data: existingDuplicate } = await supabase
+      .from('company_ids')
+      .select('id, status')
+      .eq('company_id', targetCompanyId)
+      .eq('id_type', payload.id_type)
+      .limit(1)
+      .maybeSingle()
 
     if (existingDuplicate) {
       const typeLabel = ID_TYPE_LABELS[payload.id_type] || payload.id_type
@@ -248,11 +229,7 @@ export async function createCompanyIDAction(payload: {
     const finalStatus: CompanyIDStatus = payload.status || (idNumber || issueDate ? 'done' : 'in_progress')
 
     // Find actual company name to display
-    let finalCompanyName = compName
-    if (!finalCompanyName && targetCompanyId) {
-      const co = diskCompanies.find(c => c.id === targetCompanyId)
-      if (co) finalCompanyName = co.name
-    }
+    const finalCompanyName = compName
 
     const diskRecord: CompanyIDRecord = {
       id: recordId,
@@ -288,38 +265,11 @@ export async function createCompanyIDAction(payload: {
       console.warn('Supabase insert company_ids error:', dbErr)
     }
 
-    // Save to Disk Store (Guarantees immediate persistence)
-    diskIDs.unshift(diskRecord)
-
     // Sync to Commercial Transactions Feed
     const isRenew = Boolean(payload.notes?.includes('تجديد'))
     const txTypeStr = mapIDTypeToTxType(payload.id_type, isRenew)
     const txStatus = finalStatus === 'done' ? 'done' : 'in_progress'
     const lawyerId = payload.lawyer_id?.trim() || null
-
-    const txRecord: TransactionFull = {
-      id: recordId,
-      company_id: targetCompanyId,
-      client_id: null,
-      lawyer_id: lawyerId,
-      type: txTypeStr,
-      status: txStatus,
-      priority: 'medium',
-      tx_date: createdAt.slice(0, 10),
-      due_date: expiryDate || null,
-      description: payload.notes?.trim() || `إصدار ${ID_TYPE_LABELS[payload.id_type] || payload.id_type}`,
-      services: [payload.id_type],
-      lacks: null,
-      fee: null,
-      phone: null,
-      created_at: createdAt,
-      clients: null,
-      profiles: null,
-      companies: {
-        id: targetCompanyId,
-        name: finalCompanyName || 'شركة',
-      } as Company,
-    }
 
     try {
       await dbWrite(supabase.from('transactions').insert({
@@ -338,9 +288,6 @@ export async function createCompanyIDAction(payload: {
       rethrowDbError(txDbErr)
       console.warn('transactions insert for company_ids notice:', txDbErr)
     }
-
-    const diskTxs = ([] as TransactionFull[])
-    diskTxs.unshift(txRecord)
 
     // Log timeline event for real companies only
     try {
@@ -420,24 +367,8 @@ export async function updateCompanyIDAction(
       console.warn('Supabase update company_ids error:', dbErr)
     }
 
-    // Update disk store
-    const diskIDs = ([] as CompanyIDRecord[])
-    const idx = diskIDs.findIndex(x => x.id === id)
-    let updatedRec: CompanyIDRecord | undefined = undefined
-    if (idx !== -1) {
-      Object.assign(diskIDs[idx], updateData)
-      updatedRec = diskIDs[idx]
-    }
-
     // Update corresponding commercial transaction
     const isDone = payload.status === 'done' || Boolean(payload.id_number || payload.issue_date)
-    const diskTxs = ([] as TransactionFull[])
-    const txIdx = diskTxs.findIndex(t => t.id === id)
-    if (txIdx !== -1) {
-      diskTxs[txIdx].status = isDone ? 'done' : 'in_progress'
-      if (payload.expiry_date) diskTxs[txIdx].due_date = payload.expiry_date
-    }
-
     try {
       await dbWrite(supabase.from('transactions').update({
         status: isDone ? 'done' : 'in_progress',
@@ -454,7 +385,7 @@ export async function updateCompanyIDAction(
     } catch (dbErr) {
  rethrowDbError(dbErr) }
 
-    return { success: true, record: updatedRec }
+    return { success: true, record: undefined as CompanyIDRecord | undefined }
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : 'فشل تعديل الهوية'
     return { success: false, error: message }
@@ -499,11 +430,6 @@ export async function deleteCompanyIDAction(id: string) {
       console.warn('Supabase delete company_ids error:', dbErr)
     }
 
-    const diskIDs = ([] as CompanyIDRecord[])
-    const filtered = diskIDs.filter(x => x.id !== id)
-
-    const diskTxs = ([] as TransactionFull[])
-    const filteredTxs = diskTxs.filter(x => x.id !== id)
 
     try {
       revalidatePath('/commercial/ids')
@@ -516,11 +442,6 @@ export async function deleteCompanyIDAction(id: string) {
     return { success: true }
   } catch (dbErr) {
     rethrowDbError(dbErr)
-    const diskIDs = ([] as CompanyIDRecord[])
-    const filtered = diskIDs.filter(x => x.id !== id)
-
-    const diskTxs = ([] as TransactionFull[])
-    const filteredTxs = diskTxs.filter(x => x.id !== id)
     return { success: true }
   }
 }

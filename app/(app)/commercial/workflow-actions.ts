@@ -19,7 +19,9 @@ export async function updateWorkflowStatusAction(payload: StatusUpdatePayload) {
   if (denied) return denied
 
   try {
-    const { entityId, entityType = 'transaction', companyId, fromStatus, toStatus, actorName = 'محمد أحمد', notes, reasons } = payload
+    const { entityId, entityType = 'transaction', companyId, fromStatus, toStatus, notes, reasons } = payload
+    // اسم المنفّذ من الحساب المسجل (لا يُؤخذ من المتصفح — كان ثابتاً «محمد أحمد»)
+    const actorName = (await getCurrentUserProfile())?.name || 'مستخدم النظام'
     const fromConfig = getWorkflowStatusConfig(fromStatus)
     const toConfig = getWorkflowStatusConfig(toStatus)
     const now = new Date()
@@ -60,34 +62,7 @@ export async function updateWorkflowStatusAction(payload: StatusUpdatePayload) {
       return { success: false, error: 'تعذّر حفظ الحالة في قاعدة البيانات. حاول مجدداً' }
     }
 
-    // 2. Update Disk JSON Stores
-    if (entityType === 'transaction') {
-      const diskTxs = ([] as Array<Record<string, unknown>>)
-      const idx = diskTxs.findIndex(t => t.id === entityId || (targetCompanyId && t.company_id === targetCompanyId))
-      if (idx !== -1) {
-        diskTxs[idx].status = toStatus
-        if (extraDetail) diskTxs[idx].status_reason = extraDetail
-      } else {
-        diskTxs.push({
-          id: entityId,
-          company_id: targetCompanyId,
-          status: toStatus,
-          status_reason: extraDetail || undefined,
-          updated_at: now.toISOString(),
-        })
-      }
-    }
-
-    if (targetCompanyId) {
-      const diskCompanies = ([] as Array<Record<string, unknown>>)
-      const cIdx = diskCompanies.findIndex(c => c.id === targetCompanyId)
-      if (cIdx !== -1) {
-        diskCompanies[cIdx].status = toStatus
-        if (extraDetail) diskCompanies[cIdx].status_reason = extraDetail
-      }
-    }
-
-    // 3. Create Timeline Record (Automatic Integration)
+    // 2. سجل زمني تلقائي
     if (targetCompanyId) {
       const timelineDescription = `تم تغيير حالة سير العمل من (${fromConfig.label}) إلى (${toConfig.label})${
         extraDetail ? ` - ${extraDetail}` : ''
