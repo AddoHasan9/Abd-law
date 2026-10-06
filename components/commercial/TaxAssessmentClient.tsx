@@ -1,6 +1,8 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { AttachmentChip } from '@/components/ui/AttachmentField'
+import { listAttachmentInfoAction } from '@/app/(app)/commercial/attachments/actions'
 import Link from 'next/link'
 import dynamic from 'next/dynamic'
 import { PageHeader } from '@/components/ui/PageHeader'
@@ -36,6 +38,12 @@ export default function TaxAssessmentClient({ assessments = [], companies = [], 
   const [statusFilter, setStatusFilter] = useState<'all' | 'in_progress' | 'tax_cleared'>('all')
 
   const [isModalOpen, setIsModalOpen] = useState(false)
+  // السجلات التي لها مرفق (معلومات خفيفة بدون الملف) — تتحدث عند إغلاق النافذة
+  const [attachments, setAttachments] = useState<Map<string, string>>(new Map())
+  useEffect(() => {
+    if (isModalOpen) return
+    listAttachmentInfoAction('tax_assessment').then(rows => setAttachments(new Map(rows.map(r => [r.entity_id, r.file_name]))))
+  }, [isModalOpen])
   const [editingItem, setEditingItem] = useState<TaxAssessment | null>(null)
   const [toastMsg, setToastMsg] = useState<{ type: 'ok' | 'err'; text: string } | null>(null)
 
@@ -346,6 +354,7 @@ export default function TaxAssessmentClient({ assessments = [], companies = [], 
 
                       {/* Clearance & Receipt Info */}
                       <td className="p-3.5 text-center">
+                        {attachments.has(item.id) && <AttachmentChip entity="tax_assessment" entityId={item.id} name={attachments.get(item.id)} />}
                         {isCleared ? (
                           <div className="flex flex-col gap-0.5 items-center text-[11px]">
                             {item.clearance_letter_no && <span>كتاب: <strong className="num text-emerald-700 dark:text-emerald-300">{item.clearance_letter_no}</strong></span>}

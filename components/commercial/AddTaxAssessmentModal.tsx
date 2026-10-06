@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { AttachmentField } from '@/components/ui/AttachmentField'
 import { toast } from 'sonner'
 import { createPortal } from 'react-dom'
 import { Icon } from '@/components/ui/Icon'
@@ -473,6 +474,14 @@ export default function AddTaxAssessmentModal({
                 </div>
               </div>
             )}
+
+            {/* باركود أو صورة التحاسب بعد إكماله (اختياري) */}
+            <AttachmentField
+              entity="tax_assessment"
+              entityId={editingAssessment?.id}
+              label="باركود أو صورة التحاسب / براءة الذمة"
+              hint="JPG أو PNG أو PDF — تُصغَّر الصور تلقائياً"
+            />
 
             {/* Notes */}
             <div className="field">

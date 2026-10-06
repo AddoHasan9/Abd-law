@@ -3289,3 +3289,36 @@ html[data-theme="dark"] .page-head.tone-violet { --tone: #a78bfa; } html[data-th
 
 /* عدّاد داخل زر أزرق (مثل «الكل» في الودائع): كان أزرق على أزرق فلا يُقرأ */
 .btn-primary .nav-num { background: rgba(255,255,255,.25) !important; color: #fff !important; }
+
+/* ============================================================
+   المرفقات الاختيارية (صورة الهوية، باركود/صورة التحاسب)
+   ============================================================ */
+.att-field { display: flex; flex-direction: column; gap: 8px; }
+.att-label { font-size: 12.5px; font-weight: 800; color: var(--text); display: flex; align-items: center; gap: 6px; }
+.att-optional { font-size: 10.5px; font-weight: 700; color: var(--text-3); background: var(--surface-2); border-radius: 6px; padding: 1px 7px; }
+.att-note { font-size: 12px; color: var(--text-3); padding: 12px; border-radius: 12px; background: var(--surface-2); text-align: center; }
+.att-drop {
+  display: flex; flex-direction: column; align-items: center; gap: 4px; width: 100%;
+  padding: 14px; border-radius: 14px; border: 1.5px dashed var(--line); background: var(--surface);
+  color: var(--accent); font-size: 13px; font-weight: 800; cursor: pointer; transition: border-color .15s ease, background-color .15s ease;
+}
+.att-drop:hover { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 5%, var(--surface)); }
+.att-drop small { font-size: 11px; font-weight: 600; color: var(--text-3); }
+.att-drop:disabled { opacity: .6; cursor: wait; }
+.att-file { display: flex; align-items: center; gap: 12px; padding: 10px; border-radius: 14px; border: 1px solid var(--line-soft); background: var(--surface); }
+.att-thumb { width: 56px; height: 56px; flex: none; border-radius: 10px; overflow: hidden; border: 1px solid var(--line-soft); background: var(--surface-2); display: grid; place-items: center; cursor: zoom-in; padding: 0; }
+.att-thumb img { width: 100%; height: 100%; object-fit: cover; }
+.att-thumb .material-symbols-outlined { font-size: 28px; color: #e11d48; }
+.att-meta { flex: 1; min-width: 0; }
+.att-name { font-size: 13px; font-weight: 700; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.att-size { font-size: 11px; color: var(--text-3); }
+.att-actions { display: flex; gap: 2px; flex-wrap: wrap; }
+.att-del:hover { color: #e11d48 !important; }
+.att-chip {
+  display: inline-grid; place-items: center; width: 26px; height: 26px; border-radius: 8px; vertical-align: middle;
+  border: 1px solid color-mix(in srgb, var(--accent) 30%, transparent); background: color-mix(in srgb, var(--accent) 8%, var(--surface));
+  color: var(--accent); cursor: pointer; margin-inline-start: 6px;
+}
+.att-chip .material-symbols-outlined { font-size: 15px; }
+.att-chip:disabled { opacity: .5; cursor: wait; }
+@media (pointer: coarse) { .att-chip { width: 34px; height: 34px; } }

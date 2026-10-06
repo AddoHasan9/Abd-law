@@ -1,6 +1,8 @@
 'use client'
 
 import { useState, useEffect, useCallback, useMemo } from 'react'
+import { AttachmentChip } from '@/components/ui/AttachmentField'
+import { listAttachmentInfoAction } from '@/app/(app)/commercial/attachments/actions'
 import Link from 'next/link'
 import dynamic from 'next/dynamic'
 import { PageHeader } from '@/components/ui/PageHeader'
@@ -47,6 +49,12 @@ export default function IDsClient({ companies = [], initialCompanyId }: Props) {
 
   // Modals
   const [isModalOpen, setIsModalOpen] = useState(false)
+  // السجلات التي لها مرفق (معلومات خفيفة بدون الملف) — تتحدث عند إغلاق النافذة
+  const [attachments, setAttachments] = useState<Map<string, string>>(new Map())
+  useEffect(() => {
+    if (isModalOpen) return
+    listAttachmentInfoAction('company_id').then(rows => setAttachments(new Map(rows.map(r => [r.entity_id, r.file_name]))))
+  }, [isModalOpen])
   const [modalIdType, setModalIdType] = useState<'importer_id' | 'tax_id' | 'planning_id' | 'chamber_id'>('chamber_id')
   const [selectedCompanyForModal, setSelectedCompanyForModal] = useState<Company | null>(null)
   const [editingRecord, setEditingRecord] = useState<CompanyIDRecord | null>(null)
@@ -348,6 +356,7 @@ export default function IDsClient({ companies = [], initialCompanyId }: Props) {
 
                       {/* رقم الهوية والانتهاء — خلية واحدة («قيد الإصدار» تظهر في عمود الحالة فقط) */}
                       <td className="py-3.5 px-3 text-center align-middle text-xs">
+                        {attachments.has(r.id) && <AttachmentChip entity="company_id" entityId={r.id} name={attachments.get(r.id)} />}
                         {r.id_number || r.expiry_date ? (
                           <div className="flex flex-col gap-0.5 items-center">
                             {r.id_number && <span className="num font-bold text-[var(--text)]">{r.id_number}</span>}
