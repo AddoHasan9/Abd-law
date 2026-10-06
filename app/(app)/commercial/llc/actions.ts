@@ -4,9 +4,8 @@ import { requireRecordAccess } from '@/lib/auth/record-access'
 import { dbWrite, rethrowDbError } from '@/lib/data/db-guard'
 import { revalidatePath } from 'next/cache'
 import { createAdminClient } from '@/lib/supabase/server'
-import { readJsonFile, writeJsonFile } from '@/lib/data/fs-store'
 import { logTimelineEvent } from '@/lib/data/timeline'
-import type { CompanyWithWorkflow, CompanyManager } from '@/types/database'
+import type { CompanyManager } from '@/types/database'
 import { requirePermission } from '@/lib/auth/require-permission'
 
 function generateUUID() {
@@ -66,14 +65,10 @@ export async function createLLCTransactionAction(payload: CreateLLCTransactionPa
     }
 
     const isValidUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(targetCompanyId)
-    const diskCompanies = readJsonFile<CompanyWithWorkflow[]>('companies.json', [])
 
     // Handle company lookup or creation if typed manually
     if ((!targetCompanyId || !isValidUUID) && compName) {
-      const foundInDisk = diskCompanies.find(c => c.name.toLowerCase() === compName.toLowerCase())
-      if (foundInDisk) {
-        targetCompanyId = foundInDisk.id
-      } else {
+      {
         try {
           const { data: matchedCo } = await supabase
             .from('companies')
@@ -105,8 +100,6 @@ export async function createLLCTransactionAction(payload: CreateLLCTransactionPa
               console.warn('Company auto-insert in DB notice:', insErr)
             }
 
-            diskCompanies.unshift(newCoRecord as unknown as CompanyWithWorkflow)
-            writeJsonFile('companies.json', diskCompanies)
           }
         } catch (e) {
           rethrowDbError(e)
@@ -140,9 +133,6 @@ export async function createLLCTransactionAction(payload: CreateLLCTransactionPa
         console.warn('company_managers insert notice:', mgrErr)
       }
 
-      const diskManagers = readJsonFile<CompanyManager[]>('company_managers.json', [])
-      diskManagers.unshift(mgrObj)
-      writeJsonFile('company_managers.json', diskManagers)
     }
 
     // Prepare Transaction Object
@@ -158,12 +148,6 @@ export async function createLLCTransactionAction(payload: CreateLLCTransactionPa
     const capitalAfter = payload.capital_after !== undefined && payload.capital_after !== null ? Number(payload.capital_after) : null
     const sellerName = payload.seller_name?.trim() || null
     const buyerName = payload.buyer_name?.trim() || null
-
-    let finalCoName = compName
-    if (!finalCoName && targetCompanyId) {
-      const co = diskCompanies.find(c => c.id === targetCompanyId)
-      if (co) finalCoName = co.name
-    }
 
     const txRecord = {
       id: txId,
@@ -191,18 +175,6 @@ export async function createLLCTransactionAction(payload: CreateLLCTransactionPa
       rethrowDbError(dbErr)
       console.warn('Supabase insert transaction error:', dbErr)
     }
-
-    // Save to Local Disk Store for 100% Reliability
-    const diskTxs = readJsonFile<Array<Record<string, unknown>>>('transactions.json', [])
-    diskTxs.unshift({
-      ...txRecord,
-      companies: {
-        id: targetCompanyId,
-        name: finalCoName,
-        manager: payload.manager_name || null,
-      },
-    })
-    writeJsonFile('transactions.json', diskTxs)
 
     // Log Timeline Event
     try {
@@ -264,9 +236,6 @@ export async function updateLLCTransactionAction(payload: UpdateLLCTransactionPa
     const txId = payload.id
     if (!txId) return { success: false, error: 'معرف المعاملة مفقود' }
 
-    const diskTxs = readJsonFile<Array<Record<string, unknown>>>('transactions.json', [])
-    const index = diskTxs.findIndex(t => t.id === txId)
-
     const updates: Record<string, unknown> = {}
     if (payload.type !== undefined) updates.type = payload.type
     if (payload.status !== undefined) updates.status = payload.status
@@ -290,26 +259,6 @@ export async function updateLLCTransactionAction(payload: UpdateLLCTransactionPa
       console.warn('Supabase update transaction error:', dbErr)
     }
 
-    // Disk update
-    if (index !== -1) {
-      const existing = diskTxs[index]
-      const existingCompany = (existing.companies || {}) as Record<string, unknown>
-      
-      if (payload.company_name) {
-        existingCompany.name = payload.company_name
-      }
-      if (payload.manager_name) {
-        existingCompany.manager = payload.manager_name
-      }
-
-      diskTxs[index] = {
-        ...existing,
-        ...updates,
-        companies: existingCompany,
-      }
-      writeJsonFile('transactions.json', diskTxs)
-    }
-
     // Update manager if provided
     if (payload.manager_name?.trim() && payload.company_id) {
       const mgrName = payload.manager_name.trim()
@@ -323,10 +272,8 @@ export async function updateLLCTransactionAction(payload: UpdateLLCTransactionPa
       try {
         await dbWrite(supabase.from('company_managers').insert(mgrObj), 'company_managers')
       } catch (dbErr) {
-    rethrowDbError(dbErr)}
-      const diskManagers = readJsonFile<CompanyManager[]>('company_managers.json', [])
-      diskManagers.unshift(mgrObj)
-      writeJsonFile('company_managers.json', diskManagers)
+        rethrowDbError(dbErr)
+      }
     }
 
     revalidatePath('/commercial/llc')

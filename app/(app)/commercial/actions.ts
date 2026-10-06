@@ -4,11 +4,12 @@
 'use server'
 
 import { requireRecordAccess } from '@/lib/auth/record-access'
+import { getCurrentUserProfile } from '@/lib/auth/require-permission'
+import { findCompanyByName } from '@/lib/data/company-name'
 import { dbWrite, rethrowDbError } from '@/lib/data/db-guard'
 import { revalidatePath } from 'next/cache'
 import { createAdminClient } from '@/lib/supabase/server'
-import type { TxPriority, CompanyWithWorkflow } from '@/types/database'
-import { readJsonFile, writeJsonFile } from '@/lib/data/fs-store'
+import type { TxPriority } from '@/types/database'
 import { logTimelineEvent } from '@/lib/data/timeline'
 import { requirePermission } from '@/lib/auth/require-permission'
 
@@ -42,12 +43,11 @@ export async function createTransactionAction(formData: FormData) {
       return { success: false, error: 'يرجى تحديد الشركة أو كتابة اسمها' }
     }
 
-    const diskCompanies = readJsonFile<CompanyWithWorkflow[]>('companies.json', [])
-
     if (!company_id && company_name) {
-      const foundInDisk = diskCompanies.find(c => c.name.toLowerCase() === company_name.toLowerCase())
-      if (foundInDisk) {
-        company_id = foundInDisk.id
+      // شركة موجودة بنفس الاسم؟ (كان يُبحث في ملف مؤقت فارغ فتُنشأ شركة مكررة دائماً)
+      const existingCo = await findCompanyByName(company_name)
+      if (existingCo) {
+        company_id = existingCo.id
       } else {
         const newCoUUID = generateUUID()
         company_id = newCoUUID
@@ -63,9 +63,8 @@ export async function createTransactionAction(formData: FormData) {
         try {
           await dbWrite(supabase.from('companies').insert(newCo), 'companies')
         } catch (dbErr) {
-    rethrowDbError(dbErr)}
-        diskCompanies.unshift(newCo as unknown as CompanyWithWorkflow)
-        writeJsonFile('companies.json', diskCompanies)
+          rethrowDbError(dbErr)
+        }
       }
     }
 
@@ -114,10 +113,6 @@ export async function createTransactionAction(formData: FormData) {
       // Ignored for disk fallback
     }
 
-    const diskTxs = readJsonFile<Array<Record<string, unknown>>>('transactions.json', [])
-    diskTxs.unshift(txObj)
-    writeJsonFile('transactions.json', diskTxs)
-
     // Log timeline event for transaction creation
     if (company_id) {
       await logTimelineEvent({
@@ -125,7 +120,7 @@ export async function createTransactionAction(formData: FormData) {
         event_type: 'tx_created',
         title: 'إنشاء معاملة تجارية جديدة',
         description: `نوع الخدمة: ${type} | أولوية المعاملة: ${priority}`,
-        actor_name: 'محمد أحمد',
+        actor_name: (await getCurrentUserProfile())?.name || undefined,
       })
     }
 
@@ -177,15 +172,7 @@ export async function assignLawyerToTransactionAction(
       console.warn('Supabase assign lawyer notice:', e)
     }
 
-    const diskTxs = readJsonFile<Array<Record<string, unknown>>>('transactions.json', [])
-    const idx = diskTxs.findIndex(t => t.id === txId)
-    if (idx !== -1) {
-      diskTxs[idx].lawyer_id = lawyerId
-      diskTxs[idx].assigned_lawyer_name = lawyerName
-      writeJsonFile('transactions.json', diskTxs)
-    }
-
-    const targetCompanyId = companyId || (idx !== -1 ? (diskTxs[idx].company_id as string) : null)
+    const targetCompanyId = companyId || null
 
     if (targetCompanyId) {
       await logTimelineEvent({
@@ -193,7 +180,7 @@ export async function assignLawyerToTransactionAction(
         event_type: 'lawyer_assigned',
         title: 'تعيين المحامي المكلف',
         description: lawyerName ? `تم تكليف المحامي: ${lawyerName}` : 'تم إلغاء التكليف الحالي',
-        actor_name: 'محمد أحمد',
+        actor_name: (await getCurrentUserProfile())?.name || undefined,
       })
     }
 
@@ -254,12 +241,6 @@ export async function updateTransactionDetailsAction(
           console.warn('Supabase company update error:', coError)
         }
 
-        const diskCompanies = readJsonFile<Array<Record<string, unknown>>>('companies.json', [])
-        const cIdx = diskCompanies.findIndex(c => c.id === targetCompanyId)
-        if (cIdx !== -1) {
-          diskCompanies[cIdx].name = payload.company_name
-          writeJsonFile('companies.json', diskCompanies)
-        }
       }
 
       // 2. تحديث المدير المفوض عبر جدول company_managers (مطابقة لقاعدة AGENTS.md)
@@ -280,14 +261,6 @@ export async function updateTransactionDetailsAction(
           console.warn('Supabase company_managers error:', mgrError)
         }
 
-        const diskMgrs = readJsonFile<Array<Record<string, unknown>>>('company_managers.json', [])
-        const mIdx = diskMgrs.findIndex(m => m.company_id === targetCompanyId && m.active)
-        if (mIdx !== -1) {
-          diskMgrs[mIdx].name = payload.manager_name
-        } else {
-          diskMgrs.push(mgrObj)
-        }
-        writeJsonFile('company_managers.json', diskMgrs)
       }
     }
 
@@ -346,41 +319,13 @@ export async function updateTransactionDetailsAction(
       }
     }
 
-    // 4. تحديث التخزين المحلي (.data/transactions.json)
-    const diskTxs = readJsonFile<Array<Record<string, unknown>>>('transactions.json', [])
-    let idx = diskTxs.findIndex(t => t.id === txId || t.id === realTxId)
-    if (idx === -1 && targetCompanyId) {
-      idx = diskTxs.findIndex(t => t.company_id === targetCompanyId)
-    }
-
-    const updatedTxDisk: Record<string, unknown> = idx !== -1 ? { ...diskTxs[idx] } : { id: realTxId, created_at: new Date().toISOString() }
-
-    if (payload.company_id !== undefined) updatedTxDisk.company_id = payload.company_id
-    if (payload.type !== undefined) updatedTxDisk.type = payload.type
-    if (payload.priority !== undefined) updatedTxDisk.priority = payload.priority
-    if (payload.status !== undefined) updatedTxDisk.status = payload.status
-    if (payload.tx_date !== undefined) updatedTxDisk.tx_date = payload.tx_date
-    if (payload.fee !== undefined) updatedTxDisk.fee = payload.fee
-    if (payload.description !== undefined) updatedTxDisk.description = payload.description
-    if (payload.phone !== undefined) updatedTxDisk.phone = payload.phone
-    if (payload.lawyer_id !== undefined) updatedTxDisk.lawyer_id = payload.lawyer_id
-    if (payload.lawyer_name !== undefined) updatedTxDisk.assigned_lawyer_name = payload.lawyer_name
-    updatedTxDisk.updated_at = new Date().toISOString()
-
-    if (idx !== -1) {
-      diskTxs[idx] = updatedTxDisk
-    } else {
-      diskTxs.unshift(updatedTxDisk)
-    }
-    writeJsonFile('transactions.json', diskTxs)
-
     if (targetCompanyId) {
       await logTimelineEvent({
         company_id: targetCompanyId,
         event_type: 'tx_updated',
         title: 'تحديث وتصحيح بيانات المعاملة',
         description: `تم تحديث وتصحيح البيانات بنجاح في النظام.`,
-        actor_name: 'محمد أحمد',
+        actor_name: (await getCurrentUserProfile())?.name || undefined,
       })
     }
 
@@ -392,7 +337,12 @@ export async function updateTransactionDetailsAction(
     } catch (dbErr) {
     rethrowDbError(dbErr)}
 
-    return { success: true, updatedTx: updatedTxDisk }
+    const updatedTx: Record<string, unknown> = { id: realTxId, updated_at: new Date().toISOString() }
+    for (const k of ['company_id', 'type', 'priority', 'status', 'tx_date', 'fee', 'description', 'phone', 'lawyer_id'] as const) {
+      if (payload[k] !== undefined) updatedTx[k] = payload[k]
+    }
+    if (payload.lawyer_name !== undefined) updatedTx.assigned_lawyer_name = payload.lawyer_name
+    return { success: true, updatedTx }
   } catch (err: unknown) {
     console.error('updateTransactionDetailsAction exception:', err)
     return { success: false, error: 'حدث خطأ أثناء تعديل بيانات المعاملة' }
@@ -417,12 +367,17 @@ export async function archiveTransactionAction(txId: string, reason?: string) {
     } catch (dbErr) {
     rethrowDbError(dbErr)}
 
-    const diskTxs = readJsonFile<Array<Record<string, unknown>>>('transactions.json', [])
-    const idx = diskTxs.findIndex(t => t.id === txId)
-    if (idx !== -1) {
-      diskTxs[idx].status = 'closed'
-      diskTxs[idx].archive_reason = reason || 'أرشفة من قائمة الخيارات'
-      writeJsonFile('transactions.json', diskTxs)
+    // سبب الأرشفة في السجل الزمني للشركة (كان يُحفظ في ملف مؤقت فيضيع)
+    const { data: tx } = await supabase.from('transactions').select('company_id').eq('id', txId).maybeSingle()
+    if (tx?.company_id) {
+      await logTimelineEvent({
+        company_id: tx.company_id,
+        event_type: 'tx_archived',
+        title: 'أرشفة معاملة',
+        description: reason?.trim() || 'أرشفة من قائمة الخيارات',
+        actor_name: (await getCurrentUserProfile())?.name || undefined,
+        related_link: '/commercial',
+      })
     }
 
     try {
@@ -454,17 +409,6 @@ export async function deleteTransactionAction(txId: string) {
       rethrowDbError(e)
       console.warn('Supabase transaction delete warning:', e)
     }
-
-    // Add to persistent deleted transaction blacklist
-    const deletedTxIds = readJsonFile<string[]>('deleted_transaction_ids.json', [])
-    if (!deletedTxIds.includes(txId)) {
-      deletedTxIds.push(txId)
-      writeJsonFile('deleted_transaction_ids.json', deletedTxIds)
-    }
-
-    const diskTxs = readJsonFile<Array<Record<string, unknown>>>('transactions.json', [])
-    const filtered = diskTxs.filter(t => t.id !== txId)
-    writeJsonFile('transactions.json', filtered)
 
     try {
       revalidatePath('/commercial')
@@ -530,29 +474,6 @@ export async function updateTransactionStatusAction(txId: string, status: string
     } catch (e) {
       console.error('updateTransactionStatusAction DB error:', e)
       return { success: false, error: 'تعذّر حفظ الحالة في قاعدة البيانات. حاول مجدداً' }
-    }
-
-    const diskTxs = readJsonFile<Array<Record<string, unknown>>>('transactions.json', [])
-    const idx = diskTxs.findIndex(t => t.id === txId || t.id === `tx_${companyId}` || (companyId && t.company_id === companyId))
-    if (idx !== -1) {
-      diskTxs[idx].status = status
-    } else if (companyId) {
-      diskTxs.push({
-        id: txId || `tx_${companyId}`,
-        company_id: companyId,
-        status: status,
-        updated_at: new Date().toISOString(),
-      })
-    }
-    writeJsonFile('transactions.json', diskTxs)
-
-    if (companyId) {
-      const diskCompanies = readJsonFile<Array<Record<string, unknown>>>('companies.json', [])
-      const cIdx = diskCompanies.findIndex(c => c.id === companyId)
-      if (cIdx !== -1) {
-        diskCompanies[cIdx].status = status === 'done' ? 'established' : status
-        writeJsonFile('companies.json', diskCompanies)
-      }
     }
 
     try {

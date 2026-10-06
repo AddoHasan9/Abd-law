@@ -12,10 +12,8 @@
  * ⚫ < 0 أيام     ← منتهية الصلاحية (Expired).
  */
 
-import { readAuthorizedJsonFile } from '@/lib/auth/scoped-store'
 import { requirePermission } from '@/lib/auth/require-permission'
 import { createClient } from '@/lib/supabase/server'
-import type { CompanyIDRecord, Company } from '@/types/database'
 
 export type AlertCategory =
   | 'government_id'
@@ -219,50 +217,6 @@ export async function getActiveExpiryAlerts(): Promise<ExpiryAlertItem[]> {
       console.warn('getActiveExpiryAlerts DB company_ids notice:', err)
     }
 
-    // 2. فحص التخزين القرصي المساعد (company_ids.json & companies.json)
-    try {
-      const diskIDs = await readAuthorizedJsonFile<CompanyIDRecord[]>('company_ids.json', [])
-      const diskCompanies = await readAuthorizedJsonFile<Company[]>('companies.json', [])
-      const compMap = new Map<string, string>()
-      diskCompanies.forEach(c => compMap.set(c.id, c.name))
-
-      for (const rec of diskIDs) {
-        if (!rec.expiry_date || !rec.company_id) continue
-        const key = `id_${rec.id}`
-        if (seenKeys.has(key)) continue
-
-        const calc = calculateExpiryDaysAndPriority(rec.expiry_date)
-        if (calc.priority === 'ok') continue
-
-        seenKeys.add(key)
-        const companyName = compMap.get(rec.company_id) || rec.company_name || 'شركة غير معرفة'
-        const title = ID_TYPE_LABELS[rec.id_type] || rec.id_type || 'هوية حكومية'
-
-        alerts.push({
-          id: key,
-          entityId: rec.id,
-          companyId: rec.company_id,
-          companyName,
-          category: 'government_id',
-          categoryLabel: 'هوية حكومية',
-          title,
-          idType: rec.id_type,
-          idNumber: rec.id_number || undefined,
-          managerName: rec.manager_name || undefined,
-          issueDate: rec.issue_date,
-          expiryDate: rec.expiry_date,
-          daysLeft: calc.daysLeft,
-          priority: calc.priority,
-          priorityLabel: calc.priorityLabel,
-          badgeClass: calc.badgeClass,
-          colorTheme: calc.colorTheme,
-          profileUrl: `/commercial/companies/${rec.company_id}`,
-          sectionUrl: `/commercial/companies/${rec.company_id}?tab=ids`,
-        })
-      }
-    } catch (err) {
-      console.warn('getActiveExpiryAlerts disk company_ids notice:', err)
-    }
 
     // 3. فحص العلامات التجارية (Trademarks)
     try {

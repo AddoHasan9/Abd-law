@@ -1,14 +1,12 @@
 'use server'
 
-import { readAuthorizedJsonFile } from '@/lib/auth/scoped-store'
 import { dbWrite, rethrowDbError } from '@/lib/data/db-guard'
 import { requireRecordAccess } from '@/lib/auth/record-access'
 import { revalidatePath } from 'next/cache'
 import { createAdminClient, createClient } from '@/lib/supabase/server'
 import { logTimelineEvent } from '@/lib/data/timeline'
-import { readJsonFile, writeJsonFile } from '@/lib/data/fs-store'
 import { listCompanies } from '@/lib/data/companies'
-import type { Company, TaxAssessment, TransactionFull } from '@/types/database'
+import type { TaxAssessment } from '@/types/database'
 import { requirePermission } from '@/lib/auth/require-permission'
 
 function generateUUID() {
@@ -50,8 +48,6 @@ export async function getTaxAssessmentsAction(companyId?: string): Promise<{ suc
   try {
     const allCompanies = await listCompanies()
     const compMap = new Map<string, string>(allCompanies.map(c => [c.id, c.name]))
-    const diskAssessments = await readAuthorizedJsonFile<TaxAssessment[]>('tax_assessments.json', [])
-
     let dbItems: TaxAssessment[] = []
     try {
       const supabase = await createClient()
@@ -67,24 +63,13 @@ export async function getTaxAssessmentsAction(companyId?: string): Promise<{ suc
     } catch (dbErr) {
     rethrowDbError(dbErr)}
 
-    const map = new Map<string, TaxAssessment>()
-    dbItems.forEach(i => map.set(i.id, i))
-    diskAssessments.forEach(i => {
-      const existing = map.get(i.id)
-      const coName = i.company_name || compMap.get(i.company_id) || null
-      map.set(i.id, { ...(existing || {}), ...i, company_name: coName })
-    })
-
-    let list = Array.from(map.values())
+    let list = dbItems
       .map(item => ({
         ...item,
         company_name: compMap.get(item.company_id) || item.company_name || null,
       }))
       .filter(item => {
-        // Exclude any test artifact dummy companies or orphaned records
-        if (!item.company_id || item.company_id.startsWith('dup_tax_co_') || item.company_id.startsWith('test_co_')) {
-          return false
-        }
+        if (!item.company_id) return false
         // Must belong to a valid registered company in companies list or have a confirmed valid company_name
         return Boolean(compMap.has(item.company_id) || item.company_name)
       })
@@ -97,10 +82,8 @@ export async function getTaxAssessmentsAction(companyId?: string): Promise<{ suc
     return { success: true, data: list }
   } catch (err: unknown) {
     rethrowDbError(err)
-    console.error('getTaxAssessmentsAction exception, using disk store:', err)
-    const diskAssessments = await readAuthorizedJsonFile<TaxAssessment[]>('tax_assessments.json', [])
-    const list = companyId ? diskAssessments.filter(x => x.company_id === companyId) : diskAssessments
-    return { success: true, data: list }
+    console.error('getTaxAssessmentsAction exception:', err)
+    return { success: false, data: [] as TaxAssessment[], error: 'تعذّر تحميل ملفات التحاسب' }
   }
 }
 
@@ -124,18 +107,7 @@ export async function createTaxAssessmentAction(payload: CreateTaxAssessmentPayl
       return { success: false, error: 'المحامي المكلّف / المسؤول مطلوب (إلزامي)' }
     }
 
-    // Check duplicate tax assessment for same company + year (Disk + DB)
-    const diskAssessments = readJsonFile<TaxAssessment[]>('tax_assessments.json', [])
-    const existingTax = diskAssessments.find(
-      t => t.company_id === payload.company_id && Number(t.year) === Number(payload.year)
-    )
-    if (existingTax) {
-      return {
-        success: false,
-        error: `تم تسجيل تحاسب ضريبي لهذه الشركة لسنة (${payload.year}) مسبقاً. يرجى تعديل السجل القائم بدلاً من إنشاء سجل مكرر.`,
-      }
-    }
-
+    // منع تكرار التحاسب لنفس الشركة والسنة
     try {
       const supabase = createAdminClient()
       const { data: dbExisting } = await supabase
@@ -212,43 +184,16 @@ export async function createTaxAssessmentAction(payload: CreateTaxAssessmentPayl
       console.warn('Supabase insert tax_assessment notice:', dbErr)
     }
 
-    // Save to Local Disk Store
-    diskAssessments.unshift(newRecord)
-    writeJsonFile('tax_assessments.json', diskAssessments)
-
     // Sync to Commercial Transactions Feed
     const txTypeStr = newRecord.status === 'tax_cleared' ? 'tax-clear' : 'tax-assess'
     const txStatus = newRecord.status === 'tax_cleared' ? 'completed' : 'in_progress'
-
-    const txRecord: TransactionFull = {
-      id: assessmentId,
-      company_id: payload.company_id,
-      client_id: null,
-      lawyer_id: payload.lawyer_id || null,
-      type: txTypeStr,
-      status: txStatus,
-      priority: 'medium',
-      tx_date: createdAt.slice(0, 10),
-      due_date: newRecord.clearance_date || null,
-      description: payload.notes?.trim() || `تحاسب ضريبي لسنة ${newRecord.year}`,
-      services: ['tax_assessment'],
-      lacks: null,
-      fee: null,
-      phone: null,
-      created_at: createdAt,
-      clients: null,
-      profiles: payload.assigned_lawyer_name ? ({ id: payload.lawyer_id || '1', name: payload.assigned_lawyer_name } as unknown as typeof txRecord.profiles) : null,
-      companies: {
-        id: payload.company_id,
-        name: targetCompany?.name || 'شركة',
-      } as Company,
-    }
 
     try {
       const supabase = createAdminClient()
       await dbWrite(supabase.from('transactions').insert({
         id: assessmentId,
         company_id: payload.company_id,
+        lawyer_id: payload.lawyer_id?.trim() || null,
         type: txTypeStr,
         status: txStatus,
         priority: 'medium',
@@ -260,13 +205,9 @@ export async function createTaxAssessmentAction(payload: CreateTaxAssessmentPayl
     } catch (dbErr) {
     rethrowDbError(dbErr)}
 
-    const diskTxs = readJsonFile<TransactionFull[]>('transactions.json', [])
-    diskTxs.unshift(txRecord)
-    writeJsonFile('transactions.json', diskTxs)
-
     // Log Timeline Event for real companies only
     try {
-      if (payload.company_id && !payload.company_id.startsWith('dup_') && !payload.company_id.startsWith('test_co_')) {
+      if (payload.company_id) {
         await logTimelineEvent({
           company_id: payload.company_id,
           event_type: 'tax_assessment_started',
@@ -304,13 +245,12 @@ export async function updateTaxAssessmentAction(
   if (denied) return denied
 
   try {
-    const diskAssessments = readJsonFile<TaxAssessment[]>('tax_assessments.json', [])
-    const idx = diskAssessments.findIndex(a => a.id === id)
-    if (idx === -1) {
+    // السجل الحالي من قاعدة البيانات (كان يُبحث عنه في ملف مؤقت فارغ فيفشل كل تعديل)
+    const { data: currentRow } = await createAdminClient().from('tax_assessments').select('*').eq('id', id).maybeSingle()
+    if (!currentRow) {
       return { success: false, error: 'سجل التحاسب الضريبي غير موجود' }
     }
-
-    const current = diskAssessments[idx]
+    const current = currentRow as TaxAssessment
     const updatedRecord: TaxAssessment = {
       ...current,
       ...(payload.year !== undefined ? { year: Number(payload.year) } : {}),
@@ -331,26 +271,13 @@ export async function updateTaxAssessmentAction(
       ...(payload.notes !== undefined ? { notes: payload.notes.trim() || null } : {}),
     }
 
-    // Try updating Supabase
-    try {
-      const supabase = createAdminClient()
-      await dbWrite(supabase.from('tax_assessments').update(updatedRecord).eq('id', id), 'tax_assessments')
-    } catch (dbErr) {
-    rethrowDbError(dbErr)}
-
-    diskAssessments[idx] = updatedRecord
-    writeJsonFile('tax_assessments.json', diskAssessments)
+    // الحفظ — الحقول المعدّلة فقط (لا نعيد كتابة id/created_at أو حقول للعرض)
+    const { id: _id, created_at: _c, company_name: _n, ...changes } = updatedRecord as TaxAssessment & { company_name?: string | null }
+    void _id; void _c; void _n
+    await dbWrite(createAdminClient().from('tax_assessments').update(changes).eq('id', id), 'tax_assessments')
 
     // Update corresponding transaction in transactions.json
     const isCleared = updatedRecord.status === 'tax_cleared'
-    const diskTxs = readJsonFile<TransactionFull[]>('transactions.json', [])
-    const txIdx = diskTxs.findIndex(t => t.id === id)
-    if (txIdx !== -1) {
-      diskTxs[txIdx].status = isCleared ? 'completed' : 'in_progress'
-      diskTxs[txIdx].type = isCleared ? 'tax-clear' : 'tax-assess'
-      if (updatedRecord.clearance_date) diskTxs[txIdx].due_date = updatedRecord.clearance_date
-      writeJsonFile('transactions.json', diskTxs)
-    }
 
     try {
       const supabase = createAdminClient()
@@ -395,14 +322,6 @@ export async function deleteTaxAssessmentAction(id: string): Promise<{ success: 
   if (denied) return denied
 
   try {
-    const diskAssessments = readJsonFile<TaxAssessment[]>('tax_assessments.json', [])
-    const filtered = diskAssessments.filter(a => a.id !== id)
-    writeJsonFile('tax_assessments.json', filtered)
-
-    const diskTxs = readJsonFile<TransactionFull[]>('transactions.json', [])
-    const filteredTxs = diskTxs.filter(t => t.id !== id)
-    writeJsonFile('transactions.json', filteredTxs)
-
     try {
       const supabase = createAdminClient()
       await dbWrite(supabase.from('tax_assessments').delete().eq('id', id), 'tax_assessments')

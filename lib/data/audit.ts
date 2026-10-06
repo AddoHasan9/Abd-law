@@ -4,9 +4,7 @@
  * يسجّل كافة عمليات الدخول، الخروج، الإنشاء، التعديل، والحذف
  * في قاعدة بيانات Supabase والتخزين المحلي المزدوج بدقة تامة.
  */
-import { readAuthorizedJsonFile } from '@/lib/auth/scoped-store'
 import { createAdminClient, createClient } from '@/lib/supabase/server'
-import { readJsonFile, writeJsonFile } from '@/lib/data/fs-store'
 
 export interface UserAuditLogEntry {
   id: string
@@ -54,18 +52,7 @@ export async function logUserAuditAction(payload: {
     created_at: new Date().toISOString(),
   }
 
-  // 1. التخزين المحلي المزدوج (Disk JSON)
-  try {
-    const diskLogs = readJsonFile<UserAuditLogEntry[]>('user_audit_logs.json', [])
-    diskLogs.unshift(entry)
-    // الاحتفاظ بآخر 2000 سجل لضمان سرعة الأداء
-    if (diskLogs.length > 2000) diskLogs.length = 2000
-    writeJsonFile('user_audit_logs.json', diskLogs)
-  } catch (err) {
-    console.warn('Audit disk write notice:', err)
-  }
-
-  // 2. التخزين السحابي في Supabase
+  // التخزين في Supabase
   try {
     const supabase = createAdminClient()
     const { error: auditErr } = await supabase.from('user_audit_logs').insert({
@@ -97,8 +84,6 @@ export async function getAuditLogs(filters?: {
   userId?: string
   limit?: number
 }): Promise<UserAuditLogEntry[]> {
-  const diskLogs = await readAuthorizedJsonFile<UserAuditLogEntry[]>('user_audit_logs.json', [])
-
   try {
     const supabase = await createClient()
     let query = supabase
@@ -112,21 +97,13 @@ export async function getAuditLogs(filters?: {
     if (filters?.userId) query = query.eq('user_id', filters.userId)
 
     const { data, error } = await query
-
-    if (!error && data && data.length > 0) {
-      // Merge disk and DB
-      const map = new Map<string, UserAuditLogEntry>()
-      diskLogs.forEach(l => map.set(l.id, l))
-      ;(data as UserAuditLogEntry[]).forEach(l => map.set(l.id, l))
-      return Array.from(map.values()).sort(
-        (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-      )
+    if (error) {
+      console.error('getAuditLogs:', error.message)
+      return []
     }
-  } catch {}
-
-  let results = diskLogs
-  if (filters?.action) results = results.filter(l => l.action === filters.action)
-  if (filters?.category) results = results.filter(l => l.category === filters.category)
-  if (filters?.userId) results = results.filter(l => l.user_id === filters.userId)
-  return results.slice(0, filters?.limit || 100)
+    return (data ?? []) as UserAuditLogEntry[]
+  } catch (err) {
+    console.error('getAuditLogs:', err)
+    return []
+  }
 }

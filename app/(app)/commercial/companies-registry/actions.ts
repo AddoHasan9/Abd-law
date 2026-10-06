@@ -4,7 +4,6 @@ import { revalidatePath } from 'next/cache'
 import { findCompanyByName } from '@/lib/data/company-name'
 import { dbWrite, rethrowDbError } from '@/lib/data/db-guard'
 import { createAdminClient } from '@/lib/supabase/server'
-import { readJsonFile, writeJsonFile } from '@/lib/data/fs-store'
 import { logTimelineEvent } from '@/lib/data/timeline'
 import { WORKFLOW } from '@/lib/constants'
 import type { CompanyWithWorkflow, CompanyManager, CompanyShareholder, CompanyIDRecord, WorkflowStep } from '@/types/database'
@@ -64,7 +63,6 @@ export async function createEstablishedCompanyAction(payload: AddEstablishedComp
 
     const companyId = generateUUID()
     const name = payload.name.trim()
-    const lawyerId = payload.lawyer_id?.trim() || 'db13125d-3aa1-46ab-9159-8fad18746623'
 
     // منع تكرار الشركات بالاسم نفسه — من قاعدة البيانات
     const existingActive = await findCompanyByName(name)
@@ -135,9 +133,6 @@ export async function createEstablishedCompanyAction(payload: AddEstablishedComp
         console.warn('Supabase insert company_manager notice:', mgrDbErr)
       }
 
-      const diskManagers = readJsonFile<CompanyManager[]>('company_managers.json', [])
-      diskManagers.unshift(managerRecord)
-      writeJsonFile('company_managers.json', diskManagers)
     }
 
     // 3. Insert Shareholders in company_shareholders table
@@ -165,9 +160,6 @@ export async function createEstablishedCompanyAction(payload: AddEstablishedComp
           console.warn('Supabase insert company_shareholders notice:', shDbErr)
         }
 
-        const diskShareholders = readJsonFile<CompanyShareholder[]>('company_shareholders.json', [])
-        diskShareholders.push(...shareholderRecords)
-        writeJsonFile('company_shareholders.json', diskShareholders)
       }
     }
 
@@ -216,9 +208,6 @@ export async function createEstablishedCompanyAction(payload: AddEstablishedComp
           console.warn('Supabase insert company_ids notice:', idDbErr)
         }
 
-        const diskIDs = readJsonFile<CompanyIDRecord[]>('company_ids.json', [])
-        diskIDs.unshift(...idRecords)
-        writeJsonFile('company_ids.json', diskIDs)
       }
     }
 
@@ -240,7 +229,7 @@ export async function createEstablishedCompanyAction(payload: AddEstablishedComp
     } catch (dbErr) {
     rethrowDbError(dbErr)}
 
-    // 7. Save Company to Local Disk Store for 100% Guaranteed Availability
+    // 7. الشركة كاملة لإرجاعها للواجهة
     const fullCompanyObject: CompanyWithWorkflow = {
       ...companyDataToInsert,
       task_no: String(Math.floor(1000 + Math.random() * 9000)),
@@ -255,18 +244,6 @@ export async function createEstablishedCompanyAction(payload: AddEstablishedComp
       managers: managerRecord ? [managerRecord] : [],
       shareholders: shareholderRecords,
     }
-
-    const currentDiskCompanies = readJsonFile<CompanyWithWorkflow[]>('companies.json', [])
-    currentDiskCompanies.unshift(fullCompanyObject)
-    writeJsonFile('companies.json', currentDiskCompanies)
-
-    try {
-      const deletedIds = readJsonFile<string[]>('deleted_company_ids.json', [])
-      if (deletedIds.includes(companyId)) {
-        writeJsonFile('deleted_company_ids.json', deletedIds.filter(id => id !== companyId))
-      }
-    } catch (dbErr) {
-    rethrowDbError(dbErr)}
 
     // 8. Log Timeline Event
     try {

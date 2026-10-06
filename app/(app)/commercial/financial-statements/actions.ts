@@ -1,7 +1,6 @@
 'use server'
 
-import { readAuthorizedJsonFile } from '@/lib/auth/scoped-store'
-import { rethrowDbError } from '@/lib/data/db-guard'
+import { dbWrite, rethrowDbError } from '@/lib/data/db-guard'
 import { requireRecordAccess } from '@/lib/auth/record-access'
 import { revalidatePath } from 'next/cache'
 import { createAdminClient, createClient } from '@/lib/supabase/server'
@@ -9,13 +8,11 @@ import type { FinancialStatement } from '@/types/database'
 import { createNotificationAction } from '@/app/(app)/notifications/actions'
 import { logTimelineEvent } from '@/lib/data/timeline'
 import { getCurrentUserProfile, requirePermission } from '@/lib/auth/require-permission'
-import { readJsonFile, writeJsonFile, ALLOW_LOCAL_FALLBACK } from '@/lib/data/fs-store'
 
 export async function getFinancialStatementsAction(companyId?: string) {
   const accessDenied = await requirePermission('financial_statements', 'view')
   if (accessDenied) return { success: false, data: [], error: accessDenied.error }
 
-  const diskFS = await readAuthorizedJsonFile<FinancialStatement[]>('financial_statements.json', [])
   try {
     const supabase = await createClient()
     let query = supabase
@@ -57,32 +54,11 @@ export async function getFinancialStatementsAction(companyId?: string) {
       created_at: item.created_at,
     })) : []
 
-    const map = new Map<string, FinancialStatement>()
-    diskFS.forEach(f => {
-      if (!companyId || f.company_id === companyId) {
-        map.set(f.id, f)
-      }
-    })
-    dbItems.forEach(f => {
-      const existing = map.get(f.id)
-      map.set(f.id, {
-        ...existing,
-        ...f,
-        date_submitted_tax: f.date_submitted_tax || existing?.date_submitted_tax,
-        date_submitted_registrar: f.date_submitted_registrar || existing?.date_submitted_registrar || f.date_submitted,
-      })
-    })
-
-    const result = Array.from(map.values()).sort((a, b) => b.year - a.year)
-    return { success: true, data: result }
+    return { success: true, data: dbItems.sort((a, b) => b.year - a.year) }
   } catch (err) {
     rethrowDbError(err)
-    console.warn('getFinancialStatementsAction exception, using disk store:', err)
-    let items = [...diskFS]
-    if (companyId) {
-      items = items.filter(x => x.company_id === companyId)
-    }
-    return { success: true, data: items }
+    console.warn('getFinancialStatementsAction exception:', err)
+    return { success: false, data: [] as FinancialStatement[], error: 'تعذّر تحميل الحسابات الختامية' }
   }
 }
 
@@ -198,12 +174,8 @@ export async function createFinancialStatementsBatchAction(payload: {
       }
     }
 
-    // Check existing years in database or disk for this company
+    // السنوات المسجلة مسبقاً لهذه الشركة
     const existingYears = new Set<number>()
-    const diskFS = readJsonFile<FinancialStatement[]>('financial_statements.json', [])
-    diskFS
-      .filter(x => x.company_id === payload.company_id)
-      .forEach(x => existingYears.add(x.year))
 
     try {
       const { data: existingRecords } = await supabase
@@ -269,33 +241,9 @@ export async function createFinancialStatementsBatchAction(payload: {
       console.error('createFinancialStatementsBatchAction DB error:', e)
     }
 
-    if (insertedRecords.length === 0 && !ALLOW_LOCAL_FALLBACK) {
+    if (insertedRecords.length === 0) {
       return { success: false, error: 'تعذّر الحفظ في قاعدة البيانات. تحقق من الاتصال وحاول مجدداً' }
     }
-    if (insertedRecords.length === 0) {
-      for (const r of payload.rows) {
-        const item: FinancialStatement = {
-          id: 'fs_' + Math.random().toString(36).substring(2, 9),
-          company_id: payload.company_id,
-          company_name: companyName,
-          year: r.year,
-          date_received: r.date_received || null,
-          date_submitted: r.date_submitted || r.date_submitted_registrar || null,
-          date_submitted_tax: r.date_submitted_tax || null,
-          date_submitted_registrar: r.date_submitted_registrar || r.date_submitted || null,
-          tax_submitted: Boolean(r.date_submitted_tax),
-          registrar_submitted: Boolean(r.date_submitted_registrar || r.date_submitted),
-          notes: r.notes?.trim() || null,
-          created_at: new Date().toISOString(),
-        }
-        insertedRecords.push(item)
-      }
-    }
-
-    // Persist to disk store
-    const currentDisk = readJsonFile<FinancialStatement[]>('financial_statements.json', [])
-    insertedRecords.forEach(rec => currentDisk.unshift(rec))
-    writeJsonFile('financial_statements.json', currentDisk)
 
     // Send summary notification for created batch
     await createNotificationAction({
@@ -375,32 +323,6 @@ export async function updateFinancialStatementAction(
     } catch (dbErr) {
     rethrowDbError(dbErr)}
 
-    // Update disk store
-    const diskFS = readJsonFile<FinancialStatement[]>('financial_statements.json', [])
-    const idx = diskFS.findIndex(x => x.id === id)
-    if (idx !== -1) {
-      if (payload.year !== undefined) diskFS[idx].year = payload.year
-      if (payload.date_received !== undefined) diskFS[idx].date_received = payload.date_received || null
-      if (payload.date_submitted !== undefined) diskFS[idx].date_submitted = payload.date_submitted || null
-      if (payload.date_submitted_tax !== undefined) {
-        diskFS[idx].date_submitted_tax = payload.date_submitted_tax || null
-        diskFS[idx].tax_submitted = Boolean(payload.date_submitted_tax)
-      }
-      if (payload.date_submitted_registrar !== undefined) {
-        diskFS[idx].date_submitted_registrar = payload.date_submitted_registrar || null
-        diskFS[idx].date_submitted = payload.date_submitted_registrar || null
-        diskFS[idx].registrar_submitted = Boolean(payload.date_submitted_registrar)
-      }
-      if (payload.tax_submitted !== undefined) diskFS[idx].tax_submitted = payload.tax_submitted
-      if (payload.registrar_submitted !== undefined) diskFS[idx].registrar_submitted = payload.registrar_submitted
-      if (payload.notes !== undefined) diskFS[idx].notes = payload.notes.trim() || null
-      writeJsonFile('financial_statements.json', diskFS)
-
-      targetCompanyId = targetCompanyId || diskFS[idx].company_id
-      targetYear = targetYear || diskFS[idx].year
-      companyName = companyName || diskFS[idx].company_name || null
-    }
-
     if (targetCompanyId && (payload.date_submitted_tax || payload.date_submitted_registrar || payload.date_submitted)) {
       const parts: string[] = []
       if (payload.date_submitted_tax) parts.push(`الهيئة العامة للضرائب (${payload.date_submitted_tax})`)
@@ -465,28 +387,18 @@ export async function deleteFinancialStatementAction(id: string) {
   if (denied) return denied
 
   try {
-    const supabase = createAdminClient()
-    try {
-      const diskFS = readJsonFile<FinancialStatement[]>('financial_statements.json', [])
-      writeJsonFile('financial_statements.json', diskFS.filter(x => x.id !== id))
-    } catch (dbErr) {
-    rethrowDbError(dbErr)}
-
-    revalidatePath('/commercial/financial-statements')
-    revalidatePath('/commercial/companies')
-    revalidatePath('/commercial')
-    revalidatePath('/dashboard')
-
-    return { success: true }
-  } catch (dbErr) {
-    rethrowDbError(dbErr)
-    try {
-      const diskFS = readJsonFile<FinancialStatement[]>('financial_statements.json', [])
-      writeJsonFile('financial_statements.json', diskFS.filter(x => x.id !== id))
-    } catch (dbErr) {
-    rethrowDbError(dbErr)}
-    return { success: true }
+    // الحذف من قاعدة البيانات (كان يحذف من الملف المؤقت فقط فتعود السنة بعد التحديث)
+    await dbWrite(createAdminClient().from('financial_statements').delete().eq('id', id), 'financial_statements')
+  } catch (err) {
+    rethrowDbError(err)
+    return { success: false, error: 'تعذّر الحذف من قاعدة البيانات. حاول مجدداً' }
   }
+
+  revalidatePath('/commercial/financial-statements')
+  revalidatePath('/commercial/companies')
+  revalidatePath('/commercial')
+  revalidatePath('/dashboard')
+  return { success: true }
 }
 
 // حالة «متابعة التواصل» لكل شركة وسنة — محفوظة في قاعدة البيانات (كانت في ذاكرة الخادم فتضيع)

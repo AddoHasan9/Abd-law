@@ -2,7 +2,6 @@
 
 import { revalidatePath } from 'next/cache'
 import { createAdminClient } from '@/lib/supabase/server'
-import { readJsonFile, writeJsonFile } from '@/lib/data/fs-store'
 import { logTimelineEvent } from '@/lib/data/timeline'
 import { getWorkflowStatusConfig, StatusUpdatePayload, AuditLogItem } from '@/lib/workflow-status'
 import { getCurrentUserProfile, requirePermission } from '@/lib/auth/require-permission'
@@ -20,7 +19,9 @@ export async function updateWorkflowStatusAction(payload: StatusUpdatePayload) {
   if (denied) return denied
 
   try {
-    const { entityId, entityType = 'transaction', companyId, fromStatus, toStatus, actorName = 'محمد أحمد', notes, reasons } = payload
+    const { entityId, entityType = 'transaction', companyId, fromStatus, toStatus, notes, reasons } = payload
+    // اسم المنفّذ من الحساب المسجل (لا يُؤخذ من المتصفح — كان ثابتاً «محمد أحمد»)
+    const actorName = (await getCurrentUserProfile())?.name || 'مستخدم النظام'
     const fromConfig = getWorkflowStatusConfig(fromStatus)
     const toConfig = getWorkflowStatusConfig(toStatus)
     const now = new Date()
@@ -61,36 +62,7 @@ export async function updateWorkflowStatusAction(payload: StatusUpdatePayload) {
       return { success: false, error: 'تعذّر حفظ الحالة في قاعدة البيانات. حاول مجدداً' }
     }
 
-    // 2. Update Disk JSON Stores
-    if (entityType === 'transaction') {
-      const diskTxs = readJsonFile<Array<Record<string, unknown>>>('transactions.json', [])
-      const idx = diskTxs.findIndex(t => t.id === entityId || (targetCompanyId && t.company_id === targetCompanyId))
-      if (idx !== -1) {
-        diskTxs[idx].status = toStatus
-        if (extraDetail) diskTxs[idx].status_reason = extraDetail
-      } else {
-        diskTxs.push({
-          id: entityId,
-          company_id: targetCompanyId,
-          status: toStatus,
-          status_reason: extraDetail || undefined,
-          updated_at: now.toISOString(),
-        })
-      }
-      writeJsonFile('transactions.json', diskTxs)
-    }
-
-    if (targetCompanyId) {
-      const diskCompanies = readJsonFile<Array<Record<string, unknown>>>('companies.json', [])
-      const cIdx = diskCompanies.findIndex(c => c.id === targetCompanyId)
-      if (cIdx !== -1) {
-        diskCompanies[cIdx].status = toStatus
-        if (extraDetail) diskCompanies[cIdx].status_reason = extraDetail
-        writeJsonFile('companies.json', diskCompanies)
-      }
-    }
-
-    // 3. Create Timeline Record (Automatic Integration)
+    // 2. سجل زمني تلقائي
     if (targetCompanyId) {
       const timelineDescription = `تم تغيير حالة سير العمل من (${fromConfig.label}) إلى (${toConfig.label})${
         extraDetail ? ` - ${extraDetail}` : ''

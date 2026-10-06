@@ -7,7 +7,6 @@
  * 3. كتاب المحاسب (accountant)
  * 4. رفع باركود / QR الشركة أو PDF (barcode)
  */
-import { readAuthorizedJsonFile } from '@/lib/auth/scoped-store'
 import { requirePermission } from '@/lib/auth/require-permission'
 import { createClient } from '@/lib/supabase/server'
 import type { DepositWithStages, DepositStage, Company } from '@/types/database'
@@ -46,10 +45,6 @@ export async function listDeposits(): Promise<DepositWithStages[]> {
   if (accessDenied) return []
 
   try {
-    const deletedCompanyIds = await readAuthorizedJsonFile<string[]>('deleted_company_ids.json', [])
-    const diskDeposits = await readAuthorizedJsonFile<RawDepositItem[]>('deposits.json', [])
-    const diskCompanies = await readAuthorizedJsonFile<Company[]>('companies.json', [])
-
     // Try fetching from Supabase
     let dbDeposits: RawDepositItem[] = []
     try {
@@ -73,12 +68,7 @@ export async function listDeposits(): Promise<DepositWithStages[]> {
       const depositId = d.id
       const coObj = d.companies as Company | null
       const companyId = (d.company_id || coObj?.id) as string
-      if (deletedCompanyIds.includes(companyId)) return
-
-      let co = coObj
-      if (!co || !co.name) {
-        co = diskCompanies.find(c => c.id === companyId) || null
-      }
+      const co = coObj?.name ? coObj : null
 
       const rawStages = Array.isArray(d.deposit_stages) ? d.deposit_stages : []
       const stages: DepositStage[] = STANDARD_STAGES_CONFIG.map(cfg => {
@@ -108,55 +98,6 @@ export async function listDeposits(): Promise<DepositWithStages[]> {
       } as unknown as DepositWithStages)
     })
 
-    // 2. Merge Disk Deposits (Disk updates take priority for recent stage toggles & barcode uploads)
-    diskDeposits.forEach(d => {
-      const depositId = d.id
-      const coObj = d.companies as Company | null
-      const companyId = (d.company_id || coObj?.id) as string
-      if (deletedCompanyIds.includes(companyId)) return
-
-      const co = coObj || diskCompanies.find(c => c.id === companyId) || null
-      const existing = map.get(depositId)
-
-      const diskStagesRaw = Array.isArray(d.deposit_stages) ? d.deposit_stages : []
-      const mergedStages: DepositStage[] = STANDARD_STAGES_CONFIG.map(cfg => {
-        const existingStage = existing?.deposit_stages?.find(s => s.stage_key === cfg.stage_key || (cfg.stage_key === 'advisor' && s.stage_key === 'consultant'))
-        const diskStage = diskStagesRaw.find(s => s.stage_key === cfg.stage_key || (cfg.stage_key === 'advisor' && s.stage_key === 'consultant') || s.id === existingStage?.id)
-        const isBarcode = cfg.stage_key === 'barcode'
-        const hasBarcodeUrl = isBarcode && (co?.barcode_url || diskStage?.notes)
-
-        // Prefer done state from disk or DB
-        const isDone = diskStage?.state === 'done' || existingStage?.state === 'done' || Boolean(hasBarcodeUrl)
-        const state: 'done' | 'idle' | 'progress' = isDone ? 'done' : (diskStage?.state || existingStage?.state || 'idle')
-        const at_date = diskStage?.at_date || existingStage?.at_date || (isDone ? (co?.deposit_released_at || new Date().toISOString().slice(0, 10)) : null)
-        const notes = diskStage?.notes || existingStage?.notes || (isBarcode ? (co?.barcode_url || null) : null)
-
-        return {
-          id: diskStage?.id || existingStage?.id || `stage_${cfg.stage_key}_${depositId}`,
-          deposit_id: depositId,
-          stage_key: cfg.stage_key,
-          stage_order: cfg.stage_order,
-          label: cfg.label,
-          state,
-          at_date: at_date || null,
-          notes: notes || null,
-          by_id: diskStage?.by_id || existingStage?.by_id || null,
-          created_at: diskStage?.created_at || existingStage?.created_at || new Date().toISOString(),
-        }
-      })
-
-      const isReleased = d.status === 'released' || (existing as { status?: string })?.status === 'released' || co?.deposit_released || co?.status === 'established'
-
-      map.set(depositId, {
-        ...(existing || {}),
-        ...d,
-        company_id: companyId,
-        companies: co,
-        status: isReleased ? 'released' : (d.status || (existing as { status?: string })?.status || 'active'),
-        deposit_stages: mergedStages,
-      } as unknown as DepositWithStages)
-    })
-
     const result = Array.from(map.values()).sort(
       (a, b) => new Date(b.started_at || '').getTime() - new Date(a.started_at || '').getTime()
     )
@@ -165,11 +106,6 @@ export async function listDeposits(): Promise<DepositWithStages[]> {
     return result
   } catch (e) {
     console.error('Exception in listDeposits:', e)
-    const diskDeposits = await readAuthorizedJsonFile<RawDepositItem[]>('deposits.json', [])
-    const diskCompanies = await readAuthorizedJsonFile<Company[]>('companies.json', [])
-    return diskDeposits.map(d => ({
-      ...d,
-      companies: d.companies || diskCompanies.find(c => c.id === d.company_id) || null
-    })) as unknown as DepositWithStages[]
+    return []
   }
 }
