@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
+import { AttachmentField } from '@/components/ui/AttachmentField'
 import { toast } from 'sonner'
 import { Mi } from '@/components/ui/Mi'
 import { createPortal } from 'react-dom'
@@ -554,6 +555,14 @@ export default function AddIDModal({
                 </div>
               </div>
             </div>
+
+            {/* صورة الهوية بعد صدورها (اختياري) */}
+            <AttachmentField
+              entity="company_id"
+              entityId={record?.id}
+              label="صورة الهوية أو الوثيقة الصادرة"
+              hint="JPG أو PNG أو PDF — تُصغَّر الصور تلقائياً"
+            />
 
             {/* Notes */}
             <div className="flex flex-col gap-1.5">
