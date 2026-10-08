@@ -8,7 +8,7 @@ import { runAction } from '@/components/ui/ConfirmDialog'
 import { toast } from 'sonner'
 import { KpiCard } from '@/components/ui/KpiCard'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { wfProgress, formatMoney, formatDate, penaltyState } from '@/lib/constants'
+import { wfProgress, formatMoney, formatDate, penaltyState, WORKFLOW } from '@/lib/constants'
 import { calculateFSState } from '@/lib/financial-statements/calc'
 import { calculateCompanyStatus } from '@/lib/status-engine'
 import { WorkflowStatus } from '@/components/ui/WorkflowStatus'
@@ -319,17 +319,22 @@ export default function CompaniesClient({ initialCompanies }: Props) {
                   <div className="min-w-0">
                     <h3 title={co.name}>{co.name}</h3>
                     <p className="co-card-meta">
-                      <span className="num">#{co.task_no ?? '—'}</span>
+                      <span className="num">{co.task_no ?? '—'}</span>
                       <span aria-hidden>·</span>
                       <span>{co.kind ?? 'شركة'}</span>
                     </p>
                   </div>
-                  <span className={`co-pill co-card-status ${isEstablished ? 'is-ok' : co.cert_date ? 'is-info' : 'is-warn'}`}>
+                  <span className={`co-chip ${isEstablished ? 'is-ok' : co.cert_date ? 'is-deposit' : 'is-forming'}`}>
+                    <span className="co-chip-dot" aria-hidden />
                     {isEstablished ? 'مؤسسة' : co.cert_date ? 'إطلاق الوديعة' : 'قيد التأسيس'}
                   </span>
                 </header>
 
                 <dl className="co-card-facts">
+                  <div>
+                    <dt>رأس المال</dt>
+                    <dd className="num" title={co.capital ? formatMoney(co.capital) : undefined}>{co.capital ? compactIQD(co.capital) : '—'}</dd>
+                  </div>
                   <div>
                     <dt>رقم الشهادة</dt>
                     <dd className="num">{co.cert_no || '—'}</dd>
@@ -338,11 +343,29 @@ export default function CompaniesClient({ initialCompanies }: Props) {
                     <dt>تاريخ الشهادة</dt>
                     <dd className="num">{co.cert_date ? formatDate(co.cert_date) : '—'}</dd>
                   </div>
-                  <div>
-                    <dt>رأس المال</dt>
-                    <dd className="num co-card-money" title={co.capital ? formatMoney(co.capital) : undefined}>{co.capital ? compactIQD(co.capital) : '—'}</dd>
-                  </div>
                 </dl>
+
+                {/* المحطات الثمانية: المنجزة ✓ · الحالية ذهبية · الباقية رمادية */}
+                {!isEstablished && !pen && (
+                  <div className="co-steps">
+                    <ol className="co-dots" aria-label={`محطات التأسيس: ${pg.done} من ${pg.total}`}>
+                      {WORKFLOW.map(w => {
+                        const st = co.workflow_steps?.find(x => x.step_key === w.id)?.state
+                        const isCur = pg.current?.id === w.id
+                        return (
+                          <li key={w.id} className={st === 'done' ? 'is-done' : isCur ? 'is-cur' : ''} title={w.label}>
+                            {st === 'done' && <span className="material-symbols-outlined" aria-hidden>check</span>}
+                            <span className="sr-only">{w.label}: {st === 'done' ? 'منجزة' : isCur ? 'الحالية' : 'لم تبدأ'}</span>
+                          </li>
+                        )
+                      })}
+                    </ol>
+                    <span className="co-steps-meta">
+                      <b className="num">{pg.done} من {pg.total}</b> خطوات
+                      {pg.current && <span> · الآن: {pg.current.label}</span>}
+                    </span>
+                  </div>
+                )}
 
                 <footer className="co-card-foot">
                   {isEstablished ? (
@@ -352,12 +375,7 @@ export default function CompaniesClient({ initialCompanies }: Props) {
                       <span className="material-symbols-outlined" aria-hidden>account_balance</span>
                       الوديعة: متابعة <span className="num">({pen.daysLeft} يوم)</span>
                     </span>
-                  ) : (
-                    <span className="co-progress" title={pg.current ? `المحطة الحالية: ${pg.current.label}` : undefined}>
-                      <span className="co-progress-bar"><span style={{ width: `${pg.pct}%` }} /></span>
-                      <span className="num">{pg.done}/{pg.total}</span>
-                    </span>
-                  )}
+                  ) : null}
                   {isEstablished && !co.financial_statements_enabled && (
                     <button
                       type="button"
@@ -372,6 +390,10 @@ export default function CompaniesClient({ initialCompanies }: Props) {
                     </button>
                   )}
                   {co.lacks && <span className="co-pill is-bad" title={co.lacks}><span className="material-symbols-outlined" aria-hidden>warning</span>نواقص</span>}
+                  <span className="co-more" aria-hidden>
+                    عرض التفاصيل
+                    <span className="material-symbols-outlined">chevron_left</span>
+                  </span>
                 </footer>
               </article>
             )

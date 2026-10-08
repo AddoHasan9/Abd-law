@@ -3505,3 +3505,54 @@ html:root .kpi-card { border-radius: 20px; }
 @keyframes kb-pop { 0% { transform: scale(.95); opacity: .6; } 60% { transform: scale(1.02); } 100% { transform: none; opacity: 1; } }
 @media (prefers-reduced-motion: reduce) { .kb-card, .kb-card:hover { transition: none; transform: none; } .kb-card.is-moved { animation: none; } }
 @media (max-width: 640px) { .kb { padding: 10px; } .kb-board { grid-auto-columns: 82%; } }
+
+/* ============================================================
+   بطاقات تأسيس الشركات — النموذج 01 + نقاط المراحل (02) بألوان الشعار
+   بلا حد علوي ملوّن: الحالة تظهر في الشارة والنقاط فقط
+   ============================================================ */
+html:root .co-card {
+  --tone: var(--accent);
+  border: 1px solid var(--line-soft); border-top: 1px solid var(--line-soft); border-radius: 20px;
+  padding: 16px; gap: 14px;
+}
+@media (hover: hover) { html:root .co-card:hover { transform: translateY(-3px); box-shadow: 0 14px 30px -16px rgba(15, 23, 42, .35); border-color: color-mix(in srgb, var(--accent) 30%, var(--line-soft)); } }
+html:root .co-card-head h3 { font-size: 15px; font-weight: 800; line-height: 1.55; }
+html:root .co-card-meta { font-size: 12px; }
+
+.co-chip { flex: none; display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 800; padding: 4px 10px; border-radius: 999px; white-space: nowrap; }
+.co-chip-dot { width: 7px; height: 7px; border-radius: 999px; background: currentColor; }
+.co-chip.is-forming { background: color-mix(in srgb, var(--gold) 16%, var(--surface)); color: #8A6A38; }
+.co-chip.is-deposit { background: var(--accent-soft); color: var(--accent); }
+.co-chip.is-ok { background: rgba(16, 185, 129, .12); color: #047857; }
+html[data-theme="dark"] .co-chip.is-forming { color: #E3C48F; }
+html[data-theme="dark"] .co-chip.is-deposit { color: #A9BBE6; }
+html[data-theme="dark"] .co-chip.is-ok { color: #6EE7B7; }
+
+/* الحقائق الثلاث بفواصل رفيعة بدل الصندوق الرمادي */
+html:root .co-card-facts { background: transparent; padding: 12px 0; border-radius: 0; border-top: 1px solid var(--line-soft); border-bottom: 1px solid var(--line-soft); gap: 0; }
+html:root .co-card-facts > div { padding-inline: 10px; border-inline-start: 1px solid var(--line-soft); }
+html:root .co-card-facts > div:first-child { padding-inline-start: 0; border-inline-start: 0; }
+html:root .co-card-facts dt { font-size: 11.5px; font-weight: 600; }
+html:root .co-card-facts dd { font-size: 14px; margin-top: 4px; }
+
+/* المحطات الثمانية */
+.co-steps { display: flex; flex-direction: column; gap: 8px; }
+.co-dots { list-style: none; margin: 0; padding: 0; display: flex; align-items: center; }
+.co-dots li { position: relative; flex: 1; display: flex; align-items: center; justify-content: center; height: 22px; }
+.co-dots li::after { content: ''; width: 20px; height: 20px; border-radius: 999px; background: var(--surface-2); border: 1.5px solid var(--line); position: relative; z-index: 1; box-sizing: border-box; }
+.co-dots li + li::before { content: ''; position: absolute; inset-inline-end: 50%; width: 100%; height: 2px; background: var(--line-soft); top: 10px; }
+.co-dots li.is-done::after { background: var(--brand); border-color: var(--brand); }
+.co-dots li.is-done + li::before, .co-dots li.is-done::before { background: var(--brand); }
+.co-dots li.is-cur::after { background: var(--surface); border: 2.5px solid var(--gold); box-shadow: 0 0 0 4px color-mix(in srgb, var(--gold) 22%, transparent); }
+.co-dots li .material-symbols-outlined { position: absolute; z-index: 2; font-size: 14px; color: #fff; font-weight: 700; }
+.co-steps-meta { font-size: 12.5px; color: var(--text-3); }
+.co-steps-meta b { color: var(--text); font-weight: 800; }
+
+/* «عرض التفاصيل» — البطاقة كلها تُفتح، وهذا الدليل البصري */
+.co-more { margin-inline-start: auto; display: inline-flex; align-items: center; gap: 2px; min-height: 36px; padding: 0 12px; border-radius: 10px; border: 1px solid color-mix(in srgb, var(--accent) 35%, var(--line-soft)); color: var(--accent); font-size: 12.5px; font-weight: 800; transition: background-color .18s ease; }
+.co-more .material-symbols-outlined { font-size: 18px; transition: transform .18s ease; }
+@media (hover: hover) { html:root .co-card:hover .co-more { background: var(--accent-soft); } html:root .co-card:hover .co-more .material-symbols-outlined { transform: translateX(-3px); } }
+html[data-theme="dark"] .co-more { color: #A9BBE6; }
+
+/* البطاقة المختارة في المؤشرات: لون الشعار بدل لون كل بطاقة */
+html:root .kpi-card.is-active { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent) inset; background: color-mix(in srgb, var(--accent) 5%, var(--surface)); }
