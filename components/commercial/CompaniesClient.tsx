@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useOpenOnNewParam } from '@/lib/hooks/useOpenOnNewParam'
 import dynamic from 'next/dynamic'
 import { PageHeader } from '@/components/ui/PageHeader'
 import { runAction } from '@/components/ui/ConfirmDialog'
@@ -45,6 +46,8 @@ export default function CompaniesClient({ initialCompanies }: Props) {
   const [selectedCompany, setSelectedCompany] = useState<CompanyWithWorkflow | null>(null)
   const [isDetailsOpen, setIsDetailsOpen] = useState(false)
   const [isNewCompanyOpen, setIsNewCompanyOpen] = useState(false)
+  // فتح نافذة التأسيس من رابط ‎?new=1 (الإجراءات السريعة في لوحة التحكم)
+  useOpenOnNewParam(() => setIsNewCompanyOpen(true))
   const [notification, setNotification] = useState<string | null>(null)
   const [assigningId, setAssigningId] = useState<string | null>(null)
   const tabsScrollRef = useDragScroll<HTMLDivElement>({ speed: 1.4 })

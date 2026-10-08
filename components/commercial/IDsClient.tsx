@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback, useMemo } from 'react'
+import { useOpenOnNewParam } from '@/lib/hooks/useOpenOnNewParam'
 import { AttachmentChip } from '@/components/ui/AttachmentField'
 import { listAttachmentInfoAction } from '@/app/(app)/commercial/attachments/actions'
 import Link from 'next/link'
@@ -95,6 +96,9 @@ export default function IDsClient({ companies = [], initialCompanyId }: Props) {
     setSelectedCompanyForModal(targetCompany || (focusedCompanyId ? companies.find(c => c.id === focusedCompanyId) || null : null))
     setIsModalOpen(true)
   }
+
+  // فتح نافذة الإضافة من رابط ‎?new=1 (الإجراءات السريعة في لوحة التحكم)
+  useOpenOnNewParam(() => openAddModal('chamber_id'))
 
   const openEditModal = (record: CompanyIDRecord) => {
     setEditingRecord(record)

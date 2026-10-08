@@ -26,6 +26,7 @@ export function KpiCard({
   active,
   alert,
   format,
+  featured,
 }: {
   label: string
   value: number
@@ -39,8 +40,10 @@ export function KpiCard({
   alert?: boolean
   /** تنسيق الرقم (مثلاً المبالغ) */
   format?: 'currency' | 'number'
+  /** البطاقة الرئيسية الملوّنة بلون الشعار (واحدة بكل صفحة) */
+  featured?: boolean
 }) {
-  const cls = `kpi-card tone-${tone}${active ? ' is-active' : ''}${alert ? ' is-alert' : ''}`
+  const cls = `kpi-card tone-${tone}${active ? ' is-active' : ''}${alert ? ' is-alert' : ''}${featured ? ' is-featured' : ''}`
   const body = (
     <>
       <span className="kpi-label">{label}</span>

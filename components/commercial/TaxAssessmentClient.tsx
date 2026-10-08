@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useOpenOnNewParam } from '@/lib/hooks/useOpenOnNewParam'
 import { AttachmentChip } from '@/components/ui/AttachmentField'
 import { listAttachmentInfoAction } from '@/app/(app)/commercial/attachments/actions'
 import Link from 'next/link'
@@ -101,6 +102,9 @@ export default function TaxAssessmentClient({ assessments = [], companies = [], 
     setEditingItem(null)
     setIsModalOpen(true)
   }
+
+  // فتح نافذة الإضافة من رابط ‎?new=1 (الإجراءات السريعة في لوحة التحكم)
+  useOpenOnNewParam(() => openAddModal())
 
   const openEditModal = (item: TaxAssessment) => {
     setEditingItem(item)

@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
+import { useOpenOnNewParam } from '@/lib/hooks/useOpenOnNewParam'
 import Link from 'next/link'
 import dynamic from 'next/dynamic'
 import { isFSComplete } from '@/lib/financial-statements/completion'
@@ -70,6 +71,8 @@ export default function FinancialStatementsClient({ companies = [] }: Props) {
   }
 
   const [isAddModalOpen, setIsAddModalOpen] = useState(false)
+  // فتح نافذة الإضافة من رابط ‎?new=1 (الإجراءات السريعة في لوحة التحكم)
+  useOpenOnNewParam(() => setIsAddModalOpen(true))
   const [modalCompanyId, setModalCompanyId] = useState<string | undefined>()
   const [editingStatement, setEditingStatement] = useState<FinancialStatement | null>(null)
 

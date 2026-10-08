@@ -66,7 +66,14 @@ export interface DashboardStats {
     name: string
     doneCount: number
   }>
+  /** المعاملات المسجّلة في كل يوم من الأسبوع الحالي (السبت ← الجمعة، بتوقيت بغداد) */
+  weeklyActivity: Array<{ date: string; label: string; count: number; isToday: boolean; isFuture: boolean }>
+  /** الشركات قيد التأسيس مع تقدّم محطات سير العمل */
+  formingList: Array<{ id: string; name: string; done: number; total: number; current: string | null }>
 }
+
+const BAGHDAD_DAY = (d: Date) => d.toLocaleDateString('en-CA', { timeZone: 'Asia/Baghdad' })
+const WEEK_LABELS = ['السبت', 'الأحد', 'الاثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة']
 
 import { listCompanies } from '@/lib/data/companies'
 import { listTransactions } from '@/lib/data/transactions'
@@ -331,6 +338,36 @@ export async function getDashboardStats(): Promise<DashboardStats> {
       }))
     }
 
+    // نشاط الأسبوع: عدد المعاملات المسجّلة يومياً (السبت أول الأسبوع)
+    const todayStr = BAGHDAD_DAY(new Date())
+    const today = new Date(todayStr + 'T12:00:00Z')
+    const sinceSaturday = (today.getUTCDay() + 1) % 7 // السبت=0 … الجمعة=6
+    const weekStart = new Date(today.getTime() - sinceSaturday * 86400000)
+    const perDay = new Map<string, number>()
+    for (const t of txList) {
+      const d = String(t.tx_date || t.created_at || '').slice(0, 10)
+      if (d) perDay.set(d, (perDay.get(d) || 0) + 1)
+    }
+    const weeklyActivity = WEEK_LABELS.map((label, i) => {
+      const date = new Date(weekStart.getTime() + i * 86400000).toISOString().slice(0, 10)
+      return { date, label, count: perDay.get(date) || 0, isToday: date === todayStr, isFuture: date > todayStr }
+    })
+
+    // الشركات قيد التأسيس وتقدّمها
+    const formingList = companies
+      .filter(c => c.status !== 'established' && c.status !== 'done' && !c.deposit_released && !c.external)
+      .map(c => {
+        const steps = [...(c.workflow_steps || [])].sort((a, b) => (a.step_order || 0) - (b.step_order || 0))
+        const current = steps.find(s => s.state === 'doing') || steps.find(s => s.state !== 'done')
+        return {
+          id: c.id,
+          name: c.name,
+          done: steps.filter(s => s.state === 'done').length,
+          total: steps.length || 8,
+          current: current?.label || (steps.length ? 'إطلاق الوديعة' : null),
+        }
+      })
+
     return {
       activeTxCount,
       doneThisMonthCount,
@@ -348,6 +385,8 @@ export async function getDashboardStats(): Promise<DashboardStats> {
       priorityDistribution,
       recentTransactions,
       topLawyers,
+      weeklyActivity,
+      formingList,
     }
   } catch (err) {
     console.error('getDashboardStats error:', err)
@@ -368,6 +407,8 @@ export async function getDashboardStats(): Promise<DashboardStats> {
       priorityDistribution: [],
       recentTransactions: [],
       topLawyers: [],
+      weeklyActivity: [],
+      formingList: [],
     }
   }
 }
