@@ -687,7 +687,7 @@ export default function Company360Client({
                 </thead>
                 <tbody className="divide-y divide-[var(--border-soft)]">
                   {company.shareholders.map((sh, idx) => (
-                    <tr key={sh.id || idx} className="hover:bg-blue-500/[0.04] dark:hover:bg-blue-500/[0.08] transition-colors">
+                    <tr key={sh.id || idx} className="hover:bg-[color:color-mix(in_srgb,var(--accent)_4%,transparent)] dark:hover:bg-[color:color-mix(in_srgb,var(--accent)_8%,transparent)] transition-colors">
                       <td className="py-3 px-4 font-bold text-[13px] text-[var(--text)]">
                         <div className="flex items-center gap-2">
                           <span>{sh.name}</span>

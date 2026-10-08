@@ -371,7 +371,7 @@ export default function AddFinancialStatementModal({
                 <span>مهلة الضرائب القانونية: <strong>31 تموز (31/7)</strong></span>
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <span style={{ color: '#2563eb', fontSize: '16px' }}><Mi n="domain" /></span>
+                <span style={{ color: 'var(--accent)', fontSize: '16px' }}><Mi n="domain" /></span>
                 <span>مهلة مسجل الشركات: <strong>7 تشرين الأول (7/10)</strong></span>
               </div>
             </div>

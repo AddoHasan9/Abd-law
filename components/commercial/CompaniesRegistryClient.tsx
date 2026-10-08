@@ -177,13 +177,13 @@ export default function CompaniesRegistryClient({ companies = [] }: Props) {
                     <tr
                       key={co.id}
                       onClick={e => { if (!(e.target as HTMLElement).closest('a,button')) openDetails(co) }}
-                      className="id-row hover:bg-blue-500/[0.04] dark:hover:bg-blue-500/[0.08] transition-colors duration-150"
+                      className="id-row hover:bg-[color:color-mix(in_srgb,var(--accent)_4%,transparent)] dark:hover:bg-[color:color-mix(in_srgb,var(--accent)_8%,transparent)] transition-colors duration-150"
                       title="اضغط لعرض وتعديل أو حذف تفاصيل الشركة"
                     >
                       {/* Company Name */}
                       <td className="py-2.5 px-3">
                         <div className="flex items-center gap-2.5">
-                          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[var(--accent-soft)] to-blue-500/10 border border-[color:color-mix(in_srgb,var(--accent)_20%,transparent)] text-[var(--accent)] flex items-center justify-center shrink-0 shadow-xs">
+                          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[var(--accent-soft)] to-[color:color-mix(in_srgb,var(--accent)_10%,transparent)] border border-[color:color-mix(in_srgb,var(--accent)_20%,transparent)] text-[var(--accent)] flex items-center justify-center shrink-0 shadow-xs">
                             <span className="material-symbols-outlined text-[17px]">domain</span>
                           </div>
                           <Link href={`/commercial/companies/${co.id}`} className="id-co-link font-bold text-[13.5px] text-[var(--text)] leading-snug break-words whitespace-normal" title="فتح الملف الشامل للشركة">
@@ -239,7 +239,7 @@ export default function CompaniesRegistryClient({ companies = [] }: Props) {
                       {/* Financial Statements */}
                       <td className="py-2.5 px-2 text-center align-middle whitespace-nowrap">
                         {co.last_completed_fs_year ? (
-                          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10.5px] font-bold bg-blue-500/10 text-blue-700 dark:text-blue-300 border border-blue-500/20">
+                          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10.5px] font-bold bg-[color:color-mix(in_srgb,var(--accent)_10%,transparent)] text-[var(--accent)] dark:text-[#A9BBE6] border border-[color:color-mix(in_srgb,var(--accent)_20%,transparent)]">
                             ميزانية {co.last_completed_fs_year}
                           </span>
                         ) : (

@@ -296,7 +296,7 @@ export default function TaxAssessmentClient({ assessments = [], companies = [], 
 
                       {/* Assessment Year */}
                       <td className="p-3.5 text-center font-black num">
-                        <span className="px-3 py-1 rounded-xl bg-blue-500/10 text-blue-700 dark:text-blue-300 border border-blue-500/20">
+                        <span className="px-3 py-1 rounded-xl bg-[color:color-mix(in_srgb,var(--accent)_10%,transparent)] text-[var(--accent)] dark:text-[#A9BBE6] border border-[color:color-mix(in_srgb,var(--accent)_20%,transparent)]">
                           {item.year}
                         </span>
                       </td>

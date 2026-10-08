@@ -84,7 +84,7 @@ export default function WorkflowTimelineMotion({
         {/* Header Title & Live Counter Capsule */}
         <div className="flex items-center justify-between flex-wrap gap-3 relative z-10">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-amber-500/15 border border-amber-500/30 text-amber-600 dark:text-amber-400 flex items-center justify-center font-black shrink-0 shadow-xs">
+            <div className="w-10 h-10 rounded-xl bg-[var(--accent-soft)] text-[var(--accent)] flex items-center justify-center font-black shrink-0">
               <Sparkles className="w-5 h-5 animate-pulse" />
             </div>
             <div>
@@ -98,10 +98,9 @@ export default function WorkflowTimelineMotion({
           {/* Progress Capsule */}
           <div className="flex items-center gap-2.5 bg-[var(--surface-2)] px-3.5 py-1.5 rounded-full border border-[var(--line-soft)] shadow-xs">
             <span className="relative flex h-2.5 w-2.5">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
+                            <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-[var(--brand)]"></span>
             </span>
-            <span className="text-xs font-extrabold text-emerald-600 dark:text-emerald-400 num">
+            <span className="text-xs font-extrabold text-[var(--text)] num">
               {pct}% مكتمل
             </span>
             <span className="text-xs text-[var(--text-3)] font-semibold num border-s border-[var(--line-soft)] ps-2">
@@ -113,7 +112,7 @@ export default function WorkflowTimelineMotion({
         {/* Animated Progress Bar */}
         <div className="w-full h-2.5 rounded-full bg-[var(--surface-2)] overflow-hidden p-0.5 border border-[var(--line-soft)] relative">
           <motion.div
-            className="h-full rounded-full bg-gradient-to-r from-emerald-500 via-amber-400 to-emerald-400 shadow-sm relative overflow-hidden"
+            className="h-full rounded-full bg-[var(--brand)] relative overflow-hidden"
             initial={{ width: '0%' }}
             animate={{ width: `${Math.max(pct, 3)}%` }}
             transition={{ type: 'spring', stiffness: 100, damping: 20 }}
@@ -144,9 +143,9 @@ export default function WorkflowTimelineMotion({
               transition={{ duration: 0.28, delay: idx * 0.03 }}
               className={`rounded-2xl transition-all duration-300 flex items-center justify-between flex-wrap sm:flex-nowrap gap-4 p-4 sm:p-5 relative ${
                 isDoing
-                  ? 'bg-amber-500/[0.05] dark:bg-amber-950/20 border-2 border-amber-500 shadow-[0_0_22px_rgba(245,158,11,0.22)] ring-2 ring-amber-500/20'
+                  ? 'bg-[color:color-mix(in_srgb,var(--gold)_7%,var(--surface))] border-2 border-[color:var(--gold)] ring-4 ring-[color:color-mix(in_srgb,var(--gold)_18%,transparent)]'
                   : isDone
-                  ? 'bg-[var(--surface)] border border-emerald-500/40 shadow-xs hover:border-emerald-500/60'
+                  ? 'bg-[var(--surface)] border border-[var(--line-soft)] hover:border-[color:color-mix(in_srgb,var(--accent)_35%,var(--line-soft))]'
                   : 'bg-[color:color-mix(in_srgb,var(--surface-2)_60%,transparent)] border border-[var(--line-soft)] opacity-70 hover:opacity-90'
               }`}
             >
@@ -174,19 +173,19 @@ export default function WorkflowTimelineMotion({
                           cy="22"
                           r="18"
                           fill="none"
-                          stroke="#F59E0B"
+                          style={{ stroke: 'var(--gold)' }}
                           strokeWidth="3"
                           strokeDasharray="56 56"
                           strokeLinecap="round"
                         />
                       </svg>
                       {/* Center Static Upright Number */}
-                      <span className="relative z-10 font-black text-sm text-amber-600 dark:text-amber-400 num">
+                      <span className="relative z-10 font-black text-sm text-[#8A6A38] dark:text-[#E3C48F] num">
                         {step.step_order}
                       </span>
                     </>
                   ) : isDone ? (
-                    <div className="w-10 h-10 rounded-full bg-emerald-500 text-white flex items-center justify-center shadow-md shadow-emerald-500/40 ring-2 ring-emerald-500/30">
+                    <div className="w-10 h-10 rounded-full bg-[var(--brand)] text-white flex items-center justify-center">
                       <Check className="w-5 h-5 stroke-[3]" />
                     </div>
                   ) : (
@@ -203,7 +202,7 @@ export default function WorkflowTimelineMotion({
                     <h4
                       className={`font-black text-base sm:text-lg leading-tight ${
                         isDoing
-                          ? 'text-amber-600 dark:text-amber-400 font-display'
+                          ? 'text-[#8A6A38] dark:text-[#E3C48F] font-display'
                           : isDone
                           ? 'text-[var(--text)] font-extrabold'
                           : 'text-[var(--text-2)] font-bold'
@@ -214,16 +213,16 @@ export default function WorkflowTimelineMotion({
 
                     {/* Status Pill Badge */}
                     {isDoing && (
-                      <span className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full text-xs font-black bg-amber-500/15 text-amber-700 dark:text-amber-400 border border-amber-500/35 shadow-xs">
-                        <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-ping" />
+                      <span className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full text-xs font-black bg-[color:color-mix(in_srgb,var(--gold)_16%,var(--surface))] text-[#8A6A38] dark:text-[#E3C48F]">
+                        <span className="w-1.5 h-1.5 rounded-full bg-[var(--gold)]" />
                         <span>جاري التنفيذ</span>
                       </span>
                     )}
 
                     {isDone && (
-                      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-black bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border border-emerald-500/30">
+                      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-black bg-[var(--accent-soft)] text-[var(--accent)] dark:text-[#A9BBE6]">
                         <CheckCircle2 className="w-3.5 h-3.5" />
-                        <span>مكتملة بنجاح</span>
+                        <span>مكتملة</span>
                       </span>
                     )}
                   </div>
@@ -235,7 +234,7 @@ export default function WorkflowTimelineMotion({
                       <span>المسؤول: {step.owner_kind || 'المدير المختص'}</span>
                     </span>
                     {isDone && step.done_at && (
-                      <span className="text-[11px] text-emerald-600 dark:text-emerald-400 font-semibold num border-s border-[var(--line-soft)] ps-2">
+                      <span className="text-[11px] text-[var(--text-3)] font-semibold num border-s border-[var(--line-soft)] ps-2">
                         {formatArabicDate(step.done_at)}
                       </span>
                     )}
@@ -252,7 +251,7 @@ export default function WorkflowTimelineMotion({
                     whileTap={{ scale: 0.94 }}
                     onClick={() => handleComplete(step.id, step.step_order)}
                     disabled={animatingStepId === step.id}
-                    className="px-5 py-2.5 rounded-full font-black text-xs sm:text-sm bg-[#10B981] hover:bg-[#059669] active:bg-[#047857] text-white shadow-[0_0_18px_rgba(16,185,129,0.45)] hover:shadow-[0_0_26px_rgba(16,185,129,0.65)] transition-all flex items-center gap-2 cursor-pointer disabled:opacity-50"
+                    className="px-5 py-2.5 rounded-full font-black text-xs sm:text-sm bg-[var(--accent)] hover:bg-[color:color-mix(in_srgb,var(--accent)_86%,#000)] text-white transition-all flex items-center gap-2 cursor-pointer disabled:opacity-50"
                   >
                     <span>إكمال الخطوة</span>
                     <CheckCheck className="w-5 h-5 stroke-[2.5]" />
@@ -290,7 +289,7 @@ export default function WorkflowTimelineMotion({
           <button
             type="button"
             onClick={onTransferToDeposit}
-            className="w-full py-4 px-6 rounded-2xl font-black text-sm bg-gradient-to-r from-emerald-500 via-amber-500 to-emerald-600 hover:brightness-105 active:scale-98 text-white shadow-lg shadow-emerald-500/25 flex items-center justify-center gap-2.5 transition cursor-pointer border border-white/20"
+            className="w-full py-4 px-6 rounded-2xl font-black text-sm bg-[var(--brand)] hover:brightness-110 active:scale-98 text-white flex items-center justify-center gap-2.5 transition cursor-pointer border border-white/20"
           >
             <ShieldCheck className="w-5 h-5" />
             <span>اكتمل التأسيس — إدخال بيانات الشهادة والتحويل لمسار إطلاق الوديعة ←</span>

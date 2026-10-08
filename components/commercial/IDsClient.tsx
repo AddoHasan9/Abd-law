@@ -308,14 +308,14 @@ export default function IDsClient({ companies = [], initialCompanyId }: Props) {
                   return (
                     <tr
                       key={r.id}
-                      className="id-row hover:bg-blue-500/[0.04] dark:hover:bg-blue-500/[0.08] transition-colors duration-200"
+                      className="id-row hover:bg-[color:color-mix(in_srgb,var(--accent)_4%,transparent)] dark:hover:bg-[color:color-mix(in_srgb,var(--accent)_8%,transparent)] transition-colors duration-200"
                       onClick={e => { if (!(e.target as HTMLElement).closest('a,button')) openEditModal(r) }}
                       title="فتح الهوية"
                     >
                       {/* Company Name */}
                       <td className="py-3.5 px-4">
                         <div className="flex items-center gap-3">
-                          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[var(--accent-soft)] to-blue-500/10 border border-[color:color-mix(in_srgb,var(--accent)_20%,transparent)] text-[var(--accent)] flex items-center justify-center shrink-0 shadow-xs">
+                          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[var(--accent-soft)] to-[color:color-mix(in_srgb,var(--accent)_10%,transparent)] border border-[color:color-mix(in_srgb,var(--accent)_20%,transparent)] text-[var(--accent)] flex items-center justify-center shrink-0 shadow-xs">
                             <span className="material-symbols-outlined text-[19px]">domain</span>
                           </div>
                           {r.company_id ? (
@@ -334,7 +334,7 @@ export default function IDsClient({ companies = [], initialCompanyId }: Props) {
 
                       {/* ID Type */}
                       <td className="py-3.5 px-3 text-center align-middle">
-                        <span className="inline-flex items-center whitespace-nowrap px-3 py-1 rounded-full text-xs font-bold bg-blue-500/10 text-blue-700 dark:text-blue-300 border border-blue-500/20">
+                        <span className="inline-flex items-center whitespace-nowrap px-3 py-1 rounded-full text-xs font-bold bg-[color:color-mix(in_srgb,var(--accent)_10%,transparent)] text-[var(--accent)] dark:text-[#A9BBE6] border border-[color:color-mix(in_srgb,var(--accent)_20%,transparent)]">
                           {typeMeta.label}
                         </span>
                       </td>
@@ -347,7 +347,7 @@ export default function IDsClient({ companies = [], initialCompanyId }: Props) {
                       {/* Chamber Grade */}
                       <td className="py-3.5 px-3 text-center align-middle">
                         {r.id_type === 'chamber_id' && r.grade ? (
-                          <span className="inline-flex items-center whitespace-nowrap px-3 py-1 rounded-full text-xs font-bold bg-blue-500/10 text-blue-700 dark:text-blue-300 border border-blue-500/20">درجة {r.grade}</span>
+                          <span className="inline-flex items-center whitespace-nowrap px-3 py-1 rounded-full text-xs font-bold bg-[color:color-mix(in_srgb,var(--accent)_10%,transparent)] text-[var(--accent)] dark:text-[#A9BBE6] border border-[color:color-mix(in_srgb,var(--accent)_20%,transparent)]">درجة {r.grade}</span>
                         ) : (
                           <span className="text-[var(--text-3)]">—</span>
                         )}

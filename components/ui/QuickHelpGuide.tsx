@@ -313,7 +313,7 @@ export default function QuickHelpGuide() {
                     key={item.id}
                     className={`rounded-2xl border transition duration-200 overflow-hidden ${
                       isExpanded
-                        ? 'bg-[var(--surface-2)] border-[#38BDF8]/40 shadow-md shadow-blue-500/5'
+                        ? 'bg-[var(--surface-2)] border-[#38BDF8]/40 shadow-md shadow-[color:color-mix(in_srgb,var(--accent)_5%,transparent)]'
                         : 'bg-[color:color-mix(in_srgb,var(--surface-2)_50%,transparent)] border-[var(--glass-border)] hover:border-[var(--line)]'
                     }`}
                   >
@@ -327,7 +327,7 @@ export default function QuickHelpGuide() {
                         <div
                           className={`w-9 h-9 rounded-xl flex items-center justify-center flex-none transition-colors ${
                             isExpanded
-                              ? 'bg-[var(--accent)] text-white shadow-md shadow-blue-500/20'
+                              ? 'bg-[var(--accent)] text-white shadow-md shadow-[color:color-mix(in_srgb,var(--accent)_20%,transparent)]'
                               : 'bg-[var(--surface-3)] text-[var(--accent)]'
                           }`}
                         >

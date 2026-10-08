@@ -250,7 +250,7 @@ export default function NotificationCenter({ initialCount = 0 }: Props) {
                 const isWarn = item.type === 'deposit_stage' || item.title.includes('ينتهي') || item.title.includes('قريباً')
                 const isDone = item.type === 'step_completed' || item.title.includes('مكتملة')
 
-                const borderLeftColor = isUrgent ? '#ef4444' : isWarn ? '#f59e0b' : isDone ? '#10b981' : '#3b82f6'
+                const borderLeftColor = isUrgent ? '#ef4444' : isWarn ? '#f59e0b' : isDone ? '#10b981' : 'var(--accent)'
 
                 return (
                   <div

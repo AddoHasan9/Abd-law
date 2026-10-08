@@ -18,7 +18,7 @@ export default function NotFound() {
         <div className="flex items-center gap-3 w-full pt-2">
           <Link
             href="/dashboard"
-            className="flex-1 py-3 px-4 rounded-xl bg-[var(--accent)] text-slate-950 font-bold text-sm hover:brightness-110 active:scale-98 transition flex items-center justify-center gap-2 shadow-lg shadow-blue-500/20"
+            className="flex-1 py-3 px-4 rounded-xl bg-[var(--accent)] text-slate-950 font-bold text-sm hover:brightness-110 active:scale-98 transition flex items-center justify-center gap-2 shadow-lg shadow-[color:color-mix(in_srgb,var(--accent)_20%,transparent)]"
           >
             <span className="material-symbols-outlined text-[18px]">dashboard</span>
             <span>لوحة التحكم</span>

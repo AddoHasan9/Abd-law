@@ -9,7 +9,6 @@ import CompanyFileLink from '@/components/commercial/CompanyFileLink'
 import { useRouter } from 'next/navigation'
 import { createPortal } from 'react-dom'
 import { Icon } from '@/components/ui/Icon'
-import { WorkflowStatus } from '@/components/ui/WorkflowStatus'
 import { updateCompanyDetailsAction, launchDepositWorkflowAction, advanceCompanyStepAction, deleteCompanyAction } from '@/app/(app)/commercial/companies/actions'
 import { updateCompanyFSSettingsAction } from '@/app/(app)/commercial/financial-statements/actions'
 import { getCompanyIDsAction, deleteCompanyIDAction, type CompanyIDRecord } from '@/app/(app)/commercial/ids/actions'
@@ -561,7 +560,13 @@ export default function CompanyDetailsModal({ company, isOpen, onClose, onDelete
           <div style={{ flex: 1, minWidth: 0 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
               <h3 style={{ margin: 0, fontSize: '17px', fontWeight: 800, color: 'var(--text)' }}>{company.name}</h3>
-              <WorkflowStatus status={company.status} entityId={company.id} entityType="company" size="sm" />
+              {/* حالة الشركة للقراءة فقط — تحددها محطات التأسيس والوديعة (نفس شارة البطاقة) */}
+              {(() => {
+                const est = company.status === 'established' || company.deposit_released || company.external
+                const cls = est ? 'is-ok' : company.cert_date ? 'is-deposit' : 'is-forming'
+                const label = est ? 'مؤسسة' : company.cert_date ? 'إطلاق الوديعة' : 'قيد التأسيس'
+                return <span className={`co-chip ${cls}`}><span className="co-chip-dot" aria-hidden />{label}</span>
+              })()}
             </div>
             <span style={{ fontSize: '12px', color: 'var(--text-3)', marginTop: '3px', display: 'block' }}>تعديل ومتابعة بيانات الشركة وتحديث المحطات والمستندات</span>
           </div>
@@ -1211,7 +1216,7 @@ export default function CompanyDetailsModal({ company, isOpen, onClose, onDelete
                       type="button"
                       onClick={handleReleaseDeposit}
                       disabled={loading}
-                      className="w-full py-3.5 px-6 rounded-2xl font-black text-sm bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 active:scale-98 text-white shadow-lg shadow-emerald-500/30 flex items-center justify-center gap-2 transition cursor-pointer"
+                      className="w-full py-3.5 px-6 rounded-2xl font-black text-sm bg-[var(--accent)] hover:bg-[color:color-mix(in_srgb,var(--accent)_86%,#000)] active:scale-98 text-white flex items-center justify-center gap-2 transition cursor-pointer"
                     >
                       <span className="material-symbols-outlined text-[20px]">send</span>
                       <span>{loading ? 'جاري الحفظ والتحويل...' : 'حفظ بيانات الشهادة والتحويل لإطلاق الوديعة الآن ←'}</span>

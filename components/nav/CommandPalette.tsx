@@ -95,7 +95,7 @@ export default function CommandPalette({
             className="flex items-center justify-between cursor-pointer"
           >
             <div className="flex items-center gap-2">
-              <FileText className="h-4 w-4 text-blue-500" />
+              <FileText className="h-4 w-4 text-[var(--accent)]" />
               <span>سجل المعاملات والتوكيلات</span>
             </div>
             <span className="text-[11px] text-muted-foreground font-mono">/commercial/transactions</span>
@@ -204,7 +204,7 @@ export default function CommandPalette({
               className="flex items-center gap-2 cursor-pointer"
             >
               <Sun className="h-4 w-4 text-amber-400 dark:hidden" />
-              <Moon className="h-4 w-4 text-blue-400 hidden dark:block" />
+              <Moon className="h-4 w-4 text-[var(--accent)] hidden dark:block" />
               <span>تبديل المظهر (فاتح / داكن)</span>
             </CommandItem>
           )}

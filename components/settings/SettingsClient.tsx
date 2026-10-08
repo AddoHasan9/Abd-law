@@ -241,7 +241,7 @@ export default function SettingsClient() {
           onClick={() => setActiveTab('workflows')}
           className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-black text-xs transition cursor-pointer ${
             activeTab === 'workflows'
-              ? 'bg-[var(--accent)] text-white shadow-md shadow-blue-500/20'
+              ? 'bg-[var(--accent)] text-white shadow-md shadow-[color:color-mix(in_srgb,var(--accent)_20%,transparent)]'
               : 'text-[var(--text-3)] hover:text-[var(--text)]'
           }`}
         >
@@ -254,7 +254,7 @@ export default function SettingsClient() {
           onClick={() => setActiveTab('general')}
           className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-black text-xs transition cursor-pointer ${
             activeTab === 'general'
-              ? 'bg-[var(--accent)] text-white shadow-md shadow-blue-500/20'
+              ? 'bg-[var(--accent)] text-white shadow-md shadow-[color:color-mix(in_srgb,var(--accent)_20%,transparent)]'
               : 'text-[var(--text-3)] hover:text-[var(--text)]'
           }`}
         >
@@ -302,7 +302,7 @@ export default function SettingsClient() {
                     onClick={() => setSelectedTxKey(key)}
                     className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl text-xs font-black transition flex-none cursor-pointer border ${
                       isSelected
-                        ? 'bg-[var(--accent)] border-[var(--accent)] text-white shadow-md shadow-blue-500/25'
+                        ? 'bg-[var(--accent)] border-[var(--accent)] text-white shadow-md shadow-[color:color-mix(in_srgb,var(--accent)_25%,transparent)]'
                         : 'bg-[var(--surface-2)] border-[var(--line-soft)] text-[var(--text-2)] hover:text-[var(--text)] hover:bg-[var(--surface-3)]'
                     }`}
                   >
@@ -342,7 +342,7 @@ export default function SettingsClient() {
                 <div>
                   <div className="flex items-center gap-2.5">
                     <span className="text-base font-black text-[var(--text)]">{activeTemplate.txLabel}</span>
-                    <span className="px-2.5 py-0.5 rounded-md bg-[var(--accent-soft)] text-[var(--accent)] text-[10px] font-bold border border-blue-500/20">
+                    <span className="px-2.5 py-0.5 rounded-md bg-[var(--accent-soft)] text-[var(--accent)] text-[10px] font-bold border border-[color:color-mix(in_srgb,var(--accent)_20%,transparent)]">
                       {activeTemplate.steps.length} محطات معتمدة
                     </span>
                   </div>
@@ -362,7 +362,7 @@ export default function SettingsClient() {
                     >
                       {editingStepId === step.id ? (
                         <div className="flex-1 flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5">
-                          <div className="w-8 h-8 rounded-xl bg-blue-500 text-white flex items-center justify-center font-black text-xs flex-none">
+                          <div className="w-8 h-8 rounded-xl bg-[var(--accent)] text-white flex items-center justify-center font-black text-xs flex-none">
                             <span className="num">{idx + 1}</span>
                           </div>
                           <input
@@ -483,7 +483,7 @@ export default function SettingsClient() {
                   <button
                     type="button"
                     onClick={handleAddStep}
-                    className="px-5 py-2.5 rounded-xl bg-[var(--accent)] hover:brightness-110 active:bg-blue-700 text-white font-bold text-xs transition flex items-center justify-center gap-1.5 flex-none cursor-pointer shadow-md shadow-blue-500/20"
+                    className="px-5 py-2.5 rounded-xl bg-[var(--accent)] hover:brightness-110 active:bg-[var(--accent)] text-white font-bold text-xs transition flex items-center justify-center gap-1.5 flex-none cursor-pointer shadow-md shadow-[color:color-mix(in_srgb,var(--accent)_20%,transparent)]"
                   >
                     <span className="material-symbols-outlined text-[18px]">add</span>
                     <span>إضافة محطة</span>
@@ -582,7 +582,7 @@ export default function SettingsClient() {
               <button
                 type="submit"
                 disabled={saving}
-                className="px-6 py-2.5 rounded-xl bg-[var(--accent)] hover:brightness-110 text-white font-black text-xs shadow-md shadow-blue-500/25 active:scale-95 transition flex items-center gap-2 cursor-pointer disabled:opacity-50"
+                className="px-6 py-2.5 rounded-xl bg-[var(--accent)] hover:brightness-110 text-white font-black text-xs shadow-md shadow-[color:color-mix(in_srgb,var(--accent)_25%,transparent)] active:scale-95 transition flex items-center gap-2 cursor-pointer disabled:opacity-50"
               >
                 <span className="material-symbols-outlined text-[18px]">save</span>
                 <span>{saving ? 'جاري الحفظ...' : 'حفظ التغييرات'}</span>

@@ -614,7 +614,7 @@ export default function UsersClient({ initialProfiles }: Props) {
               }}
               className="flex items-center gap-2.5 w-full px-3 py-2 rounded-xl text-xs font-semibold text-[var(--text)] hover:bg-[var(--surface-2)] transition-colors cursor-pointer text-right"
             >
-              <span className="material-symbols-outlined text-[16px] text-blue-400">visibility</span>
+              <span className="material-symbols-outlined text-[16px] text-[var(--accent)]">visibility</span>
               <span>عرض البيانات الكاملة</span>
             </button>
 
