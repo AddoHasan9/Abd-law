@@ -233,7 +233,7 @@ export default function IDsClient({ companies = [], initialCompanyId }: Props) {
 
       {/* المؤشرات — البطاقة الموحدة */}
       <div className="kpi-grid cols-4">
-        <KpiCard label="إجمالي الهويات" value={stats.total} icon="badge" tone="violet" hint="كل الهويات المسجلة" active={statusFilter === 'all'} onClick={() => setStatusFilter('all')} />
+        <KpiCard featured label="إجمالي الهويات" value={stats.total} icon="badge" tone="violet" hint="كل الهويات المسجلة" active={statusFilter === 'all'} onClick={() => setStatusFilter('all')} />
         <KpiCard label="قيد الإصدار" value={stats.inProgress} icon="pending_actions" tone="amber" hint="بانتظار الإصدار" active={statusFilter === 'in_progress'} onClick={() => setStatusFilter('in_progress')} />
         <KpiCard label="المكتملة والسارية" value={stats.done} icon="verified" tone="emerald" hint="سارية المفعول" active={statusFilter === 'done'} onClick={() => setStatusFilter('done')} />
         <KpiCard label="تتطلب تجديداً" value={stats.expiring} icon="event_busy" tone="rose" hint="منتهية أو قريبة الانتهاء" active={statusFilter === 'expiring'} onClick={() => setStatusFilter('expiring')} alert={stats.expiring > 0} />

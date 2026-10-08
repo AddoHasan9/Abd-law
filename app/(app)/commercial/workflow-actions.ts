@@ -50,11 +50,13 @@ export async function updateWorkflowStatusAction(payload: StatusUpdatePayload) {
         const { error } = await supabase.from('companies').update({ status: toStatus }).eq('id', entityId)
         if (error) throw error
       } else {
-        const { error } = await supabase.from('transactions').update({ status: toStatus }).eq('id', entityId)
+        // حالة المعاملة فقط — حالة الشركة تحددها محطات التأسيس والوديعة، لا حالة معاملة
+        // (كانت تُنسخ لحالة الشركة فتصبح الشركة «ملغاة» أو «مكتملة» بسبب معاملة هوية مثلاً)
+        const { data: updated, error } = await supabase.from('transactions').update({ status: toStatus }).eq('id', entityId).select('id')
         if (error) throw error
-        if (targetCompanyId) {
-          const { error: coErr } = await supabase.from('companies').update({ status: toStatus }).eq('id', targetCompanyId)
-          if (coErr) throw coErr
+        if (!updated?.length) {
+          // سجل مولّد من قسم آخر (الهويات / التحاسب / التأسيس): حالته تُدار من قسمه
+          return { success: false, error: 'حالة هذا السجل تُدار من قسمه الخاص (الهويات أو التحاسب الضريبي أو تأسيس الشركات). افتحه من هناك.' }
         }
       }
     } catch (e) {

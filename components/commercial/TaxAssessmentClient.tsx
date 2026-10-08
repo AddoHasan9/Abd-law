@@ -193,7 +193,7 @@ export default function TaxAssessmentClient({ assessments = [], companies = [], 
 
       {/* المؤشرات — البطاقة الموحدة */}
       <div className="kpi-grid cols-4">
-        <KpiCard label="ملفات التحاسب" value={stats.total} icon="folder_open" tone="blue" hint="كل الملفات" active={statusFilter === 'all'} onClick={() => setStatusFilter('all')} />
+        <KpiCard featured label="ملفات التحاسب" value={stats.total} icon="folder_open" tone="blue" hint="كل الملفات" active={statusFilter === 'all'} onClick={() => setStatusFilter('all')} />
         <KpiCard label="قيد المتابعة" value={stats.inProgress} icon="pending_actions" tone="amber" hint="لم تُحسم بعد" active={statusFilter === 'in_progress'} onClick={() => setStatusFilter('in_progress')} />
         <KpiCard label="براءة ذمة" value={stats.cleared} icon="task_alt" tone="emerald" hint="صدرت براءة الذمة" active={statusFilter === 'tax_cleared'} onClick={() => setStatusFilter('tax_cleared')} />
         <KpiCard label="الضرائب المقدّرة" value={stats.totalTaxAmount} icon="payments" tone="indigo" hint="إجمالي المبالغ" format="currency" onClick={() => setStatusFilter('all')} />

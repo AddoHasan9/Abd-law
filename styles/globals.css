@@ -3439,3 +3439,69 @@ html[data-theme="dark"] .page-head.tone-violet { --tone: #a78bfa; } html[data-th
   .bx-card, .bx-bar, .bx-fill, .bx-ring circle.bx-ring-fg { animation: none !important; }
   .bx-card:hover { transform: none; }
 }
+
+/* ============================================================
+   طبقة الهوية الموحّدة — لون الشعار لكل الصفحات (آخر الملف حتى تكون الكلمة الأخيرة)
+   ============================================================ */
+html:root, html:root[data-theme="light"] { --accent: #2B4C8C !important; --accent-soft: rgba(43, 76, 140, .10) !important; }
+html:root[data-theme="dark"] { --accent: #5576C0 !important; --accent-soft: rgba(85, 118, 192, .18) !important; }
+@media (prefers-color-scheme: dark) {
+  html:root:not([data-theme="light"]) { --accent: #5576C0 !important; --accent-soft: rgba(85, 118, 192, .18) !important; }
+}
+
+/* البطاقات والجداول: رأس هادئ (بدل الصبغة الزرقاء) وأيقونة بلون خفيف — مثل لوحة التحكم */
+html:root .data-panel { box-shadow: none; }
+html:root .data-panel-head { background: transparent; border-bottom: 1px solid var(--line-soft); }
+html:root .data-panel-icon { background: var(--accent-soft); color: var(--accent); box-shadow: none; }
+html:root .data-panel-head h2 { font-size: 16px; }
+
+/* الزر الأساسي: لون واحد، زوايا 12، بلا ظل أزرق ثابت */
+html:root .btn-primary {
+  border-radius: 12px !important;
+  border: 1px solid var(--accent) !important;
+  box-shadow: none !important;
+}
+html:root .btn-primary:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--accent) 86%, #000) !important;
+  box-shadow: 0 8px 18px -10px color-mix(in srgb, var(--accent) 70%, transparent) !important;
+  transform: none;
+}
+html:root .kpi-card { border-radius: 20px; }
+
+/* ============================================================
+   لوحة Kanban للمعاملات
+   ============================================================ */
+.kb { padding: 14px; display: flex; flex-direction: column; gap: 10px; }
+.kb-board { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(250px, 1fr); gap: 12px; overflow-x: auto; padding-bottom: 6px; scroll-snap-type: x proximity; }
+.kb-col { background: var(--surface-2); border-radius: 18px; padding: 10px; display: flex; flex-direction: column; gap: 8px; min-height: 220px; scroll-snap-align: start; transition: background-color .18s ease, box-shadow .18s ease; }
+.kb-col.is-over { background: var(--accent-soft); box-shadow: inset 0 0 0 2px var(--accent); }
+.kb-col-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 2px 4px 4px; }
+.kb-col-head h3 { margin: 0; font-size: 14px; font-weight: 800; color: var(--text); display: flex; align-items: center; gap: 8px; }
+.kb-dot { width: 9px; height: 9px; border-radius: 999px; }
+.kb-count { font-size: 12px; font-weight: 800; color: var(--text-2); background: var(--surface); border: 1px solid var(--line-soft); border-radius: 999px; padding: 1px 9px; }
+.kb-list { display: flex; flex-direction: column; gap: 8px; flex: 1; }
+.kb-card { background: var(--surface); border: 1px solid var(--line-soft); border-radius: 14px; padding: 12px; display: flex; flex-direction: column; gap: 8px; cursor: grab; transition: transform .2s cubic-bezier(.2, .8, .2, 1), box-shadow .2s ease, opacity .2s ease; }
+@media (hover: hover) { .kb-card:hover { transform: translateY(-2px); box-shadow: 0 10px 22px -14px rgba(15, 23, 42, .4); } }
+.kb-card:active { cursor: grabbing; }
+.kb-card.is-dragging { opacity: .45; transform: rotate(-1.5deg) scale(.98); }
+.kb-card.is-moved { animation: kb-pop .45s cubic-bezier(.2, .9, .3, 1.25); }
+.kb-card-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.kb-type { font-size: 11.5px; font-weight: 800; color: var(--accent); background: var(--accent-soft); border-radius: 8px; padding: 2px 8px; max-width: 70%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.kb-date { font-size: 11.5px; color: var(--text-3); white-space: nowrap; }
+.kb-title { all: unset; cursor: pointer; font-size: 13.5px; font-weight: 800; line-height: 1.5; color: var(--text); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.kb-title:hover { color: var(--accent); }
+.kb-title:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 4px; }
+.kb-card-foot { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; }
+.kb-lawyer { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text-2); flex: 1 1 auto; white-space: nowrap; }
+.kb-avatar { width: 24px; height: 24px; border-radius: 999px; background: #E9D9B8; color: #1B2333; display: grid; place-items: center; font-size: 11px; font-weight: 800; flex: none; }
+.kb-move { margin-inline-start: auto; }
+.kb-move select { font: inherit; font-size: 12px; font-weight: 700; min-height: 32px; max-width: 150px; padding: 0 8px; border-radius: 10px; border: 1px solid var(--line-soft); background: var(--surface-2); color: var(--text-2); cursor: pointer; }
+.kb-empty { flex: 1; min-height: 90px; border: 1.5px dashed var(--line); border-radius: 14px; display: grid; place-items: center; color: var(--text-3); font-size: 12.5px; text-align: center; padding: 10px; }
+.kb-note { margin: 0; font-size: 12.5px; color: var(--text-3); }
+.view-switch { display: inline-flex; gap: 4px; padding: 3px; border-radius: 12px; background: var(--surface-2); border: 1px solid var(--line-soft); }
+.view-switch button { font: inherit; cursor: pointer; min-height: 34px; padding: 0 12px; border-radius: 9px; border: 0; background: transparent; color: var(--text-2); font-size: 12.5px; font-weight: 800; display: inline-flex; align-items: center; gap: 6px; transition: background-color .18s ease, color .18s ease; }
+.view-switch button .material-symbols-outlined { font-size: 17px; }
+.view-switch button.is-on { background: var(--surface); color: var(--accent); box-shadow: 0 1px 3px rgba(15, 23, 42, .1); }
+@keyframes kb-pop { 0% { transform: scale(.95); opacity: .6; } 60% { transform: scale(1.02); } 100% { transform: none; opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .kb-card, .kb-card:hover { transition: none; transform: none; } .kb-card.is-moved { animation: none; } }
+@media (max-width: 640px) { .kb { padding: 10px; } .kb-board { grid-auto-columns: 82%; } }

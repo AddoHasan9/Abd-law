@@ -85,7 +85,7 @@ export default function CompaniesRegistryClient({ companies = [] }: Props) {
 
       {/* المؤشرات — البطاقة الموحدة */}
       <div className="kpi-grid cols-3">
-        <KpiCard label="الشركات المسجلة" value={companiesList.length} icon="domain" tone="emerald" hint="كل الشركات المؤسسة" />
+        <KpiCard featured label="الشركات المسجلة" value={companiesList.length} icon="domain" tone="emerald" hint="كل الشركات المؤسسة" />
         <KpiCard label="مدرجة بالحسابات الختامية" value={companiesList.filter(c => c.financial_statements_enabled || c.last_completed_fs_year).length} icon="receipt_long" tone="indigo" hint="الحسابات الختامية" href="/commercial/financial-statements" />
         <KpiCard label="محدودة المسؤولية" value={companiesList.filter(c => c.kind !== 'فردية').length} icon="history_edu" tone="blue" hint="قسم المحدودة" href="/commercial/llc" />
       </div>

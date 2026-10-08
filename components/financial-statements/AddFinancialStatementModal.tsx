@@ -620,8 +620,8 @@ export default function AddFinancialStatementModal({
 
                   {/* Registrar Delivery */}
                   <div style={{
-                    background: editRegistrarSubmitted ? 'rgba(59, 130, 246, 0.06)' : 'var(--surface)',
-                    border: `1px solid ${editRegistrarSubmitted ? 'rgba(59, 130, 246, 0.3)' : 'var(--line-soft)'}`,
+                    background: editRegistrarSubmitted ? 'var(--accent-soft)' : 'var(--surface)',
+                    border: `1px solid ${editRegistrarSubmitted ? 'color-mix(in srgb, var(--accent) 30%, transparent)' : 'var(--line-soft)'}`,
                     borderRadius: 'var(--r-md)',
                     padding: '14px',
                     display: 'flex',
@@ -833,8 +833,8 @@ export default function AddFinancialStatementModal({
 
                       {/* Registrar Delivery Switch */}
                       <div style={{
-                        background: row.registrar_submitted ? 'rgba(59, 130, 246, 0.06)' : 'var(--surface)',
-                        border: `1px solid ${row.registrar_submitted ? 'rgba(59, 130, 246, 0.3)' : 'var(--line-soft)'}`,
+                        background: row.registrar_submitted ? 'var(--accent-soft)' : 'var(--surface)',
+                        border: `1px solid ${row.registrar_submitted ? 'color-mix(in srgb, var(--accent) 30%, transparent)' : 'var(--line-soft)'}`,
                         borderRadius: 'var(--r-md)',
                         padding: '12px 14px',
                         display: 'flex',

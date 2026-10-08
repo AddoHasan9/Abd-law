@@ -225,7 +225,7 @@ export default function CompaniesClient({ initialCompanies }: Props) {
 
       {/* المؤشرات — نفس بطاقة لوحة التحكم */}
       <div className="kpi-grid cols-4">
-        <KpiCard
+        <KpiCard featured
           label="الشركات المؤسسة"
           value={establishedCompanies.length}
           icon="verified"

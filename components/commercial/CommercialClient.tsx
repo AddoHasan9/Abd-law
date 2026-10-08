@@ -14,6 +14,7 @@ import { Icon } from '@/components/ui/Icon'
 import { Empty } from '@/components/ui/Empty'
 import { useModalBodyLock } from '@/lib/hooks/useModalBodyLock'
 import dynamic from 'next/dynamic'
+import TxBoard from './TxBoard'
 import type { TransactionFull, Company, CompanyWithWorkflow } from '@/types/database'
 
 const AddTransactionModal = dynamic(() => import('./AddTransactionModal'), { ssr: false })
@@ -165,6 +166,15 @@ export default function CommercialClient({ heading = 'المعاملات الت�
   const [statusFilter, setStatusFilter] = useState('')
   const [priorityFilter, setPriorityFilter] = useState('')
   const [lawyerFilter, setLawyerFilter] = useState('')
+  // طريقة العرض: جدول أو لوحة Kanban (تُحفظ على هذا الجهاز)
+  const [view, setView] = useState<'table' | 'board'>('table')
+  useEffect(() => {
+    try { if (localStorage.getItem('commercial-view') === 'board') setView('board') } catch { /* وضع خاص */ }
+  }, [])
+  const switchView = (v: 'table' | 'board') => {
+    setView(v)
+    try { localStorage.setItem('commercial-view', v) } catch { /* وضع خاص */ }
+  }
 
   const filteredRows = useMemo(() => {
     return localRows.filter(t => {
@@ -419,7 +429,16 @@ export default function CommercialClient({ heading = 'المعاملات الت�
       </div>
 
       {/* 2. Main Transactions Interactive Table */}
-      <DataPanel icon="table_rows" title="جدول المعاملات التجارية" subtitle="متابعة كافة معاملات وحركات الشركات وقسم المحدودة" count={filteredRows.length} total={localRows.length} unit="معاملة">
+      <DataPanel icon="table_rows" title={view === 'board' ? 'لوحة المعاملات' : 'جدول المعاملات التجارية'} subtitle="متابعة كافة معاملات وحركات الشركات وقسم المحدودة" count={filteredRows.length} total={localRows.length} unit="معاملة" actions={
+          <div className="view-switch" role="group" aria-label="طريقة العرض">
+            <button type="button" className={view === 'table' ? 'is-on' : ''} aria-pressed={view === 'table'} onClick={() => switchView('table')}>
+              <span className="material-symbols-outlined" aria-hidden>table_rows</span>جدول
+            </button>
+            <button type="button" className={view === 'board' ? 'is-on' : ''} aria-pressed={view === 'board'} onClick={() => switchView('board')}>
+              <span className="material-symbols-outlined" aria-hidden>view_kanban</span>لوحة
+            </button>
+          </div>
+        }>
         
 
         {!localRows.length ? (
@@ -432,6 +451,8 @@ export default function CommercialClient({ heading = 'المعاملات الت�
           <div className="py-14 px-6 text-center text-sm font-semibold text-[var(--text-3)]">
             لا توجد معاملات مطابقة للفلاتر المحددة.
           </div>
+        ) : view === 'board' ? (
+          <TxBoard rows={filteredRows} />
         ) : (
           <div className="overflow-x-auto w-full">
             <table className="stackable w-full border-collapse text-right text-xs table-auto">
