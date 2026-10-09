@@ -48,19 +48,24 @@ export default function DashboardClient({ stats, profiles = [], companies = [] }
   const weekMax = Math.max(1, ...week.map(d => d.count))
   const weekTotal = week.reduce((a, d) => a + d.count, 0)
 
-  // ── المهل القريبة: الحسابات الختامية + الهويات، الأكثر إلحاحاً أولاً ─
+  // ── المهل القريبة: مصدر واحد (الوديعة + الهويات + الحسابات الختامية)، الأكثر إلحاحاً أولاً ─
+  //    (كانت الهويات تُضاف مرتين: مرة ضمن urgentDeadlines ومرة من expiryAlerts)
   const deadlines = useMemo(() => {
-    const fs = (stats.urgentDeadlines || []).map(d => {
+    const idKeys = new Set((stats.expiryAlerts || []).map(a => `${a.companyId}|${a.title}`))
+    return (stats.urgentDeadlines || []).map(d => {
       const late = d.level === 'late'
-      const chip = late ? `متأخرة ${d.daysLate} يوم` : d.daysLeft <= 0 ? 'اليوم' : d.daysLeft === 1 ? 'غداً' : `باقي ${d.daysLeft} يوم`
-      return { key: `fs-${d.companyId}-${d.due}`, company: d.companyName, what: d.title || 'الحسابات الختامية', chip, late, rank: late ? -d.daysLate : d.daysLeft, href: `/commercial/financial-statements?companyId=${d.companyId}` }
+      const isId = idKeys.has(`${d.companyId}|${d.title}`)
+      const isDeposit = d.title === 'إطلاق الوديعة المصرفية'
+      const days = late ? d.daysLate : d.daysLeft
+      const chip = isId
+        ? (late ? `منتهية منذ ${days} يوم` : d.daysLeft === 0 ? 'تنتهي اليوم' : d.daysLeft === 1 ? 'تنتهي غداً' : `تنتهي بعد ${days} يوم`)
+        : (late ? `متأخرة ${days} يوم` : d.daysLeft <= 0 ? 'اليوم' : d.daysLeft === 1 ? 'غداً' : `باقي ${days} يوم`)
+      const href = isId ? '/commercial/ids' : isDeposit ? '/commercial/deposits' : `/commercial/financial-statements?companyId=${d.companyId}`
+      return { key: `${d.companyId}|${d.title}|${d.due}`, company: d.companyName, what: d.title, chip, late, rank: d.daysLeft, href }
     })
-    const ids = (stats.expiryAlerts || []).filter(a => a.daysLeft <= 30).map(a => {
-      const late = a.daysLeft < 0
-      const chip = late ? `منتهية منذ ${Math.abs(a.daysLeft)} يوم` : a.daysLeft === 0 ? 'تنتهي اليوم' : a.daysLeft === 1 ? 'تنتهي غداً' : `باقي ${a.daysLeft} يوم`
-      return { key: `id-${a.id}`, company: a.companyName, what: a.categoryLabel || a.title, chip, late, rank: late ? a.daysLeft : a.daysLeft, href: '/commercial/ids' }
-    })
-    return [...fs, ...ids].sort((x, y) => Number(y.late) - Number(x.late) || x.rank - y.rank).slice(0, 4)
+      .filter((d, i, all) => all.findIndex(x => x.key === d.key) === i)
+      .sort((x, y) => Number(y.late) - Number(x.late) || x.rank - y.rank)
+      .slice(0, 4)
   }, [stats.urgentDeadlines, stats.expiryAlerts])
 
   // ── مسار التأسيس ─────────────────────────────────────────────

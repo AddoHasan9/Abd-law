@@ -172,42 +172,18 @@ export default function IDsClient({ companies = [], initialCompanyId }: Props) {
           <>
 {/* 4 Dedicated ID Action Buttons */}
         {canCreateID && (
-          <div className="flex items-center gap-2 flex-wrap">
-            <button
-              type="button"
-              onClick={() => openAddModal('chamber_id')}
-              className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white shadow-xs transition active:scale-95"
-            >
-              <Icon name="plus" />
-              <span>هوية غرفة التجارة</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => openAddModal('tax_id')}
-              className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold bg-[var(--accent)] hover:opacity-90 text-white shadow-xs transition active:scale-95"
-            >
-              <Icon name="plus" />
-              <span>هوية ضريبية</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => openAddModal('importer_id')}
-              className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold bg-[var(--surface-2)] hover:bg-[var(--surface-3)] text-[var(--text)] border border-[var(--line-soft)] transition active:scale-95"
-            >
-              <Icon name="plus" />
-              <span>هوية مستورد</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => openAddModal('planning_id')}
-              className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold bg-[var(--surface-2)] hover:bg-[var(--surface-3)] text-[var(--text)] border border-[var(--line-soft)] transition active:scale-95"
-            >
-              <Icon name="plus" />
-              <span>هوية تخطيط</span>
-            </button>
+          <div className="id-add-row" role="group" aria-label="إضافة هوية">
+            {([
+              ['chamber_id', 'هوية غرفة التجارة'],
+              ['tax_id', 'هوية ضريبية'],
+              ['importer_id', 'هوية مستورد'],
+              ['planning_id', 'هوية تخطيط'],
+            ] as const).map(([type, label]) => (
+              <button key={type} type="button" className="id-add" onClick={() => openAddModal(type)}>
+                <Icon name="plus" />
+                <span>{label}</span>
+              </button>
+            ))}
           </div>
         )}
           </>
