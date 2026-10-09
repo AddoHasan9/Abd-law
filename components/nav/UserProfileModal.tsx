@@ -192,7 +192,7 @@ export default function UserProfileModal({ isOpen, onClose, profile }: Props) {
                   width: '68px',
                   height: '68px',
                   borderRadius: '50%',
-                  background: 'linear-gradient(135deg, var(--accent) 0%, #0369a1 100%)',
+                  background: 'linear-gradient(135deg, var(--accent) 0%, var(--brand) 100%)',
                   color: '#ffffff',
                   fontSize: '24px',
                   fontWeight: 800,

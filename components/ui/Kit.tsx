@@ -268,7 +268,7 @@ export function Badge({
     warning: 'bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/25',
     danger: 'bg-rose-500/15 text-rose-600 dark:text-rose-400 border border-rose-500/25',
     destructive: 'bg-rose-500/15 text-rose-600 dark:text-rose-400 border border-rose-500/25',
-    info: 'bg-sky-500/15 text-sky-600 dark:text-sky-400 border border-sky-500/25',
+    info: 'bg-[color:color-mix(in_srgb,var(--accent)_15%,transparent)] text-[var(--accent)] dark:text-[#A9BBE6] border border-[color:color-mix(in_srgb,var(--accent)_25%,transparent)]',
     neutral: 'bg-surface-2 text-text-3 border border-border-soft',
   }
 

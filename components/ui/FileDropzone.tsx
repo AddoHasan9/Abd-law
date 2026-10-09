@@ -54,11 +54,11 @@ export function FileDropzone({
         className={`flex flex-col items-center justify-center p-6 border-2 border-dashed rounded-2xl cursor-pointer transition duration-300 backdrop-blur-xl select-none text-center ${
           isDragActive
             ? 'border-cyan-400 bg-cyan-500/10 shadow-lg shadow-cyan-500/10 scale-[1.01]'
-            : 'border-slate-300 dark:border-white/15 bg-white/40 dark:bg-slate-900/40 hover:bg-white/60 dark:hover:bg-slate-800/50 hover:border-blue-400 dark:hover:border-cyan-400'
+            : 'border-slate-300 dark:border-white/15 bg-white/40 dark:bg-slate-900/40 hover:bg-white/60 dark:hover:bg-slate-800/50 hover:border-[color:var(--accent)] dark:hover:border-cyan-400'
         }`}
       >
         <input {...getInputProps()} />
-        <div className="w-12 h-12 rounded-2xl bg-blue-500/10 dark:bg-cyan-500/15 border border-blue-500/20 dark:border-cyan-500/30 flex items-center justify-center text-blue-600 dark:text-cyan-400 mb-3 shadow-xs">
+        <div className="w-12 h-12 rounded-2xl bg-[color:color-mix(in_srgb,var(--accent)_10%,transparent)] dark:bg-cyan-500/15 border border-[color:color-mix(in_srgb,var(--accent)_20%,transparent)] dark:border-cyan-500/30 flex items-center justify-center text-[var(--accent)] dark:text-cyan-400 mb-3 shadow-xs">
           <UploadCloud className="w-6 h-6 animate-pulse" />
         </div>
         <p className="text-xs font-bold text-slate-800 dark:text-slate-100">
@@ -81,7 +81,7 @@ export function FileDropzone({
               className="flex items-center justify-between p-2.5 rounded-xl bg-white/70 dark:bg-slate-900/60 border border-slate-200/80 dark:border-white/10 backdrop-blur-md shadow-xs text-right"
             >
               <div className="flex items-center gap-2.5 min-w-0">
-                <div className="p-1.5 rounded-lg bg-blue-500/10 dark:bg-cyan-500/15 text-blue-600 dark:text-cyan-400 shrink-0">
+                <div className="p-1.5 rounded-lg bg-[color:color-mix(in_srgb,var(--accent)_10%,transparent)] dark:bg-cyan-500/15 text-[var(--accent)] dark:text-cyan-400 shrink-0">
                   <FileText className="w-4 h-4" />
                 </div>
                 <div className="flex flex-col min-w-0">

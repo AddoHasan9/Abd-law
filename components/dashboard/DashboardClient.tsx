@@ -1,19 +1,20 @@
 'use client'
 
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
-import { KpiCard } from '@/components/ui/KpiCard'
-import { DataPanel } from '@/components/ui/DataPanel'
+/**
+ * لوحة التحكم — أسلوب Bento
+ * الترتيب حسب الأهمية: المؤشرات ← نشاط الأسبوع + المهل + التأسيس ← أحدث المعاملات + التذكيرات ← الفريق + الإجراءات السريعة.
+ * البطاقة الأولى ملوّنة بلون الشعار؛ الباقي هادئ. الحركات تنطفئ مع «تقليل الحركة».
+ */
+import { useMemo, useState } from 'react'
 import Link from 'next/link'
+import { KpiCard } from '@/components/ui/KpiCard'
+import { FadeInStagger } from '@/components/ui/FadeInStagger'
 import { formatDate, formatFullDate } from '@/lib/constants'
+import { getWorkflowStatusConfig } from '@/lib/workflow-status'
 import type { DashboardStats } from '@/lib/data/dashboard'
 import type { ProfileWithStats } from '@/lib/data/profiles'
 import type { Company } from '@/types/database'
 import RemindersWidget from './RemindersWidget'
-import { WorkflowStatus } from '@/components/ui/WorkflowStatus'
-import { FadeInStagger } from '@/components/ui/FadeInStagger'
-import { RollingNumber } from '@/components/ui/RollingNumber'
-import { AnimatedTabs } from '@/components/ui/AnimatedTabs'
 
 interface Props {
   stats: DashboardStats
@@ -21,357 +22,254 @@ interface Props {
   companies?: Company[]
 }
 
+type TxFilter = 'all' | 'progress' | 'new' | 'done'
+const RING = 339.3 // محيط دائرة نصف قطرها 54
+
+const isProgress = (s: string) => s === 'progress' || s === 'doing'
+const isNew = (s: string) => s === 'new' || s === 'wait'
+const isDone = (s: string) => s === 'done' || s === 'completed'
+
 export default function DashboardClient({ stats, profiles = [], companies = [] }: Props) {
-  const [txFilter, setTxFilter] = useState<'all' | 'progress' | 'new' | 'done'>('all')
-  const router = useRouter()
+  const [txFilter, setTxFilter] = useState<TxFilter>('all')
 
-  // Dynamic values mapped from stats store
-  const establishedCount = stats.establishedCompaniesCount ?? stats.totalCompaniesCount ?? 0
-  const formingCount = stats.formingCompaniesCount ?? 0
-  const llcCount = stats.llcTransactionsCount ?? 0
-  const depositsCount = stats.activeDepositsCount ?? 0
-  const idsCount = stats.totalIDsCount ?? (stats.expiryAlerts?.length || 0)
+  // ── المؤشرات (البطاقة كلها رابط) ─────────────────────────────
+  const urgentFS = stats.urgentDeadlines?.length || 0
+  const kpis = [
+    { label: 'الشركات المؤسسة', value: stats.establishedCompaniesCount ?? stats.totalCompaniesCount ?? 0, hint: 'دليل الشركات', icon: 'verified', href: '/commercial/companies-registry', tone: 'emerald' as const, featured: true },
+    { label: 'قيد التأسيس', value: stats.formingCompaniesCount ?? 0, hint: 'مسار التأسيس', icon: 'pending_actions', href: '/commercial/companies', tone: 'amber' as const },
+    { label: 'إطلاق الوديعة', value: stats.activeDepositsCount ?? 0, hint: 'مسار الودائع', icon: 'account_balance', href: '/commercial/deposits', tone: 'blue' as const },
+    { label: 'قسم المحدودة', value: stats.llcTransactionsCount ?? 0, hint: 'المعاملات النشطة', icon: 'history_edu', href: '/commercial/llc', tone: 'indigo' as const },
+    { label: 'الهويات', value: stats.totalIDsCount ?? 0, hint: 'مستورد وضريبة وغرفة', icon: 'badge', href: '/commercial/ids', tone: 'violet' as const },
+    { label: 'الحسابات الختامية', value: urgentFS, hint: urgentFS ? 'مهل قريبة تحتاج متابعة' : 'مهلة 7/10 السنوية', icon: 'receipt_long', href: '/commercial/financial-statements', tone: 'rose' as const, alert: urgentFS > 0 },
+  ]
+
+  // ── نشاط الأسبوع ─────────────────────────────────────────────
+  const week = stats.weeklyActivity || []
+  const weekMax = Math.max(1, ...week.map(d => d.count))
+  const weekTotal = week.reduce((a, d) => a + d.count, 0)
+
+  // ── المهل القريبة: الحسابات الختامية + الهويات، الأكثر إلحاحاً أولاً ─
+  const deadlines = useMemo(() => {
+    const fs = (stats.urgentDeadlines || []).map(d => {
+      const late = d.level === 'late'
+      const chip = late ? `متأخرة ${d.daysLate} يوم` : d.daysLeft <= 0 ? 'اليوم' : d.daysLeft === 1 ? 'غداً' : `باقي ${d.daysLeft} يوم`
+      return { key: `fs-${d.companyId}-${d.due}`, company: d.companyName, what: d.title || 'الحسابات الختامية', chip, late, rank: late ? -d.daysLate : d.daysLeft, href: `/commercial/financial-statements?companyId=${d.companyId}` }
+    })
+    const ids = (stats.expiryAlerts || []).filter(a => a.daysLeft <= 30).map(a => {
+      const late = a.daysLeft < 0
+      const chip = late ? `منتهية منذ ${Math.abs(a.daysLeft)} يوم` : a.daysLeft === 0 ? 'تنتهي اليوم' : a.daysLeft === 1 ? 'تنتهي غداً' : `باقي ${a.daysLeft} يوم`
+      return { key: `id-${a.id}`, company: a.companyName, what: a.categoryLabel || a.title, chip, late, rank: late ? a.daysLeft : a.daysLeft, href: '/commercial/ids' }
+    })
+    return [...fs, ...ids].sort((x, y) => Number(y.late) - Number(x.late) || x.rank - y.rank).slice(0, 4)
+  }, [stats.urgentDeadlines, stats.expiryAlerts])
+
+  // ── مسار التأسيس ─────────────────────────────────────────────
+  const forming = stats.formingList || []
+  const formDone = forming.reduce((a, c) => a + c.done, 0)
+  const formTotal = forming.reduce((a, c) => a + c.total, 0)
+  const formRatio = formTotal ? formDone / formTotal : 0
+
+  // ── أحدث المعاملات ───────────────────────────────────────────
   const recentTxs = stats.recentTransactions || []
-
-  const filteredRecentTxs = recentTxs.filter(tx => {
-    if (txFilter === 'all') return true
-    if (txFilter === 'progress') return tx.status === 'progress' || tx.status === 'doing'
-    if (txFilter === 'new') return tx.status === 'new' || tx.status === 'wait'
-    if (txFilter === 'done') return tx.status === 'done' || tx.status === 'completed'
-    return true
-  })
-
-  // Dynamic active lawyers from users table
-  const activeLawyers = profiles.filter(p => p.active !== false && !p.id.startsWith('prof_'))
-  const displayLawyers: ProfileWithStats[] = activeLawyers.length
-    ? activeLawyers
-    : [
-        {
-          id: 'db13125d-3aa1-46ab-9159-8fad18746623',
-          name: 'منتظر الخزرجي',
-          role: 'super_admin',
-          title: 'مدير النظام الأعلى',
-          active_tx_count: 0,
-          active: true,
-          created_at: '',
-          dept: 'الإدارة العامة',
-          phone: null,
-        },
-      ]
-
+  const counts = {
+    all: recentTxs.length,
+    progress: recentTxs.filter(t => isProgress(t.status)).length,
+    new: recentTxs.filter(t => isNew(t.status)).length,
+    done: recentTxs.filter(t => isDone(t.status)).length,
+  }
+  const filteredTxs = recentTxs.filter(t =>
+    txFilter === 'all' ? true : txFilter === 'progress' ? isProgress(t.status) : txFilter === 'new' ? isNew(t.status) : isDone(t.status)
+  ).slice(0, 6)
   const txHref = (tx: (typeof recentTxs)[number]) =>
     tx.companyId
       ? (tx.type === 'formation' || tx.typeLabel?.includes('تأسيس') ? `/commercial/companies?id=${tx.companyId}` : `/commercial/companies/${tx.companyId}`)
       : (tx.type === 'llc' ? `/commercial/llc?id=${tx.id}` : '/commercial')
-  // عمود المحامي يظهر فقط إذا كان هناك تكليف فعلي — بدل تكرار «غير محدد» في كل صف
-  const showLawyer = recentTxs.some(tx => !!tx.lawyerName)
 
-  const urgentFS = stats.urgentDeadlines?.length || 0
-  const kpis = [
-    { label: 'الشركات المؤسسة', value: establishedCount, hint: 'دليل الشركات', icon: 'verified', href: '/commercial/companies-registry', tone: 'emerald' as const },
-    { label: 'قيد التأسيس', value: formingCount, hint: 'مسار التأسيس', icon: 'pending_actions', href: '/commercial/companies', tone: 'amber' as const },
-    { label: 'إطلاق الوديعة', value: depositsCount, hint: 'مسار الودائع', icon: 'account_balance', href: '/commercial/deposits', tone: 'blue' as const },
-    { label: 'قسم المحدودة', value: llcCount, hint: 'المعاملات النشطة', icon: 'history_edu', href: '/commercial/llc', tone: 'indigo' as const },
-    { label: 'الهويات', value: idsCount, hint: 'مستورد وضريبة وغرفة', icon: 'badge', href: '/commercial/ids', tone: 'violet' as const },
-    { label: 'الحسابات الختامية', value: urgentFS, hint: urgentFS ? 'مهل قريبة تحتاج متابعة' : 'مهلة 7/10 السنوية', icon: 'receipt_long', href: '/commercial/financial-statements', tone: 'rose' as const, alert: urgentFS > 0 },
+  // ── الفريق ───────────────────────────────────────────────────
+  const team = profiles.filter(p => p.active !== false && !p.id.startsWith('prof_'))
+  const maxWorkload = Math.max(1, ...team.map(l => l.active_tx_count ?? 0))
+  const roleOf = (p: ProfileWithStats) => p.title || (p.role === 'super_admin' ? 'مدير النظام' : p.role === 'manager' ? 'مدير' : p.dept || 'محامي')
+
+  const actions = [
+    { label: 'تأسيس شركة', icon: 'domain_add', href: '/commercial/companies?new=1' },
+    { label: 'إضافة هوية', icon: 'badge', href: '/commercial/ids?new=1' },
+    { label: 'تحاسب ضريبي', icon: 'request_quote', href: '/commercial/tax-assessment?new=1' },
+    { label: 'حسابات ختامية', icon: 'receipt_long', href: '/commercial/financial-statements?new=1' },
   ]
 
-  const maxWorkload = Math.max(...displayLawyers.map(l => l.active_tx_count ?? 0), 1)
-
   return (
-    <div className="flex flex-col w-full gap-3.5 relative z-10 animate-fade-in-up">
-      
-      {/* 1. سطر علوي هادئ: العنوان موجود أصلاً في الشريط العلوي، فهنا ملخص + التاريخ فقط */}
-      <div className="dash-intro">
-        <h1>ملخص اليوم</h1>
-        <span className="dash-date">
-          <span className="material-symbols-outlined" aria-hidden>calendar_today</span>
-          {formatFullDate()}
-        </span>
-      </div>
+    <div className="bx relative z-10">
+      <header className="bx-head">
+        <div>
+          <h1>لوحة التحكم</h1>
+          <p>{formatFullDate()} — كل ما يحتاج تصرفك اليوم بمكان واحد</p>
+        </div>
+      </header>
 
-      {/* 2. المؤشرات: البطاقة كلها رابط، الرقم هو الأبرز، واللون فقط لما يحتاج انتباه */}
+      {/* 1. المؤشرات — الأولى ملوّنة بلون الشعار */}
       <FadeInStagger className="kpi-grid">
         {kpis.map(k => (
-          <KpiCard key={k.href} label={k.label} value={k.value} icon={k.icon} tone={k.tone} hint={k.hint} href={k.href} alert={k.alert} />
+          <KpiCard key={k.href} label={k.label} value={k.value} icon={k.icon} tone={k.tone} hint={k.hint} href={k.href} alert={k.alert} featured={k.featured} />
         ))}
       </FadeInStagger>
 
-      {/* 3. Central Interactive Bento Section: Active Transactions (8 cols) + Reminders & Deadlines (4 cols) */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-3.5 w-full">
-        
-        {/* Right 8 Cols: Recent Active Transactions Workspace */}
-        <div className="lg:col-span-8 flex flex-col gap-3">
-          <DataPanel className="h-full flex flex-col" icon="assignment" title="أحدث المعاملات وسير العمل" subtitle="متابعة وتحديث حالة سير العمل اليومية مباشرة" actions={
-              <AnimatedTabs<'all' | 'progress' | 'new' | 'done'>
-                layoutId="dashboard-tx"
-                size="sm"
-                activeTab={txFilter}
-                onChange={setTxFilter}
-                tabs={[
-                  { id: 'all', label: 'الكل', count: recentTxs.length },
-                  { id: 'progress', label: 'قيد الإنجاز' },
-                  { id: 'new', label: 'جديدة' },
-                  { id: 'done', label: 'مكتملة' },
-                ]}
-              />
-
-            }>
-            <div className="p-3 sm:p-4 flex flex-col gap-3 flex-1">
-            
-            
-
-            {/* Transactions Responsive Table */}
-            {filteredRecentTxs.length === 0 ? (
-              <div className="py-8 text-center text-xs text-[var(--text-3)] flex flex-col items-center justify-center gap-1.5">
-                <span className="material-symbols-outlined text-[26px] opacity-40">inbox</span>
-                <span>لا توجد معاملات مطابقة في هذا الفلتر</span>
-              </div>
-            ) : (
-              <div className="overflow-x-auto">
-                <table className="w-full text-xs text-right border-collapse">
-                  <thead>
-                    <tr className="border-b border-[var(--line-soft)] text-[var(--text-3)] bg-[color:color-mix(in_srgb,var(--surface-2)_50%,transparent)] text-[11px]">
-                      <th className="py-2 px-2.5 font-bold">الشركة / المعاملة</th>
-                      <th className="py-2 px-2.5 font-bold text-center">نوع المعاملة</th>
-                      {showLawyer && <th className="py-2 px-2.5 font-bold text-center">المحامي المكلف</th>}
-                      <th className="py-2 px-2.5 font-bold text-center">الحالة</th>
-                      <th className="py-2 px-2.5 font-bold text-center">التاريخ</th>
-                      <th className="py-2 px-2.5 w-8"><span className="sr-only">فتح</span></th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {filteredRecentTxs.slice(0, 7).map(tx => (
-                      <tr
-                        key={tx.id}
-                        className="dash-row border-b border-[color:color-mix(in_srgb,var(--line-soft)_50%,transparent)]"
-                        onClick={e => { if (!(e.target as HTMLElement).closest('a,button,[role="menu"],[role="listbox"]')) router.push(txHref(tx)) }}
-                      >
-                        {/* Company / Task Name */}
-                        <td className="py-2 px-2.5">
-                          <div className="flex flex-col min-w-[160px]">
-                            <Link href={txHref(tx)} className="dash-row-link font-extrabold text-[var(--text)] text-xs truncate max-w-[260px] xl:max-w-[440px]">
-                              {tx.companyName || tx.clientName || 'معاملة تجارية'}
-                            </Link>
-                            {tx.clientName && tx.companyName && (
-                              <span className="text-[10px] text-[var(--text-3)] truncate">
-                                العميل: {tx.clientName}
-                              </span>
-                            )}
-                          </div>
-                        </td>
-
-                        {/* Transaction Type */}
-                        <td className="py-2 px-2.5 text-center whitespace-nowrap">
-                          <span className="badge-type text-[10.5px]">
-                            {tx.typeLabel}
-                          </span>
-                        </td>
-
-                        {/* Assigned Lawyer from DB */}
-                        {showLawyer && (
-                          <td className="py-2 px-2.5 text-center text-[var(--text-2)] font-semibold text-[11px] whitespace-nowrap">
-                            {tx.lawyerName || <span className="text-[var(--text-3)]">—</span>}
-                          </td>
-                        )}
-
-                        {/* Live Workflow Status Badge */}
-                        <td className="py-2 px-2.5 text-center whitespace-nowrap">
-                          <WorkflowStatus
-                            status={tx.status}
-                            entityId={tx.id}
-                            entityType="transaction"
-                            size="sm"
-                          />
-                        </td>
-
-                        {/* Real Date */}
-                        <td className="py-2 px-2.5 text-center num text-[var(--text-3)] text-[11px] whitespace-nowrap">
-                          {tx.txDate ? formatDate(tx.txDate) : '—'}
-                        </td>
-
-                        <td className="py-2 px-2 text-left">
-                          <span className="material-symbols-outlined dash-row-go" aria-hidden>chevron_left</span>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
-
-            {/* View All Footer Link */}
-            <div className="pt-2 flex justify-between items-center text-[11px] text-[var(--text-3)] border-t border-[var(--line-soft)] mt-auto">
-              <span>عرض أحدث {Math.min(7, filteredRecentTxs.length)} من أصل {recentTxs.length} معاملة مسجلة</span>
-              <Link
-                href="/commercial"
-                className="font-bold text-[var(--accent)] hover:underline flex items-center gap-1"
-              >
-                <span>الانتقال لكافة المعاملات</span>
-                <span className="material-symbols-outlined text-[12px]">arrow_left</span>
-              </Link>
+      <div className="bx-grid">
+        {/* 2. نشاط الأسبوع */}
+        <section className="bx-card bx-s6" style={{ animationDelay: '.08s' }} aria-labelledby="bx-week-h">
+          <div className="bx-card-head">
+            <div>
+              <h2 id="bx-week-h">نشاط هذا الأسبوع</h2>
+              <small>المعاملات المسجّلة كل يوم · المجموع <span className="num">{weekTotal}</span></small>
             </div>
+            <Link href="/commercial" className="bx-link">كل المعاملات ←</Link>
           </div>
-          </DataPanel>
-        </div>
-
-        {/* Left 4 Cols: Reminders Widget */}
-        <div className="lg:col-span-4 flex flex-col gap-4">
-          <RemindersWidget companies={companies} />
-        </div>
-      </div>
-
-      {/* 4. Bottom Analytical Bento Section: Team Workload & Status Distribution */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-3.5 w-full">
-        
-        {/* Workload Distribution (Span 6) */}
-        <div className="lg:col-span-6 flex flex-col gap-3">
-          <DataPanel className="h-full flex flex-col" icon="group" title="توزيع المهام والمعاملات على الكادر" subtitle="متابعة الطاقة الاستيعابية والمهام المسندة للفريق" count={displayLawyers.length} unit="أعضاء" actions={
-              <Link href="/settings/users" className="btn btn-sm btn-soft">إدارة الكادر</Link>
-            }>
-            <div className="p-3 sm:p-4 flex flex-col gap-3 flex-1">
-            
-            
-
-            {/* Staff Workload Cards Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 flex-1">
-              {displayLawyers.map(lawyer => {
-                const count = lawyer.active_tx_count ?? 0
-                const percent = Math.min(100, Math.round((count / maxWorkload) * 100))
-                const roleLabel = lawyer.title || (lawyer.role === 'super_admin' ? 'مدير النظام الأعلى' : lawyer.role === 'manager' ? 'مدير العمليات' : 'محامي ومستشار')
-                const isFree = count === 0
-                const initial = lawyer.name.trim().slice(0, 1) || '؟'
-
-                // Capacity Color Coding
-                const barGradient = isFree
-                  ? 'from-emerald-500 to-teal-500'
-                  : percent <= 45
-                  ? 'from-emerald-500 to-blue-500'
-                  : percent <= 80
-                  ? 'from-blue-500 to-indigo-600'
-                  : 'from-amber-500 to-rose-500'
-
-                const statusColor = isFree
-                  ? 'text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 border-emerald-500/20'
-                  : percent <= 45
-                  ? 'text-blue-600 dark:text-blue-400 bg-blue-500/10 border-blue-500/20'
-                  : percent <= 80
-                  ? 'text-indigo-600 dark:text-indigo-400 bg-indigo-500/10 border-indigo-500/20'
-                  : 'text-amber-600 dark:text-amber-400 bg-amber-500/10 border-amber-500/20'
-
-                return (
+          <div className="bx-week" role="img" aria-label={`المعاملات المسجّلة هذا الأسبوع: ${week.map(d => `${d.label} ${d.isFuture ? '—' : d.count}`).join('، ')}`}>
+            {week.map((d, i) => {
+              const h = d.isFuture ? 42 : Math.max(6, (d.count / weekMax) * 100)
+              return (
+                <div className="bx-day" key={d.date}>
+                  {d.isToday && <span className="bx-tip">اليوم · <span className="num">{d.count}</span></span>}
                   <div
-                    key={lawyer.id || lawyer.name}
-                    className="flex flex-col justify-between gap-2 p-3 rounded-xl bg-[color:color-mix(in_srgb,var(--surface-2)_70%,transparent)] hover:bg-[var(--surface-2)] border border-[var(--glass-border)] hover:border-[color:color-mix(in_srgb,var(--accent)_30%,transparent)] transition shadow-2xs group"
-                  >
-                    {/* Top Row: Avatar + Name + Task Status Badge */}
-                    <div className="flex items-start justify-between gap-2">
-                      <div className="flex items-center gap-2 min-w-0">
-                        {/* Circular Avatar with Online Indicator */}
-                        <div className="relative shrink-0">
-                          {lawyer.avatar_url ? (
-                            <img
-                              src={lawyer.avatar_url}
-                              alt={lawyer.name}
-                              className="w-8 h-8 rounded-full object-cover border border-white/20 shadow-xs"
-                            />
-                          ) : (
-                            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-600 to-indigo-700 text-white font-black text-xs flex items-center justify-center border border-white/20 shadow-xs">
-                              {initial}
-                            </div>
-                          )}
-                          <span
-                            className="absolute -bottom-0.5 -right-0.5 w-2 h-2 rounded-full bg-emerald-500 border border-[var(--surface-2)]"
-                            title="نشط"
-                          />
-                        </div>
+                    className={`bx-bar${d.isToday ? ' is-today' : ''}${d.isFuture ? ' is-future' : ''}`}
+                    style={{ height: `${h}%`, animationDelay: `${0.15 + i * 0.05}s` }}
+                    title={d.isFuture ? d.label : `${d.label}: ${d.count}`}
+                  />
+                  <span className={`bx-day-label${d.isToday ? ' is-today' : ''}`}>{d.label}</span>
+                </div>
+              )
+            })}
+          </div>
+        </section>
 
-                        {/* Staff Name & Role */}
-                        <div className="flex flex-col min-w-0">
-                          <span className="text-xs font-black text-[var(--text)] truncate leading-tight group-hover:text-[var(--accent)] transition-colors">
-                            {lawyer.name}
-                          </span>
-                          <span className="text-[10px] text-[var(--text-3)] font-medium mt-0.5 truncate">
-                            {roleLabel} {lawyer.dept ? `• ${lawyer.dept}` : ''}
-                          </span>
-                        </div>
-                      </div>
+        {/* 3. المهل القريبة */}
+        <section className="bx-card bx-s3" style={{ animationDelay: '.14s' }} aria-labelledby="bx-dl-h">
+          <div className="bx-card-head">
+            <h2 id="bx-dl-h">المهل القريبة</h2>
+          </div>
+          {deadlines.length ? (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+              {deadlines.map(d => (
+                <Link key={d.key} href={d.href} className={`bx-deadline ${d.late ? 'is-late' : 'is-soon'}`}>
+                  <b>{d.company}</b>
+                  <span>{d.what}</span>
+                  <em>{d.chip}</em>
+                </Link>
+              ))}
+            </div>
+          ) : (
+            <div className="bx-empty">لا توجد مهل قريبة</div>
+          )}
+        </section>
 
-                      {/* Workload Status Tag */}
-                      <span className={`text-[10.5px] font-bold px-2 py-0.5 rounded-full border shrink-0 ${statusColor}`}>
-                        {isFree ? 'متاح للعمل' : `${count} مهام نشطة`}
-                      </span>
-                    </div>
-
-                    {/* Middle Section: Task Capacity & Interactive Progress Ratio Bar */}
-                    <div className="space-y-1 pt-1 border-t border-[color:color-mix(in_srgb,var(--line-soft)_50%,transparent)]">
-                      <div className="flex items-center justify-between text-[10.5px] font-bold">
-                        <span className="text-[var(--text-3)]">نسبة الإشغال:</span>
-                        <span className={`num ${isFree ? 'text-emerald-600 dark:text-emerald-400' : 'text-[var(--accent)]'}`}>
-                          {isFree ? '0% (طاقة شاغرة)' : `${percent}% من الطاقة الاستيعابية`}
-                        </span>
-                      </div>
-
-                      {/* Animated Task Ratio Progress Bar */}
-                      <div className="w-full h-1.5 bg-[var(--surface-3)] rounded-full overflow-hidden p-[0.5px]">
-                        <div
-                          className={`h-full rounded-full bg-gradient-to-r ${barGradient} transition-all duration-500`}
-                          style={{ width: `${isFree ? 0 : Math.max(12, percent)}%` }}
-                        />
-                      </div>
-                    </div>
-
-                    {/* Bottom Micro Details: Direct Contact / Email */}
-                    {(lawyer.email || lawyer.phone) && (
-                      <div className="flex items-center justify-between text-[10.5px] text-[var(--text-3)] num pt-1 border-t border-[color:color-mix(in_srgb,var(--line-soft)_40%,transparent)] truncate">
-                        <span className="truncate" dir="ltr">
-                          {lawyer.phone || lawyer.email}
-                        </span>
-                        <span className="text-[10.5px] text-[var(--text-3)] group-hover:text-[var(--accent)] transition-colors shrink-0">
-                          تفاصيل الملف ←
-                        </span>
-                      </div>
-                    )}
-                  </div>
-                )
-              })}
+        {/* 4. مسار التأسيس */}
+        <section className="bx-card bx-s3" style={{ animationDelay: '.2s' }} aria-labelledby="bx-form-h">
+          <div className="bx-card-head">
+            <h2 id="bx-form-h">مسار التأسيس</h2>
+            <Link href="/commercial/companies" className="bx-link">فتح ←</Link>
+          </div>
+          <div className="bx-ring">
+            <svg width="132" height="132" viewBox="0 0 132 132" aria-hidden="true">
+              <circle cx="66" cy="66" r="54" fill="none" stroke="var(--surface-2)" strokeWidth="14" />
+              <circle className="bx-ring-fg" cx="66" cy="66" r="54" fill="none" stroke="var(--brand)" strokeWidth="14" strokeLinecap="round"
+                strokeDasharray={RING} strokeDashoffset={RING * (1 - formRatio)} transform="rotate(-90 66 66)" />
+            </svg>
+            <div className="bx-ring-center">
+              <b className="num">{forming.length}</b>
+              <span>قيد التأسيس</span>
             </div>
           </div>
-          </DataPanel>
-        </div>
+          {forming.length ? (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+              {forming.slice(0, 3).map(c => (
+                <Link key={c.id} href={`/commercial/companies?id=${c.id}`} className="bx-prog">
+                  <span className="bx-prog-top"><b>{c.name}</b><span className="num">{c.done}/{c.total}</span></span>
+                  <span className="bx-track"><span className="bx-fill" style={{ width: `${(c.done / Math.max(1, c.total)) * 100}%` }} /></span>
+                  {c.current && <span style={{ fontSize: 12, color: 'var(--text-3)' }}>الآن: {c.current}</span>}
+                </Link>
+              ))}
+            </div>
+          ) : (
+            <div className="bx-empty">لا توجد شركات قيد التأسيس</div>
+          )}
+        </section>
 
-        {/* Workflow Status Distribution (Span 6) */}
-        <div className="lg:col-span-6 flex flex-col gap-3">
-          <DataPanel className="h-full flex flex-col" icon="pie_chart" title="حالات سير العمل في النظام" subtitle="توزيع المعاملات حسب المرحلة" count={stats.statusDistribution.reduce((a, x) => a + x.count, 0)} unit="بند">
-            <div className="p-3 sm:p-4 flex flex-col gap-3 flex-1">
-            
-
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 flex-1">
-              {stats.statusDistribution.slice(0, 6).map(st => (
-                <div
-                  key={st.id}
-                  style={{
-                    backgroundColor: st.bg || 'var(--surface-2)',
-                    borderColor: st.border || 'var(--line-soft)',
-                  }}
-                  className="flex flex-col justify-between p-2.5 rounded-xl border transition-all duration-200 hover:-translate-y-0.5 shadow-2xs"
-                >
-                  <span style={{ color: st.text || 'var(--text)' }} className="text-[11px] font-bold">
-                    {st.label}
-                  </span>
-                  <div className="flex items-baseline justify-between mt-1">
-                    <span className="text-lg font-black num" style={{ color: st.text || 'var(--text)' }}>
-                      {st.count}
-                    </span>
-                    <span className="text-[10.5px] text-[var(--text-3)] font-semibold">معاملة</span>
-                  </div>
-                </div>
+        {/* 5. أحدث المعاملات */}
+        <section className="bx-card bx-s8" style={{ animationDelay: '.26s' }} aria-labelledby="bx-tx-h">
+          <div className="bx-card-head">
+            <h2 id="bx-tx-h">أحدث المعاملات</h2>
+            <div className="bx-pills" role="group" aria-label="تصفية المعاملات">
+              {([['all', 'الكل'], ['progress', 'قيد التنفيذ'], ['new', 'جديدة'], ['done', 'مكتملة']] as const).map(([id, label]) => (
+                <button key={id} type="button" className={`bx-pill${txFilter === id ? ' is-on' : ''}`} aria-pressed={txFilter === id} onClick={() => setTxFilter(id)}>
+                  {label} <i className="num">{counts[id]}</i>
+                </button>
               ))}
             </div>
           </div>
-          </DataPanel>
+          {filteredTxs.length ? (
+            <div className="bx-rows">
+              {filteredTxs.map(tx => {
+                const st = getWorkflowStatusConfig(tx.status)
+                return (
+                  <Link key={tx.id} href={txHref(tx)} className="bx-row">
+                    <span className="bx-row-main">
+                      <span className="bx-dot" style={{ background: st.text }} aria-hidden />
+                      <span className="bx-row-text">
+                        <b>{tx.companyName || tx.clientName || 'بدون شركة'}</b>
+                        <span>{tx.typeLabel}{tx.lawyerName ? ` · ${tx.lawyerName}` : ''}</span>
+                      </span>
+                    </span>
+                    <span className="bx-chip" style={{ background: st.bg, color: st.text, border: `1px solid ${st.border}` }}>{st.label}</span>
+                    <span className="bx-row-date num">{tx.txDate ? formatDate(tx.txDate) : '—'}</span>
+                  </Link>
+                )
+              })}
+            </div>
+          ) : (
+            <div className="bx-empty">لا توجد معاملات بهذا التصنيف</div>
+          )}
+          <Link href="/commercial" className="bx-link" style={{ alignSelf: 'flex-start' }}>كل المعاملات ({recentTxs.length}) ←</Link>
+        </section>
+
+        {/* 6. التذكيرات */}
+        <div className="bx-s4" style={{ minWidth: 0 }}>
+          <RemindersWidget companies={companies} />
         </div>
 
+        {/* 7. الفريق */}
+        <section className="bx-card bx-s6" style={{ animationDelay: '.32s' }} aria-labelledby="bx-team-h">
+          <div className="bx-card-head">
+            <h2 id="bx-team-h">الفريق</h2>
+            <span className="bx-chip" style={{ background: 'var(--surface-2)', color: 'var(--text-2)' }}><span className="num">{team.length}</span> أعضاء</span>
+          </div>
+          {team.map(m => {
+            const count = m.active_tx_count ?? 0
+            return (
+              <div className="bx-member" key={m.id}>
+                <span className="bx-avatar" aria-hidden>{m.name.trim().slice(0, 1) || '؟'}</span>
+                <span className="bx-member-text">
+                  <b>{m.name} <small>· {roleOf(m)}</small></b>
+                  <span className="bx-track"><span className="bx-fill" style={{ width: `${Math.max(3, (count / maxWorkload) * 100)}%`, opacity: count ? 1 : .35 }} /></span>
+                </span>
+                <span className="bx-member-count"><span className="num">{count}</span> معاملة</span>
+              </div>
+            )
+          })}
+        </section>
+
+        {/* 8. الإجراءات السريعة — تفتح نافذة الإضافة مباشرة */}
+        <section className="bx-card bx-s6" style={{ animationDelay: '.38s' }} aria-labelledby="bx-act-h">
+          <div className="bx-card-head">
+            <h2 id="bx-act-h">إجراءات سريعة</h2>
+          </div>
+          <div className="bx-actions">
+            {actions.map(a => (
+              <Link key={a.href} href={a.href} className="bx-action">
+                <span className="material-symbols-outlined" aria-hidden>{a.icon}</span>
+                {a.label}
+              </Link>
+            ))}
+          </div>
+        </section>
       </div>
     </div>
   )

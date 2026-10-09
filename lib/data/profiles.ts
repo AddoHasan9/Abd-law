@@ -27,6 +27,37 @@ const userSchema = z.object({
 export type UserInput = z.input<typeof userSchema>
 
 /** Directory queries use session RLS; Auth emails are limited to user administrators. */
+const CLOSED_STATUSES = new Set(['done', 'completed', 'closed', 'cancelled', 'archived', 'cleared', 'paid'])
+
+/**
+ * عبء العمل لكل عضو: المعاملات وملفات التحاسب المكلّف بها (بدون تكرار السجل نفسه).
+ * active_tx_count = المفتوحة، completed_tx_count = المنجزة.
+ * (كان الحقل معرّفاً ولا يُملأ أبداً فيظهر صفر للجميع)
+ */
+async function withWorkload(profiles: ProfileWithStats[]): Promise<ProfileWithStats[]> {
+  if (!profiles.length) return profiles
+  try {
+    const admin = createAdminClient()
+    const [tx, tax] = await Promise.all([
+      admin.from('transactions').select('id, lawyer_id, status').not('lawyer_id', 'is', null),
+      admin.from('tax_assessments').select('id, lawyer_id, status').not('lawyer_id', 'is', null),
+    ])
+    const seen = new Set<string>()
+    const active = new Map<string, number>()
+    const done = new Map<string, number>()
+    for (const r of [...(tx.data || []), ...(tax.data || [])] as Array<{ id: string; lawyer_id: string; status: string | null }>) {
+      if (seen.has(r.id)) continue
+      seen.add(r.id)
+      const bucket = CLOSED_STATUSES.has(String(r.status || '')) ? done : active
+      bucket.set(r.lawyer_id, (bucket.get(r.lawyer_id) || 0) + 1)
+    }
+    return profiles.map(p => ({ ...p, active_tx_count: active.get(p.id) || 0, completed_tx_count: done.get(p.id) || 0 }))
+  } catch (e) {
+    console.error('withWorkload:', e)
+    return profiles
+  }
+}
+
 export async function listProfiles(includeAuth = false): Promise<ProfileWithStats[]> {
   if (!await getCurrentUserProfile()) throw new Error('الحساب غير مخول')
   if (includeAuth) {
@@ -36,7 +67,7 @@ export async function listProfiles(includeAuth = false): Promise<ProfileWithStat
   const client = includeAuth ? createAdminClient() : await createClient()
   const { data, error } = await client.from('profiles').select('*').order('created_at')
   if (error) throw new Error('تعذر تحميل المستخدمين')
-  const profiles = (data || []) as ProfileWithStats[]
+  const profiles = await withWorkload((data || []) as ProfileWithStats[])
   if (!includeAuth) return profiles
   const authUsers = new Map<string, { email?: string; last_sign_in_at?: string }>()
   for (let page = 1; ; page++) {

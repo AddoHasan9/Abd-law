@@ -360,7 +360,7 @@ export default function AddLLCTransactionModal({
 
             {/* Specialized Section for Capital Up (زيادة رأس المال) */}
             {txType === 'capital-up' && (
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 p-3.5 rounded-xl bg-sky-500/10 border border-sky-500/25">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 p-3.5 rounded-xl bg-[color:color-mix(in_srgb,var(--accent)_10%,transparent)] border border-[color:color-mix(in_srgb,var(--accent)_25%,transparent)]">
                 <div className="field" style={{ margin: 0 }}>
                   <label htmlFor="llc-cap-before" style={{ fontSize: '12px', fontWeight: 700, color: 'var(--text)' }}>
                     <Mi n="payments" />رأس المال القديم (السابق)

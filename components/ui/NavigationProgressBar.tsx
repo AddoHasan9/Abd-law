@@ -90,7 +90,7 @@ export function NavigationProgressBar() {
       style={{ top: 'env(safe-area-inset-top, 0px)' }}
     >
       <div
-        className="h-full bg-gradient-to-l from-sky-400 via-blue-500 to-emerald-400 shadow-[0_0_8px_rgba(56,189,248,0.6)]"
+        className="h-full bg-gradient-to-l from-[color:var(--accent)] via-[color:var(--accent)] to-emerald-400 shadow-[0_0_8px_rgba(56,189,248,0.6)]"
         style={{
           width: `${progress}%`,
           opacity: progress === 100 ? 0 : 1,

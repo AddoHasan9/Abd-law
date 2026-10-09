@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useOpenOnNewParam } from '@/lib/hooks/useOpenOnNewParam'
 import { AttachmentChip } from '@/components/ui/AttachmentField'
 import { listAttachmentInfoAction } from '@/app/(app)/commercial/attachments/actions'
 import Link from 'next/link'
@@ -102,6 +103,9 @@ export default function TaxAssessmentClient({ assessments = [], companies = [], 
     setIsModalOpen(true)
   }
 
+  // فتح نافذة الإضافة من رابط ‎?new=1 (الإجراءات السريعة في لوحة التحكم)
+  useOpenOnNewParam(() => openAddModal())
+
   const openEditModal = (item: TaxAssessment) => {
     setEditingItem(item)
     setIsModalOpen(true)
@@ -189,7 +193,7 @@ export default function TaxAssessmentClient({ assessments = [], companies = [], 
 
       {/* المؤشرات — البطاقة الموحدة */}
       <div className="kpi-grid cols-4">
-        <KpiCard label="ملفات التحاسب" value={stats.total} icon="folder_open" tone="blue" hint="كل الملفات" active={statusFilter === 'all'} onClick={() => setStatusFilter('all')} />
+        <KpiCard featured label="ملفات التحاسب" value={stats.total} icon="folder_open" tone="blue" hint="كل الملفات" active={statusFilter === 'all'} onClick={() => setStatusFilter('all')} />
         <KpiCard label="قيد المتابعة" value={stats.inProgress} icon="pending_actions" tone="amber" hint="لم تُحسم بعد" active={statusFilter === 'in_progress'} onClick={() => setStatusFilter('in_progress')} />
         <KpiCard label="براءة ذمة" value={stats.cleared} icon="task_alt" tone="emerald" hint="صدرت براءة الذمة" active={statusFilter === 'tax_cleared'} onClick={() => setStatusFilter('tax_cleared')} />
         <KpiCard label="الضرائب المقدّرة" value={stats.totalTaxAmount} icon="payments" tone="indigo" hint="إجمالي المبالغ" format="currency" onClick={() => setStatusFilter('all')} />
@@ -292,7 +296,7 @@ export default function TaxAssessmentClient({ assessments = [], companies = [], 
 
                       {/* Assessment Year */}
                       <td className="p-3.5 text-center font-black num">
-                        <span className="px-3 py-1 rounded-xl bg-blue-500/10 text-blue-700 dark:text-blue-300 border border-blue-500/20">
+                        <span className="px-3 py-1 rounded-xl bg-[color:color-mix(in_srgb,var(--accent)_10%,transparent)] text-[var(--accent)] dark:text-[#A9BBE6] border border-[color:color-mix(in_srgb,var(--accent)_20%,transparent)]">
                           {item.year}
                         </span>
                       </td>

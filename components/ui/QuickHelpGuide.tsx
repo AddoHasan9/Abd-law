@@ -74,31 +74,31 @@ export default function QuickHelpGuide() {
             content: (
               <div className="space-y-2.5 text-xs text-[var(--text-2)]">
                 <div className="flex items-start gap-2.5">
-                  <span className="w-5 h-5 rounded-full bg-[#3B82F6] text-white flex items-center justify-center font-bold text-[11px] flex-none">1</span>
+                  <span className="w-5 h-5 rounded-full bg-[var(--accent)] text-white flex items-center justify-center font-bold text-[11px] flex-none">1</span>
                   <div>
                     <strong className="text-[var(--text)] text-xs">إجمالي الشركات:</strong> عدد الشركات المسجلة والموثقة في أرشيف وسجلات المكتب.
                   </div>
                 </div>
                 <div className="flex items-start gap-2.5">
-                  <span className="w-5 h-5 rounded-full bg-[#3B82F6] text-white flex items-center justify-center font-bold text-[11px] flex-none">2</span>
+                  <span className="w-5 h-5 rounded-full bg-[var(--accent)] text-white flex items-center justify-center font-bold text-[11px] flex-none">2</span>
                   <div>
                     <strong className="text-[var(--text)] text-xs">مسار التأسيس (8 خطوات):</strong> متابعة الشركات قيد التأسيس خطوة بخطوة حتى صدور الشهادة.
                   </div>
                 </div>
                 <div className="flex items-start gap-2.5">
-                  <span className="w-5 h-5 rounded-full bg-[#3B82F6] text-white flex items-center justify-center font-bold text-[11px] flex-none">3</span>
+                  <span className="w-5 h-5 rounded-full bg-[var(--accent)] text-white flex items-center justify-center font-bold text-[11px] flex-none">3</span>
                   <div>
                     <strong className="text-[var(--text)] text-xs">إطلاق الوديعة (30 يوماً):</strong> متابعة مهلة تحرير الوديعة المصرفية بعد صدور شهادة التأسيس لتفادي الغرامات.
                   </div>
                 </div>
                 <div className="flex items-start gap-2.5">
-                  <span className="w-5 h-5 rounded-full bg-[#3B82F6] text-white flex items-center justify-center font-bold text-[11px] flex-none">4</span>
+                  <span className="w-5 h-5 rounded-full bg-[var(--accent)] text-white flex items-center justify-center font-bold text-[11px] flex-none">4</span>
                   <div>
                     <strong className="text-[var(--text)] text-xs">توزيع المهام على الكادر:</strong> رسم توضيحي لحجم المعاملات المنجزة والمكلف بها كل محامي في المكتب.
                   </div>
                 </div>
                 <div className="flex items-start gap-2.5">
-                  <span className="w-5 h-5 rounded-full bg-[#3B82F6] text-white flex items-center justify-center font-bold text-[11px] flex-none">5</span>
+                  <span className="w-5 h-5 rounded-full bg-[var(--accent)] text-white flex items-center justify-center font-bold text-[11px] flex-none">5</span>
                   <div>
                     <strong className="text-[var(--text)] text-xs">المعاملات حسب النوع:</strong> تصنيف المعاملات (تأسيس، بيع أسهم، زيادة رأس مال، نقل مقر، تعيين مدير).
                   </div>
@@ -313,7 +313,7 @@ export default function QuickHelpGuide() {
                     key={item.id}
                     className={`rounded-2xl border transition duration-200 overflow-hidden ${
                       isExpanded
-                        ? 'bg-[var(--surface-2)] border-[#38BDF8]/40 shadow-md shadow-blue-500/5'
+                        ? 'bg-[var(--surface-2)] border-[#38BDF8]/40 shadow-md shadow-[color:color-mix(in_srgb,var(--accent)_5%,transparent)]'
                         : 'bg-[color:color-mix(in_srgb,var(--surface-2)_50%,transparent)] border-[var(--glass-border)] hover:border-[var(--line)]'
                     }`}
                   >
@@ -327,7 +327,7 @@ export default function QuickHelpGuide() {
                         <div
                           className={`w-9 h-9 rounded-xl flex items-center justify-center flex-none transition-colors ${
                             isExpanded
-                              ? 'bg-[#3B82F6] text-white shadow-md shadow-blue-500/20'
+                              ? 'bg-[var(--accent)] text-white shadow-md shadow-[color:color-mix(in_srgb,var(--accent)_20%,transparent)]'
                               : 'bg-[var(--surface-3)] text-[var(--accent)]'
                           }`}
                         >

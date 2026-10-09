@@ -173,7 +173,7 @@ export default function BarcodeUploader({
           style={{
             position: 'relative',
             padding: '14px 12px',
-            background: 'linear-gradient(135deg, rgba(56, 189, 248, 0.08) 0%, rgba(16, 185, 129, 0.08) 100%)',
+            background: 'var(--accent-soft)',
             border: '1.5px dashed rgba(56, 189, 248, 0.5)',
             borderRadius: '12px',
             display: 'flex',
@@ -190,7 +190,7 @@ export default function BarcodeUploader({
               left: 0,
               right: 0,
               height: '2px',
-              background: 'linear-gradient(90deg, transparent, #38BDF8, #10B981, transparent)',
+              background: 'linear-gradient(90deg, transparent, var(--accent), var(--gold), transparent)',
               boxShadow: '0 0 8px #38BDF8',
               animation: 'laserScanCompact 1.2s ease-in-out infinite alternate',
             }}
@@ -235,7 +235,7 @@ export default function BarcodeUploader({
                 style={{
                   width: `${uploadProgress}%`,
                   height: '100%',
-                  background: 'linear-gradient(90deg, #38BDF8, #10B981)',
+                  background: 'linear-gradient(90deg, var(--accent), var(--brand))',
                   transition: 'width 0.25s ease',
                   borderRadius: '999px',
                 }}

@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
+import { useOpenOnNewParam } from '@/lib/hooks/useOpenOnNewParam'
 import Link from 'next/link'
 import dynamic from 'next/dynamic'
 import { isFSComplete } from '@/lib/financial-statements/completion'
@@ -70,6 +71,8 @@ export default function FinancialStatementsClient({ companies = [] }: Props) {
   }
 
   const [isAddModalOpen, setIsAddModalOpen] = useState(false)
+  // فتح نافذة الإضافة من رابط ‎?new=1 (الإجراءات السريعة في لوحة التحكم)
+  useOpenOnNewParam(() => setIsAddModalOpen(true))
   const [modalCompanyId, setModalCompanyId] = useState<string | undefined>()
   const [editingStatement, setEditingStatement] = useState<FinancialStatement | null>(null)
 
@@ -336,7 +339,7 @@ export default function FinancialStatementsClient({ companies = [] }: Props) {
 
       {/* المؤشرات — البطاقة الموحدة */}
       <div className="kpi-grid cols-4">
-        <KpiCard label="الشركات المكلّف بها" value={groupedCompanies.length} icon="corporate_fare" tone="blue" hint="شركات بالحسابات الختامية" onClick={() => setActiveTab('grouped')} />
+        <KpiCard featured label="الشركات المكلّف بها" value={groupedCompanies.length} icon="corporate_fare" tone="blue" hint="شركات بالحسابات الختامية" onClick={() => setActiveTab('grouped')} />
         <KpiCard label="ميزانيات مستحقة" value={totalRequired} icon="receipt_long" tone="indigo" hint="للسنة الحالية" onClick={() => setActiveTab('grouped')} />
         <KpiCard label="تقترب المهلة (7/10)" value={nearDeadline.length} icon="schedule" tone="amber" hint="خلال الأيام القادمة" alert={false} onClick={() => setActiveTab('grouped')} />
         <KpiCard

@@ -587,7 +587,7 @@ export default function DepositsClient({ deposits = [], companyId }: Props) {
                       color: 'var(--text-2)',
                     }}
                   >
-                    <span className="material-symbols-outlined text-sky-500 text-[14px]">info</span>
+                    <span className="material-symbols-outlined text-[var(--accent)] text-[14px]">info</span>
                     <span>أُرسلت على النظام · بانتظار رفع الباركود لإكمال الإطلاق.</span>
                   </div>
                 ) : pen ? (

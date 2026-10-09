@@ -241,7 +241,7 @@ export default function SettingsClient() {
           onClick={() => setActiveTab('workflows')}
           className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-black text-xs transition cursor-pointer ${
             activeTab === 'workflows'
-              ? 'bg-[#3B82F6] text-white shadow-md shadow-blue-500/20'
+              ? 'bg-[var(--accent)] text-white shadow-md shadow-[color:color-mix(in_srgb,var(--accent)_20%,transparent)]'
               : 'text-[var(--text-3)] hover:text-[var(--text)]'
           }`}
         >
@@ -254,7 +254,7 @@ export default function SettingsClient() {
           onClick={() => setActiveTab('general')}
           className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-black text-xs transition cursor-pointer ${
             activeTab === 'general'
-              ? 'bg-[#3B82F6] text-white shadow-md shadow-blue-500/20'
+              ? 'bg-[var(--accent)] text-white shadow-md shadow-[color:color-mix(in_srgb,var(--accent)_20%,transparent)]'
               : 'text-[var(--text-3)] hover:text-[var(--text)]'
           }`}
         >
@@ -302,7 +302,7 @@ export default function SettingsClient() {
                     onClick={() => setSelectedTxKey(key)}
                     className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl text-xs font-black transition flex-none cursor-pointer border ${
                       isSelected
-                        ? 'bg-[#3B82F6] border-[#3B82F6] text-white shadow-md shadow-blue-500/25'
+                        ? 'bg-[var(--accent)] border-[var(--accent)] text-white shadow-md shadow-[color:color-mix(in_srgb,var(--accent)_25%,transparent)]'
                         : 'bg-[var(--surface-2)] border-[var(--line-soft)] text-[var(--text-2)] hover:text-[var(--text)] hover:bg-[var(--surface-3)]'
                     }`}
                   >
@@ -342,7 +342,7 @@ export default function SettingsClient() {
                 <div>
                   <div className="flex items-center gap-2.5">
                     <span className="text-base font-black text-[var(--text)]">{activeTemplate.txLabel}</span>
-                    <span className="px-2.5 py-0.5 rounded-md bg-blue-500/10 text-[#3B82F6] text-[10px] font-bold border border-blue-500/20">
+                    <span className="px-2.5 py-0.5 rounded-md bg-[var(--accent-soft)] text-[var(--accent)] text-[10px] font-bold border border-[color:color-mix(in_srgb,var(--accent)_20%,transparent)]">
                       {activeTemplate.steps.length} محطات معتمدة
                     </span>
                   </div>
@@ -362,7 +362,7 @@ export default function SettingsClient() {
                     >
                       {editingStepId === step.id ? (
                         <div className="flex-1 flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5">
-                          <div className="w-8 h-8 rounded-xl bg-blue-500 text-white flex items-center justify-center font-black text-xs flex-none">
+                          <div className="w-8 h-8 rounded-xl bg-[var(--accent)] text-white flex items-center justify-center font-black text-xs flex-none">
                             <span className="num">{idx + 1}</span>
                           </div>
                           <input
@@ -423,7 +423,7 @@ export default function SettingsClient() {
                               <button
                                 type="button"
                                 onClick={() => handleStartEditStep(step)}
-                                className="w-8 h-8 rounded-xl bg-[var(--surface-3)] text-[var(--text-2)] hover:text-[#3B82F6] hover:bg-[var(--surface)] border border-[var(--line-soft)] flex items-center justify-center transition-colors cursor-pointer"
+                                className="w-8 h-8 rounded-xl bg-[var(--surface-3)] text-[var(--text-2)] hover:text-[var(--accent)] hover:bg-[var(--surface)] border border-[var(--line-soft)] flex items-center justify-center transition-colors cursor-pointer"
                                 title="تعديل اسم أو مسؤول المحطة"
                               >
                                 <span className="material-symbols-outlined text-[16px]">edit</span>
@@ -432,7 +432,7 @@ export default function SettingsClient() {
                                 type="button"
                                 onClick={() => handleMoveStep(idx, 'up')}
                                 disabled={idx === 0}
-                                className="w-8 h-8 rounded-xl bg-[var(--surface-3)] text-[var(--text-2)] hover:text-[#3B82F6] hover:bg-[var(--surface)] border border-[var(--line-soft)] disabled:opacity-30 flex items-center justify-center transition-colors cursor-pointer"
+                                className="w-8 h-8 rounded-xl bg-[var(--surface-3)] text-[var(--text-2)] hover:text-[var(--accent)] hover:bg-[var(--surface)] border border-[var(--line-soft)] disabled:opacity-30 flex items-center justify-center transition-colors cursor-pointer"
                                 title="تحريك لأعلى"
                               >
                                 <span className="material-symbols-outlined text-[16px]">arrow_upward</span>
@@ -441,7 +441,7 @@ export default function SettingsClient() {
                                 type="button"
                                 onClick={() => handleMoveStep(idx, 'down')}
                                 disabled={idx === activeTemplate.steps.length - 1}
-                                className="w-8 h-8 rounded-xl bg-[var(--surface-3)] text-[var(--text-2)] hover:text-[#3B82F6] hover:bg-[var(--surface)] border border-[var(--line-soft)] disabled:opacity-30 flex items-center justify-center transition-colors cursor-pointer"
+                                className="w-8 h-8 rounded-xl bg-[var(--surface-3)] text-[var(--text-2)] hover:text-[var(--accent)] hover:bg-[var(--surface)] border border-[var(--line-soft)] disabled:opacity-30 flex items-center justify-center transition-colors cursor-pointer"
                                 title="تحريك لأسفل"
                               >
                                 <span className="material-symbols-outlined text-[16px]">arrow_downward</span>
@@ -471,19 +471,19 @@ export default function SettingsClient() {
                     placeholder="اسم المحطة الجديدة (مثال: تدقيق المشاور القانوني، كتاب الضرائب...)"
                     value={newStepLabel}
                     onChange={e => setNewStepLabel(e.target.value)}
-                    className="input grow bg-[var(--surface)] text-[var(--text)] placeholder:text-[var(--text-3)] border border-[var(--border)] focus:border-[#3B82F6] rounded-xl h-11 text-xs px-3.5"
+                    className="input grow bg-[var(--surface)] text-[var(--text)] placeholder:text-[var(--text-3)] border border-[var(--border)] focus:border-[var(--accent)] rounded-xl h-11 text-xs px-3.5"
                   />
                   <input
                     type="text"
                     placeholder="الجهة المسؤولة (مثال: الموظف المختص، مدير القسم...)"
                     value={newStepOwner}
                     onChange={e => setNewStepOwner(e.target.value)}
-                    className="input w-full sm:w-56 bg-[var(--surface)] text-[var(--text)] placeholder:text-[var(--text-3)] border border-[var(--border)] focus:border-[#3B82F6] rounded-xl h-11 text-xs px-3.5"
+                    className="input w-full sm:w-56 bg-[var(--surface)] text-[var(--text)] placeholder:text-[var(--text-3)] border border-[var(--border)] focus:border-[var(--accent)] rounded-xl h-11 text-xs px-3.5"
                   />
                   <button
                     type="button"
                     onClick={handleAddStep}
-                    className="px-5 py-2.5 rounded-xl bg-[#3B82F6] hover:bg-blue-600 active:bg-blue-700 text-white font-bold text-xs transition flex items-center justify-center gap-1.5 flex-none cursor-pointer shadow-md shadow-blue-500/20"
+                    className="px-5 py-2.5 rounded-xl bg-[var(--accent)] hover:brightness-110 active:bg-[var(--accent)] text-white font-bold text-xs transition flex items-center justify-center gap-1.5 flex-none cursor-pointer shadow-md shadow-[color:color-mix(in_srgb,var(--accent)_20%,transparent)]"
                   >
                     <span className="material-symbols-outlined text-[18px]">add</span>
                     <span>إضافة محطة</span>
@@ -582,7 +582,7 @@ export default function SettingsClient() {
               <button
                 type="submit"
                 disabled={saving}
-                className="px-6 py-2.5 rounded-xl bg-[#3B82F6] hover:bg-blue-600 text-white font-black text-xs shadow-md shadow-blue-500/25 active:scale-95 transition flex items-center gap-2 cursor-pointer disabled:opacity-50"
+                className="px-6 py-2.5 rounded-xl bg-[var(--accent)] hover:brightness-110 text-white font-black text-xs shadow-md shadow-[color:color-mix(in_srgb,var(--accent)_25%,transparent)] active:scale-95 transition flex items-center gap-2 cursor-pointer disabled:opacity-50"
               >
                 <span className="material-symbols-outlined text-[18px]">save</span>
                 <span>{saving ? 'جاري الحفظ...' : 'حفظ التغييرات'}</span>
