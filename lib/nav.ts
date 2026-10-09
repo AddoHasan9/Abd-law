@@ -38,7 +38,7 @@ export const NAV: NavGroup[] = [
     key: 'g-home',
     items: [
       { key: 'dashboard', label: 'لوحة التحكم', href: '/dashboard', icon: 'grid' },
-      { key: 'reminders', label: 'التذكير والاشعارات', href: '/reminders', icon: 'bell' },
+      { key: 'reminders', label: 'التذكير والإشعارات', href: '/reminders', icon: 'bell' },
       { key: 'tools', label: 'الأدوات', href: '/tools', icon: 'tools' },
     ],
   },
@@ -52,7 +52,7 @@ export const NAV: NavGroup[] = [
     items: [
       { key: 'companies-registry', label: 'الشركات', href: '/commercial/companies-registry', icon: 'build2' },
       { key: 'companies', label: 'تأسيس الشركات', href: '/commercial/companies', icon: 'build' },
-      { key: 'deposits',  label: 'اطلاق الوديعة',    href: '/commercial/deposits',  icon: 'vault' },
+      { key: 'deposits',  label: 'إطلاق الوديعة',    href: '/commercial/deposits',  icon: 'vault' },
       { key: 'llc',       label: 'قسم المحدودة',    href: '/commercial/llc',       icon: 'badge' },
       { key: 'company-ids', label: 'قسم الهويات',   href: '/commercial/ids',       icon: 'stamp' },
       { key: 'tax-assessment', label: 'التحاسب الضريبي', href: '/commercial/tax-assessment', icon: 'scale' },
@@ -64,6 +64,7 @@ export const NAV: NavGroup[] = [
   {
     key: 'g-sys',
     label: 'النظام',
+    icon: 'gear',
     items: [
       { key: 'users',       label: 'المستخدمون',       href: '/settings/users',       icon: 'shield', cap: '*' },
       { key: 'permissions', label: 'الصلاحيات',        href: '/settings/permissions', icon: 'key',    cap: '*' },

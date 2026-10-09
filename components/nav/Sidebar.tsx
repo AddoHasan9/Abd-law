@@ -174,14 +174,18 @@ export default function Sidebar({
             </button>
           </div>
         ) : (
+          // نفس شكل رأس «القسم التجاري» (أيقونة + اسم + سهم طي) — كان عنواناً رمادياً صغيراً بشكل مختلف
           <button
             type="button"
-            className="nav-group-head transition-colors duration-150 hover:text-[var(--text)] cursor-pointer"
+            className="nav-item nav-item-head nav-head-btn transition duration-150 cursor-pointer"
             onClick={() => toggle(g.key)}
             aria-expanded={!shut}
           >
-            <span className="text-right flex-1">{g.label}</span>
-            <Icon name="chev" className={`icon chev transition-transform duration-200 ${shut ? 'rotate-90' : 'rotate-0'}`} />
+            {g.icon && <Icon name={g.icon} className="icon shrink-0" />}
+            <span className="truncate flex-1 text-right">{g.label}</span>
+            <span className="nav-toggle" aria-hidden>
+              <Icon name="chev" className={`icon chev transition-transform duration-200 ${shut ? 'rotate-90' : 'rotate-0'}`} />
+            </span>
           </button>
         )}
 

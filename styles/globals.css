@@ -3281,7 +3281,7 @@ html[data-theme="dark"] .page-head.tone-violet { --tone: #a78bfa; } html[data-th
 @media (pointer: coarse) { .id-icon-btn { width: 38px; height: 38px; } }
 
 /* «دليل الاستخدام» في الشريط الجانبي (بدل الزر العائم) */
-.side-help { width: 100%; border: 0; background: none; font: inherit; cursor: pointer; margin-top: 6px; }
+.side-help { width: 100%; border: 0; background: none; font-family: inherit; cursor: pointer; margin-top: 6px; }
 /* اختصارات لوحة المفاتيح لا معنى لها على اللمس */
 @media (pointer: coarse) { .kbd { display: none !important; } }
 /* شرائح الأسبوع/الشهر/السنة: مسافة ثابتة بين الكلمة والرقم */
@@ -3660,3 +3660,45 @@ html:root #topbar .tb-user {
 @media (max-width: 370px) {
   html:root #topbar .icon-btn { width: 36px; height: 36px; min-width: 36px; min-height: 36px; }
 }
+
+
+/* ============================================================
+   الشريط الجانبي — متناسق مع الشريط العلوي العائم
+   ============================================================ */
+/* العنصر الفعّال: خلفية ناعمة بلون الهوية فقط (بلا إطار أو ظل؛ كان سماوياً في الليلي) */
+html:root .nav-item[aria-current="page"] {
+  background: var(--accent-soft) !important;
+  color: var(--accent) !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+}
+html[data-theme="dark"] .nav-item[aria-current="page"] { background: var(--accent-soft) !important; color: #A9BBE6 !important; border-color: transparent !important; box-shadow: none !important; }
+
+/* رأس مجموعة بلا صفحة («النظام»): نفس شكل «القسم التجاري» */
+.nav-head-btn { width: 100%; border: 0; background: none; font-family: inherit; text-align: right; }
+.nav-head-btn .nav-toggle { margin-inline-start: auto; }
+
+
+/* الكمبيوتر: لوحة عائمة مدورة مثل الشريط العلوي */
+@media (min-width: 769px) {
+  html:root #sidebar {
+    margin: 10px 0 10px 10px; margin-inline-start: 10px; margin-inline-end: 0;
+    height: calc(100dvh - 20px); max-height: calc(100dvh - 20px);
+    top: 10px;
+    border: 1px solid var(--line-soft);
+    border-radius: 22px;
+    background: color-mix(in srgb, var(--surface) 86%, transparent);
+    box-shadow: 0 10px 30px -18px rgba(15, 23, 42, .28);
+  }
+  html[data-theme="dark"] #sidebar { box-shadow: 0 12px 30px -18px rgba(0, 0, 0, .7); }
+}
+
+/* الهاتف: الحافة الداخلية للقائمة المنزلقة مدورة */
+@media (max-width: 768px) {
+  html:root #sidebar {
+    border-start-end-radius: 24px;
+    border-end-end-radius: 24px;
+  }
+}
+/* رأس القائمة يكبر مع الاسم إذا التفّ لسطرين (بدل ارتفاع ثابت يقصّه) */
+html:root #sidebar .side-head { height: auto !important; min-height: 58px; padding-block: 10px !important; }
