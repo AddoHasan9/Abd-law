@@ -97,6 +97,7 @@ export default function NotificationCenter({ initialCount = 0 }: Props) {
         <Icon name="bell" />
         {unreadCount > 0 && (
           <span
+            className="tb-badge"
             style={{
               position: 'absolute',
               top: '2px',

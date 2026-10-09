@@ -135,7 +135,7 @@ export default function Topbar({ profile, title, subtitle, notifCount = 0, onMen
         <Icon name="menu" />
       </button>
 
-      <div className="flex flex-col justify-center min-w-0 flex-shrink-0">
+      <div className="tb-title flex flex-col justify-center min-w-0 flex-shrink-0">
         <Suspense fallback={<div id="page-title">{title}</div>}>
           <PageTitle />
         </Suspense>
@@ -173,7 +173,7 @@ export default function Topbar({ profile, title, subtitle, notifCount = 0, onMen
         <button
           type="button"
           onClick={() => setIsUserMenuOpen(prev => !prev)}
-          className="flex items-center gap-2 px-2.5 py-1 border-s border-[var(--border-soft)] hover:bg-[color:color-mix(in_srgb,var(--surface-2)_80%,transparent)] rounded-xl transition duration-200 cursor-pointer select-none text-right outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]"
+          className="tb-user flex items-center gap-2 px-2.5 py-1 border-s border-[var(--border-soft)] hover:bg-[color:color-mix(in_srgb,var(--surface-2)_80%,transparent)] rounded-xl transition duration-200 cursor-pointer select-none text-right outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]"
           aria-expanded={isUserMenuOpen}
           aria-haspopup="true"
           title="قائمة المستخدم"
@@ -187,7 +187,7 @@ export default function Topbar({ profile, title, subtitle, notifCount = 0, onMen
             </span>
           </div>
 
-          <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-[var(--accent)] to-emerald-500 flex items-center justify-center p-0.5 shadow-xs flex-shrink-0 relative hover:scale-105 transition-transform duration-200">
+          <div className="w-8 h-8 rounded-full bg-[var(--brand)] flex items-center justify-center p-0.5 shadow-xs flex-shrink-0 relative hover:scale-105 transition-transform duration-200">
             {avatarUrl && !imgError ? (
               <img
                 src={avatarUrl}
@@ -220,7 +220,7 @@ export default function Topbar({ profile, title, subtitle, notifCount = 0, onMen
               <div className="flex items-center gap-3">
                 {/* Avatar with Green Online Status Dot */}
                 <div className="relative shrink-0">
-                  <div className="w-11 h-11 rounded-full bg-gradient-to-tr from-[var(--accent)] to-emerald-500 flex items-center justify-center p-0.5 shadow-sm">
+                  <div className="w-11 h-11 rounded-full bg-[var(--brand)] flex items-center justify-center p-0.5 shadow-sm">
                     {avatarUrl && !imgError ? (
                       <img
                         src={avatarUrl}

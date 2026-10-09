@@ -3589,3 +3589,74 @@ html[data-theme="dark"] .id-add { color: #A9BBE6; }
 /* شرائح الأسبوع/الشهر/السنة داخل البطاقة الملوّنة: أبيض شفاف حتى تُقرأ على الكحلي */
 html:root .kpi-card.is-featured .kpi-chips > span { background: rgba(255, 255, 255, .14) !important; color: #fff !important; border-color: rgba(255, 255, 255, .22) !important; }
 html:root .kpi-card.is-featured .kpi-chips > span.is-on { background: #fff !important; color: var(--brand) !important; }
+
+/* ============================================================
+   الشريط العلوي العائم (مستوحى من التصاميم المرفقة)
+   منفصل عن الحواف · زوايا مدورة · زجاجي · أزرار دائرية · الحساب كحبة واحدة
+   ============================================================ */
+html:root #topbar {
+  width: calc(100% - 28px); max-width: none; align-self: center;
+  margin: 10px 14px 4px;
+  border: 1px solid var(--line-soft);
+  border-radius: 22px;
+  background: color-mix(in srgb, var(--surface) 86%, transparent);
+  -webkit-backdrop-filter: blur(20px) saturate(170%);
+  backdrop-filter: blur(20px) saturate(170%);
+  box-shadow: 0 10px 30px -18px rgba(15, 23, 42, .28), 0 1px 0 rgba(255, 255, 255, .6) inset;
+  padding: 0 10px 0 12px;
+  gap: 8px;
+}
+html[data-theme="dark"] #topbar { box-shadow: 0 12px 30px -18px rgba(0, 0, 0, .7), 0 1px 0 rgba(255, 255, 255, .04) inset; }
+
+/* أزرار دائرية ناعمة */
+html:root #topbar .icon-btn {
+  width: 42px; height: 42px; min-width: 42px; min-height: 42px;
+  border-radius: 999px;
+  background: var(--surface-2);
+  border: 1px solid var(--line-soft);
+  color: var(--text-2);
+  display: inline-grid; place-items: center;
+  transition: background-color .18s ease, color .18s ease, transform .12s ease, border-color .18s ease;
+}
+@media (hover: hover) { html:root #topbar .icon-btn:hover { background: var(--accent-soft); color: var(--accent); border-color: color-mix(in srgb, var(--accent) 30%, var(--line-soft)); } }
+html:root #topbar .icon-btn:active { transform: scale(.94); }
+
+/* عدّاد الإشعارات: أصغر ومحاط بحلقة بلون الشريط حتى ينفصل عن الزر */
+html:root #topbar .tb-badge { top: -3px !important; right: -3px !important; min-width: 18px !important; height: 18px !important; font-size: 10px !important; box-shadow: 0 0 0 2.5px var(--surface); }
+
+/* البحث: حبة دائرية */
+html:root #topbar .search-trigger { border-radius: 999px; background: var(--surface-2); border: 1px solid var(--line-soft); }
+
+/* الحساب: صورة + الاسم والدور + سهم، داخل حبة واحدة */
+html:root #topbar .tb-user {
+  border: 1px solid var(--line-soft) !important;
+  border-radius: 999px !important;
+  padding: 4px 10px 4px 4px !important;
+  background: var(--surface);
+  margin-inline-start: 2px;
+}
+@media (hover: hover) { html:root #topbar .tb-user:hover { background: var(--surface-2) !important; } }
+
+/* الهاتف: الحبة تطفو تحت منطقة الساعة/النوتش بدل ما تلصق بها */
+@media (max-width: 768px) {
+  html:root #topbar {
+    margin: calc(env(safe-area-inset-top) + 8px) 10px 2px !important;
+    padding: 0 8px !important;
+    height: var(--topbar-h) !important; min-height: var(--topbar-h) !important; max-height: var(--topbar-h) !important;
+    gap: 4px !important;
+    border-radius: 20px;
+    width: calc(100% - 20px) !important;
+  }
+  html:root #topbar .icon-btn { width: 38px; height: 38px; min-width: 38px; min-height: 38px; }
+  /* «دليل الاستخدام» موجود في القائمة الجانبية — نوفّر مكانه على الهاتف */
+  html:root #topbar .help-top { display: none !important; }
+  html:root #topbar #page-title { font-size: 16px !important; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  html:root #topbar .tb-title { flex: 1 1 auto !important; flex-shrink: 1 !important; min-width: 0 !important; }
+  html:root #topbar .top-spacer { display: none; }
+  html:root #topbar .tb-user { padding: 3px !important; border: 1px solid var(--line-soft) !important; }
+}
+@media (prefers-reduced-motion: reduce) { html:root #topbar .icon-btn { transition: none; } }
+
+@media (max-width: 370px) {
+  html:root #topbar .icon-btn { width: 36px; height: 36px; min-width: 36px; min-height: 36px; }
+}
