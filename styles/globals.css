@@ -3571,3 +3571,21 @@ html:root .btn-go:hover:not(:disabled) {
   transform: none;
 }
 html:root .btn-go:active:not(:disabled) { background: color-mix(in srgb, var(--accent) 76%, #000) !important; }
+
+/* أزرار إضافة الهويات: أربعة أنواع بنفس الوزن (كان كل زر بلون مختلف) */
+.id-add-row { display: flex; flex-wrap: wrap; gap: 8px; }
+.id-add {
+  font: inherit; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;
+  min-height: 40px; padding: 0 14px; border-radius: 12px;
+  border: 1px solid color-mix(in srgb, var(--accent) 35%, var(--line-soft));
+  background: var(--surface); color: var(--accent); font-size: 12.5px; font-weight: 800;
+  transition: background-color .18s ease, border-color .18s ease, transform .12s ease;
+}
+.id-add:hover { background: var(--accent-soft); border-color: var(--accent); }
+.id-add:active { transform: scale(.97); }
+.id-add svg { width: 16px; height: 16px; }
+html[data-theme="dark"] .id-add { color: #A9BBE6; }
+
+/* شرائح الأسبوع/الشهر/السنة داخل البطاقة الملوّنة: أبيض شفاف حتى تُقرأ على الكحلي */
+html:root .kpi-card.is-featured .kpi-chips > span { background: rgba(255, 255, 255, .14) !important; color: #fff !important; border-color: rgba(255, 255, 255, .22) !important; }
+html:root .kpi-card.is-featured .kpi-chips > span.is-on { background: #fff !important; color: var(--brand) !important; }
