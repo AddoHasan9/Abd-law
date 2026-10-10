@@ -3679,26 +3679,80 @@ html[data-theme="dark"] .nav-item[aria-current="page"] { background: var(--accen
 .nav-head-btn .nav-toggle { margin-inline-start: auto; }
 
 
-/* الكمبيوتر: لوحة عائمة مدورة مثل الشريط العلوي */
-@media (min-width: 769px) {
-  html:root #sidebar {
-    margin: 10px 0 10px 10px; margin-inline-start: 10px; margin-inline-end: 0;
-    height: calc(100dvh - 20px); max-height: calc(100dvh - 20px);
-    top: 10px;
-    border: 1px solid var(--line-soft);
-    border-radius: 22px;
-    background: color-mix(in srgb, var(--surface) 86%, transparent);
-    box-shadow: 0 10px 30px -18px rgba(15, 23, 42, .28);
-  }
-  html[data-theme="dark"] #sidebar { box-shadow: 0 12px 30px -18px rgba(0, 0, 0, .7); }
-}
-
-/* الهاتف: الحافة الداخلية للقائمة المنزلقة مدورة */
-@media (max-width: 768px) {
-  html:root #sidebar {
-    border-start-end-radius: 24px;
-    border-end-end-radius: 24px;
-  }
-}
 /* رأس القائمة يكبر مع الاسم إذا التفّ لسطرين (بدل ارتفاع ثابت يقصّه) */
 html:root #sidebar .side-head { height: auto !important; min-height: 58px; padding-block: 10px !important; }
+
+/* ============================================================
+   أزرار أسفل النوافذ: شريط ثابت ملتصق بالحافة (كانت «طايفة» فوق الحقول)
+   السبب: منطقة التمرير لها مسافة سفلية، فيظهر المحتوى تحت الأزرار اللاصقة.
+   ============================================================ */
+html:root .modal :is(form, .modal-body, div):has(> .modal-foot) { padding-bottom: 0 !important; }
+html:root .modal .modal-foot {
+  position: sticky !important; bottom: 0 !important; z-index: 6 !important;
+  background: var(--surface-2) !important;
+  border-top: 1px solid var(--line-soft) !important;
+  box-shadow: 0 -12px 20px -16px rgba(15, 23, 42, .35);
+}
+html[data-theme="dark"] .modal .modal-foot { box-shadow: 0 -12px 20px -16px rgba(0, 0, 0, .8); }
+
+/* الشريط الجانبي: بطاقة المهل + «دليل الاستخدام» مثبتتان أسفل الشريط (بدل فراغ كبير تحتهما) */
+html:root #sidebar .side-nav > .side-deadline { margin-top: auto !important; }
+html:root #sidebar .side-nav:not(:has(> .side-deadline)) > .side-help { margin-top: auto !important; }
+
+
+/* ============================================================
+   الشريط الجانبي — «كعب الملف»: كحلي الشعار، ملتصق بيمين الصفحة، أنحف
+   الجرأة كلها هنا؛ الصفحات تبقى فاتحة وهادئة.
+   الألوان تُعاد تعريفها داخل الشريط فقط، فتتبعها كل العناصر تلقائياً.
+   ============================================================ */
+html:root { --sidebar-w: 232px; }
+html:root #sidebar {
+  --spine: #1E2B4A;
+  --text: #F2F4F9; --text-2: #C9D1E3; --text-3: #8E9AB8;
+  --surface: rgba(255, 255, 255, .06); --surface-2: rgba(255, 255, 255, .05); --surface-3: rgba(255, 255, 255, .09);
+  --line: rgba(255, 255, 255, .14); --line-soft: rgba(255, 255, 255, .09); --border: rgba(255, 255, 255, .09); --border-soft: rgba(255, 255, 255, .09);
+  --accent: #E3C48F; --accent-soft: rgba(255, 255, 255, .08);
+  background: var(--spine) !important;
+  -webkit-backdrop-filter: none !important; backdrop-filter: none !important;
+  border: 0 !important; border-radius: 0 !important; margin: 0 !important;
+  box-shadow: none !important;
+  color: var(--text);
+}
+html[data-theme="dark"] #sidebar { --spine: #121A2C; border-inline-end: 1px solid rgba(255, 255, 255, .06) !important; }
+
+/* الرأس: الشعار + الاسم على سطر واحد مختصر */
+html:root #sidebar .side-head { border-bottom: 1px solid var(--line-soft) !important; background: transparent !important; }
+html:root #sidebar .side-head * { color: inherit; }
+
+/* العناصر: أصغر وأكثف (40px)، والفعّال بخط ذهبي على حافته */
+html:root #sidebar .nav-item { min-height: 40px; border-radius: 10px; color: var(--text-2) !important; border: 0 !important; box-shadow: none !important; position: relative; }
+html:root #sidebar .nav-item .icon { color: var(--text-3) !important; }
+@media (hover: hover) { html:root #sidebar .nav-item:hover { background: rgba(255, 255, 255, .06) !important; color: var(--text) !important; } }
+html:root #sidebar .nav-item[aria-current="page"] {
+  background: rgba(255, 255, 255, .10) !important; color: #fff !important; font-weight: 800;
+}
+html:root #sidebar .nav-item[aria-current="page"] .icon { color: var(--gold, #B08D57) !important; }
+html:root #sidebar .nav-item[aria-current="page"]::after {
+  content: ''; position: absolute; inset-inline-start: 0; top: 9px; bottom: 9px; width: 3px; border-radius: 3px;
+  background: var(--gold, #B08D57);
+}
+html:root #sidebar .nav-item.sub[aria-current="page"] { background: transparent !important; }
+html:root #sidebar .nav-item.sub[aria-current="page"]::after { display: none; }
+html:root #sidebar .nav-item.sub[aria-current="page"] .nav-tree-dot { background: var(--gold, #B08D57) !important; box-shadow: 0 0 0 3px rgba(176, 141, 87, .25) !important; }
+html:root #sidebar .nav-item-head { color: var(--text) !important; font-weight: 800; }
+html:root #sidebar .nav-toggle { color: var(--text-3) !important; }
+html:root #sidebar .nav-sub::before { background: var(--line) !important; }
+html:root #sidebar .nav-tree-dot { background: var(--text-3) !important; }
+html:root #sidebar .nav-num { color: var(--text-3); }
+
+/* بطاقة المهل على الكحلي: سطح شفاف وخط أوضح */
+html:root #sidebar .side-deadline > * { background-color: rgba(255, 255, 255, .06) !important; border-color: rgba(255, 255, 255, .12) !important; }
+
+/* الهاتف: نفس الكعب الكحلي، ملتصق بالحافة اليمنى بلا زوايا */
+@media (max-width: 768px) {
+  html:root #sidebar { width: 272px !important; max-width: 82vw !important; border-radius: 0 !important; }
+  html[data-theme="dark"] #sidebar { background: var(--spine) !important; }
+}
+/* اسم المكتب والوصف: سطر واحد لكل منهما مع اختصار (الشريط صار أنحف) */
+html:root #sidebar .side-head .min-w-0 > * { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+html:root #sidebar .side-name { font-size: 12.5px !important; }
