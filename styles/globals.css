@@ -81,8 +81,8 @@
     --gold-glow: rgba(212, 175, 55, 0.25);
     --gold-border: rgba(212, 175, 55, 0.35);
 
-    --font-ui: var(--font-cairo), 'Cairo', -apple-system, 'Segoe UI', system-ui, sans-serif;
-    --font-display: var(--font-cairo), 'Cairo', var(--font-ui);
+    --font-ui: var(--font-plex), 'IBM Plex Sans Arabic', -apple-system, 'Segoe UI', system-ui, sans-serif;
+    --font-display: var(--font-plex), 'IBM Plex Sans Arabic', var(--font-ui);
 
     /* ---- Default Tokens (Apple Pure Frosted Slate — Image 5 Spec) ---- */
     --bg-app: #EEF2F6;
@@ -3748,3 +3748,69 @@ html:root #sidebar .side-name { font-size: 12.5px !important; }
 
 /* زر القائمة (☰) للهاتف فقط — قاعدة الأزرار الدائرية كانت تُظهره على الحاسبة */
 @media (min-width: 1025px) { html:root #topbar #menu-btn { display: none !important; } }
+
+/* ============================================================
+   الحاسبة: طي الشريط الجانبي إلى أيقونات فقط (زر في رأس الشريط)
+   ============================================================ */
+.side-collapse { display: none; }
+@media (min-width: 1025px) {
+  .side-collapse {
+    display: grid; place-items: center; flex: none;
+    width: 30px; height: 30px; border-radius: 999px; margin-inline-start: auto;
+    border: 1px solid var(--line-soft); background: var(--surface); color: var(--text-3); cursor: pointer;
+    transition: background-color .18s ease, color .18s ease;
+  }
+  .side-collapse:hover { background: var(--accent-soft); color: var(--accent); }
+  .side-collapse .icon { width: 16px; height: 16px; transform: rotate(0deg); transition: transform .2s ease; }
+
+  html:root #sidebar { transition: width .22s ease, min-width .22s ease, max-width .22s ease; }
+  html:root.side-collapsed { --sidebar-w: 72px; }
+  html.side-collapsed #sidebar .side-head { flex-direction: column; gap: 8px; padding-inline: 0 !important; justify-content: center; }
+  html.side-collapsed #sidebar .side-head > .min-w-0 { display: none; }
+  html.side-collapsed #sidebar .side-collapse { margin: 0; }
+  html.side-collapsed #sidebar .side-collapse .icon { transform: rotate(180deg); }
+  html.side-collapsed #sidebar .nav-item { justify-content: center; padding-inline: 0 !important; }
+  html.side-collapsed #sidebar .nav-item > .truncate,
+  html.side-collapsed #sidebar .nav-item > .nav-num,
+  html.side-collapsed #sidebar .nav-item .nav-toggle,
+  html.side-collapsed #sidebar .nav-sub,
+  html.side-collapsed #sidebar .side-deadline { display: none !important; }
+  html.side-collapsed #sidebar .nav-item-head { margin-top: 6px; }
+  html.side-collapsed #sidebar .nav-badge { position: absolute; top: 2px; inset-inline-end: 8px; }
+  html.side-collapsed #sidebar .side-help > :not(.icon):not(svg) { display: none; }
+}
+
+/* ============================================================
+   الهاتف: شريط سفلي عائم بأهم 4 أقسام + «القائمة»
+   ============================================================ */
+.tabbar { display: none; }
+@media (max-width: 768px) {
+  .tabbar {
+    position: fixed; z-index: 60;
+    inset-inline: 10px; bottom: calc(env(safe-area-inset-bottom) + 10px);
+    display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 2px;
+    padding: 6px; border-radius: 22px;
+    background: color-mix(in srgb, var(--surface) 88%, transparent);
+    -webkit-backdrop-filter: blur(20px) saturate(170%); backdrop-filter: blur(20px) saturate(170%);
+    border: 1px solid var(--line-soft);
+    box-shadow: 0 12px 30px -14px rgba(15, 23, 42, .35);
+  }
+  html[data-theme="dark"] .tabbar { box-shadow: 0 12px 30px -14px rgba(0, 0, 0, .8); }
+  .tabbar-item {
+    font: inherit; border: 0; background: none; cursor: pointer; text-decoration: none;
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px;
+    min-height: 52px; border-radius: 16px;
+    color: var(--text-3); font-size: 11px; font-weight: 600;
+    transition: background-color .18s ease, color .18s ease;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .tabbar-item .icon { width: 21px; height: 21px; }
+  .tabbar-item.is-on { background: var(--accent-soft); color: var(--accent); font-weight: 800; }
+  html[data-theme="dark"] .tabbar-item.is-on { color: #A9BBE6; }
+  .tabbar-item:active { transform: scale(.96); }
+  /* مساحة أسفل المحتوى حتى لا يغطيه الشريط */
+  html:root #view-root { padding-bottom: calc(env(safe-area-inset-bottom) + 86px) !important; }
+  /* القائمة المنزلقة مفتوحة: الشريط السفلي يختفي */
+  body.side-open .tabbar { opacity: 0; pointer-events: none; }
+}
+@media (prefers-reduced-motion: reduce) { html:root #sidebar, .side-collapse .icon { transition: none; } }

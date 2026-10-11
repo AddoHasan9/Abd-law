@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from 'next'
-import { Cairo } from 'next/font/google'
+import { IBM_Plex_Sans_Arabic } from 'next/font/google'
+import { MATERIAL_ICONS_HREF } from '@/lib/icon-names'
 import { Toaster } from '@/components/ui/Toaster'
 import { ConfirmHost } from '@/components/ui/ConfirmDialog'
 import { ModalManager } from '@/components/ui/ModalManager'
@@ -8,10 +9,11 @@ import { BoosthisScript } from '@/components/BoosthisScript'
 import { QueryProvider } from '@/components/providers/QueryProvider'
 import '@/styles/globals.css'
 
-const cairo = Cairo({
-  subsets: ['arabic'],
-  weight: ['400', '500', '600', '700', '800', '900'],
-  variable: '--font-cairo',
+// IBM Plex Sans Arabic: أوضح للأرقام والنص العربي في الجداول (أوزانه حتى 700؛ الأثقل يُعرض 700)
+const plex = IBM_Plex_Sans_Arabic({
+  subsets: ['arabic', 'latin'],
+  weight: ['400', '500', '600', '700'],
+  variable: '--font-plex',
   display: 'swap',
 })
 
@@ -30,7 +32,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="ar" dir="rtl" data-theme="light" data-scroll-behavior="smooth" className={cairo.variable} suppressHydrationWarning>
+    <html lang="ar" dir="rtl" data-theme="light" data-scroll-behavior="smooth" className={plex.variable} suppressHydrationWarning>
       <head>
         <meta id="theme-color-meta" name="theme-color" content="#EEF2F6" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -41,13 +43,14 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link
           rel="stylesheet"
-          href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap"
+          href={MATERIAL_ICONS_HREF}
         />
 
         {/* Theme script to prevent flicker, set theme-color for iOS status bar, and initialize theme */}
         <script
           dangerouslySetInnerHTML={{
             __html: `try {
+              if (localStorage.getItem('side-collapsed') === '1') document.documentElement.classList.add('side-collapsed');
               var t = localStorage.getItem('theme') || 'light';
               document.documentElement.dataset.theme = t;
               if (t === 'dark') {

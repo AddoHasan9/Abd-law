@@ -10,6 +10,36 @@ import type { CompanyWithWorkflow, Company, CompanyManager, CompanyShareholder, 
 import { sanitizeFormationWorkflowSteps } from '@/lib/constants'
 
 /** كل الشركات مع مخططاتها، مرتّبة بالأحدث */
+/**
+ * نسخة خفيفة للشريط الجانبي: الحقول اللازمة لـ penaltyState ومحرك مهل الحسابات الختامية فقط.
+ * كان الشريط يجلب كل الشركات مع المدراء والمساهمين وسير العمل في كل تحميل.
+ * نفس قواعد listCompanies: توحيد حالة «المؤسسة» وإزالة التكرار بالاسم.
+ */
+export type CompanyLite = Pick<Company, 'id' | 'name' | 'kind' | 'status' | 'deposit_released' | 'cert_date' | 'created_at'> & Partial<Company>
+export async function listCompaniesLite(): Promise<CompanyLite[]> {
+  const accessDenied = await requirePermission('companies', 'view')
+  if (accessDenied) return []
+  try {
+    const supabase = await createClient()
+    const { data } = await supabase
+      .from('companies')
+      .select('id, name, kind, status, deposit_released, deposit_released_at, cert_date, created_at, establishment_date, financial_statements_enabled, fs_first_method, last_completed_fs_year')
+      .order('created_at', { ascending: false })
+    const byName = new Map<string, CompanyLite>()
+    for (const c of (data || []) as CompanyLite[]) {
+      const released = Boolean(c.deposit_released) || ['established', 'registered', 'active'].includes(String(c.status))
+      const row = { ...c, deposit_released: released, status: (released ? 'established' : (c.status || 'forming')) as CompanyLite['status'] }
+      const key = row.name?.trim().toLowerCase() || row.id
+      const existing = byName.get(key)
+      if (!existing || (row.status === 'established' && existing.status !== 'established')) byName.set(key, row)
+    }
+    return Array.from(byName.values())
+  } catch (e) {
+    console.error('listCompaniesLite:', e)
+    return []
+  }
+}
+
 export async function listCompanies(): Promise<CompanyWithWorkflow[]> {
   const accessDenied = await requirePermission('companies', 'view')
   if (accessDenied) return []

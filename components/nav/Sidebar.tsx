@@ -20,10 +20,13 @@ interface Props {
   deadline?: DeadlineItem | null
   deadlines?: DeadlineItem[]
   onNavigate?: () => void
+  /** الحاسبة: طي الشريط إلى أيقونات فقط */
+  collapsed?: boolean
+  onToggleCollapse?: () => void
 }
 
 export default function Sidebar({
-  profile, officeName, txCounts, badges, deadline, deadlines = [], onNavigate,
+  profile, officeName, txCounts, badges, deadline, deadlines = [], onNavigate, collapsed = false, onToggleCollapse,
 }: Props) {
   const pathname = usePathname()
   const params = useSearchParams()
@@ -114,6 +117,7 @@ export default function Sidebar({
         onClick={onNavigate}
         className={`nav-item${sub ? ' sub' : ' hover:-translate-x-0.5'} transition duration-150`}
         aria-current={active ? 'page' : undefined}
+        title={leaf.label}
       >
         {sub && (
           <span className="nav-tree-node">
@@ -156,6 +160,7 @@ export default function Sidebar({
               href={g.href}
               onClick={onNavigate}
               className="nav-item nav-item-head transition duration-150 hover:-translate-x-0.5"
+              title={g.label}
               aria-current={
                 pathname === g.href && !typeParam ? 'page' : undefined
               }
@@ -178,6 +183,7 @@ export default function Sidebar({
           <button
             type="button"
             className="nav-item nav-item-head nav-head-btn transition duration-150 cursor-pointer"
+            title={g.label}
             onClick={() => toggle(g.key)}
             aria-expanded={!shut}
           >
@@ -218,6 +224,18 @@ export default function Sidebar({
             للمحاماة والاستشارات القانونية
           </div>
         </div>
+        {onToggleCollapse && (
+          <button
+            type="button"
+            className="side-collapse"
+            onClick={onToggleCollapse}
+            aria-label={collapsed ? 'توسيع القائمة' : 'طي القائمة'}
+            title={collapsed ? 'توسيع القائمة' : 'طي القائمة'}
+            aria-expanded={!collapsed}
+          >
+            <Icon name="chev" className="icon" />
+          </button>
+        )}
       </div>
 
       <nav className="side-nav" aria-label="أقسام التطبيق">

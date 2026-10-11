@@ -15,6 +15,7 @@ import QuickHelpGuide from '@/components/ui/QuickHelpGuide'
 import { NavigationProgressBar } from '@/components/ui/NavigationProgressBar'
 import type { DeadlineItem } from './DeadlineCard'
 import { FSAlertBanner } from './FSAlertBanner'
+import MobileTabBar from './MobileTabBar'
 import type { Profile } from '@/types/database'
 
 interface Props {
@@ -36,6 +37,22 @@ export default function AppShell({
   notifCount, title, subtitle, children,
 }: Props) {
   const [open, setOpen] = useState(false)
+  // الحاسبة: طي الشريط الجانبي إلى أيقونات (يُحفظ في المتصفح)
+  // null = لم يُقرأ الاختيار بعد ⇒ لا نلمس الصنف (يضعه سكربت الرأس قبل الرسم، فلا وميض)
+  const [collapsedPref, setCollapsed] = useState<boolean | null>(null)
+  const collapsed = collapsedPref === true
+  useEffect(() => {
+    try { setCollapsed(localStorage.getItem('side-collapsed') === '1') } catch { setCollapsed(false) }
+  }, [])
+  useEffect(() => {
+    if (collapsedPref === null) return
+    document.documentElement.classList.toggle('side-collapsed', collapsedPref)
+  }, [collapsedPref])
+  const toggleCollapsed = () => setCollapsed(v => {
+    const next = !v
+    try { localStorage.setItem('side-collapsed', next ? '1' : '0') } catch { /* تخزين غير متاح */ }
+    return next
+  })
   const clientProfile = profile
 
   // منع تمرير الخلفية عند فتح القائمة على الجوال
@@ -71,6 +88,8 @@ export default function AppShell({
             deadline={deadline}
             deadlines={deadlines}
             onNavigate={() => setOpen(false)}
+            collapsed={collapsed}
+            onToggleCollapse={toggleCollapsed}
           />
         </Suspense>
 
@@ -89,6 +108,7 @@ export default function AppShell({
           </main>
         </div>
 
+        <MobileTabBar onMenu={() => setOpen(v => !v)} />
         {/* Dynamic Page Help & Guidance Guide */}
         <QuickHelpGuide />
       </div>

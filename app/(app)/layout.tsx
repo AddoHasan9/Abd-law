@@ -11,7 +11,8 @@ import AppShell from '@/components/nav/AppShell'
 import { IconSprite } from '@/components/ui/Icon'
 import { getProfile, getSettings } from '@/lib/data/session'
 import { countsByType } from '@/lib/data/transactions'
-import { listCompanies, submittedMap } from '@/lib/data/companies'
+import { listCompaniesLite, submittedMap } from '@/lib/data/companies'
+import type { Company } from '@/types/database'
 import { penaltyState, DEFAULT_PENALTY } from '@/lib/constants'
 import { getActiveExpiryAlerts } from '@/lib/notification-engine'
 import { computeFSDeadlines, loadFSRows } from '@/lib/financial-statements/deadlines'
@@ -31,7 +32,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
     Promise.resolve(verifiedProfile),
     getSettings(),
     countsByType().catch(() => ({})),
-    listCompanies().catch(() => []),
+    listCompaniesLite().catch(() => []),
     submittedMap().catch(() => ({})),
     getActiveExpiryAlerts().catch(() => []),
     loadFSRows().catch(() => []),
@@ -90,7 +91,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   })
 
   // 3. مهل الحسابات الختامية — من المحرك الموحّد والسجلات الفعلية
-  computeFSDeadlines(companies, fsRows).forEach(d => {
+  computeFSDeadlines(companies as Company[], fsRows).forEach(d => {
     allDeadlines.push({
       id: d.id,
       companyId: d.companyId,
