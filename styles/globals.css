@@ -3745,3 +3745,6 @@ html:root #sidebar .nav-item.sub[aria-current="page"] .nav-tree-dot { background
 /* اسم المكتب والوصف: سطر واحد لكل منهما مع اختصار (الشريط صار أنحف) */
 html:root #sidebar .side-head .min-w-0 > * { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 html:root #sidebar .side-name { font-size: 12.5px !important; }
+
+/* زر القائمة (☰) للهاتف فقط — قاعدة الأزرار الدائرية كانت تُظهره على الحاسبة */
+@media (min-width: 1025px) { html:root #topbar #menu-btn { display: none !important; } }
