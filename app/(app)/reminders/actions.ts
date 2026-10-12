@@ -4,7 +4,6 @@ import { revalidatePath } from 'next/cache'
 import { rethrowDbError } from '@/lib/data/db-guard'
 import { createAdminClient } from '@/lib/supabase/server'
 import type { ReminderItem, ReminderPriority } from '@/types/database'
-import { createNotificationAction } from '@/app/(app)/notifications/actions'
 import { getCurrentUserProfile } from '@/lib/auth/require-permission'
 
 
@@ -51,7 +50,7 @@ export async function getRemindersAction(filter?: 'active' | 'completed' | 'arch
     }))
 
     // Automatic trigger check for due reminders
-    await checkAndTriggerDueRemindersAction(items)
+    // تنبيهات التذكيرات صارت من الجدولة (/api/push/dispatch كل 5 دقائق، بتوقيت بغداد، لصاحب التذكير فقط)
 
     return { success: true, data: items }
   } catch (err) {
@@ -244,43 +243,3 @@ export async function deleteReminderAction(id: string) {
   }
 }
 
-/**
-  فحص آلي للتذكيرات المستحقة التي حان موعدها ولم يُرسل بها إشعار سابقاً
- */
-async function checkAndTriggerDueRemindersAction(reminders: ReminderItem[]) {
-  try {
-    const now = new Date()
-    const todayStr = now.toISOString().slice(0, 10)
-    const currentTimeStr = now.toTimeString().slice(0, 5) // HH:MM
-
-    const dueReminders = reminders.filter(r => {
-      if (r.is_completed || r.is_archived || r.alert_sent || !r.due_date) return false
-      if (r.due_date < todayStr) return true
-      if (r.due_date === todayStr) {
-        if (!r.due_time) return true
-        return r.due_time <= currentTimeStr
-      }
-      return false
-    })
-
-    if (dueReminders.length === 0) return
-
-    const supabase = createAdminClient()
-
-    for (const item of dueReminders) {
-      await createNotificationAction({
-        title: `تنبيه تذكير شخصي: ${item.title}`,
-        description: item.notes || (item.due_date ? `موعد الاستحقاق: ${item.due_date}` : 'تذكير غير محدد'),
-        type: 'reminder_alert',
-        related_company_id: item.company_id || undefined,
-        link_url: '/dashboard',
-      })
-
-      const { error } = await supabase.from('reminders').update({ alert_sent: true }).eq('id', item.id)
-      if (error) console.error('reminder alert_sent update failed:', error.message)
-    }
-  } catch (err) {
-    rethrowDbError(err)
-    console.error('checkAndTriggerDueRemindersAction error:', err)
-  }
-}

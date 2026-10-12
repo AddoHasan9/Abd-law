@@ -8,7 +8,8 @@ import { createServerClient, type CookieOptions } from '@supabase/ssr'
 import { isUserRole } from '@/lib/permissions'
 import { NextResponse, type NextRequest } from 'next/server'
 
-const PUBLIC_PATHS = ['/login', '/auth', '/reset-password']
+// /api/push/dispatch محمي بسرّ خاص (تستدعيه الجدولة بلا جلسة) · /sw.js عامل الإشعارات
+const PUBLIC_PATHS = ['/login', '/auth', '/reset-password', '/api/push/dispatch', '/sw.js']
 
 export async function middleware(request: NextRequest) {
   const path = request.nextUrl.pathname
