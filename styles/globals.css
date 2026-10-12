@@ -3814,3 +3814,23 @@ html:root #sidebar .side-name { font-size: 12.5px !important; }
   body.side-open .tabbar { opacity: 0; pointer-events: none; }
 }
 @media (prefers-reduced-motion: reduce) { html:root #sidebar, .side-collapse .icon { transition: none; } }
+
+/* ============================================================
+   شاشة الدخول على الهاتف/الآيباد: بلا زجاج مغبّش ولا دوائر ضبابية ولا حركة دخول
+   السبب: زجاج blur(40px) فوق دوائر blur(120px) بحجم يصل 700px، مع حركة ظهور داخله،
+   يجبر Safari على إعادة رسم الضباب كل إطار ⇒ الشاشة «تجمد» ولا تستجيب للكتابة ثوانٍ.
+   الحاسبة تبقى كما هي.
+   ============================================================ */
+@media (max-width: 1024px), (hover: none), (prefers-reduced-motion: reduce) {
+  .login-orb { display: none !important; }
+  .login-shell {
+    -webkit-backdrop-filter: none !important; backdrop-filter: none !important;
+    background: #FFFFFF !important;
+    transition: none !important;
+  }
+  html[data-theme="dark"] .login-shell, .dark .login-shell { background: #121722 !important; }
+  .login-shell .fade-stagger > * { animation: none !important; }
+  /* بقية الزجاج والنبض داخل الصفحة (زر المظهر، شرائط النموذج) */
+  .login-page [class*="backdrop-blur"] { -webkit-backdrop-filter: none !important; backdrop-filter: none !important; }
+  .login-page .animate-pulse { animation: none !important; }
+}

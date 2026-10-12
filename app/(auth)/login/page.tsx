@@ -8,12 +8,12 @@ export const metadata = { title: 'تسجيل الدخول — مكتب المح�
 
 export default function LoginPage() {
   return (
-    <main className="relative min-h-[100dvh] w-full flex items-center justify-center p-3 sm:p-6 md:p-10 bg-[#EEF2F6] dark:bg-[#0B0E14] text-slate-900 dark:text-white overflow-hidden transition-colors duration-500 selection:bg-blue-600 selection:text-white">
+    <main className="login-page relative min-h-[100dvh] w-full flex items-center justify-center p-3 sm:p-6 md:p-10 bg-[#EEF2F6] dark:bg-[#0B0E14] text-slate-900 dark:text-white overflow-hidden transition-colors duration-500 selection:bg-blue-600 selection:text-white">
       
       {/* Ambient Atmospheric Glow Orbs */}
-      <div className="pointer-events-none absolute -top-44 -right-44 w-[500px] h-[500px] bg-blue-500/10 dark:bg-blue-600/15 rounded-full blur-[120px]" />
-      <div className="pointer-events-none absolute -bottom-44 -left-44 w-[500px] h-[500px] bg-indigo-500/10 dark:bg-indigo-600/15 rounded-full blur-[120px]" />
-      <div className="pointer-events-none absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[700px] bg-amber-500/[0.03] dark:bg-amber-400/[0.04] rounded-full blur-[140px]" />
+      <div className="login-orb pointer-events-none absolute -top-44 -right-44 w-[500px] h-[500px] bg-blue-500/10 dark:bg-blue-600/15 rounded-full blur-[120px]" />
+      <div className="login-orb pointer-events-none absolute -bottom-44 -left-44 w-[500px] h-[500px] bg-indigo-500/10 dark:bg-indigo-600/15 rounded-full blur-[120px]" />
+      <div className="login-orb pointer-events-none absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[700px] bg-amber-500/[0.03] dark:bg-amber-400/[0.04] rounded-full blur-[140px]" />
 
       {/* Top Floating Theme Switcher Button with Safe Area Inset Support */}
       <div className="absolute top-[max(16px,env(safe-area-inset-top))] left-4 sm:left-6 z-50">
@@ -21,7 +21,7 @@ export default function LoginPage() {
       </div>
 
       {/* Main Container with Apple Frosted Glass & Precision Specular Border */}
-      <div className="relative z-10 w-full max-w-[1040px] rounded-[32px] sm:rounded-[40px] bg-white/80 dark:bg-[#121722]/85 backdrop-blur-[40px] backdrop-saturate-[190%] border border-white/90 dark:border-white/10 shadow-[0_20px_50px_rgba(15,23,42,0.08)] dark:shadow-[0_25px_60px_rgba(0,0,0,0.65)] overflow-hidden grid grid-cols-1 lg:grid-cols-12 ring-1 ring-black/5 dark:ring-white/5 transition-all duration-500">
+      <div className="login-shell relative z-10 w-full max-w-[1040px] rounded-[32px] sm:rounded-[40px] bg-white/80 dark:bg-[#121722]/85 backdrop-blur-[40px] backdrop-saturate-[190%] border border-white/90 dark:border-white/10 shadow-[0_20px_50px_rgba(15,23,42,0.08)] dark:shadow-[0_25px_60px_rgba(0,0,0,0.65)] overflow-hidden grid grid-cols-1 lg:grid-cols-12 ring-1 ring-black/5 dark:ring-white/5 transition-all duration-500">
         
         {/* ============ Brand Presentation Panel (Desktop) ============ */}
         <aside className="hidden lg:flex lg:col-span-5 bg-gradient-to-b from-white/60 to-white/30 dark:from-white/[0.03] dark:to-transparent p-8 md:p-10 flex-col justify-between border-l border-slate-200/80 dark:border-white/10 relative overflow-hidden text-right transition-colors duration-500">
