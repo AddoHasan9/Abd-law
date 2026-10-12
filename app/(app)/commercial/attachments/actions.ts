@@ -9,20 +9,29 @@ import { revalidatePath } from 'next/cache'
 import { createAdminClient } from '@/lib/supabase/server'
 import { getCurrentUserProfile, requirePermission } from '@/lib/auth/require-permission'
 
-export type AttachmentEntity = 'company_id' | 'tax_assessment'
+export type AttachmentEntity = 'company_id' | 'tax_assessment' | 'company_certificate' | 'deposit_letter' | 'company_contract'
+
+const ENTITIES: readonly AttachmentEntity[] = ['company_id', 'tax_assessment', 'company_certificate', 'deposit_letter', 'company_contract']
+
+/** الصفحات التي تعرض كل نوع (لتحديثها بعد الرفع أو الحذف) */
+function pathsFor(entity: AttachmentEntity): string[] {
+  if (entity === 'company_id') return ['/commercial/ids']
+  if (entity === 'tax_assessment') return ['/commercial/tax-assessment']
+  return ['/commercial/companies', '/commercial/deposits', '/commercial/companies-registry']
+}
 
 const MAX_BYTES = 5 * 1024 * 1024
 const DATA_URL = /^data:(image\/(?:jpeg|png|webp)|application\/pdf);base64,([A-Za-z0-9+/]+=*)$/
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 
-/** صلاحية كل نوع: الهويات ← قسم الهويات، التحاسب ← الشركات */
+/** صلاحية كل نوع: الهويات ← قسم الهويات، التحاسب ومرفقات الشركة (الشهادة، الوديعة، العقد) ← الشركات */
 async function guard(entity: AttachmentEntity, mode: 'view' | 'write') {
   if (entity === 'company_id') return requirePermission('government_ids', mode === 'view' ? 'view' : 'create')
   return requirePermission('companies', mode === 'view' ? 'view' : 'edit')
 }
 
 function validEntity(entity: string): entity is AttachmentEntity {
-  return entity === 'company_id' || entity === 'tax_assessment'
+  return (ENTITIES as readonly string[]).includes(entity)
 }
 
 export async function uploadAttachmentAction(entity: AttachmentEntity, entityId: string, fileName: string, dataUrl: string) {
@@ -53,7 +62,7 @@ export async function uploadAttachmentAction(entity: AttachmentEntity, entityId:
     console.error('uploadAttachmentAction:', error.message)
     return { success: false as const, error: 'تعذّر حفظ المرفق. حاول مجدداً' }
   }
-  revalidatePath(entity === 'company_id' ? '/commercial/ids' : '/commercial/tax-assessment')
+  pathsFor(entity).forEach(p => revalidatePath(p))
   return { success: true as const }
 }
 
@@ -91,6 +100,6 @@ export async function deleteAttachmentAction(entity: AttachmentEntity, entityId:
     .eq('entity_type', entity)
     .eq('entity_id', entityId)
   if (error) return { success: false as const, error: 'تعذّر حذف المرفق' }
-  revalidatePath(entity === 'company_id' ? '/commercial/ids' : '/commercial/tax-assessment')
+  pathsFor(entity).forEach(p => revalidatePath(p))
   return { success: true as const }
 }

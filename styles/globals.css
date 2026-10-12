@@ -81,8 +81,8 @@
     --gold-glow: rgba(212, 175, 55, 0.25);
     --gold-border: rgba(212, 175, 55, 0.35);
 
-    --font-ui: var(--font-cairo), 'Cairo', -apple-system, 'Segoe UI', system-ui, sans-serif;
-    --font-display: var(--font-cairo), 'Cairo', var(--font-ui);
+    --font-ui: var(--font-plex), 'IBM Plex Sans Arabic', -apple-system, 'Segoe UI', system-ui, sans-serif;
+    --font-display: var(--font-plex), 'IBM Plex Sans Arabic', var(--font-ui);
 
     /* ---- Default Tokens (Apple Pure Frosted Slate — Image 5 Spec) ---- */
     --bg-app: #EEF2F6;
@@ -3281,7 +3281,7 @@ html[data-theme="dark"] .page-head.tone-violet { --tone: #a78bfa; } html[data-th
 @media (pointer: coarse) { .id-icon-btn { width: 38px; height: 38px; } }
 
 /* «دليل الاستخدام» في الشريط الجانبي (بدل الزر العائم) */
-.side-help { width: 100%; border: 0; background: none; font: inherit; cursor: pointer; margin-top: 6px; }
+.side-help { width: 100%; border: 0; background: none; font-family: inherit; cursor: pointer; margin-top: 6px; }
 /* اختصارات لوحة المفاتيح لا معنى لها على اللمس */
 @media (pointer: coarse) { .kbd { display: none !important; } }
 /* شرائح الأسبوع/الشهر/السنة: مسافة ثابتة بين الكلمة والرقم */
@@ -3589,3 +3589,248 @@ html[data-theme="dark"] .id-add { color: #A9BBE6; }
 /* شرائح الأسبوع/الشهر/السنة داخل البطاقة الملوّنة: أبيض شفاف حتى تُقرأ على الكحلي */
 html:root .kpi-card.is-featured .kpi-chips > span { background: rgba(255, 255, 255, .14) !important; color: #fff !important; border-color: rgba(255, 255, 255, .22) !important; }
 html:root .kpi-card.is-featured .kpi-chips > span.is-on { background: #fff !important; color: var(--brand) !important; }
+
+/* ============================================================
+   الشريط العلوي العائم (مستوحى من التصاميم المرفقة)
+   منفصل عن الحواف · زوايا مدورة · زجاجي · أزرار دائرية · الحساب كحبة واحدة
+   ============================================================ */
+html:root #topbar {
+  width: calc(100% - 28px); max-width: none; align-self: center;
+  margin: 10px 14px 4px;
+  border: 1px solid var(--line-soft);
+  border-radius: 22px;
+  background: color-mix(in srgb, var(--surface) 86%, transparent);
+  -webkit-backdrop-filter: blur(20px) saturate(170%);
+  backdrop-filter: blur(20px) saturate(170%);
+  box-shadow: 0 10px 30px -18px rgba(15, 23, 42, .28), 0 1px 0 rgba(255, 255, 255, .6) inset;
+  padding: 0 10px 0 12px;
+  gap: 8px;
+}
+html[data-theme="dark"] #topbar { box-shadow: 0 12px 30px -18px rgba(0, 0, 0, .7), 0 1px 0 rgba(255, 255, 255, .04) inset; }
+
+/* أزرار دائرية ناعمة */
+html:root #topbar .icon-btn {
+  width: 42px; height: 42px; min-width: 42px; min-height: 42px;
+  border-radius: 999px;
+  background: var(--surface-2);
+  border: 1px solid var(--line-soft);
+  color: var(--text-2);
+  display: inline-grid; place-items: center;
+  transition: background-color .18s ease, color .18s ease, transform .12s ease, border-color .18s ease;
+}
+@media (hover: hover) { html:root #topbar .icon-btn:hover { background: var(--accent-soft); color: var(--accent); border-color: color-mix(in srgb, var(--accent) 30%, var(--line-soft)); } }
+html:root #topbar .icon-btn:active { transform: scale(.94); }
+
+/* عدّاد الإشعارات: أصغر ومحاط بحلقة بلون الشريط حتى ينفصل عن الزر */
+html:root #topbar .tb-badge { top: -3px !important; right: -3px !important; min-width: 18px !important; height: 18px !important; font-size: 10px !important; box-shadow: 0 0 0 2.5px var(--surface); }
+
+/* البحث: حبة دائرية */
+html:root #topbar .search-trigger { border-radius: 999px; background: var(--surface-2); border: 1px solid var(--line-soft); }
+
+/* الحساب: صورة + الاسم والدور + سهم، داخل حبة واحدة */
+html:root #topbar .tb-user {
+  border: 1px solid var(--line-soft) !important;
+  border-radius: 999px !important;
+  padding: 4px 10px 4px 4px !important;
+  background: var(--surface);
+  margin-inline-start: 2px;
+}
+@media (hover: hover) { html:root #topbar .tb-user:hover { background: var(--surface-2) !important; } }
+
+/* الهاتف: الحبة تطفو تحت منطقة الساعة/النوتش بدل ما تلصق بها */
+@media (max-width: 768px) {
+  html:root #topbar {
+    margin: calc(env(safe-area-inset-top) + 8px) 10px 2px !important;
+    padding: 0 8px !important;
+    height: var(--topbar-h) !important; min-height: var(--topbar-h) !important; max-height: var(--topbar-h) !important;
+    gap: 4px !important;
+    border-radius: 20px;
+    width: calc(100% - 20px) !important;
+  }
+  html:root #topbar .icon-btn { width: 38px; height: 38px; min-width: 38px; min-height: 38px; }
+  /* «دليل الاستخدام» موجود في القائمة الجانبية — نوفّر مكانه على الهاتف */
+  html:root #topbar .help-top { display: none !important; }
+  html:root #topbar #page-title { font-size: 16px !important; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  html:root #topbar .tb-title { flex: 1 1 auto !important; flex-shrink: 1 !important; min-width: 0 !important; }
+  html:root #topbar .top-spacer { display: none; }
+  html:root #topbar .tb-user { padding: 3px !important; border: 1px solid var(--line-soft) !important; }
+}
+@media (prefers-reduced-motion: reduce) { html:root #topbar .icon-btn { transition: none; } }
+
+@media (max-width: 370px) {
+  html:root #topbar .icon-btn { width: 36px; height: 36px; min-width: 36px; min-height: 36px; }
+}
+
+
+/* ============================================================
+   الشريط الجانبي — متناسق مع الشريط العلوي العائم
+   ============================================================ */
+/* العنصر الفعّال: خلفية ناعمة بلون الهوية فقط (بلا إطار أو ظل؛ كان سماوياً في الليلي) */
+html:root .nav-item[aria-current="page"] {
+  background: var(--accent-soft) !important;
+  color: var(--accent) !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+}
+html[data-theme="dark"] .nav-item[aria-current="page"] { background: var(--accent-soft) !important; color: #A9BBE6 !important; border-color: transparent !important; box-shadow: none !important; }
+
+/* رأس مجموعة بلا صفحة («النظام»): نفس شكل «القسم التجاري» */
+.nav-head-btn { width: 100%; border: 0; background: none; font-family: inherit; text-align: right; }
+.nav-head-btn .nav-toggle { margin-inline-start: auto; }
+
+
+/* رأس القائمة يكبر مع الاسم إذا التفّ لسطرين (بدل ارتفاع ثابت يقصّه) */
+html:root #sidebar .side-head { height: auto !important; min-height: 58px; padding-block: 10px !important; }
+
+/* ============================================================
+   أزرار أسفل النوافذ: شريط ثابت ملتصق بالحافة (كانت «طايفة» فوق الحقول)
+   السبب: منطقة التمرير لها مسافة سفلية، فيظهر المحتوى تحت الأزرار اللاصقة.
+   ============================================================ */
+html:root .modal :is(form, .modal-body, div):has(> .modal-foot) { padding-bottom: 0 !important; }
+html:root .modal .modal-foot {
+  position: sticky !important; bottom: 0 !important; z-index: 6 !important;
+  background: var(--surface-2) !important;
+  border-top: 1px solid var(--line-soft) !important;
+  box-shadow: 0 -12px 20px -16px rgba(15, 23, 42, .35);
+}
+html[data-theme="dark"] .modal .modal-foot { box-shadow: 0 -12px 20px -16px rgba(0, 0, 0, .8); }
+
+/* الشريط الجانبي: بطاقة المهل + «دليل الاستخدام» مثبتتان أسفل الشريط (بدل فراغ كبير تحتهما) */
+html:root #sidebar .side-nav > .side-deadline { margin-top: auto !important; }
+html:root #sidebar .side-nav:not(:has(> .side-deadline)) > .side-help { margin-top: auto !important; }
+
+
+/* ============================================================
+   الشريط الجانبي — هادئ وفاتح (مستوحى من Taskk)
+   بلون خلفية الصفحة نفسها، ملتصق باليمين، العنصر الفعّال بطاقة بيضاء صغيرة
+   ============================================================ */
+html:root { --sidebar-w: 240px; }
+html:root #sidebar {
+  background: var(--bg, #EEF1F6) !important;
+  -webkit-backdrop-filter: none !important; backdrop-filter: none !important;
+  border: 0 !important; border-inline-end: 1px solid var(--line-soft) !important;
+  border-radius: 0 !important; margin: 0 !important; box-shadow: none !important;
+}
+
+/* الرأس: بلا خط فاصل، هادئ */
+html:root #sidebar .side-head { border-bottom: 0 !important; background: transparent !important; }
+
+/* العناصر: رمادية بأيقونات رفيعة؛ الفعّال بطاقة بيضاء بظل خفيف ونص داكن */
+html:root #sidebar .nav-item { min-height: 38px; border-radius: 10px; color: var(--text-2) !important; border: 1px solid transparent !important; box-shadow: none !important; font-weight: 500; }
+html:root #sidebar .nav-item .icon { color: var(--text-3) !important; stroke-width: 1.6; }
+@media (hover: hover) { html:root #sidebar .nav-item:hover { background: color-mix(in srgb, var(--surface) 60%, transparent) !important; color: var(--text) !important; } }
+html:root #sidebar .nav-item[aria-current="page"] {
+  background: var(--surface) !important; color: var(--text) !important; font-weight: 700;
+  border-color: var(--line-soft) !important;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, .06), 0 2px 8px -4px rgba(15, 23, 42, .12) !important;
+}
+html:root #sidebar .nav-item[aria-current="page"] .icon { color: var(--text) !important; }
+html[data-theme="dark"] #sidebar .nav-item[aria-current="page"] { box-shadow: 0 1px 0 rgba(255, 255, 255, .04) inset, 0 2px 10px -4px rgba(0, 0, 0, .6) !important; }
+
+/* رؤوس المجموعات: صغيرة ورمادية مثل «File / Apps» حتى لا تنافس العناصر */
+html:root #sidebar .nav-item-head { color: var(--text-3) !important; font-size: 12px !important; font-weight: 700 !important; min-height: 32px; margin-top: 8px; }
+html:root #sidebar .nav-item-head .icon { color: var(--text-3) !important; }
+html:root #sidebar .nav-item-head[aria-current="page"] { background: transparent !important; border-color: transparent !important; box-shadow: none !important; color: var(--text) !important; }
+html:root #sidebar .nav-toggle { color: var(--text-3) !important; }
+
+/* الفرعية: بلا خط شجرة ثقيل، نقطة صغيرة فقط */
+html:root #sidebar .nav-sub::before { background: var(--line-soft) !important; }
+html:root #sidebar .nav-tree-dot { background: var(--line) !important; }
+html:root #sidebar .nav-item.sub[aria-current="page"] .nav-tree-dot { background: var(--text) !important; box-shadow: none !important; }
+
+@media (max-width: 768px) {
+  html:root #sidebar { width: 272px !important; max-width: 82vw !important; border-radius: 0 !important; background: var(--bg, #EEF1F6) !important; }
+}
+
+/* اسم المكتب والوصف: سطر واحد لكل منهما مع اختصار (الشريط صار أنحف) */
+html:root #sidebar .side-head .min-w-0 > * { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+html:root #sidebar .side-name { font-size: 12.5px !important; }
+
+/* زر القائمة (☰) للهاتف فقط — قاعدة الأزرار الدائرية كانت تُظهره على الحاسبة */
+@media (min-width: 1025px) { html:root #topbar #menu-btn { display: none !important; } }
+
+/* ============================================================
+   الحاسبة: طي الشريط الجانبي إلى أيقونات فقط (زر في رأس الشريط)
+   ============================================================ */
+.side-collapse { display: none; }
+@media (min-width: 1025px) {
+  .side-collapse {
+    display: grid; place-items: center; flex: none;
+    width: 30px; height: 30px; border-radius: 999px; margin-inline-start: auto;
+    border: 1px solid var(--line-soft); background: var(--surface); color: var(--text-3); cursor: pointer;
+    transition: background-color .18s ease, color .18s ease;
+  }
+  .side-collapse:hover { background: var(--accent-soft); color: var(--accent); }
+  .side-collapse .icon { width: 16px; height: 16px; transform: rotate(0deg); transition: transform .2s ease; }
+
+  html:root #sidebar { transition: width .22s ease, min-width .22s ease, max-width .22s ease; }
+  html:root.side-collapsed { --sidebar-w: 72px; }
+  html.side-collapsed #sidebar .side-head { flex-direction: column; gap: 8px; padding-inline: 0 !important; justify-content: center; }
+  html.side-collapsed #sidebar .side-head > .min-w-0 { display: none; }
+  html.side-collapsed #sidebar .side-collapse { margin: 0; }
+  html.side-collapsed #sidebar .side-collapse .icon { transform: rotate(180deg); }
+  html.side-collapsed #sidebar .nav-item { justify-content: center; padding-inline: 0 !important; }
+  html.side-collapsed #sidebar .nav-item > .truncate,
+  html.side-collapsed #sidebar .nav-item > .nav-num,
+  html.side-collapsed #sidebar .nav-item .nav-toggle,
+  html.side-collapsed #sidebar .nav-sub,
+  html.side-collapsed #sidebar .side-deadline { display: none !important; }
+  html.side-collapsed #sidebar .nav-item-head { margin-top: 6px; }
+  html.side-collapsed #sidebar .nav-badge { position: absolute; top: 2px; inset-inline-end: 8px; }
+  html.side-collapsed #sidebar .side-help > :not(.icon):not(svg) { display: none; }
+}
+
+/* ============================================================
+   الهاتف: شريط سفلي عائم بأهم 4 أقسام + «القائمة»
+   ============================================================ */
+.tabbar { display: none; }
+@media (max-width: 768px) {
+  .tabbar {
+    position: fixed; z-index: 60;
+    inset-inline: 10px; bottom: calc(env(safe-area-inset-bottom) + 10px);
+    display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 2px;
+    padding: 6px; border-radius: 22px;
+    background: color-mix(in srgb, var(--surface) 88%, transparent);
+    -webkit-backdrop-filter: blur(20px) saturate(170%); backdrop-filter: blur(20px) saturate(170%);
+    border: 1px solid var(--line-soft);
+    box-shadow: 0 12px 30px -14px rgba(15, 23, 42, .35);
+  }
+  html[data-theme="dark"] .tabbar { box-shadow: 0 12px 30px -14px rgba(0, 0, 0, .8); }
+  .tabbar-item {
+    font: inherit; border: 0; background: none; cursor: pointer; text-decoration: none;
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px;
+    min-height: 52px; border-radius: 16px;
+    color: var(--text-3); font-size: 11px; font-weight: 600;
+    transition: background-color .18s ease, color .18s ease;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .tabbar-item .icon { width: 21px; height: 21px; }
+  .tabbar-item.is-on { background: var(--accent-soft); color: var(--accent); font-weight: 800; }
+  html[data-theme="dark"] .tabbar-item.is-on { color: #A9BBE6; }
+  .tabbar-item:active { transform: scale(.96); }
+  /* مساحة أسفل المحتوى حتى لا يغطيه الشريط */
+  html:root #view-root { padding-bottom: calc(env(safe-area-inset-bottom) + 86px) !important; }
+  /* القائمة المنزلقة مفتوحة: الشريط السفلي يختفي */
+  body.side-open .tabbar { opacity: 0; pointer-events: none; }
+}
+@media (prefers-reduced-motion: reduce) { html:root #sidebar, .side-collapse .icon { transition: none; } }
+
+/* ============================================================
+   شاشة الدخول على الهاتف/الآيباد: بلا زجاج مغبّش ولا دوائر ضبابية ولا حركة دخول
+   السبب: زجاج blur(40px) فوق دوائر blur(120px) بحجم يصل 700px، مع حركة ظهور داخله،
+   يجبر Safari على إعادة رسم الضباب كل إطار ⇒ الشاشة «تجمد» ولا تستجيب للكتابة ثوانٍ.
+   الحاسبة تبقى كما هي.
+   ============================================================ */
+@media (max-width: 1024px), (hover: none), (prefers-reduced-motion: reduce) {
+  .login-orb { display: none !important; }
+  .login-shell {
+    -webkit-backdrop-filter: none !important; backdrop-filter: none !important;
+    background: #FFFFFF !important;
+    transition: none !important;
+  }
+  html[data-theme="dark"] .login-shell, .dark .login-shell { background: #121722 !important; }
+  .login-shell .fade-stagger > * { animation: none !important; }
+  /* بقية الزجاج والنبض داخل الصفحة (زر المظهر، شرائط النموذج) */
+  .login-page [class*="backdrop-blur"] { -webkit-backdrop-filter: none !important; backdrop-filter: none !important; }
+  .login-page .animate-pulse { animation: none !important; }
+}

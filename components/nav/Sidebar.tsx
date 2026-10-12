@@ -20,10 +20,13 @@ interface Props {
   deadline?: DeadlineItem | null
   deadlines?: DeadlineItem[]
   onNavigate?: () => void
+  /** الحاسبة: طي الشريط إلى أيقونات فقط */
+  collapsed?: boolean
+  onToggleCollapse?: () => void
 }
 
 export default function Sidebar({
-  profile, officeName, txCounts, badges, deadline, deadlines = [], onNavigate,
+  profile, officeName, txCounts, badges, deadline, deadlines = [], onNavigate, collapsed = false, onToggleCollapse,
 }: Props) {
   const pathname = usePathname()
   const params = useSearchParams()
@@ -114,6 +117,7 @@ export default function Sidebar({
         onClick={onNavigate}
         className={`nav-item${sub ? ' sub' : ' hover:-translate-x-0.5'} transition duration-150`}
         aria-current={active ? 'page' : undefined}
+        title={leaf.label}
       >
         {sub && (
           <span className="nav-tree-node">
@@ -156,6 +160,7 @@ export default function Sidebar({
               href={g.href}
               onClick={onNavigate}
               className="nav-item nav-item-head transition duration-150 hover:-translate-x-0.5"
+              title={g.label}
               aria-current={
                 pathname === g.href && !typeParam ? 'page' : undefined
               }
@@ -174,14 +179,19 @@ export default function Sidebar({
             </button>
           </div>
         ) : (
+          // نفس شكل رأس «القسم التجاري» (أيقونة + اسم + سهم طي) — كان عنواناً رمادياً صغيراً بشكل مختلف
           <button
             type="button"
-            className="nav-group-head transition-colors duration-150 hover:text-[var(--text)] cursor-pointer"
+            className="nav-item nav-item-head nav-head-btn transition duration-150 cursor-pointer"
+            title={g.label}
             onClick={() => toggle(g.key)}
             aria-expanded={!shut}
           >
-            <span className="text-right flex-1">{g.label}</span>
-            <Icon name="chev" className={`icon chev transition-transform duration-200 ${shut ? 'rotate-90' : 'rotate-0'}`} />
+            {g.icon && <Icon name={g.icon} className="icon shrink-0" />}
+            <span className="truncate flex-1 text-right">{g.label}</span>
+            <span className="nav-toggle" aria-hidden>
+              <Icon name="chev" className={`icon chev transition-transform duration-200 ${shut ? 'rotate-90' : 'rotate-0'}`} />
+            </span>
           </button>
         )}
 
@@ -214,6 +224,18 @@ export default function Sidebar({
             للمحاماة والاستشارات القانونية
           </div>
         </div>
+        {onToggleCollapse && (
+          <button
+            type="button"
+            className="side-collapse"
+            onClick={onToggleCollapse}
+            aria-label={collapsed ? 'توسيع القائمة' : 'طي القائمة'}
+            title={collapsed ? 'توسيع القائمة' : 'طي القائمة'}
+            aria-expanded={!collapsed}
+          >
+            <Icon name="chev" className="icon" />
+          </button>
+        )}
       </div>
 
       <nav className="side-nav" aria-label="أقسام التطبيق">

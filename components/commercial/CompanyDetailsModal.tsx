@@ -19,6 +19,7 @@ import { useModalBodyLock } from '@/lib/hooks/useModalBodyLock'
 import { IRAQ_GOVERNORATES, WORKFLOW, formatNumberWithCommas, sanitizeFormationWorkflowSteps } from '@/lib/constants'
 import { usePermissions } from '@/lib/context/UserRoleContext'
 import { useDragScroll } from '@/lib/hooks/useDragScroll'
+import { AttachmentField } from '@/components/ui/AttachmentField'
 // نافذة كبيرة: تُحمَّل عند الحاجة فقط (لا تثقل تحميل الصفحة)
 const AddIDModal = dynamic(() => import('@/components/commercial/AddIDModal'), { ssr: false })
 
@@ -1118,6 +1119,13 @@ export default function CompanyDetailsModal({ company, isOpen, onClose, onDelete
                   </div>
                 )}
               </div>
+              {/* عقد التأسيس (مرفق اختياري) */}
+              <AttachmentField
+                entity="company_contract"
+                entityId={company.id}
+                label="عقد التأسيس"
+                hint="PDF أو صورة — الحد الأقصى 5 ميغابايت"
+              />
             </div>
           )}
 
@@ -1210,6 +1218,14 @@ export default function CompanyDetailsModal({ company, isOpen, onClose, onDelete
                   </div>
                 </div>
 
+                {/* صورة شهادة التأسيس (مرفق اختياري) */}
+                <AttachmentField
+                  entity="company_certificate"
+                  entityId={company.id}
+                  label="صورة شهادة التأسيس"
+                  hint="JPG أو PNG أو PDF — تُصغَّر الصور تلقائياً"
+                />
+
                 {!company.deposit_released && (
                   <div style={{ paddingTop: '8px' }}>
                     <button
@@ -1286,6 +1302,13 @@ export default function CompanyDetailsModal({ company, isOpen, onClose, onDelete
                   )}
                 </div>
               )}
+              {/* كتاب إطلاق الوديعة (مرفق اختياري) */}
+              <AttachmentField
+                entity="deposit_letter"
+                entityId={company.id}
+                label="كتاب إطلاق الوديعة"
+                hint="صورة أو PDF لكتاب المصرف — تُصغَّر الصور تلقائياً"
+              />
             </div>
           )}
 
