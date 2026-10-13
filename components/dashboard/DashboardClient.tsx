@@ -16,7 +16,6 @@ import type { ProfileWithStats } from '@/lib/data/profiles'
 import type { Company } from '@/types/database'
 import RemindersWidget from './RemindersWidget'
 import ClockCard from './ClockCard'
-import PushCard from './PushCard'
 
 interface Props {
   stats: DashboardStats
@@ -113,11 +112,8 @@ export default function DashboardClient({ stats, profiles = [], companies = [] }
         </div>
       </header>
 
-      {/* الساعة والتاريخ + تنبيهات الهاتف */}
-      <div className="bx-grid">
-        <div className="bx-s8 ck-wrap"><ClockCard /></div>
-        <div className="bx-s4 ck-wrap"><PushCard /></div>
-      </div>
+      {/* الساعة والتاريخ (تفعيل تنبيهات الهاتف صار في الإعدادات) */}
+      <div className="ck-wrap"><ClockCard /></div>
 
       {/* 1. المؤشرات — الأولى ملوّنة بلون الشعار */}
       <FadeInStagger className="kpi-grid">

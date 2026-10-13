@@ -1,20 +1,24 @@
 'use client'
 /** بطاقة «تنبيهات الهاتف» — تطلب الإذن بضغطة من المستخدم وتشرح كل حالة بوضوح */
+import { useState } from 'react'
 import { toast } from 'sonner'
 import { Icon } from '@/components/ui/Icon'
 import { usePush } from '@/lib/push/usePush'
 
 export default function PushCard() {
   const { state, busy, enable, disable, test } = usePush()
+  const [error, setError] = useState<string | null>(null)
 
   const onEnable = async () => {
+    setError(null)
     const err = await enable()
-    if (err) toast.error(err)
+    if (err) setError(err)
     else toast.success('تم تفعيل التنبيهات على هذا الجهاز')
   }
   const onTest = async () => {
+    setError(null)
     const err = await test()
-    if (err) toast.error(err)
+    if (err) setError(err)
     else toast.success('أُرسل تنبيه تجريبي — سيظهر خلال ثوانٍ')
   }
 
@@ -49,6 +53,7 @@ export default function PushCard() {
           <button type="button" className="btn btn-ghost pc-btn" onClick={disable} disabled={busy}>إيقاف</button>
         </div>
       )}
+      {error && <p className="pc-error" role="alert">{error}</p>}
       {state === 'denied' && (
         <p className="pc-text">افتح إعدادات المتصفح ← الإشعارات ← اسمح لهذا الموقع، ثم حدّث الصفحة.</p>
       )}

@@ -18,14 +18,29 @@ function isStandalone() {
   return window.matchMedia('(display-mode: standalone)').matches || (navigator as Navigator & { standalone?: boolean }).standalone === true
 }
 
-async function getRegistration() {
-  return (await navigator.serviceWorker.getRegistration('/')) || navigator.serviceWorker.register('/sw.js', { scope: '/' })
+/** كل خطوة لها مهلة — كانت الخطوات تنتظر بلا حد فيبقى الزر «جارٍ التفعيل…» */
+function withTimeout<T>(p: Promise<T>, ms: number, message: string): Promise<T> {
+  return new Promise<T>((resolve, reject) => {
+    const t = setTimeout(() => reject(new Error(message)), ms)
+    p.then(v => { clearTimeout(t); resolve(v) }, e => { clearTimeout(t); reject(e) })
+  })
+}
+
+async function getRegistration(): Promise<ServiceWorkerRegistration> {
+  const existing = await navigator.serviceWorker.getRegistration('/')
+  if (!existing) await navigator.serviceWorker.register('/sw.js', { scope: '/' })
+  // الاشتراك يحتاج عاملاً «نشطاً» — ننتظر جاهزيته بمهلة
+  return withTimeout(navigator.serviceWorker.ready, 15000, 'تعذر تشغيل عامل الإشعارات — حدّث الصفحة وحاول مرة أخرى')
 }
 
 async function subscribeAndSave(reg: ServiceWorkerRegistration) {
   const sub = (await reg.pushManager.getSubscription()) ||
-    (await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: keyToBytes(VAPID_PUBLIC_KEY) as BufferSource }))
-  const res = await savePushSubscription(sub.toJSON(), navigator.userAgent)
+    (await withTimeout(
+      reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: keyToBytes(VAPID_PUBLIC_KEY) as BufferSource }),
+      20000,
+      'خدمة الإشعارات في المتصفح لم تستجب. في Brave فعّل «Use Google services for push messaging» من الإعدادات، أو جرّب Chrome/Edge/Safari.'
+    ))
+  const res = await withTimeout(savePushSubscription(sub.toJSON(), navigator.userAgent), 15000, 'انقطع الاتصال أثناء الحفظ — حاول مرة أخرى')
   if (!res.success) throw new Error(res.error || 'تعذر حفظ الاشتراك')
 }
 
@@ -45,7 +60,7 @@ export function usePush() {
       if (Notification.permission === 'denied') { if (alive) setState('denied'); return }
       try {
         const reg = await getRegistration()
-        const sub = await reg.pushManager.getSubscription()
+        const sub = await withTimeout(reg.pushManager.getSubscription(), 8000, 'timeout')
         if (Notification.permission === 'granted') {
           // نجدّد الاشتراك بصمت إن فُقد أو لم يُحفظ على الخادم
           await subscribeAndSave(reg)
@@ -61,8 +76,13 @@ export function usePush() {
   const enable = useCallback(async (): Promise<string | null> => {
     setBusy(true)
     try {
-      const perm = await Notification.requestPermission()
-      if (perm !== 'granted') { setState(perm === 'denied' ? 'denied' : 'off'); return 'لم يتم منح الإذن' }
+      // إن كان الإذن ممنوحاً سابقاً لا نطلبه مجدداً
+      const perm = Notification.permission === 'granted' ? 'granted' : await withTimeout(
+        Notification.requestPermission(),
+        45000,
+        'لم يُردّ على طلب الإذن. اضغط أيقونة الجرس أو القفل 🔒 في شريط العنوان، واختر «السماح بالإشعارات»، ثم اضغط «تفعيل» مرة أخرى.'
+      )
+      if (perm !== 'granted') { setState(perm === 'denied' ? 'denied' : 'off'); return perm === 'denied' ? 'تم رفض الإذن — يمكنك السماح من إعدادات المتصفح' : 'لم يتم منح الإذن' }
       await subscribeAndSave(await getRegistration())
       setState('on')
       return null

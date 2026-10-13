@@ -3888,3 +3888,11 @@ html[data-theme="dark"] .ck-card { background: linear-gradient(135deg, #18223A 0
 .pc-steps { margin: 0; padding-inline-start: 18px; font-size: 13px; color: var(--text-2); line-height: 1.9; }
 .pc-actions { display: flex; gap: 8px; margin-top: auto; }
 .pc-btn { min-height: 40px; flex: 1; }
+.pc-error { margin: 0; font-size: 12.5px; line-height: 1.8; color: #A12B36; background: #FFF4F4; border: 1px solid #F3D3D6; border-radius: 12px; padding: 10px 12px; }
+html[data-theme="dark"] .pc-error { color: #F4A3A9; background: rgba(194, 51, 63, .12); border-color: rgba(194, 51, 63, .3); }
+/* تبويب «تنبيهات الهاتف» في الإعدادات */
+.push-settings { display: grid; grid-template-columns: minmax(0, 380px) minmax(0, 1fr); gap: 16px; align-items: start; }
+.push-help h2 { margin: 0; font-size: 14.5px; font-weight: 800; color: var(--text); }
+.push-help ul { margin: 0; padding-inline-start: 18px; font-size: 13px; line-height: 1.9; color: var(--text-2); }
+.push-help p { margin: 0; font-size: 13px; line-height: 1.85; color: var(--text-2); }
+@media (max-width: 900px) { .push-settings { grid-template-columns: 1fr; } }
