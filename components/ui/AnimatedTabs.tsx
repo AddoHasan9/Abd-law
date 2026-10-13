@@ -94,7 +94,7 @@ export function AnimatedTabs<T extends string = string>({
               isSmall ? 'px-2.5 py-1 text-[11px]' : 'px-3 py-1.5 text-xs'
             } font-bold rounded-lg transition-colors duration-150 whitespace-nowrap cursor-pointer shrink-0 ${
               isActive
-                ? 'text-white'
+                ? (variant === 'primary' ? 'text-[var(--accent)] dark:text-[#A9BBE6]' : 'text-[var(--text)]')
                 : 'text-[var(--text-3)] hover:text-[var(--text)] hover:bg-[color:color-mix(in_srgb,var(--surface-3)_40%,transparent)]'
             }`}
           >
@@ -104,7 +104,7 @@ export function AnimatedTabs<T extends string = string>({
                 layoutId={`tab-pill-${layoutId}`}
                 className={`absolute inset-0 rounded-lg shadow-xs z-[-1] ${
                   variant === 'primary'
-                    ? 'bg-[var(--accent)]'
+                    ? 'bg-[var(--surface)] border border-[color:color-mix(in_srgb,var(--accent)_22%,var(--line-soft))]'
                     : 'bg-[var(--surface)] text-[var(--text)] border border-[var(--glass-border)]'
                 }`}
                 transition={{
@@ -127,7 +127,7 @@ export function AnimatedTabs<T extends string = string>({
               <span
                 className={`num text-[10.5px] px-1.5 py-0.5 rounded-full font-bold transition-colors ${
                   isActive
-                    ? 'bg-white/20 text-white'
+                    ? 'bg-[var(--accent-soft)] text-[var(--accent)] dark:text-[#A9BBE6]'
                     : 'bg-[var(--surface-3)] text-[var(--text-3)]'
                 }`}
               >

@@ -649,7 +649,7 @@ export default function CommercialClient({ heading = 'المعاملات الت�
                           }}
                           className={`w-8 h-8 rounded-full border transition inline-flex items-center justify-center text-sm font-bold shadow-xs cursor-pointer ${
                             activeMenuTx?.id === t.id
-                              ? 'bg-[var(--accent)] text-white border-[var(--accent)]'
+                              ? 'bg-[var(--accent-soft)] text-[var(--accent)] dark:text-[#A9BBE6] ring-1 ring-inset ring-[color:color-mix(in_srgb,var(--accent)_22%,transparent)]'
                               : 'bg-[var(--surface-2)] border-[var(--border)] text-[var(--text-2)] hover:bg-[var(--accent)] hover:text-white hover:border-[var(--accent)]'
                           }`}
                           aria-label="خيارات المعاملة"

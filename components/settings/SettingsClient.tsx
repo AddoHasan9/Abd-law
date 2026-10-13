@@ -246,7 +246,7 @@ export default function SettingsClient() {
           onClick={() => setActiveTab('workflows')}
           className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-black text-xs transition cursor-pointer ${
             activeTab === 'workflows'
-              ? 'bg-[var(--accent)] text-white shadow-md shadow-[color:color-mix(in_srgb,var(--accent)_20%,transparent)]'
+              ? 'bg-[var(--accent-soft)] text-[var(--accent)] dark:text-[#A9BBE6] ring-1 ring-inset ring-[color:color-mix(in_srgb,var(--accent)_22%,transparent)]'
               : 'text-[var(--text-3)] hover:text-[var(--text)]'
           }`}
         >
@@ -259,7 +259,7 @@ export default function SettingsClient() {
           onClick={() => setActiveTab('general')}
           className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-black text-xs transition cursor-pointer ${
             activeTab === 'general'
-              ? 'bg-[var(--accent)] text-white shadow-md shadow-[color:color-mix(in_srgb,var(--accent)_20%,transparent)]'
+              ? 'bg-[var(--accent-soft)] text-[var(--accent)] dark:text-[#A9BBE6] ring-1 ring-inset ring-[color:color-mix(in_srgb,var(--accent)_22%,transparent)]'
               : 'text-[var(--text-3)] hover:text-[var(--text)]'
           }`}
         >
@@ -272,7 +272,7 @@ export default function SettingsClient() {
           onClick={() => setActiveTab('push')}
           className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-black text-xs transition cursor-pointer ${
             activeTab === 'push'
-              ? 'bg-[var(--accent)] text-white shadow-md shadow-[color:color-mix(in_srgb,var(--accent)_20%,transparent)]'
+              ? 'bg-[var(--accent-soft)] text-[var(--accent)] dark:text-[#A9BBE6] ring-1 ring-inset ring-[color:color-mix(in_srgb,var(--accent)_22%,transparent)]'
               : 'text-[var(--text-3)] hover:text-[var(--text)]'
           }`}
         >

@@ -5,9 +5,9 @@ import type { Company, FinancialStatement, FSContactStatus, RequiredFSItem } fro
 
 export const FS_CONTACT_STATUS_LABELS: Record<FSContactStatus, { label: string; tagClass: string }> = {
   not_contacted: { label: 'لم يتم الاتصال', tagClass: 'tag-gray' },
-  contacted: { label: 'تم الاتصال', tagClass: 'tag-blue' },
+  contacted: { label: 'تم الاتصال', tagClass: 'tag-work' },
   promised: { label: 'وعد بالاستلام', tagClass: 'tag-warn' },
-  waiting_docs: { label: 'بانتظار المستندات', tagClass: 'tag-orange' },
+  waiting_docs: { label: 'بانتظار المستندات', tagClass: 'tag-warn' },
   docs_received: { label: 'تم استلام المستندات', tagClass: 'tag-ok' },
 }
 

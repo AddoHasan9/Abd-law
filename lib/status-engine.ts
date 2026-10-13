@@ -39,7 +39,7 @@ export const COMPANY_STATUS_META: Record<CalculatedCompanyStatus, CompanyStatusM
   deposit_running: {
     key: 'deposit_running',
     label: 'الوديعة قيد المتابعة',
-    tagClass: 'tag-blue',
+    tagClass: 'tag-work',
     description: 'شهادة التأسيس صادرة ومسار إطلاق الوديعة قيد المتابعة والمحطات الإلزامية.',
   },
   deposit_released: {
@@ -51,7 +51,7 @@ export const COMPANY_STATUS_META: Record<CalculatedCompanyStatus, CompanyStatusM
   ids_in_progress: {
     key: 'ids_in_progress',
     label: 'قيد إصدار الهويات',
-    tagClass: 'tag-orange',
+    tagClass: 'tag-warn',
     description: 'الوديعة مطلقة وجاري إصدار الهويات والترقيمات.',
   },
   fully_operational: {

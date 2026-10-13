@@ -305,17 +305,19 @@ export function WorkflowStatus({
         disabled={readOnly || isUpdating}
         onClick={toggleDropdown}
         className={cn(
-          'wf-status-btn inline-flex items-center justify-center font-bold rounded-full whitespace-nowrap transition duration-150 select-none shadow-xs border',
+          'wf-status-btn inline-flex items-center justify-center gap-1.5 font-bold rounded-full whitespace-nowrap transition duration-150 select-none border',
           sizeClasses[size],
           readOnly ? 'cursor-default' : 'cursor-pointer hover:opacity-90 active:scale-[0.98]',
           isUpdating && 'opacity-60 pointer-events-none'
         )}
         style={{
-          backgroundColor: displayConfig.bg,
-          borderColor: displayConfig.border,
-          color: displayConfig.text,
+          // هادئ: أبيض بإطار رفيع ونص رمادي، واللون في النقطة فقط
+          backgroundColor: 'var(--surface)',
+          borderColor: 'var(--line-soft)',
+          color: 'var(--text-2)',
         }}
       >
+        <span aria-hidden style={{ width: 7, height: 7, borderRadius: 999, background: displayConfig.text, flex: 'none' }} />
         <span>{displayConfig.label}</span>
       </button>
 

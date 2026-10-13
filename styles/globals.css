@@ -3944,3 +3944,73 @@ html:root .rem-meta > * + *::before { content: none !important; }
 .rem-who { display: inline-flex; align-items: center; gap: 3px; font-size: 11px; font-weight: 700; color: var(--text-2); background: var(--surface-2); border: 1px solid var(--line-soft); border-radius: 999px; padding: 0 8px; white-space: nowrap; }
 html:root .rem-repeat { margin-inline-start: 0; }
 html:root .rem-co { font-weight: 600; }
+
+/* ============================================================
+   الهدوء (مستوحى من Diwan Cloud) — نظام الشارات الثلاث + الأزرار
+   1) حالة  = أبيض + إطار رفيع + نقطة ملوّنة + نص رمادي
+   2) تصنيف = خلفية باهتة جداً + نص ملوّن، بلا إطار
+   3) محايد = إطار فقط
+   زر أساسي واحد مليء؛ أزرار الإجراء المتكررة فاتحة
+   ============================================================ */
+html:root .tag {
+  font-size: 11.5px; font-weight: 600; padding: 3px 10px; gap: 6px; line-height: 1.5;
+  border: 1px solid transparent; border-radius: 999px;
+}
+/* 1) الحالات: ok / work / warn / bad / completed */
+html:root :is(.tag-ok, .tag-work, .tag-warn, .tag-bad, .badge-completed) {
+  background: var(--surface) !important; border: 1px solid var(--line-soft) !important; color: var(--text-2) !important;
+}
+html:root :is(.tag-ok, .tag-work, .tag-warn, .tag-bad, .badge-completed)::before {
+  content: ''; width: 7px; height: 7px; border-radius: 999px; flex: none; background: var(--dot, var(--text-3));
+}
+html:root :is(.tag-ok, .badge-completed) { --dot: #22A06B; }
+html:root .tag-work { --dot: var(--accent); }
+html:root .tag-warn { --dot: #E0A100; }
+html:root .tag-bad  { --dot: #D64550; }
+/* الأيقونات داخل شارات الحالة تُخفى لصالح النقطة (بساطة) */
+html:root :is(.tag-ok, .tag-work, .tag-warn, .tag-bad, .badge-completed) > .material-symbols-outlined { display: none; }
+
+/* 2) التصنيف: باهت جداً ونص ملوّن */
+html:root .tag-orange { background: color-mix(in srgb, #C77A1F 10%, transparent) !important; color: #9A5B12 !important; border-color: transparent !important; }
+html:root .badge-type { background: var(--accent-soft) !important; color: var(--accent) !important; border-color: transparent !important; font-weight: 600; }
+html[data-theme="dark"] .tag-orange { color: #E7B36A !important; }
+html[data-theme="dark"] .badge-type { color: #A9BBE6 !important; }
+
+/* 3) محايد: إطار فقط */
+html:root :is(.tag-gray, .tag-mute, .tag-blue) { background: var(--surface) !important; border: 1px solid var(--line-soft) !important; color: var(--text-2) !important; }
+
+/* شارات الشركة القديمة (co-pill) بنفس منطق الحالة */
+html:root .co-pill { background: var(--surface) !important; border: 1px solid var(--line-soft) !important; color: var(--text-2) !important; font-weight: 600; }
+html:root .co-pill.is-ok .material-symbols-outlined { color: #22A06B; }
+html:root .co-pill.is-bad .material-symbols-outlined { color: #D64550; }
+html:root .co-pill.is-warn .material-symbols-outlined { color: #E0A100; }
+html:root .co-pill.is-info .material-symbols-outlined { color: var(--accent); }
+
+/* ── الأزرار ── */
+/* الأساسي: مليء بلون الشعار — واحد في الشاشة */
+html:root .btn-primary { font-weight: 700; letter-spacing: 0; }
+/* أزرار الإجراء المتكررة (إضافة/تكليف/إكمال المحطة…): فاتحة بلون الشعار بدل المليء */
+html:root .btn-go {
+  background: var(--accent-soft) !important; color: var(--accent) !important;
+  border: 1px solid color-mix(in srgb, var(--accent) 22%, transparent) !important; box-shadow: none !important;
+}
+html:root .btn-go:hover:not(:disabled) { background: color-mix(in srgb, var(--accent) 16%, var(--surface)) !important; box-shadow: none !important; }
+html[data-theme="dark"] .btn-go { color: #A9BBE6 !important; }
+/* الثانوي: أبيض بإطار */
+html:root .btn-ghost { background: var(--surface) !important; border: 1px solid var(--line) !important; color: var(--text) !important; box-shadow: none !important; }
+@media (hover: hover) { html:root .btn-ghost:hover:not(:disabled) { background: var(--surface-2) !important; } }
+
+/* ── الجداول: فواصل رفيعة وعناوين هادئة ── */
+html:root table thead th { font-weight: 600 !important; color: var(--text-3) !important; background: transparent !important; }
+/* تصنيفات (أنواع الهويات…): خلفية باهتة جداً ونص ملوّن، بلا إطار ولا نقطة */
+html:root :is(.tag-cat-orange, .tag-cat-green, .tag-cat-blue, .tag-cat-amber, .tag-cat-violet) { border: 1px solid transparent !important; font-weight: 600; }
+html:root .tag-cat-orange { background: rgba(199, 122, 31, .10) !important; color: #9A5B12 !important; }
+html:root .tag-cat-green  { background: rgba(34, 160, 107, .10) !important; color: #157A51 !important; }
+html:root .tag-cat-blue   { background: color-mix(in srgb, var(--accent) 10%, transparent) !important; color: var(--accent) !important; }
+html:root .tag-cat-amber  { background: rgba(224, 161, 0, .12) !important; color: #8A6400 !important; }
+html:root .tag-cat-violet { background: rgba(124, 92, 214, .10) !important; color: #5B3FB3 !important; }
+html[data-theme="dark"] .tag-cat-orange { color: #E7B36A !important; }
+html[data-theme="dark"] .tag-cat-green  { color: #6FD3A5 !important; }
+html[data-theme="dark"] .tag-cat-blue   { color: #A9BBE6 !important; }
+html[data-theme="dark"] .tag-cat-amber  { color: #E8C766 !important; }
+html[data-theme="dark"] .tag-cat-violet { color: #BCA8F2 !important; }

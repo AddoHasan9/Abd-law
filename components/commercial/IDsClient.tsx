@@ -29,10 +29,10 @@ interface Props {
 }
 
 const ID_TYPE_CONFIG: Record<string, { label: string; icon: string; tagClass: string; color: string }> = {
-  chamber_id: { label: 'هوية الغرفة التجارية', icon: 'badge', tagClass: 'tag-orange', color: '#F97316' },
-  tax_id: { label: 'هوية ضريبية', icon: 'doc', tagClass: 'tag-ok', color: '#10B981' },
-  importer_id: { label: 'هوية مستورد', icon: 'globe', tagClass: 'tag-blue', color: '#0284C7' },
-  planning_id: { label: 'هوية التخطيط', icon: 'build', tagClass: 'tag-warn', color: '#F59E0B' },
+  chamber_id: { label: 'هوية الغرفة التجارية', icon: 'badge', tagClass: 'tag-cat-orange', color: '#F97316' },
+  tax_id: { label: 'هوية ضريبية', icon: 'doc', tagClass: 'tag-cat-green', color: '#10B981' },
+  importer_id: { label: 'هوية مستورد', icon: 'globe', tagClass: 'tag-cat-blue', color: '#0284C7' },
+  planning_id: { label: 'هوية التخطيط', icon: 'build', tagClass: 'tag-cat-amber', color: '#F59E0B' },
 }
 
 export default function IDsClient({ companies = [], initialCompanyId }: Props) {

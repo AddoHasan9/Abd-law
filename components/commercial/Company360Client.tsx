@@ -55,10 +55,10 @@ const TIMELINE_EVENT_LABELS: Record<string, string> = {
 }
 
 export const ALL_ID_TYPES: Array<{ type: 'importer_id' | 'tax_id' | 'planning_id' | 'chamber_id'; label: string; tagClass: string }> = [
-  { type: 'tax_id', label: 'هوية ضريبية', tagClass: 'tag-ok' },
-  { type: 'chamber_id', label: 'هوية الغرفة التجارية', tagClass: 'tag-orange' },
-  { type: 'importer_id', label: 'هوية مستورد', tagClass: 'tag-blue' },
-  { type: 'planning_id', label: 'هوية التخطيط', tagClass: 'tag-warn' },
+  { type: 'tax_id', label: 'هوية ضريبية', tagClass: 'tag-cat-green' },
+  { type: 'chamber_id', label: 'هوية الغرفة التجارية', tagClass: 'tag-cat-orange' },
+  { type: 'importer_id', label: 'هوية مستورد', tagClass: 'tag-cat-blue' },
+  { type: 'planning_id', label: 'هوية التخطيط', tagClass: 'tag-cat-amber' },
 ]
 
 type TabType = 'all' | 'workflow' | 'basic' | 'shareholders' | 'manager' | 'deposit' | 'ids' | 'tax' | 'fs' | 'trademarks' | 'docs' | 'notes' | 'timeline'
