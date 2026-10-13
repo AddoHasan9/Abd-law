@@ -4052,3 +4052,48 @@ html[data-theme="dark"] #view-root {
   .ph-title, .ph-tag { animation: none; }
   .rv, .rv.rv-in { opacity: 1; transform: none; transition: none; }
 }
+
+/* ============================================================
+   بطاقة الساعة — النموذج 7: بطاقة بيضاء + أرقام LED نقطية كحلية
+   ============================================================ */
+.lc-card {
+  --onc: var(--brand); --off: color-mix(in srgb, var(--brand) 7%, transparent);
+  --d: 9px; --g: 4px;
+  background: var(--surface) !important; border: 1px solid var(--line-soft) !important;
+  padding: 22px 22px 18px !important; display: flex !important; flex-direction: column; gap: 0 !important;
+}
+html[data-theme="dark"] .lc-card { --onc: #E8EDF8; --off: rgba(255, 255, 255, .06); }
+.lc-row { display: flex; align-items: flex-end; gap: 14px; direction: ltr; }
+.lc-matrix { display: inline-flex; align-items: flex-end; gap: calc(var(--d) * 1.1); }
+.lc-digit { display: grid; grid-template-columns: repeat(5, var(--d)); grid-auto-rows: var(--d); gap: var(--g); }
+.lc-digit i { border-radius: 50%; background: var(--off); transition: background-color .3s ease; }
+.lc-digit i.on { background: var(--onc); }
+.lc-colon { display: grid; grid-auto-rows: var(--d); row-gap: calc(var(--g) * 2.8); padding-bottom: calc(var(--d) * 1.25); }
+.lc-colon i { width: var(--d); height: var(--d); border-radius: 50%; background: var(--onc); animation: lc-blink 1s steps(1) infinite; }
+@keyframes lc-blink { 50% { opacity: .2; } }
+.lc-small { --d: 4.5px; --g: 2px; gap: 5px; }
+.lc-side { display: flex; flex-direction: column; align-items: flex-start; gap: 8px; padding-bottom: 2px; }
+.lc-period { font-size: 15px; font-weight: 700; color: var(--gold, #B08D57); direction: rtl; line-height: 1; }
+.lc-foot { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 18px; padding-top: 14px; border-top: 1px solid var(--line-soft); }
+.lc-day { font-size: 17px; font-weight: 800; color: var(--text); }
+.lc-date { font-size: 13px; color: var(--text-3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.lc-chip { flex: none; font-size: 12px; font-weight: 700; color: var(--accent); background: var(--accent-soft); border-radius: 999px; padding: 3px 12px; }
+html[data-theme="dark"] .lc-chip { color: #A9BBE6; }
+@media (max-width: 440px) { .lc-card { --d: 6.5px; --g: 3px; padding: 18px !important; } .lc-small { --d: 3.6px; --g: 1.6px; gap: 4px; } }
+@media (max-width: 360px) { .lc-card { --d: 5.6px; --g: 2.6px; } }
+@media (prefers-reduced-motion: reduce) { .lc-colon i { animation: none; } .lc-digit i { transition: none; } }
+
+/* ============================================================
+   بطاقات المؤشرات: كلها بيضاء — المميّزة بخط ذهبي رفيع ورقم كحلي (بدل الكحلي المليء)
+   ============================================================ */
+html:root .kpi-card.is-featured {
+  background: var(--surface) !important; border-color: var(--line-soft) !important; color: var(--text) !important;
+  box-shadow: inset 0 3px 0 var(--gold, #B08D57) !important;
+}
+html:root .kpi-card.is-featured .kpi-label { color: var(--text) !important; }
+html:root .kpi-card.is-featured .kpi-hint { color: var(--text-3) !important; opacity: 1 !important; }
+html:root .kpi-card.is-featured .kpi-value { color: var(--accent) !important; }
+html[data-theme="dark"] .kpi-card.is-featured .kpi-value { color: #A9BBE6 !important; }
+html:root .kpi-card.is-featured .kpi-icon { background: var(--accent-soft) !important; color: var(--accent) !important; }
+html:root .kpi-card.is-featured .kpi-chips > span { background: var(--accent-soft) !important; color: var(--accent) !important; border-color: transparent !important; }
+html:root .kpi-card.is-featured .kpi-chips > span.is-on { background: var(--accent) !important; color: #fff !important; }
