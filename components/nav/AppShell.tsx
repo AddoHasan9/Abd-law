@@ -16,6 +16,7 @@ import { NavigationProgressBar } from '@/components/ui/NavigationProgressBar'
 import type { DeadlineItem } from './DeadlineCard'
 import { FSAlertBanner } from './FSAlertBanner'
 import MobileTabBar from './MobileTabBar'
+import RevealOnScroll from '@/components/ui/RevealOnScroll'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import { playChime } from '@/lib/push/chime'
@@ -130,6 +131,7 @@ export default function AppShell({
         </div>
 
         <MobileTabBar onMenu={() => setOpen(v => !v)} />
+        <RevealOnScroll />
         {/* Dynamic Page Help & Guidance Guide */}
         <QuickHelpGuide />
       </div>

@@ -4014,3 +4014,41 @@ html[data-theme="dark"] .tag-cat-green  { color: #6FD3A5 !important; }
 html[data-theme="dark"] .tag-cat-blue   { color: #A9BBE6 !important; }
 html[data-theme="dark"] .tag-cat-amber  { color: #E8C766 !important; }
 html[data-theme="dark"] .tag-cat-violet { color: #BCA8F2 !important; }
+
+/* ============================================================
+   إلهام Diwan (2): عناوين بلونين + توهج الخلفية + حركة عند التمرير
+   ============================================================ */
+/* 1) العنوان بلونين: الاسم غامق، والجملة رمادية — يظهر من ضبابي لواضح */
+html:root h1.ph-two {
+  font-size: clamp(24px, 2.6vw, 32px) !important; font-weight: 800 !important; line-height: 1.35 !important;
+  letter-spacing: -.01em; margin: 0; text-wrap: balance;
+}
+.ph-title { color: var(--text); }
+.ph-tag { color: var(--text-3); font-weight: 700; }
+.ph-title, .ph-tag { display: inline; animation: ph-in .7s cubic-bezier(.2, .8, .2, 1) both; }
+.ph-tag { animation-delay: .14s; }
+@keyframes ph-in { from { opacity: 0; filter: blur(8px); transform: translateY(6px); } to { opacity: 1; filter: blur(0); transform: none; } }
+html:root .page-head p, html:root .bx-head p { font-size: 13.5px; color: var(--text-3); margin-top: 6px; }
+
+/* 2) توهج خفيف أعلى الصفحة (كحلي + ذهبي)، يتحرك مع المحتوى ويختفي عند التمرير */
+html:root #view-root {
+  background-color: var(--bg);
+  background-image:
+    radial-gradient(1000px 420px at 78% -140px, rgba(43, 76, 140, .17), transparent 70%),
+    radial-gradient(700px 340px at 12% -120px, rgba(176, 141, 87, .17), transparent 70%);
+  background-repeat: no-repeat;
+  background-attachment: local;
+}
+html[data-theme="dark"] #view-root {
+  background-image:
+    radial-gradient(900px 340px at 78% -140px, rgba(85, 118, 192, .16), transparent 70%),
+    radial-gradient(620px 280px at 12% -120px, rgba(176, 141, 87, .10), transparent 70%);
+}
+
+/* 3) حركة عند التمرير: البطاقات تصعد بهدوء عند دخولها الشاشة (يديرها RevealOnScroll) */
+.rv { opacity: 0; transform: translateY(14px); }
+.rv.rv-in { opacity: 1; transform: none; transition: opacity .55s ease, transform .55s cubic-bezier(.2, .8, .2, 1); transition-delay: var(--rv-delay, 0ms); }
+@media (prefers-reduced-motion: reduce) {
+  .ph-title, .ph-tag { animation: none; }
+  .rv, .rv.rv-in { opacity: 1; transform: none; transition: none; }
+}
