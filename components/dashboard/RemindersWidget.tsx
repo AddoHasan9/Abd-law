@@ -372,10 +372,11 @@ export function ReminderItemCard({
         <div className="rem-meta">
           {item.due_date && (
             <>
-              <span className="num">{item.due_date}{item.due_time ? ` · ${item.due_time}` : ''}</span>
+              <span className="rem-when num">{item.due_date}{item.due_time ? ` · ${item.due_time}` : ''}</span>
               {repeatShort(item.repeat) && <span className="rem-repeat">🔁 {repeatShort(item.repeat)}</span>}
             </>
           )}
+          {item.assignee_name && <span className="rem-who" title="المحامي المسؤول — يصله التنبيه">👤 {item.assignee_name}</span>}
           {item.company_id ? (
             <Link href={`/commercial/companies/${item.company_id}`} className="rem-co truncate" title={item.company_name || undefined}>
               {item.company_name || 'ملف الشركة'}

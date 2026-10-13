@@ -3899,3 +3899,48 @@ html[data-theme="dark"] .pc-error { color: #F4A3A9; background: rgba(194, 51, 63
 /* شارة تكرار التذكير */
 .rem-repeat { display: inline-flex; align-items: center; gap: 3px; margin-inline-start: 8px; font-size: 11px; font-weight: 700; color: var(--accent); background: var(--accent-soft); border-radius: 999px; padding: 1px 8px; white-space: nowrap; }
 html[data-theme="dark"] .rem-repeat { color: #A9BBE6; }
+
+/* ============================================================
+   بطاقة التذكير — نظيفة ومتناسقة مع الموقع (بدل الخط الجانبي الملوّن الشبيه ببطاقة التأسيس)
+   الحالة تظهر في شارة الموعد: متأخر أحمر · اليوم ذهبي · قادم كحلي · بلا موعد رمادي
+   ============================================================ */
+html:root .rem-item {
+  border: 1px solid var(--line-soft) !important;
+  border-inline-start: 1px solid var(--line-soft) !important;
+  border-radius: 14px !important;
+  padding: 12px 12px 12px 10px !important;
+  gap: 12px !important;
+  background: var(--surface) !important;
+  transition: background-color .18s ease, border-color .18s ease, box-shadow .18s ease;
+}
+@media (hover: hover) { html:root .rem-item:hover { border-color: color-mix(in srgb, var(--accent) 28%, var(--line-soft)) !important; box-shadow: 0 6px 16px -12px rgba(15, 23, 42, .35); } }
+
+/* دائرة إنجاز بدل المربع */
+html:root .rem-check {
+  appearance: none; -webkit-appearance: none; margin: 0;
+  width: 22px; height: 22px; border-radius: 999px; flex: none; cursor: pointer;
+  border: 2px solid var(--line); background: var(--surface);
+  display: grid; place-items: center; transition: border-color .15s ease, background-color .15s ease;
+}
+html:root .rem-check:hover { border-color: var(--ok); }
+html:root .rem-check:checked { background: var(--ok); border-color: var(--ok); }
+html:root .rem-check:checked::after { content: ''; width: 6px; height: 10px; border: solid #fff; border-width: 0 2px 2px 0; transform: translateY(-1px) rotate(45deg); }
+html:root .rem-check:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+html:root .rem-title { font-size: 13.5px; }
+html:root .rem-high { background: rgba(194, 51, 63, .12) !important; color: #A12B36 !important; border-radius: 999px !important; padding: 0 8px !important; }
+html[data-theme="dark"] .rem-high { color: #F4A3A9 !important; }
+html:root .rem-meta { flex-wrap: wrap; row-gap: 6px; margin-top: 4px; }
+html:root .rem-meta > * + *::before { content: none !important; }
+
+/* شارة الموعد تحمل لون الحالة */
+.rem-when {
+  display: inline-flex; align-items: center; gap: 5px; font-size: 11.5px; font-weight: 700;
+  padding: 1px 9px 1px 8px; border-radius: 999px;
+  color: color-mix(in srgb, var(--rem-tone) 80%, var(--text));
+  background: color-mix(in srgb, var(--rem-tone) 13%, transparent);
+}
+.rem-when::before { content: ''; width: 6px; height: 6px; border-radius: 999px; background: var(--rem-tone); }
+.rem-who { display: inline-flex; align-items: center; gap: 3px; font-size: 11px; font-weight: 700; color: var(--text-2); background: var(--surface-2); border: 1px solid var(--line-soft); border-radius: 999px; padding: 0 8px; white-space: nowrap; }
+html:root .rem-repeat { margin-inline-start: 0; }
+html:root .rem-co { font-weight: 600; }

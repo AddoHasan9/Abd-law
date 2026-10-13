@@ -7,6 +7,21 @@ import type { ReminderItem, ReminderPriority } from '@/types/database'
 import { getCurrentUserProfile } from '@/lib/auth/require-permission'
 import { REPEAT_OPTIONS, type ReminderRepeat } from '@/lib/push/time'
 
+/** يقبل فقط مستخدماً فعّالاً موجوداً */
+async function validAssignee(supabase: ReturnType<typeof createAdminClient>, id?: string | null): Promise<string | null> {
+  if (!id) return null
+  const { data } = await supabase.from('profiles').select('id').eq('id', id).eq('active', true).maybeSingle()
+  return data?.id || null
+}
+
+/** المحامون/الموظفون الفعّالون لاختيار «المحامي المسؤول» في التذكير */
+export async function listReminderAssigneesAction(): Promise<{ id: string; name: string }[]> {
+  if (!await getCurrentUserProfile()) return []
+  const supabase = createAdminClient()
+  const { data } = await supabase.from('profiles').select('id, name').eq('active', true).order('name')
+  return (data || []) as { id: string; name: string }[]
+}
+
 function safeRepeat(r: unknown): ReminderRepeat {
   return REPEAT_OPTIONS.some(o => o.value === r) ? (r as ReminderRepeat) : 'none'
 }
@@ -26,10 +41,12 @@ export async function getRemindersAction(filter?: 'active' | 'completed' | 'arch
       query = query.eq('is_completed', false).eq('is_archived', false)
     }
 
-    const [{ data, error }, compRes] = await Promise.all([
+    const [{ data, error }, compRes, profRes] = await Promise.all([
       query,
       supabase.from('companies').select('id, name'),
+      supabase.from('profiles').select('id, name'),
     ])
+    const profMap = new Map<string, string>(((profRes?.data || []) as { id: string; name: string }[]).map(p => [p.id, p.name]))
 
     const companies = compRes?.data || []
 
@@ -52,6 +69,8 @@ export async function getRemindersAction(filter?: 'active' | 'completed' | 'arch
     items = items.map(item => ({
       ...item,
       company_name: item.company_id ? (compMap.get(item.company_id) || item.company_name || null) : null,
+      // اسم المحامي المسؤول (يصله التنبيه)؛ بلا تعيين = صاحب التذكير
+      assignee_name: profMap.get(item.assignee_id || item.owner_id || '') || null,
     }))
 
     // Automatic trigger check for due reminders
@@ -73,6 +92,7 @@ export async function createReminderAction(payload: {
   due_date?: string
   due_time?: string
   repeat?: ReminderRepeat
+  assignee_id?: string
 }) {
   const profile = await getCurrentUserProfile()
   if (!profile) {
@@ -111,6 +131,8 @@ export async function createReminderAction(payload: {
         due_time: newReminder.due_time,
         // صاحب التذكير ⇒ التنبيه يصل لأجهزته فقط (كان لا يُحفظ فيصل للجميع)
         owner_id: profile.id,
+        // المحامي المسؤول: يصله التنبيه وحده (افتراضياً منشئ التذكير)
+        assignee_id: (await validAssignee(supabase, payload.assignee_id)) || profile.id,
         // التكرار يحتاج تاريخاً؛ بلا تاريخ يبقى «مرة واحدة»
         repeat: newReminder.due_date ? safeRepeat(payload.repeat) : 'none',
         is_completed: false,
@@ -147,6 +169,7 @@ export async function updateReminderAction(
     due_date?: string
     due_time?: string
     repeat?: ReminderRepeat
+    assignee_id?: string
   }
 ) {
   const profile = await getCurrentUserProfile()
@@ -165,6 +188,10 @@ export async function updateReminderAction(
     if (payload.due_date !== undefined) updateData.due_date = payload.due_date || null
     if (payload.due_time !== undefined) updateData.due_time = payload.due_time || null
     if (payload.repeat !== undefined) updateData.repeat = safeRepeat(payload.repeat)
+    if (payload.assignee_id !== undefined) {
+      const a = await validAssignee(supabase, payload.assignee_id)
+      if (a) updateData.assignee_id = a
+    }
     if (payload.due_date !== undefined && !payload.due_date) updateData.repeat = 'none'
     // تغيير الموعد أو التكرار ⇒ يُنبَّه من جديد (كان التذكير المُنبَّه سابقاً لا يعود أبداً)
     if (payload.due_date !== undefined || payload.due_time !== undefined || payload.repeat !== undefined) updateData.alert_sent = false

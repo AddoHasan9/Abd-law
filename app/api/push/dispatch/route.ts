@@ -24,7 +24,7 @@ export async function POST(req: Request) {
   // 1) التذكيرات
   const { data: due } = await admin
     .from('reminders')
-    .select('id, title, notes, due_date, due_time, owner_id, company_id, repeat')
+    .select('id, title, notes, due_date, due_time, owner_id, assignee_id, company_id, repeat')
     .eq('alert_sent', false).eq('is_completed', false).eq('is_archived', false)
     .lte('due_date', now.date)
     .limit(100)
@@ -45,11 +45,13 @@ export async function POST(req: Request) {
     const title = `تذكير: ${r.title}`
     const rep = repeatShort(rule)
     const body = (r.notes || (r.due_time ? `الموعد ${r.due_time.slice(0, 5)}` : 'حان موعد التذكير')) + (rep ? ` · 🔁 ${rep}` : '')
+    // المستلم: المحامي المسؤول، وإلا صاحب التذكير، وإلا الجميع (تذكيرات قديمة بلا مالك)
+    const target: string | null = r.assignee_id || r.owner_id || null
     await admin.from('notifications').insert({
-      user_id: r.owner_id, title, description: body, type: 'reminder_alert',
+      user_id: target, title, description: body, type: 'reminder_alert',
       related_company_id: r.company_id, link_url: '/reminders', is_read: false, pushed_at: new Date().toISOString(),
     })
-    const res = await sendPush(r.owner_id ? [r.owner_id] : 'all', { title, body, url: '/reminders', tag: `reminder-${r.id}-${r.due_date}` })
+    const res = await sendPush(target ? [target] : 'all', { title, body, url: '/reminders', tag: `reminder-${r.id}-${r.due_date}` })
     devices += res.sent
     await admin.from('reminders').update(after).eq('id', r.id)
     reminders++

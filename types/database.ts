@@ -345,6 +345,9 @@ export interface Reminder {
   /** التكرار: none | daily | weekdays | weekly | monthly | yearly */
   repeat?: string | null
   owner_id?: string | null
+  /** المحامي المسؤول — يصله التنبيه وحده */
+  assignee_id?: string | null
+  assignee_name?: string | null
   last_alert_at?: string | null
   created_at: string
 }

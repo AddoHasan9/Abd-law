@@ -16,6 +16,9 @@ import { NavigationProgressBar } from '@/components/ui/NavigationProgressBar'
 import type { DeadlineItem } from './DeadlineCard'
 import { FSAlertBanner } from './FSAlertBanner'
 import MobileTabBar from './MobileTabBar'
+import { useRouter } from 'next/navigation'
+import { toast } from 'sonner'
+import { playChime } from '@/lib/push/chime'
 import type { Profile } from '@/types/database'
 
 interface Props {
@@ -37,6 +40,24 @@ export default function AppShell({
   notifCount, title, subtitle, children,
 }: Props) {
   const [open, setOpen] = useState(false)
+  const router = useRouter()
+
+  // تنبيه وصل والموقع مفتوح: نغمة + رسالة مع زر فتح (التنبيه يظهر أيضاً في إشعارات النظام)
+  useEffect(() => {
+    if (!('serviceWorker' in navigator)) return
+    const onMsg = (e: MessageEvent) => {
+      const d = e.data as { type?: string; title?: string; body?: string; url?: string } | null
+      if (!d || d.type !== 'push') return
+      playChime()
+      toast(d.title || 'تنبيه جديد', {
+        description: d.body || undefined,
+        duration: 9000,
+        action: d.url ? { label: 'فتح', onClick: () => router.push(d.url!) } : undefined,
+      })
+    }
+    navigator.serviceWorker.addEventListener('message', onMsg)
+    return () => navigator.serviceWorker.removeEventListener('message', onMsg)
+  }, [router])
   // الحاسبة: طي الشريط الجانبي إلى أيقونات (يُحفظ في المتصفح)
   // null = لم يُقرأ الاختيار بعد ⇒ لا نلمس الصنف (يضعه سكربت الرأس قبل الرسم، فلا وميض)
   const [collapsedPref, setCollapsed] = useState<boolean | null>(null)
