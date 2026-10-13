@@ -5,6 +5,11 @@ import { rethrowDbError } from '@/lib/data/db-guard'
 import { createAdminClient } from '@/lib/supabase/server'
 import type { ReminderItem, ReminderPriority } from '@/types/database'
 import { getCurrentUserProfile } from '@/lib/auth/require-permission'
+import { REPEAT_OPTIONS, type ReminderRepeat } from '@/lib/push/time'
+
+function safeRepeat(r: unknown): ReminderRepeat {
+  return REPEAT_OPTIONS.some(o => o.value === r) ? (r as ReminderRepeat) : 'none'
+}
 
 
 export async function getRemindersAction(filter?: 'active' | 'completed' | 'archived' | 'all' | 'pending') {
@@ -67,6 +72,7 @@ export async function createReminderAction(payload: {
   priority?: ReminderPriority
   due_date?: string
   due_time?: string
+  repeat?: ReminderRepeat
 }) {
   const profile = await getCurrentUserProfile()
   if (!profile) {
@@ -103,6 +109,10 @@ export async function createReminderAction(payload: {
         priority: newReminder.priority,
         due_date: newReminder.due_date,
         due_time: newReminder.due_time,
+        // صاحب التذكير ⇒ التنبيه يصل لأجهزته فقط (كان لا يُحفظ فيصل للجميع)
+        owner_id: profile.id,
+        // التكرار يحتاج تاريخاً؛ بلا تاريخ يبقى «مرة واحدة»
+        repeat: newReminder.due_date ? safeRepeat(payload.repeat) : 'none',
         is_completed: false,
         is_archived: false,
         alert_sent: false,
@@ -136,6 +146,7 @@ export async function updateReminderAction(
     priority?: ReminderPriority
     due_date?: string
     due_time?: string
+    repeat?: ReminderRepeat
   }
 ) {
   const profile = await getCurrentUserProfile()
@@ -153,6 +164,10 @@ export async function updateReminderAction(
     if (payload.priority !== undefined) updateData.priority = payload.priority
     if (payload.due_date !== undefined) updateData.due_date = payload.due_date || null
     if (payload.due_time !== undefined) updateData.due_time = payload.due_time || null
+    if (payload.repeat !== undefined) updateData.repeat = safeRepeat(payload.repeat)
+    if (payload.due_date !== undefined && !payload.due_date) updateData.repeat = 'none'
+    // تغيير الموعد أو التكرار ⇒ يُنبَّه من جديد (كان التذكير المُنبَّه سابقاً لا يعود أبداً)
+    if (payload.due_date !== undefined || payload.due_time !== undefined || payload.repeat !== undefined) updateData.alert_sent = false
 
     const { error } = await supabase
       .from('reminders')

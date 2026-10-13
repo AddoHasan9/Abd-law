@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
+import { repeatShort } from '@/lib/push/time'
 import { DataPanel } from '@/components/ui/DataPanel'
 import { confirmAction, runAction } from '@/components/ui/ConfirmDialog'
 import Link from 'next/link'
@@ -370,7 +371,10 @@ export function ReminderItemCard({
         </div>
         <div className="rem-meta">
           {item.due_date && (
-            <span className="num">{item.due_date}{item.due_time ? ` · ${item.due_time}` : ''}</span>
+            <>
+              <span className="num">{item.due_date}{item.due_time ? ` · ${item.due_time}` : ''}</span>
+              {repeatShort(item.repeat) && <span className="rem-repeat">🔁 {repeatShort(item.repeat)}</span>}
+            </>
           )}
           {item.company_id ? (
             <Link href={`/commercial/companies/${item.company_id}`} className="rem-co truncate" title={item.company_name || undefined}>

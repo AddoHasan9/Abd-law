@@ -3896,3 +3896,6 @@ html[data-theme="dark"] .pc-error { color: #F4A3A9; background: rgba(194, 51, 63
 .push-help ul { margin: 0; padding-inline-start: 18px; font-size: 13px; line-height: 1.9; color: var(--text-2); }
 .push-help p { margin: 0; font-size: 13px; line-height: 1.85; color: var(--text-2); }
 @media (max-width: 900px) { .push-settings { grid-template-columns: 1fr; } }
+/* شارة تكرار التذكير */
+.rem-repeat { display: inline-flex; align-items: center; gap: 3px; margin-inline-start: 8px; font-size: 11px; font-weight: 700; color: var(--accent); background: var(--accent-soft); border-radius: 999px; padding: 1px 8px; white-space: nowrap; }
+html[data-theme="dark"] .rem-repeat { color: #A9BBE6; }

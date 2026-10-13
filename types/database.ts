@@ -342,6 +342,10 @@ export interface Reminder {
   is_completed?: boolean
   is_archived?: boolean
   alert_sent?: boolean
+  /** التكرار: none | daily | weekdays | weekly | monthly | yearly */
+  repeat?: string | null
+  owner_id?: string | null
+  last_alert_at?: string | null
   created_at: string
 }
 
