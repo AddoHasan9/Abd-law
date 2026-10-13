@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef, useCallback } from 'react'
+import { repeatShort } from '@/lib/push/time'
 import { Mi } from '@/components/ui/Mi'
 import { confirmAction, runAction } from '@/components/ui/ConfirmDialog'
 import { Icon } from '@/components/ui/Icon'
@@ -213,7 +214,7 @@ export default function ReminderCenter() {
 
                     <div style={{ fontSize: '10.5px', color: 'var(--text-3)', marginTop: '2px', display: 'flex', gap: '8px' }}>
                       {item.due_date && (
-                        <span><Mi n="event" />{item.due_date}{item.due_time && <><Mi n="schedule" className="ms-2" />{item.due_time}</>}</span>
+                        <span><Mi n="event" />{item.due_date}{item.due_time && <><Mi n="schedule" className="ms-2" />{item.due_time}</>}{repeatShort(item.repeat) && <span className="rem-repeat">🔁 {repeatShort(item.repeat)}</span>}</span>
                       )}
                     </div>
                   </div>

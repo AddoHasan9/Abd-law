@@ -306,6 +306,18 @@ export default function Topbar({ profile, title, subtitle, notifCount = 0, onMen
                 </span>
               </Link>
 
+              {/* تنبيهات الهاتف (تفعيل الإذن من المتصفح) */}
+              <Link
+                href="/settings?tab=push"
+                onClick={() => setIsUserMenuOpen(false)}
+                className="flex items-center justify-between px-3 py-2 text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800/80 rounded-xl transition-colors group text-right"
+              >
+                <div className="flex items-center gap-2.5">
+                  <span className="material-symbols-outlined text-[18px] text-slate-500 group-hover:text-[var(--accent)] transition-colors">notifications_active</span>
+                  <span>تنبيهات الهاتف</span>
+                </div>
+              </Link>
+
               {/* Reminders & Notifications */}
               <Link
                 href="/reminders"

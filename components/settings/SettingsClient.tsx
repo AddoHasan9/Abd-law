@@ -14,13 +14,18 @@ import {
 import type { Settings } from '@/types/database'
 import { formatNumberWithCommas, parseNumberFromCommas } from '@/lib/constants'
 import { usePermissions } from '@/lib/context/UserRoleContext'
+import PushCard from '@/components/dashboard/PushCard'
 import { useDragScroll } from '@/lib/hooks/useDragScroll'
 
 export default function SettingsClient() {
   const { can } = usePermissions()
   const canEdit = can('users', 'manage_permissions')
 
-  const [activeTab, setActiveTab] = useState<'general' | 'workflows' | 'shortcuts'>('workflows')
+  // ?tab=push يفتح «تنبيهات الهاتف» مباشرة؛ ومن لا يملك صلاحية المسارات يبدأ به
+  const [activeTab, setActiveTab] = useState<'general' | 'workflows' | 'shortcuts' | 'push'>(canEdit ? 'workflows' : 'push')
+  useEffect(() => {
+    if (new URLSearchParams(window.location.search).get('tab') === 'push') setActiveTab('push')
+  }, [])
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [toastMsg, setToastMsg] = useState<{ type: 'ok' | 'err'; text: string } | null>(null)
@@ -261,7 +266,39 @@ export default function SettingsClient() {
           <span className="material-symbols-outlined text-[18px]">domain</span>
           <span>هوية المكتب وقواعد المهل</span>
         </button>
+
+        <button
+          type="button"
+          onClick={() => setActiveTab('push')}
+          className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-black text-xs transition cursor-pointer ${
+            activeTab === 'push'
+              ? 'bg-[var(--accent)] text-white shadow-md shadow-[color:color-mix(in_srgb,var(--accent)_20%,transparent)]'
+              : 'text-[var(--text-3)] hover:text-[var(--text)]'
+          }`}
+        >
+          <span className="material-symbols-outlined text-[18px]">notifications_active</span>
+          <span>تنبيهات الهاتف</span>
+        </button>
       </div>
+
+      {/* TAB: تنبيهات الهاتف (لكل مستخدم — كل جهاز يُفعَّل لوحده) */}
+      {activeTab === 'push' && (
+        <div className="push-settings">
+          <PushCard />
+          <section className="bx-card push-help" aria-labelledby="push-help-h">
+            <h2 id="push-help-h">ما الذي يصلك؟</h2>
+            <ul>
+              <li><b>تذكيراتك الشخصية</b> في موعدها بالضبط (بتوقيت بغداد) — لك وحدك.</li>
+              <li><b>إشعارات المكتب الجديدة</b> (تكليف، تغيير حالة، مهلة).</li>
+              <li>تصل <b>حتى والموقع مغلق</b>، والضغط عليها يفتح الصفحة المعنية.</li>
+            </ul>
+            <h2>كل جهاز يُفعَّل لوحده</h2>
+            <p>فعّل من الحاسبة ومن الهاتف كلٌّ على حدة. يطلب المتصفح إذنك مرة واحدة؛ إن لم تظهر نافذة الإذن فاضغط أيقونة الجرس أو القفل 🔒 في شريط العنوان.</p>
+            <h2>على iPhone</h2>
+            <p>Apple تسمح بالإشعارات فقط للموقع المضاف للشاشة الرئيسية: Safari ← زر المشاركة ← «إضافة إلى الشاشة الرئيسية»، ثم افتح الموقع من أيقونته وفعّل من هنا.</p>
+          </section>
+        </div>
+      )}
 
       {/* TAB 1: WORKFLOW BUILDER */}
       {activeTab === 'workflows' && (

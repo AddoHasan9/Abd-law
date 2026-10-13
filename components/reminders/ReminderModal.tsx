@@ -5,7 +5,8 @@ import { toast } from 'sonner'
 import { Mi } from '@/components/ui/Mi'
 import { createPortal } from 'react-dom'
 import { Icon } from '@/components/ui/Icon'
-import { createReminderAction, updateReminderAction } from '@/app/(app)/reminders/actions'
+import { createReminderAction, updateReminderAction, listReminderAssigneesAction } from '@/app/(app)/reminders/actions'
+import { REPEAT_OPTIONS, baghdadNow, type ReminderRepeat } from '@/lib/push/time'
 import { createClient } from '@/lib/supabase/client'
 import type { Company, ReminderItem, ReminderPriority } from '@/types/database'
 import { useModalBodyLock } from '@/lib/hooks/useModalBodyLock'
@@ -31,10 +32,19 @@ export default function ReminderModal({ isOpen, onClose, companies = [], editing
   const [priority, setPriority] = useState<ReminderPriority>('medium')
   const [dueDate, setDueDate] = useState('')
   const [dueTime, setDueTime] = useState('')
+  const [repeat, setRepeat] = useState<ReminderRepeat>('none')
+  // المحامي المسؤول: '' = أنا (منشئ التذكير)
+  const [assigneeId, setAssigneeId] = useState('')
+  const [assignees, setAssignees] = useState<{ id: string; name: string }[]>([])
 
   useEffect(() => {
     setMounted(true)
   }, [])
+
+  useEffect(() => {
+    if (!isOpen) return
+    listReminderAssigneesAction().then(setAssignees).catch(() => setAssignees([]))
+  }, [isOpen])
 
   useEffect(() => {
     if (editingReminder) {
@@ -44,13 +54,17 @@ export default function ReminderModal({ isOpen, onClose, companies = [], editing
       setPriority((editingReminder.priority as ReminderPriority) || 'medium')
       setDueDate(editingReminder.due_date ? editingReminder.due_date.slice(0, 10) : '')
       setDueTime(editingReminder.due_time || '')
+      setRepeat((editingReminder.repeat as ReminderRepeat) || 'none')
+      setAssigneeId(editingReminder.assignee_id || '')
     } else {
       setTitle('')
       setNotes('')
       setCompanyId(initialCompanyId || '')
       setPriority('medium')
-      setDueDate(new Date().toISOString().slice(0, 10))
+      setDueDate(baghdadNow().date) // تاريخ اليوم ببغداد (كان UTC ⇒ يوم أمس بين 12 و3 فجراً)
       setDueTime('')
+      setRepeat('none')
+      setAssigneeId('')
     }
     setError(null)
   }, [editingReminder, initialCompanyId, isOpen])
@@ -85,6 +99,8 @@ export default function ReminderModal({ isOpen, onClose, companies = [], editing
         priority,
         due_date: dueDate,
         due_time: dueTime,
+        repeat: dueDate ? repeat : 'none',
+        assignee_id: assigneeId || undefined,
       })
     } else {
       res = await createReminderAction({
@@ -94,6 +110,8 @@ export default function ReminderModal({ isOpen, onClose, companies = [], editing
         priority,
         due_date: dueDate,
         due_time: dueTime,
+        repeat: dueDate ? repeat : 'none',
+        assignee_id: assigneeId || undefined,
       })
     }
 
@@ -222,8 +240,31 @@ export default function ReminderModal({ isOpen, onClose, companies = [], editing
                 />
               </div>
             </div>
-            <span style={{ fontSize: '11px', color: 'var(--text-3)' }}>
-              ملاحظة: إذا تركت التاريخ والوقت فارغين، سيتم حفظ التذكير كملاحظة شخصية قائمة.
+            <div className="field">
+              <label htmlFor="rem-assignee">المحامي المسؤول (يصله التنبيه)</label>
+              <select id="rem-assignee" className="input" value={assigneeId} onChange={e => setAssigneeId(e.target.value)}>
+                <option value="">أنا</option>
+                {assignees.map(a => <option key={a.id} value={a.id}>{a.name}</option>)}
+              </select>
+            </div>
+
+            <div className="field">
+              <label htmlFor="rem-repeat">التكرار</label>
+              <select
+                id="rem-repeat"
+                className="input"
+                value={dueDate ? repeat : 'none'}
+                onChange={e => setRepeat(e.target.value as ReminderRepeat)}
+                disabled={!dueDate}
+              >
+                {REPEAT_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
+              </select>
+            </div>
+
+            <span style={{ fontSize: '11.5px', color: 'var(--text-3)', lineHeight: 1.8 }}>
+              {dueDate
+                ? `🔔 ${assigneeId ? `يصل تنبيه بصوت لأجهزة ${assignees.find(a => a.id === assigneeId)?.name || 'المحامي المختار'}` : 'يصلك تنبيه بصوت على أجهزتك المفعّلة'} ${dueTime ? `الساعة ${dueTime}` : 'الساعة 9:00 صباحاً'} بتوقيت بغداد${repeat !== 'none' ? '، ويتكرر تلقائياً' : ''}. التذكير نفسه ظاهر للجميع.`
+                : 'بدون تاريخ يُحفظ التذكير كملاحظة بلا تنبيه. اختر تاريخاً (ووقتاً) لتصلك التنبيهات والتكرار.'}
             </span>
           </div>
 
