@@ -123,31 +123,41 @@ export default function DashboardClient({ stats, profiles = [], companies = [] }
       </FadeInStagger>
 
       <div className="bx-grid">
-        {/* 2. نشاط الأسبوع */}
-        <section className="bx-card bx-s6" style={{ animationDelay: '.08s' }} aria-labelledby="bx-week-h">
+        {/* 2. أحدث المعاملات */}
+        <section className="bx-card bx-s6" style={{ animationDelay: '.08s' }} aria-labelledby="bx-tx-h">
           <div className="bx-card-head">
-            <div>
-              <h2 id="bx-week-h">نشاط هذا الأسبوع</h2>
-              <small>المعاملات المسجّلة كل يوم · المجموع <span className="num">{weekTotal}</span></small>
+            <h2 id="bx-tx-h">أحدث المعاملات</h2>
+            <div className="bx-pills" role="group" aria-label="تصفية المعاملات">
+              {([['all', 'الكل'], ['progress', 'قيد التنفيذ'], ['new', 'جديدة'], ['done', 'مكتملة']] as const).map(([id, label]) => (
+                <button key={id} type="button" className={`bx-pill${txFilter === id ? ' is-on' : ''}`} aria-pressed={txFilter === id} onClick={() => setTxFilter(id)}>
+                  {label} <i className="num">{counts[id]}</i>
+                </button>
+              ))}
             </div>
-            <Link href="/commercial" className="bx-link">كل المعاملات ←</Link>
           </div>
-          <div className="bx-week" role="img" aria-label={`المعاملات المسجّلة هذا الأسبوع: ${week.map(d => `${d.label} ${d.isFuture ? '—' : d.count}`).join('، ')}`}>
-            {week.map((d, i) => {
-              const h = d.isFuture ? 42 : Math.max(6, (d.count / weekMax) * 100)
-              return (
-                <div className="bx-day" key={d.date}>
-                  {d.isToday && <span className="bx-tip">اليوم · <span className="num">{d.count}</span></span>}
-                  <div
-                    className={`bx-bar${d.isToday ? ' is-today' : ''}${d.isFuture ? ' is-future' : ''}`}
-                    style={{ height: `${h}%`, animationDelay: `${0.15 + i * 0.05}s` }}
-                    title={d.isFuture ? d.label : `${d.label}: ${d.count}`}
-                  />
-                  <span className={`bx-day-label${d.isToday ? ' is-today' : ''}`}>{d.label}</span>
-                </div>
-              )
-            })}
-          </div>
+          {filteredTxs.length ? (
+            <div className="bx-rows">
+              {filteredTxs.map(tx => {
+                const st = getWorkflowStatusConfig(tx.status)
+                return (
+                  <Link key={tx.id} href={txHref(tx)} className="bx-row">
+                    <span className="bx-row-main">
+                      <span className="bx-dot" style={{ background: st.text }} aria-hidden />
+                      <span className="bx-row-text">
+                        <b>{tx.companyName || tx.clientName || 'بدون شركة'}</b>
+                        <span>{tx.typeLabel}{tx.lawyerName ? ` · ${tx.lawyerName}` : ''}</span>
+                      </span>
+                    </span>
+                    <span className="bx-chip" style={{ background: st.bg, color: st.text, border: `1px solid ${st.border}` }}>{st.label}</span>
+                    <span className="bx-row-date num">{tx.txDate ? formatDate(tx.txDate) : '—'}</span>
+                  </Link>
+                )
+              })}
+            </div>
+          ) : (
+            <div className="bx-empty">لا توجد معاملات بهذا التصنيف</div>
+          )}
+          <Link href="/commercial" className="bx-link" style={{ alignSelf: 'flex-start' }}>كل المعاملات ({recentTxs.length}) ←</Link>
         </section>
 
         {/* 3. المهل القريبة */}
@@ -202,41 +212,31 @@ export default function DashboardClient({ stats, profiles = [], companies = [] }
           )}
         </section>
 
-        {/* 5. أحدث المعاملات */}
-        <section className="bx-card bx-s8" style={{ animationDelay: '.26s' }} aria-labelledby="bx-tx-h">
+        {/* 5. نشاط الأسبوع */}
+        <section className="bx-card bx-s8" style={{ animationDelay: '.26s' }} aria-labelledby="bx-week-h">
           <div className="bx-card-head">
-            <h2 id="bx-tx-h">أحدث المعاملات</h2>
-            <div className="bx-pills" role="group" aria-label="تصفية المعاملات">
-              {([['all', 'الكل'], ['progress', 'قيد التنفيذ'], ['new', 'جديدة'], ['done', 'مكتملة']] as const).map(([id, label]) => (
-                <button key={id} type="button" className={`bx-pill${txFilter === id ? ' is-on' : ''}`} aria-pressed={txFilter === id} onClick={() => setTxFilter(id)}>
-                  {label} <i className="num">{counts[id]}</i>
-                </button>
-              ))}
+            <div>
+              <h2 id="bx-week-h">نشاط هذا الأسبوع</h2>
+              <small>المعاملات المسجّلة كل يوم · المجموع <span className="num">{weekTotal}</span></small>
             </div>
+            <Link href="/commercial" className="bx-link">كل المعاملات ←</Link>
           </div>
-          {filteredTxs.length ? (
-            <div className="bx-rows">
-              {filteredTxs.map(tx => {
-                const st = getWorkflowStatusConfig(tx.status)
-                return (
-                  <Link key={tx.id} href={txHref(tx)} className="bx-row">
-                    <span className="bx-row-main">
-                      <span className="bx-dot" style={{ background: st.text }} aria-hidden />
-                      <span className="bx-row-text">
-                        <b>{tx.companyName || tx.clientName || 'بدون شركة'}</b>
-                        <span>{tx.typeLabel}{tx.lawyerName ? ` · ${tx.lawyerName}` : ''}</span>
-                      </span>
-                    </span>
-                    <span className="bx-chip" style={{ background: st.bg, color: st.text, border: `1px solid ${st.border}` }}>{st.label}</span>
-                    <span className="bx-row-date num">{tx.txDate ? formatDate(tx.txDate) : '—'}</span>
-                  </Link>
-                )
-              })}
-            </div>
-          ) : (
-            <div className="bx-empty">لا توجد معاملات بهذا التصنيف</div>
-          )}
-          <Link href="/commercial" className="bx-link" style={{ alignSelf: 'flex-start' }}>كل المعاملات ({recentTxs.length}) ←</Link>
+          <div className="bx-week" role="img" aria-label={`المعاملات المسجّلة هذا الأسبوع: ${week.map(d => `${d.label} ${d.isFuture ? '—' : d.count}`).join('، ')}`}>
+            {week.map((d, i) => {
+              const h = d.isFuture ? 42 : Math.max(6, (d.count / weekMax) * 100)
+              return (
+                <div className="bx-day" key={d.date}>
+                  {d.isToday && <span className="bx-tip">اليوم · <span className="num">{d.count}</span></span>}
+                  <div
+                    className={`bx-bar${d.isToday ? ' is-today' : ''}${d.isFuture ? ' is-future' : ''}`}
+                    style={{ height: `${h}%`, animationDelay: `${0.15 + i * 0.05}s` }}
+                    title={d.isFuture ? d.label : `${d.label}: ${d.count}`}
+                  />
+                  <span className={`bx-day-label${d.isToday ? ' is-today' : ''}`}>{d.label}</span>
+                </div>
+              )
+            })}
+          </div>
         </section>
 
         {/* 6. التذكيرات */}

@@ -4286,3 +4286,88 @@ html[data-theme="dark"] .tk-chip.on { color: #A9BBE6; }
   .tk-row { grid-template-columns: 1fr 1fr; }
 }
 @media (prefers-reduced-motion: reduce) { .tk-urgent i, .tk-dot { animation: none; } .tk-check, .tk-check svg, .tk-finish-ic { transition: none; animation: none; } }
+
+/* ============================================================
+   بطاقة الساعة (الإصدار 3): أكبر، أرقام تتدحرج، خلفية هادئة متحركة
+   ============================================================ */
+.cr-card {
+  --c1: #7FD8C1; --c2: #6CB8F0; --c3: #A99BF5;
+  position: relative; overflow: hidden; isolation: isolate;
+  display: flex !important; flex-direction: column; gap: 22px !important;
+  padding: 26px 30px 24px !important;
+  background: var(--surface) !important; border: 1px solid var(--line-soft) !important;
+}
+/* خلفية: ثلاث بقع لونية خافتة تنجرف ببطء */
+.cr-mesh { position: absolute; inset: 0; z-index: -1; pointer-events: none; }
+.cr-mesh i { position: absolute; width: 46%; aspect-ratio: 1; border-radius: 50%; filter: blur(48px); opacity: .22; }
+.cr-mesh i:nth-child(1) { background: var(--c1); top: -40%; inset-inline-start: -8%; animation: cr-drift1 18s ease-in-out infinite alternate; }
+.cr-mesh i:nth-child(2) { background: var(--c2); top: -30%; inset-inline-end: 10%; animation: cr-drift2 22s ease-in-out infinite alternate; }
+.cr-mesh i:nth-child(3) { background: var(--c3); bottom: -55%; inset-inline-end: -10%; animation: cr-drift1 26s ease-in-out infinite alternate-reverse; }
+html[data-theme="dark"] .cr-mesh i { opacity: .16; }
+@keyframes cr-drift1 { to { transform: translate(18%, 14%) scale(1.15); } }
+@keyframes cr-drift2 { to { transform: translate(-16%, 18%) scale(.9); } }
+
+.cr-top { display: grid; grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: "date time"; align-items: center; gap: 24px; }
+.cr-date { grid-area: date; min-width: 0; }
+.cr-time { grid-area: time; display: flex; align-items: center; gap: 16px; direction: ltr; }
+
+/* الأرقام المتدحرجة */
+.cr-digits { display: flex; align-items: center; font-size: clamp(64px, 7.2vw, 104px); font-weight: 700; line-height: 1; letter-spacing: -.02em; color: var(--text); font-variant-numeric: tabular-nums; }
+.cr-roll { display: inline-block; height: 1em; overflow: hidden; width: .6em; text-align: center; }
+.cr-strip { display: flex; flex-direction: column; transition: transform .7s cubic-bezier(.22, 1.25, .36, 1); }
+.cr-strip > span { height: 1em; display: block; }
+.cr-card:not(.is-ready) .cr-strip { transition: none; }
+.cr-colon { display: inline-flex; flex-direction: column; justify-content: center; gap: .2em; padding: 0 .1em; height: 1em; }
+.cr-colon i { width: .12em; height: .12em; border-radius: 50%; background: linear-gradient(135deg, var(--c1), var(--c2)); animation: cr-breathe 2s ease-in-out infinite; }
+@keyframes cr-breathe { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: .3; transform: scale(.75); } }
+.cr-side { display: flex; flex-direction: column; align-items: flex-start; gap: 6px; direction: rtl; }
+.cr-period { font-size: 14px; font-weight: 800; background: linear-gradient(90deg, #2FA4A9, #5AA9E6); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.cr-sec { display: inline-flex; direction: ltr; font-size: 26px; font-weight: 700; color: var(--text-3); line-height: 1; font-variant-numeric: tabular-nums; }
+.cr-roll.sm { width: .62em; }
+
+/* التاريخ */
+.cr-day { font-size: 30px; font-weight: 800; color: var(--text); line-height: 1.2; }
+.cr-greg { font-size: 16px; font-weight: 600; color: var(--text-2); margin-top: 6px; }
+.cr-hijri { font-size: 13.5px; color: var(--text-3); }
+.cr-tz { display: inline-block; margin-top: 10px; font-size: 11.5px; font-weight: 700; color: #1F8A84; background: rgba(76, 195, 166, .14); border-radius: 999px; padding: 2px 10px; }
+html[data-theme="dark"] .cr-tz { color: #8FE3CF; }
+
+/* يوم العمل */
+.cr-work-head { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; font-size: 13px; font-weight: 700; color: var(--text-2); margin-bottom: 10px; }
+.cr-work-head small { font-size: 11.5px; font-weight: 500; color: var(--text-3); margin-inline-start: 6px; }
+.cr-work-head b { font-size: 14px; color: var(--text); }
+.cr-track { position: relative; height: 12px; border-radius: 999px; background: color-mix(in srgb, var(--surface-2) 80%, transparent); box-shadow: inset 0 0 0 1px var(--line-soft); }
+.cr-fill { position: absolute; inset-block: 0; inset-inline-start: 0; border-radius: inherit; overflow: hidden; transition: width 1s linear;
+  background: linear-gradient(110deg, var(--c1), var(--c2), var(--c3), var(--c1)); background-size: 300% 100%; animation: cr-flow 8s linear infinite; }
+.cr-fill::after { content: ''; position: absolute; inset: 0; background: linear-gradient(100deg, transparent 30%, rgba(255, 255, 255, .55) 50%, transparent 70%); animation: cr-sheen 2.8s ease-in-out infinite; }
+@keyframes cr-flow { to { background-position: 300% 0; } }
+@keyframes cr-sheen { from { transform: translateX(110%); } to { transform: translateX(-110%); } }
+.cr-orb { position: absolute; top: 50%; width: 20px; height: 20px; border-radius: 50%; background: #fff; transform: translate(50%, -50%); box-shadow: 0 2px 8px rgba(30, 42, 51, .25), inset 0 0 0 4px var(--c2); }
+.cr-orb::before, .cr-orb::after { content: ''; position: absolute; inset: 0; border-radius: 50%; border: 2px solid var(--c2); animation: cr-ring 2.2s ease-out infinite; }
+.cr-orb::after { animation-delay: 1.1s; }
+@keyframes cr-ring { from { transform: scale(1); opacity: .8; } to { transform: scale(2.6); opacity: 0; } }
+.cr-work.is-after .cr-fill { animation: none; background: linear-gradient(90deg, var(--c1), var(--c2)); }
+.cr-work-text { margin-top: 10px; font-size: 13px; font-weight: 700; color: var(--text-2); text-align: center; }
+
+/* دخول البطاقة */
+.cr-card.is-ready .cr-digits, .cr-card.is-ready .cr-date { animation: cr-in .6s cubic-bezier(.2, .8, .2, 1) both; }
+.cr-card.is-ready .cr-date { animation-delay: .08s; }
+@keyframes cr-in { from { opacity: 0; transform: translateY(8px); filter: blur(4px); } to { opacity: 1; transform: none; filter: none; } }
+
+@media (max-width: 760px) {
+  .cr-card { padding: 20px 18px 18px !important; gap: 18px !important; }
+  .cr-top { grid-template-columns: 1fr; grid-template-areas: "time" "date"; gap: 14px; }
+  .cr-time { justify-self: start; gap: 10px; }
+  .cr-digits { font-size: clamp(56px, 17vw, 76px); }
+  .cr-sec { font-size: 20px; }
+  .cr-date { display: flex; flex-wrap: wrap; align-items: baseline; column-gap: 10px; padding-top: 12px; border-top: 1px solid var(--line-soft); }
+  .cr-day { font-size: 20px; }
+  .cr-greg { font-size: 14px; margin: 0; }
+  .cr-hijri { font-size: 12.5px; width: 100%; }
+  .cr-tz { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .cr-mesh i, .cr-colon i, .cr-fill, .cr-fill::after, .cr-orb::before, .cr-orb::after { animation: none !important; }
+  .cr-strip, .cr-fill { transition: none; }
+  .cr-card.is-ready .cr-digits, .cr-card.is-ready .cr-date { animation: none; }
+}
