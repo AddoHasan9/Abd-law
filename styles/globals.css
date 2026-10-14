@@ -4109,3 +4109,62 @@ html[data-theme="dark"] .lc-card { --off: rgba(255, 255, 255, .035); }
 html:root .rem-actions .rem-stop { width: auto !important; padding: 0 10px !important; border-radius: 999px !important; font-size: 11.5px; font-weight: 800; color: #A12B36 !important; background: rgba(194, 51, 63, .1) !important; border: 1px solid rgba(194, 51, 63, .25) !important; white-space: nowrap; }
 html[data-theme="dark"] .rem-actions .rem-stop { color: #F4A3A9 !important; }
 html:root .rem-item.is-focus { border-color: var(--gold, #B08D57) !important; box-shadow: 0 0 0 3px color-mix(in srgb, var(--gold, #B08D57) 25%, transparent) !important; }
+
+/* ============================================================
+   بطاقة الساعة (الإصدار المتوازن): تاريخ · يوم العمل · الوقت
+   ============================================================ */
+.hc-card {
+  display: grid !important; grid-template-columns: minmax(0, auto) minmax(220px, 1fr) auto;
+  grid-template-areas: "date work time"; align-items: center; gap: 36px !important;
+  padding: 22px 30px !important; position: relative; overflow: hidden;
+  background:
+    radial-gradient(420px 220px at 6% 50%, color-mix(in srgb, var(--gold, #B08D57) 13%, transparent), transparent 70%),
+    var(--surface) !important;
+  border: 1px solid var(--line-soft) !important;
+}
+.hc-date { grid-area: date; min-width: 0; }
+.hc-work { grid-area: work; min-width: 0; }
+.hc-time { grid-area: time; display: flex; align-items: center; gap: 14px; direction: ltr; }
+
+/* الوقت */
+.hc-digits { display: flex; align-items: baseline; font-size: clamp(54px, 5.4vw, 78px); font-weight: 700; line-height: .95; letter-spacing: -.03em; color: var(--brand); font-variant-numeric: tabular-nums; }
+html[data-theme="dark"] .hc-digits { color: #EEF2FA; }
+.hc-colon { color: var(--gold, #B08D57); margin: 0 .04em; transform: translateY(-.06em); animation: hc-pulse 1s steps(1) infinite; }
+@keyframes hc-pulse { 50% { opacity: .25; } }
+.hc-side { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; direction: rtl; }
+.hc-period { font-size: 13px; font-weight: 800; color: var(--gold, #B08D57); }
+.hc-sec { font-size: 22px; font-weight: 700; color: var(--text-3); line-height: 1; direction: ltr; font-variant-numeric: tabular-nums; }
+.hc-tz { font-size: 11px; font-weight: 700; color: var(--accent); background: var(--accent-soft); border-radius: 999px; padding: 1px 9px; }
+html[data-theme="dark"] .hc-tz { color: #A9BBE6; }
+
+/* التاريخ */
+.hc-day { font-size: 26px; font-weight: 800; color: var(--text); line-height: 1.25; }
+.hc-greg { font-size: 15px; font-weight: 600; color: var(--text-2); margin-top: 4px; }
+.hc-hijri { font-size: 13px; color: var(--text-3); }
+
+/* يوم العمل */
+.hc-work-head { display: flex; justify-content: space-between; align-items: baseline; font-size: 12.5px; font-weight: 700; color: var(--text-3); margin-bottom: 8px; }
+.hc-work-head b { font-size: 13px; color: var(--text); }
+.hc-track { position: relative; height: 10px; border-radius: 999px; background: var(--surface-2); box-shadow: inset 0 0 0 1px var(--line-soft); }
+.hc-fill { position: absolute; inset-block: 0; inset-inline-start: 0; border-radius: inherit; background: linear-gradient(90deg, color-mix(in srgb, var(--gold, #B08D57) 70%, #fff), var(--gold, #B08D57)); transition: width 1s linear; }
+[dir="rtl"] .hc-fill { background: linear-gradient(270deg, color-mix(in srgb, var(--gold, #B08D57) 70%, #fff), var(--gold, #B08D57)); }
+.hc-now { position: absolute; top: 50%; width: 16px; height: 16px; border-radius: 999px; background: var(--brand); border: 3px solid var(--surface); box-shadow: 0 2px 6px rgba(15, 23, 42, .3); transform: translate(50%, -50%); }
+html[data-theme="dark"] .hc-now { background: #EEF2FA; }
+.hc-work-foot { display: flex; justify-content: space-between; gap: 8px; margin-top: 8px; font-size: 11.5px; color: var(--text-3); }
+.hc-work-text { font-weight: 700; color: var(--text-2); text-align: center; }
+.hc-work.is-after .hc-fill { background: color-mix(in srgb, var(--text-3) 35%, transparent); }
+
+/* الهاتف والشاشات الضيقة: الوقت والتاريخ جنباً، ويوم العمل تحتهما */
+@media (max-width: 760px) {
+  .hc-card { grid-template-columns: 1fr; grid-template-areas: "time" "date" "work"; gap: 14px !important; padding: 18px !important;
+    background: radial-gradient(260px 160px at 8% 22%, color-mix(in srgb, var(--gold, #B08D57) 14%, transparent), transparent 70%), var(--surface) !important; }
+  .hc-digits { font-size: clamp(42px, 13vw, 56px); }
+  .hc-time { gap: 8px; }
+  .hc-sec { font-size: 17px; }
+  .hc-time { justify-self: start; }
+  .hc-date { display: flex; flex-wrap: wrap; align-items: baseline; column-gap: 10px; padding-top: 12px; border-top: 1px solid var(--line-soft); }
+  .hc-day { font-size: 19px; }
+  .hc-greg { font-size: 14px; margin: 0; }
+  .hc-hijri { font-size: 12.5px; width: 100%; }
+}
+@media (prefers-reduced-motion: reduce) { .hc-colon { animation: none; } .hc-fill { transition: none; } }
