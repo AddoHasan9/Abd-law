@@ -13,7 +13,7 @@ export async function applyReminderAct(
 ): Promise<{ success: boolean; error?: string }> {
   if (!id || !['stop', 'done'].includes(act)) return { success: false, error: 'طلب غير صالح' }
   const admin = createAdminClient()
-  const { data: r } = await admin.from('reminders').select('id, owner_id, assignee_id').eq('id', id).maybeSingle()
+  const { data: r } = await admin.from('reminders').select('id, owner_id, assignee_id, task_id').eq('id', id).maybeSingle()
   if (!r) return { success: false, error: 'التذكير غير موجود' }
   const isAdmin = ['super_admin', 'admin'].includes(String(profile.role || ''))
   if (!isAdmin && profile.id !== r.owner_id && profile.id !== r.assignee_id) return { success: false, error: 'ليس لديك صلاحية على هذا التذكير' }
@@ -22,5 +22,9 @@ export async function applyReminderAct(
     : { repeat: 'none', alert_sent: true }
   const { error } = await admin.from('reminders').update(update).eq('id', id)
   if (error) return { success: false, error: 'تعذر الحفظ' }
+  // «تم» على تذكير مهمة ⇒ تُنجَز المهمة نفسها
+  if (act === 'done' && r.task_id) {
+    await admin.from('tasks').update({ status: 'done', done_at: new Date().toISOString(), updated_at: new Date().toISOString() }).eq('id', r.task_id)
+  }
   return { success: true }
 }

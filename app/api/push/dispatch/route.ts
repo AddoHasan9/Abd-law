@@ -24,7 +24,7 @@ export async function POST(req: Request) {
   // 1) التذكيرات
   const { data: due } = await admin
     .from('reminders')
-    .select('id, title, notes, due_date, due_time, owner_id, assignee_id, company_id, repeat')
+    .select('id, title, notes, due_date, due_time, owner_id, assignee_id, company_id, repeat, task_id')
     .eq('alert_sent', false).eq('is_completed', false).eq('is_archived', false)
     .lte('due_date', now.date)
     .limit(100)
@@ -50,8 +50,8 @@ export async function POST(req: Request) {
     const rep = repeatShort(rule)
     const timeTxt = r.due_time ? r.due_time.slice(0, 5) : '09:00'
     const title = r.title
-    // التفاصيل بأسطر واضحة: الموعد، ثم الملاحظات، ثم التكرار
-    const body = [
+    // التفاصيل بأسطر واضحة: الموعد، ثم الملاحظات، ثم التكرار (تذكير المهمة: تفاصيله جاهزة)
+    const body = r.task_id ? (r.notes || '') : [
       `⏰ الموعد ${timeTxt}`,
       r.notes?.trim() ? `📝 ${r.notes.trim()}` : '',
       rep ? `🔁 ${rep}${rule === 'every5' ? ' — اضغط لإيقافه' : ''}` : '',
@@ -62,7 +62,7 @@ export async function POST(req: Request) {
       user_id: target, title: `تذكير: ${r.title}`, description: body, type: 'reminder_alert',
       related_company_id: r.company_id, link_url: '/reminders', is_read: false, pushed_at: new Date().toISOString(),
     })
-    const res = await sendPush(target ? [target] : 'all', { title, body, url: `/reminders?r=${r.id}`, tag: `reminder-${r.id}-${r.due_date}-${timeTxt}`, rid: r.id })
+    const res = await sendPush(target ? [target] : 'all', { title, body, url: r.task_id ? `/tasks?t=${r.task_id}` : `/reminders?r=${r.id}`, tag: `reminder-${r.id}-${r.due_date}-${timeTxt}`, rid: r.id })
     devices += res.sent
     await admin.from('reminders').update(after).eq('id', r.id)
     reminders++
