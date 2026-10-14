@@ -8,4 +8,6 @@ export interface PushPayload {
   body?: string
   url?: string
   tag?: string
+  /** معرّف التذكير ⇒ أزرار «تم / إيقاف» داخل الإشعار (حيث يدعمها النظام) */
+  rid?: string
 }

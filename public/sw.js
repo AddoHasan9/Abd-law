@@ -21,7 +21,9 @@ self.addEventListener('push', event => {
       vibrate: [220, 120, 220, 120, 320],
       requireInteraction: isReminder,
       timestamp: Date.now(),
-      data: { url: data.url || '/dashboard' },
+      // أزرار داخل الإشعار (الحاسبة وأندرويد؛ iPhone لا يدعمها فيفتح التذكير عند الضغط)
+      actions: data.rid ? [{ action: 'done', title: '✓ تم' }, { action: 'stop', title: '⏹ إيقاف' }] : [],
+      data: { url: data.url || '/dashboard', rid: data.rid || null },
     })
     // إن كان الموقع مفتوحاً: نبلّغ الصفحة لتشغيل نغمة وإظهار رسالة
     const all = await self.clients.matchAll({ type: 'window', includeUncontrolled: true })
@@ -31,6 +33,16 @@ self.addEventListener('push', event => {
 
 self.addEventListener('notificationclick', event => {
   event.notification.close()
+  const nd = event.notification.data || {}
+  // زرّا «تم / إيقاف»: يُنفَّذان بلا فتح الموقع
+  if ((event.action === 'done' || event.action === 'stop') && nd.rid) {
+    event.waitUntil(fetch('/api/reminders/act', {
+      method: 'POST', credentials: 'include',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ id: nd.rid, act: event.action }),
+    }).catch(() => {}))
+    return
+  }
   const target = new URL((event.notification.data && event.notification.data.url) || '/dashboard', self.location.origin).href
   event.waitUntil((async () => {
     const all = await self.clients.matchAll({ type: 'window', includeUncontrolled: true })

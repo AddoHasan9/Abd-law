@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/server'
 import { getCronSecret, sendPush } from '@/lib/push/server'
-import { baghdadNow, isReminderDue, nextOccurrence, repeatShort, type ReminderRepeat } from '@/lib/push/time'
+import { baghdadNow, isReminderDue, nextOccurrence, plusMinutes, repeatShort, type ReminderRepeat } from '@/lib/push/time'
 
 export const dynamic = 'force-dynamic'
 export const maxDuration = 60
@@ -32,26 +32,37 @@ export async function POST(req: Request) {
     if (!isReminderDue(r.due_date, r.due_time, now)) continue
     const rule = (r.repeat || 'none') as ReminderRepeat
     const next = nextOccurrence(r.due_date, r.due_time, rule, now)
-    // بعد الإرسال: المتكرر ينتقل لموعده التالي ويبقى فعّالاً؛ مرة واحدة يُغلق
-    const after = next
-      ? { due_date: next, alert_sent: false, last_alert_at: new Date().toISOString() }
-      : { alert_sent: true, last_alert_at: new Date().toISOString() }
+    const in5 = rule === 'every5' ? plusMinutes(5) : null
+    const stamp = new Date().toISOString()
+    // بعد الإرسال: «كل 5 دقائق» ⇒ بعد 5 دقائق؛ المتكرر ⇒ موعده التالي؛ مرة واحدة ⇒ يُغلق
+    const after = in5
+      ? { due_date: in5.date, due_time: in5.time, alert_sent: false, last_alert_at: stamp }
+      : next
+        ? { due_date: next, alert_sent: false, last_alert_at: stamp }
+        : { alert_sent: true, last_alert_at: stamp }
     // متأخر جداً (لم يُنبَّه عنه سابقاً): بصمت — المتكرر ينتقل للتالي، ومرة واحدة يُعلَّم
     if (r.due_date < twoDaysAgo) {
-      await admin.from('reminders').update(next ? { due_date: next } : { alert_sent: true }).eq('id', r.id)
+      await admin.from('reminders').update(in5 ? { due_date: in5.date, due_time: in5.time } : next ? { due_date: next } : { alert_sent: true }).eq('id', r.id)
       silenced++
       continue
     }
-    const title = `تذكير: ${r.title}`
+    // الإشعار: العنوان = التذكير نفسه (هو المهم)، وتحته الوقت والتفاصيل
     const rep = repeatShort(rule)
-    const body = (r.notes || (r.due_time ? `الموعد ${r.due_time.slice(0, 5)}` : 'حان موعد التذكير')) + (rep ? ` · 🔁 ${rep}` : '')
+    const timeTxt = r.due_time ? r.due_time.slice(0, 5) : '09:00'
+    const title = r.title
+    // التفاصيل بأسطر واضحة: الموعد، ثم الملاحظات، ثم التكرار
+    const body = [
+      `⏰ الموعد ${timeTxt}`,
+      r.notes?.trim() ? `📝 ${r.notes.trim()}` : '',
+      rep ? `🔁 ${rep}${rule === 'every5' ? ' — اضغط لإيقافه' : ''}` : '',
+    ].filter(Boolean).join('\n')
     // المستلم: المحامي المسؤول، وإلا صاحب التذكير، وإلا الجميع (تذكيرات قديمة بلا مالك)
     const target: string | null = r.assignee_id || r.owner_id || null
     await admin.from('notifications').insert({
-      user_id: target, title, description: body, type: 'reminder_alert',
+      user_id: target, title: `تذكير: ${r.title}`, description: body, type: 'reminder_alert',
       related_company_id: r.company_id, link_url: '/reminders', is_read: false, pushed_at: new Date().toISOString(),
     })
-    const res = await sendPush(target ? [target] : 'all', { title, body, url: '/reminders', tag: `reminder-${r.id}-${r.due_date}` })
+    const res = await sendPush(target ? [target] : 'all', { title, body, url: `/reminders?r=${r.id}`, tag: `reminder-${r.id}-${r.due_date}-${timeTxt}`, rid: r.id })
     devices += res.sent
     await admin.from('reminders').update(after).eq('id', r.id)
     reminders++

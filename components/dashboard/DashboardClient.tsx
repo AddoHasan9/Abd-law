@@ -107,8 +107,8 @@ export default function DashboardClient({ stats, profiles = [], companies = [] }
     <div className="bx relative z-10">
       <header className="bx-head">
         <div>
-          <h1>لوحة التحكم</h1>
-          <p>{formatFullDate()} — كل ما يحتاج تصرفك اليوم بمكان واحد</p>
+          <h1 className="ph-two"><span className="ph-title">لوحة التحكم.</span> <span className="ph-tag">كل يومك بمكان واحد.</span></h1>
+          <p>{formatFullDate()}</p>
         </div>
       </header>
 

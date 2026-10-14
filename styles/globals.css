@@ -3944,3 +3944,227 @@ html:root .rem-meta > * + *::before { content: none !important; }
 .rem-who { display: inline-flex; align-items: center; gap: 3px; font-size: 11px; font-weight: 700; color: var(--text-2); background: var(--surface-2); border: 1px solid var(--line-soft); border-radius: 999px; padding: 0 8px; white-space: nowrap; }
 html:root .rem-repeat { margin-inline-start: 0; }
 html:root .rem-co { font-weight: 600; }
+
+/* ============================================================
+   الهدوء (مستوحى من Diwan Cloud) — نظام الشارات الثلاث + الأزرار
+   1) حالة  = أبيض + إطار رفيع + نقطة ملوّنة + نص رمادي
+   2) تصنيف = خلفية باهتة جداً + نص ملوّن، بلا إطار
+   3) محايد = إطار فقط
+   زر أساسي واحد مليء؛ أزرار الإجراء المتكررة فاتحة
+   ============================================================ */
+html:root .tag {
+  font-size: 11.5px; font-weight: 600; padding: 3px 10px; gap: 6px; line-height: 1.5;
+  border: 1px solid transparent; border-radius: 999px;
+}
+/* 1) الحالات: ok / work / warn / bad / completed */
+html:root :is(.tag-ok, .tag-work, .tag-warn, .tag-bad, .badge-completed) {
+  background: var(--surface) !important; border: 1px solid var(--line-soft) !important; color: var(--text-2) !important;
+}
+html:root :is(.tag-ok, .tag-work, .tag-warn, .tag-bad, .badge-completed)::before {
+  content: ''; width: 7px; height: 7px; border-radius: 999px; flex: none; background: var(--dot, var(--text-3));
+}
+html:root :is(.tag-ok, .badge-completed) { --dot: #22A06B; }
+html:root .tag-work { --dot: var(--accent); }
+html:root .tag-warn { --dot: #E0A100; }
+html:root .tag-bad  { --dot: #D64550; }
+/* الأيقونات داخل شارات الحالة تُخفى لصالح النقطة (بساطة) */
+html:root :is(.tag-ok, .tag-work, .tag-warn, .tag-bad, .badge-completed) > .material-symbols-outlined { display: none; }
+
+/* 2) التصنيف: باهت جداً ونص ملوّن */
+html:root .tag-orange { background: color-mix(in srgb, #C77A1F 10%, transparent) !important; color: #9A5B12 !important; border-color: transparent !important; }
+html:root .badge-type { background: var(--accent-soft) !important; color: var(--accent) !important; border-color: transparent !important; font-weight: 600; }
+html[data-theme="dark"] .tag-orange { color: #E7B36A !important; }
+html[data-theme="dark"] .badge-type { color: #A9BBE6 !important; }
+
+/* 3) محايد: إطار فقط */
+html:root :is(.tag-gray, .tag-mute, .tag-blue) { background: var(--surface) !important; border: 1px solid var(--line-soft) !important; color: var(--text-2) !important; }
+
+/* شارات الشركة القديمة (co-pill) بنفس منطق الحالة */
+html:root .co-pill { background: var(--surface) !important; border: 1px solid var(--line-soft) !important; color: var(--text-2) !important; font-weight: 600; }
+html:root .co-pill.is-ok .material-symbols-outlined { color: #22A06B; }
+html:root .co-pill.is-bad .material-symbols-outlined { color: #D64550; }
+html:root .co-pill.is-warn .material-symbols-outlined { color: #E0A100; }
+html:root .co-pill.is-info .material-symbols-outlined { color: var(--accent); }
+
+/* ── الأزرار ── */
+/* الأساسي: مليء بلون الشعار — واحد في الشاشة */
+html:root .btn-primary { font-weight: 700; letter-spacing: 0; }
+/* أزرار الإجراء المتكررة (إضافة/تكليف/إكمال المحطة…): فاتحة بلون الشعار بدل المليء */
+html:root .btn-go {
+  background: var(--accent-soft) !important; color: var(--accent) !important;
+  border: 1px solid color-mix(in srgb, var(--accent) 22%, transparent) !important; box-shadow: none !important;
+}
+html:root .btn-go:hover:not(:disabled) { background: color-mix(in srgb, var(--accent) 16%, var(--surface)) !important; box-shadow: none !important; }
+html[data-theme="dark"] .btn-go { color: #A9BBE6 !important; }
+/* الثانوي: أبيض بإطار */
+html:root .btn-ghost { background: var(--surface) !important; border: 1px solid var(--line) !important; color: var(--text) !important; box-shadow: none !important; }
+@media (hover: hover) { html:root .btn-ghost:hover:not(:disabled) { background: var(--surface-2) !important; } }
+
+/* ── الجداول: فواصل رفيعة وعناوين هادئة ── */
+html:root table thead th { font-weight: 600 !important; color: var(--text-3) !important; background: transparent !important; }
+/* تصنيفات (أنواع الهويات…): خلفية باهتة جداً ونص ملوّن، بلا إطار ولا نقطة */
+html:root :is(.tag-cat-orange, .tag-cat-green, .tag-cat-blue, .tag-cat-amber, .tag-cat-violet) { border: 1px solid transparent !important; font-weight: 600; }
+html:root .tag-cat-orange { background: rgba(199, 122, 31, .10) !important; color: #9A5B12 !important; }
+html:root .tag-cat-green  { background: rgba(34, 160, 107, .10) !important; color: #157A51 !important; }
+html:root .tag-cat-blue   { background: color-mix(in srgb, var(--accent) 10%, transparent) !important; color: var(--accent) !important; }
+html:root .tag-cat-amber  { background: rgba(224, 161, 0, .12) !important; color: #8A6400 !important; }
+html:root .tag-cat-violet { background: rgba(124, 92, 214, .10) !important; color: #5B3FB3 !important; }
+html[data-theme="dark"] .tag-cat-orange { color: #E7B36A !important; }
+html[data-theme="dark"] .tag-cat-green  { color: #6FD3A5 !important; }
+html[data-theme="dark"] .tag-cat-blue   { color: #A9BBE6 !important; }
+html[data-theme="dark"] .tag-cat-amber  { color: #E8C766 !important; }
+html[data-theme="dark"] .tag-cat-violet { color: #BCA8F2 !important; }
+
+/* ============================================================
+   إلهام Diwan (2): عناوين بلونين + توهج الخلفية + حركة عند التمرير
+   ============================================================ */
+/* 1) العنوان بلونين: الاسم غامق، والجملة رمادية — يظهر من ضبابي لواضح */
+html:root h1.ph-two {
+  font-size: clamp(24px, 2.6vw, 32px) !important; font-weight: 800 !important; line-height: 1.35 !important;
+  letter-spacing: -.01em; margin: 0; text-wrap: balance;
+}
+.ph-title { color: var(--text); }
+.ph-tag { color: var(--text-3); font-weight: 700; }
+.ph-title, .ph-tag { display: inline; animation: ph-in .7s cubic-bezier(.2, .8, .2, 1) both; }
+.ph-tag { animation-delay: .14s; }
+@keyframes ph-in { from { opacity: 0; filter: blur(8px); transform: translateY(6px); } to { opacity: 1; filter: blur(0); transform: none; } }
+html:root .page-head p, html:root .bx-head p { font-size: 13.5px; color: var(--text-3); margin-top: 6px; }
+
+/* 2) توهج خفيف أعلى الصفحة (كحلي + ذهبي)، يتحرك مع المحتوى ويختفي عند التمرير */
+html:root #view-root {
+  background-color: var(--bg);
+  background-image:
+    radial-gradient(1000px 420px at 78% -140px, rgba(43, 76, 140, .17), transparent 70%),
+    radial-gradient(700px 340px at 12% -120px, rgba(176, 141, 87, .17), transparent 70%);
+  background-repeat: no-repeat;
+  background-attachment: local;
+}
+html[data-theme="dark"] #view-root {
+  background-image:
+    radial-gradient(900px 340px at 78% -140px, rgba(85, 118, 192, .16), transparent 70%),
+    radial-gradient(620px 280px at 12% -120px, rgba(176, 141, 87, .10), transparent 70%);
+}
+
+/* 3) حركة عند التمرير: البطاقات تصعد بهدوء عند دخولها الشاشة (يديرها RevealOnScroll) */
+.rv { opacity: 0; transform: translateY(14px); }
+.rv.rv-in { opacity: 1; transform: none; transition: opacity .55s ease, transform .55s cubic-bezier(.2, .8, .2, 1); transition-delay: var(--rv-delay, 0ms); }
+@media (prefers-reduced-motion: reduce) {
+  .ph-title, .ph-tag { animation: none; }
+  .rv, .rv.rv-in { opacity: 1; transform: none; transition: none; }
+}
+
+/* ============================================================
+   بطاقة الساعة — النموذج 7: بطاقة بيضاء + أرقام LED نقطية كحلية
+   ============================================================ */
+.lc-card {
+  --onc: var(--brand); --off: color-mix(in srgb, var(--brand) 7%, transparent);
+  --d: 9px; --g: 4px;
+  background: var(--surface) !important; border: 1px solid var(--line-soft) !important;
+  padding: 22px 22px 18px !important; display: flex !important; flex-direction: column; gap: 0 !important;
+}
+html[data-theme="dark"] .lc-card { --onc: #E8EDF8; --off: rgba(255, 255, 255, .06); }
+.lc-row { display: flex; align-items: flex-end; gap: 14px; direction: ltr; }
+.lc-matrix { display: inline-flex; align-items: flex-end; gap: calc(var(--d) * 1.1); }
+.lc-digit { display: grid; grid-template-columns: repeat(5, var(--d)); grid-auto-rows: var(--d); gap: var(--g); }
+.lc-digit i { border-radius: 50%; background: var(--off); transition: background-color .3s ease; }
+.lc-digit i.on { background: var(--onc); }
+.lc-colon { display: grid; grid-auto-rows: var(--d); row-gap: calc(var(--g) * 2.8); padding-bottom: calc(var(--d) * 1.25); }
+.lc-colon i { width: var(--d); height: var(--d); border-radius: 50%; background: var(--onc); animation: lc-blink 1s steps(1) infinite; }
+@keyframes lc-blink { 50% { opacity: .2; } }
+.lc-small { --d: 4.5px; --g: 2px; gap: 5px; }
+.lc-side { display: flex; flex-direction: column; align-items: flex-start; gap: 8px; padding-bottom: 2px; }
+.lc-period { font-size: 15px; font-weight: 700; color: var(--gold, #B08D57); direction: rtl; line-height: 1; }
+.lc-foot { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 18px; padding-top: 14px; border-top: 1px solid var(--line-soft); }
+.lc-day { font-size: 17px; font-weight: 800; color: var(--text); }
+.lc-date { font-size: 13px; color: var(--text-3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.lc-chip { flex: none; font-size: 12px; font-weight: 700; color: var(--accent); background: var(--accent-soft); border-radius: 999px; padding: 3px 12px; }
+html[data-theme="dark"] .lc-chip { color: #A9BBE6; }
+@media (max-width: 440px) { .lc-card { --d: 6.5px; --g: 3px; padding: 18px !important; } .lc-small { --d: 3.6px; --g: 1.6px; gap: 4px; } }
+@media (max-width: 360px) { .lc-card { --d: 5.6px; --g: 2.6px; } }
+@media (prefers-reduced-motion: reduce) { .lc-colon i { animation: none; } .lc-digit i { transition: none; } }
+
+/* ============================================================
+   بطاقات المؤشرات: كلها بيضاء — المميّزة بخط ذهبي رفيع ورقم كحلي (بدل الكحلي المليء)
+   ============================================================ */
+html:root .kpi-card.is-featured {
+  background: var(--surface) !important; border-color: var(--line-soft) !important; color: var(--text) !important;
+  box-shadow: inset 0 3px 0 var(--gold, #B08D57) !important;
+}
+html:root .kpi-card.is-featured .kpi-label { color: var(--text) !important; }
+html:root .kpi-card.is-featured .kpi-hint { color: var(--text-3) !important; opacity: 1 !important; }
+html:root .kpi-card.is-featured .kpi-value { color: var(--accent) !important; }
+html[data-theme="dark"] .kpi-card.is-featured .kpi-value { color: #A9BBE6 !important; }
+html:root .kpi-card.is-featured .kpi-icon { background: var(--accent-soft) !important; color: var(--accent) !important; }
+html:root .kpi-card.is-featured .kpi-chips > span { background: var(--accent-soft) !important; color: var(--accent) !important; border-color: transparent !important; }
+html:root .kpi-card.is-featured .kpi-chips > span.is-on { background: var(--accent) !important; color: #fff !important; }
+/* وضوح أرقام LED: نقاط أكبر وأقرب (الرقم يبين متصلاً)، المطفأة بالكاد تُرى، والثواني بخط عادي */
+.lc-card { --d: 10px; --g: 2.5px; --off: color-mix(in srgb, var(--brand) 3.5%, transparent); }
+html[data-theme="dark"] .lc-card { --off: rgba(255, 255, 255, .035); }
+.lc-matrix.lc-big { gap: calc(var(--d) * 1.25); }
+.lc-sec { font-size: 22px; font-weight: 700; color: var(--text-3); font-variant-numeric: tabular-nums; line-height: 1; direction: ltr; }
+@media (max-width: 440px) { .lc-card { --d: 8px; --g: 2px; } .lc-sec { font-size: 18px; } }
+@media (max-width: 360px) { .lc-card { --d: 7px; --g: 1.8px; } }
+.lc-date { white-space: normal; overflow: visible; text-overflow: clip; line-height: 1.7; }
+/* زر «إيقاف» للتذكير المتكرر + إبراز التذكير المفتوح من إشعار الهاتف */
+html:root .rem-actions .rem-stop { width: auto !important; padding: 0 10px !important; border-radius: 999px !important; font-size: 11.5px; font-weight: 800; color: #A12B36 !important; background: rgba(194, 51, 63, .1) !important; border: 1px solid rgba(194, 51, 63, .25) !important; white-space: nowrap; }
+html[data-theme="dark"] .rem-actions .rem-stop { color: #F4A3A9 !important; }
+html:root .rem-item.is-focus { border-color: var(--gold, #B08D57) !important; box-shadow: 0 0 0 3px color-mix(in srgb, var(--gold, #B08D57) 25%, transparent) !important; }
+
+/* ============================================================
+   بطاقة الساعة (الإصدار المتوازن): تاريخ · يوم العمل · الوقت
+   ============================================================ */
+.hc-card {
+  display: grid !important; grid-template-columns: minmax(0, auto) minmax(220px, 1fr) auto;
+  grid-template-areas: "date work time"; align-items: center; gap: 36px !important;
+  padding: 22px 30px !important; position: relative; overflow: hidden;
+  background:
+    radial-gradient(420px 220px at 6% 50%, color-mix(in srgb, var(--gold, #B08D57) 13%, transparent), transparent 70%),
+    var(--surface) !important;
+  border: 1px solid var(--line-soft) !important;
+}
+.hc-date { grid-area: date; min-width: 0; }
+.hc-work { grid-area: work; min-width: 0; }
+.hc-time { grid-area: time; display: flex; align-items: center; gap: 14px; direction: ltr; }
+
+/* الوقت */
+.hc-digits { display: flex; align-items: baseline; font-size: clamp(54px, 5.4vw, 78px); font-weight: 700; line-height: .95; letter-spacing: -.03em; color: var(--brand); font-variant-numeric: tabular-nums; }
+html[data-theme="dark"] .hc-digits { color: #EEF2FA; }
+.hc-colon { color: var(--gold, #B08D57); margin: 0 .04em; transform: translateY(-.06em); animation: hc-pulse 1s steps(1) infinite; }
+@keyframes hc-pulse { 50% { opacity: .25; } }
+.hc-side { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; direction: rtl; }
+.hc-period { font-size: 13px; font-weight: 800; color: var(--gold, #B08D57); }
+.hc-sec { font-size: 22px; font-weight: 700; color: var(--text-3); line-height: 1; direction: ltr; font-variant-numeric: tabular-nums; }
+.hc-tz { font-size: 11px; font-weight: 700; color: var(--accent); background: var(--accent-soft); border-radius: 999px; padding: 1px 9px; }
+html[data-theme="dark"] .hc-tz { color: #A9BBE6; }
+
+/* التاريخ */
+.hc-day { font-size: 26px; font-weight: 800; color: var(--text); line-height: 1.25; }
+.hc-greg { font-size: 15px; font-weight: 600; color: var(--text-2); margin-top: 4px; }
+.hc-hijri { font-size: 13px; color: var(--text-3); }
+
+/* يوم العمل */
+.hc-work-head { display: flex; justify-content: space-between; align-items: baseline; font-size: 12.5px; font-weight: 700; color: var(--text-3); margin-bottom: 8px; }
+.hc-work-head b { font-size: 13px; color: var(--text); }
+.hc-track { position: relative; height: 10px; border-radius: 999px; background: var(--surface-2); box-shadow: inset 0 0 0 1px var(--line-soft); }
+.hc-fill { position: absolute; inset-block: 0; inset-inline-start: 0; border-radius: inherit; background: linear-gradient(90deg, color-mix(in srgb, var(--gold, #B08D57) 70%, #fff), var(--gold, #B08D57)); transition: width 1s linear; }
+[dir="rtl"] .hc-fill { background: linear-gradient(270deg, color-mix(in srgb, var(--gold, #B08D57) 70%, #fff), var(--gold, #B08D57)); }
+.hc-now { position: absolute; top: 50%; width: 16px; height: 16px; border-radius: 999px; background: var(--brand); border: 3px solid var(--surface); box-shadow: 0 2px 6px rgba(15, 23, 42, .3); transform: translate(50%, -50%); }
+html[data-theme="dark"] .hc-now { background: #EEF2FA; }
+.hc-work-foot { display: flex; justify-content: space-between; gap: 8px; margin-top: 8px; font-size: 11.5px; color: var(--text-3); }
+.hc-work-text { font-weight: 700; color: var(--text-2); text-align: center; }
+.hc-work.is-after .hc-fill { background: color-mix(in srgb, var(--text-3) 35%, transparent); }
+
+/* الهاتف والشاشات الضيقة: الوقت والتاريخ جنباً، ويوم العمل تحتهما */
+@media (max-width: 760px) {
+  .hc-card { grid-template-columns: 1fr; grid-template-areas: "time" "date" "work"; gap: 14px !important; padding: 18px !important;
+    background: radial-gradient(260px 160px at 8% 22%, color-mix(in srgb, var(--gold, #B08D57) 14%, transparent), transparent 70%), var(--surface) !important; }
+  .hc-digits { font-size: clamp(42px, 13vw, 56px); }
+  .hc-time { gap: 8px; }
+  .hc-sec { font-size: 17px; }
+  .hc-time { justify-self: start; }
+  .hc-date { display: flex; flex-wrap: wrap; align-items: baseline; column-gap: 10px; padding-top: 12px; border-top: 1px solid var(--line-soft); }
+  .hc-day { font-size: 19px; }
+  .hc-greg { font-size: 14px; margin: 0; }
+  .hc-hijri { font-size: 12.5px; width: 100%; }
+}
+@media (prefers-reduced-motion: reduce) { .hc-colon { animation: none; } .hc-fill { transition: none; } }

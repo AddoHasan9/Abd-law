@@ -11,7 +11,7 @@ const TABS = [
   { href: '/dashboard', label: 'الرئيسية', icon: 'grid', match: (p: string) => p === '/dashboard' },
   { href: '/commercial', label: 'المعاملات', icon: 'brief', match: (p: string) => p === '/commercial' },
   { href: '/commercial/companies-registry', label: 'الشركات', icon: 'build2', match: (p: string) => p.startsWith('/commercial/companies') },
-  { href: '/commercial/ids', label: 'الهويات', icon: 'stamp', match: (p: string) => p.startsWith('/commercial/ids') },
+  { href: '/commercial/ids', label: 'الهويات', icon: 'idcard', match: (p: string) => p.startsWith('/commercial/ids') },
 ] as const
 
 export default function MobileTabBar({ onMenu }: { onMenu: () => void }) {
