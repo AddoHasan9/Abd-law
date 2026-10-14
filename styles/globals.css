@@ -4097,3 +4097,11 @@ html[data-theme="dark"] .kpi-card.is-featured .kpi-value { color: #A9BBE6 !impor
 html:root .kpi-card.is-featured .kpi-icon { background: var(--accent-soft) !important; color: var(--accent) !important; }
 html:root .kpi-card.is-featured .kpi-chips > span { background: var(--accent-soft) !important; color: var(--accent) !important; border-color: transparent !important; }
 html:root .kpi-card.is-featured .kpi-chips > span.is-on { background: var(--accent) !important; color: #fff !important; }
+/* وضوح أرقام LED: نقاط أكبر وأقرب (الرقم يبين متصلاً)، المطفأة بالكاد تُرى، والثواني بخط عادي */
+.lc-card { --d: 10px; --g: 2.5px; --off: color-mix(in srgb, var(--brand) 3.5%, transparent); }
+html[data-theme="dark"] .lc-card { --off: rgba(255, 255, 255, .035); }
+.lc-matrix.lc-big { gap: calc(var(--d) * 1.25); }
+.lc-sec { font-size: 22px; font-weight: 700; color: var(--text-3); font-variant-numeric: tabular-nums; line-height: 1; direction: ltr; }
+@media (max-width: 440px) { .lc-card { --d: 8px; --g: 2px; } .lc-sec { font-size: 18px; } }
+@media (max-width: 360px) { .lc-card { --d: 7px; --g: 1.8px; } }
+.lc-date { white-space: normal; overflow: visible; text-overflow: clip; line-height: 1.7; }

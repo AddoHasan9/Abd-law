@@ -14,7 +14,7 @@ const fmtHijri = new Intl.DateTimeFormat('ar-IQ-u-ca-islamic-umalqura-nu-latn', 
 
 // أرقام نقطية 5×7 (1 = نقطة مضاءة)
 const GLYPH: Record<string, string[]> = {
-  '0': ['01110', '10001', '10011', '10101', '11001', '10001', '01110'],
+  '0': ['01110', '10001', '10001', '10001', '10001', '10001', '01110'],
   '1': ['00100', '01100', '00100', '00100', '00100', '00100', '01110'],
   '2': ['01110', '10001', '00001', '00010', '00100', '01000', '11111'],
   '3': ['11110', '00001', '00001', '01110', '00001', '00001', '11110'],
@@ -64,7 +64,7 @@ export default function ClockCard() {
         </span>
         <span className="lc-side">
           <span className="lc-period">{now ? (h24 < 12 ? 'ص' : 'م') : ''}</span>
-          <span className="lc-matrix lc-small"><Dots ch={ss[0]} /><Dots ch={ss[1]} /></span>
+          <span className="lc-sec">{ss}</span>
         </span>
       </div>
       <div className="lc-foot">
