@@ -367,7 +367,7 @@
   }
 
   html[data-theme="dark"] {
-    background-color: #0F131A !important;
+    background-color: #1C2128 !important;
   }
 
   body {
@@ -378,7 +378,7 @@
   }
 
   html[data-theme="dark"] body {
-    background-color: #0F131A !important;
+    background-color: #1C2128 !important;
   }
 
   h1,
@@ -4410,4 +4410,44 @@ html[data-theme="dark"] .cr-orb { background: #EEF2FA; }
     background: radial-gradient(260px 160px at 8% 18%, color-mix(in srgb, var(--gold, #B08D57) 14%, transparent), transparent 70%), var(--surface) !important; }
   .cr-digits { font-size: clamp(54px, 16vw, 72px); }
   .cr-day { font-size: 20px; }
+}
+
+/* ============================================================
+   الوضع الليلي «الخافت» (Dimmed) — مستوحى من GitHub Dark Dimmed و Material:
+   رمادي مزرق لا أسود · البطاقات أفتح من الصفحة (الارتفاع = أفتح) · نص أبيض ناعم لا ناصع · ألوان أقل تشبّعاً
+   ============================================================ */
+html:root[data-theme="dark"] {
+  --bg-app: #1C2128 !important;
+  --bg: #1C2128 !important;
+  --surface: #252B33 !important;
+  --surface-glass: rgba(37, 43, 51, .84) !important;
+  --surface-2: #2D333B !important;
+  --surface-3: #363D47 !important;
+  --border: rgba(205, 217, 229, .16) !important;
+  --border-soft: rgba(205, 217, 229, .10) !important;
+  --line: rgba(205, 217, 229, .15) !important;
+  --line-soft: rgba(205, 217, 229, .10) !important;
+  --line-glass: rgba(205, 217, 229, .14) !important;
+  --text: #DDE3EA !important;
+  --text-1: #E6EBF0 !important;
+  --text-2: #ADBAC7 !important;
+  --text-3: #8B96A3 !important;
+  --accent: #6CA0F0 !important;
+  --accent-soft: rgba(108, 160, 240, .15) !important;
+  --brand: #4A69AD !important;
+  --brand-soft: rgba(108, 160, 240, .14) !important;
+  --glass-bg: rgba(37, 43, 51, .84) !important;
+  --glass-border: rgba(205, 217, 229, .12) !important;
+  --glass-shadow: 0 12px 32px rgba(0, 0, 0, .28) !important;
+  --canvas-mesh: #1C2128 !important;
+  --input-bg: #22272E !important;
+}
+html[data-theme="dark"] body { background: var(--bg) !important; color: var(--text); }
+/* ظلال أخف في الليلي (الظل الأسود الثقيل يبدو «ثقوباً») */
+html[data-theme="dark"] :is(.bx-card, .kpi-card, .card, .tk-card, .data-panel) { box-shadow: 0 1px 0 rgba(255, 255, 255, .03) inset, 0 6px 18px -12px rgba(0, 0, 0, .45) !important; }
+/* التوهج الذهبي/الكحلي أعلى الصفحة أخف ليلاً */
+html[data-theme="dark"] #view-root {
+  background-image:
+    radial-gradient(900px 340px at 78% -140px, rgba(108, 160, 240, .09), transparent 70%),
+    radial-gradient(620px 280px at 12% -120px, rgba(201, 166, 110, .07), transparent 70%) !important;
 }
