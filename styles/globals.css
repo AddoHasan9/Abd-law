@@ -81,8 +81,8 @@
     --gold-glow: rgba(212, 175, 55, 0.25);
     --gold-border: rgba(212, 175, 55, 0.35);
 
-    --font-ui: var(--font-plex), 'IBM Plex Sans Arabic', -apple-system, 'Segoe UI', system-ui, sans-serif;
-    --font-display: var(--font-plex), 'IBM Plex Sans Arabic', var(--font-ui);
+    --font-ui: var(--font-plex), 'Tajawal', -apple-system, 'Segoe UI', system-ui, sans-serif;
+    --font-display: var(--font-plex), 'Tajawal', var(--font-ui);
 
     /* ---- Default Tokens (Apple Pure Frosted Slate — Image 5 Spec) ---- */
     --bg-app: #EEF2F6;
@@ -4370,4 +4370,44 @@ html[data-theme="dark"] .cr-tz { color: #8FE3CF; }
   .cr-mesh i, .cr-colon i, .cr-fill, .cr-fill::after, .cr-orb::before, .cr-orb::after { animation: none !important; }
   .cr-strip, .cr-fill { transition: none; }
   .cr-card.is-ready .cr-digits, .cr-card.is-ready .cr-date { animation: none; }
+}
+
+/* ============================================================
+   الساعة — رجوع للشكل الهادئ (أبيض + لمسة ذهبية)، مع الأرقام المتدحرجة
+   الحاسبة: صف واحد «التاريخ · يوم العمل · الوقت» — الهاتف: الوقت ثم التاريخ ثم الشريط
+   ============================================================ */
+.cr-card {
+  --c1: var(--gold, #B08D57); --c2: var(--gold, #B08D57); --c3: var(--gold, #B08D57);
+  display: grid !important; grid-template-columns: minmax(0, auto) minmax(220px, 1fr) auto;
+  grid-template-areas: "date work time"; align-items: center; gap: 36px !important;
+  padding: 24px 30px !important;
+  background:
+    radial-gradient(440px 230px at 6% 50%, color-mix(in srgb, var(--gold, #B08D57) 13%, transparent), transparent 70%),
+    var(--surface) !important;
+}
+.cr-mesh { display: none !important; }
+.cr-top { display: contents; }
+.cr-work { grid-area: work; min-width: 0; }
+.cr-digits { color: var(--brand); font-size: clamp(60px, 6vw, 88px); }
+html[data-theme="dark"] .cr-digits { color: #EEF2FA; }
+.cr-colon i { background: var(--gold, #B08D57); }
+.cr-period { background: none; -webkit-background-clip: border-box; background-clip: border-box; color: var(--gold, #B08D57); }
+.cr-day { font-size: 26px; }
+.cr-greg { font-size: 15px; }
+.cr-tz { color: var(--accent); background: var(--accent-soft); }
+html[data-theme="dark"] .cr-tz { color: #A9BBE6; }
+.cr-track { height: 10px; background: var(--surface-2); }
+.cr-fill { animation: none; background: linear-gradient(90deg, color-mix(in srgb, var(--gold, #B08D57) 70%, #fff), var(--gold, #B08D57)); }
+[dir="rtl"] .cr-fill { background: linear-gradient(270deg, color-mix(in srgb, var(--gold, #B08D57) 70%, #fff), var(--gold, #B08D57)); }
+.cr-fill::after { background: linear-gradient(100deg, transparent 30%, rgba(255, 255, 255, .45) 50%, transparent 70%); }
+.cr-orb { width: 16px; height: 16px; background: var(--brand); box-shadow: 0 2px 6px rgba(15, 23, 42, .3); border: 3px solid var(--surface); }
+html[data-theme="dark"] .cr-orb { background: #EEF2FA; }
+.cr-orb::before, .cr-orb::after { border-color: color-mix(in srgb, var(--brand) 45%, transparent); inset: -3px; }
+.cr-work-head small { display: none; }
+.cr-work-foot { display: none; }
+@media (max-width: 760px) {
+  .cr-card { grid-template-columns: 1fr; grid-template-areas: "time" "date" "work"; gap: 14px !important; padding: 18px !important;
+    background: radial-gradient(260px 160px at 8% 18%, color-mix(in srgb, var(--gold, #B08D57) 14%, transparent), transparent 70%), var(--surface) !important; }
+  .cr-digits { font-size: clamp(54px, 16vw, 72px); }
+  .cr-day { font-size: 20px; }
 }
