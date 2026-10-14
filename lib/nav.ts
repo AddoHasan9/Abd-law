@@ -38,6 +38,7 @@ export const NAV: NavGroup[] = [
     key: 'g-home',
     items: [
       { key: 'dashboard', label: 'لوحة التحكم', href: '/dashboard', icon: 'grid' },
+      { key: 'tasks', label: 'المهام', href: '/tasks', icon: 'tasks' },
       { key: 'reminders', label: 'التذكير والإشعارات', href: '/reminders', icon: 'bell' },
       { key: 'tools', label: 'الأدوات', href: '/tools', icon: 'tools' },
     ],

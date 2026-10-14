@@ -1,13 +1,14 @@
 'use client'
 /**
- * بطاقة الساعة — متوازنة تملأ العرض بثلاث مناطق:
- *   الوقت (أرقام كبيرة واضحة) · شريط «يوم العمل» (مضى/باقي + علامة الآن) · التاريخ (ميلادي + هجري)
+ * بطاقة الساعة — أكبر وأنعم:
+ *   أرقام تتدحرج عند التغيّر · نقطتان «تتنفّسان» · خلفية ألوان هادئة تتحرك ببطء
+ *   التاريخ (ميلادي + هجري) · شريط «يوم العمل» بألوان متماوجة ونقطة «الآن» تطلق حلقات
  * بتوقيت بغداد، تُرسم بعد التحميل فقط، وتحترم «تقليل الحركة».
  */
 import { useEffect, useState } from 'react'
 
 const TZ = 'Asia/Baghdad'
-/** ساعات الدوام (بتوقيت بغداد) — تُعدَّل هنا */
+/** ساعات الدوام (بتوقيت بغداد) */
 const WORK_START = 8 * 60
 const WORK_END = 16 * 60
 
@@ -21,9 +22,17 @@ const hm = (mins: number) => {
   if (!h) return `${m} د`
   return m ? `${h} س ${m} د` : `${h} س`
 }
-const label12 = (mins: number) => {
-  const h = Math.floor(mins / 60) % 24, h12 = h % 12 === 0 ? 12 : h % 12
-  return `${h12}:${String(mins % 60).padStart(2, '0')}`
+
+/** رقم يتدحرج: عمود 0-9 ينزلق إلى الرقم الحالي */
+function Roll({ d, className = '' }: { d: string; className?: string }) {
+  const n = /\d/.test(d) ? Number(d) : null
+  return (
+    <span className={`cr-roll ${className}`} aria-hidden>
+      <span className="cr-strip" style={{ transform: `translateY(${n == null ? 0 : -n * 10}%)` }}>
+        {Array.from({ length: 10 }, (_, i) => <span key={i}>{n == null ? '–' : i}</span>)}
+      </span>
+    </span>
+  )
 }
 
 export default function ClockCard() {
@@ -49,49 +58,51 @@ export default function ClockCard() {
   const nowMin = h24 * 60 + min
   const total = WORK_END - WORK_START
   const done = Math.min(Math.max(nowMin - WORK_START, 0), total)
-  const pct = now ? Math.round((done / total) * 100) : 0
-  const state = !now ? '' : nowMin < WORK_START ? 'before' : nowMin >= WORK_END ? 'after' : 'during'
+  const pct = now ? (done / total) * 100 : 0
+  const state = !now ? 'idle' : nowMin < WORK_START ? 'before' : nowMin >= WORK_END ? 'after' : 'during'
   const workText = !now ? '\u00A0'
     : state === 'before' ? `يبدأ الدوام بعد ${hm(WORK_START - nowMin)}`
-    : state === 'after' ? 'انتهى دوام اليوم'
+    : state === 'after' ? 'انتهى دوام اليوم ✓'
     : `مضى ${hm(done)} · باقي ${hm(total - done)}`
 
   return (
-    <section className="hc-card bx-card" aria-label="الوقت والتاريخ بتوقيت بغداد">
-      {/* التاريخ */}
-      <div className="hc-date">
-        <div className="hc-day">{now ? fmtWeekday.format(now) : '\u00A0'}</div>
-        <div className="hc-greg">{now ? fmtGreg.format(now) : '\u00A0'}</div>
-        <div className="hc-hijri">{now ? `${fmtHijri.format(now).replace(/\s*هـ$/, '')} هـ` : '\u00A0'}</div>
+    <section className={`cr-card bx-card${now ? ' is-ready' : ''}`} aria-label="الوقت والتاريخ بتوقيت بغداد">
+      <span className="cr-mesh" aria-hidden><i /><i /><i /></span>
+
+      <div className="cr-top">
+        {/* الوقت */}
+        <div className="cr-time" role="timer" aria-live="off" aria-label={now ? `${h12}:${mm} ${period}` : ''}>
+          <div className="cr-digits">
+            <Roll d={hh[0]} /><Roll d={hh[1]} />
+            <span className="cr-colon" aria-hidden><i /><i /></span>
+            <Roll d={mm[0]} /><Roll d={mm[1]} />
+          </div>
+          <div className="cr-side">
+            <span className="cr-period">{period}</span>
+            <span className="cr-sec"><Roll d={ss[0]} className="sm" /><Roll d={ss[1]} className="sm" /></span>
+          </div>
+        </div>
+
+        {/* التاريخ */}
+        <div className="cr-date">
+          <div className="cr-day">{now ? fmtWeekday.format(now) : '\u00A0'}</div>
+          <div className="cr-greg">{now ? fmtGreg.format(now) : '\u00A0'}</div>
+          <div className="cr-hijri">{now ? `${fmtHijri.format(now).replace(/\s*هـ$/, '')} هـ` : '\u00A0'}</div>
+          <span className="cr-tz">بتوقيت بغداد</span>
+        </div>
       </div>
 
       {/* يوم العمل */}
-      <div className={`hc-work is-${state || 'idle'}`}>
-        <div className="hc-work-head">
-          <span>يوم العمل</span>
-          <b className="num">{state === 'during' ? `${pct}%` : ''}</b>
+      <div className={`cr-work is-${state}`}>
+        <div className="cr-work-head">
+          <span>يوم العمل <small>8:00 ص – 4:00 م</small></span>
+          <b className="num">{state === 'during' ? `${Math.round(pct)}%` : state === 'after' ? '100%' : ''}</b>
         </div>
-        <div className="hc-track" role="progressbar" aria-valuemin={0} aria-valuemax={100} aria-valuenow={pct} aria-label="نسبة ما مضى من الدوام">
-          <span className="hc-fill" style={{ width: `${pct}%` }} />
-          {state === 'during' && <span className="hc-now" style={{ insetInlineStart: `${pct}%` }} />}
+        <div className="cr-track" role="progressbar" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(pct)} aria-label="نسبة ما مضى من الدوام">
+          <span className="cr-fill" style={{ width: `${pct}%` }} />
+          {state === 'during' && <span className="cr-orb" style={{ insetInlineStart: `${pct}%` }} />}
         </div>
-        <div className="hc-work-foot">
-          <span className="num">{label12(WORK_START)} ص</span>
-          <span className="hc-work-text">{workText}</span>
-          <span className="num">{label12(WORK_END)} م</span>
-        </div>
-      </div>
-
-      {/* الوقت */}
-      <div className="hc-time" role="timer" aria-live="off" aria-label={now ? `${h12}:${mm} ${period}` : ''}>
-        <div className="hc-digits num">
-          <span>{hh}</span><span className="hc-colon">:</span><span>{mm}</span>
-        </div>
-        <div className="hc-side">
-          <span className="hc-period">{period}</span>
-          <span className="hc-sec num">{ss}</span>
-          <span className="hc-tz">بغداد</span>
-        </div>
+        <div className="cr-work-text">{workText}</div>
       </div>
     </section>
   )
