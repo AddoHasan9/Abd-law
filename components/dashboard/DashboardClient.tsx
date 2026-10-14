@@ -166,12 +166,15 @@ export default function DashboardClient({ stats, profiles = [], companies = [] }
             <h2 id="bx-dl-h">المهل القريبة</h2>
           </div>
           {deadlines.length ? (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            <div className="dl-list">
               {deadlines.map(d => (
-                <Link key={d.key} href={d.href} className={`bx-deadline ${d.late ? 'is-late' : 'is-soon'}`}>
-                  <b>{d.company}</b>
-                  <span>{d.what}</span>
-                  <em>{d.chip}</em>
+                <Link key={d.key} href={d.href} className={`dl-row ${d.late ? 'is-late' : 'is-soon'}`}>
+                  <i className="dl-dot" aria-hidden />
+                  <span className="dl-main">
+                    <b>{d.company}</b>
+                    <span>{d.what}</span>
+                  </span>
+                  <em className="dl-chip">{d.chip}</em>
                 </Link>
               ))}
             </div>
@@ -223,16 +226,15 @@ export default function DashboardClient({ stats, profiles = [], companies = [] }
           </div>
           <div className="bx-week" role="img" aria-label={`المعاملات المسجّلة هذا الأسبوع: ${week.map(d => `${d.label} ${d.isFuture ? '—' : d.count}`).join('، ')}`}>
             {week.map((d, i) => {
-              const h = d.isFuture ? 42 : Math.max(6, (d.count / weekMax) * 100)
+              // عمود أنيق: الرقم فوقه، مسار خفيف بكامل الارتفاع يمتلئ حسب العدد، واسم اليوم تحته
+              const h = d.isFuture ? 0 : d.count === 0 ? 0 : Math.max(10, (d.count / Math.max(weekMax, 1)) * 100)
               return (
-                <div className="bx-day" key={d.date}>
-                  {d.isToday && <span className="bx-tip">اليوم · <span className="num">{d.count}</span></span>}
-                  <div
-                    className={`bx-bar${d.isToday ? ' is-today' : ''}${d.isFuture ? ' is-future' : ''}`}
-                    style={{ height: `${h}%`, animationDelay: `${0.15 + i * 0.05}s` }}
-                    title={d.isFuture ? d.label : `${d.label}: ${d.count}`}
-                  />
-                  <span className={`bx-day-label${d.isToday ? ' is-today' : ''}`}>{d.label}</span>
+                <div className={`bx-day wk${d.isToday ? ' is-today' : ''}${d.isFuture ? ' is-future' : ''}`} key={d.date} title={d.isFuture ? d.label : `${d.label}: ${d.count}`}>
+                  <span className="wk-val num">{d.isFuture ? '' : d.count}</span>
+                  <div className="wk-col">
+                    <div className="wk-fill" style={{ height: `${h}%`, animationDelay: `${0.15 + i * 0.05}s` }} />
+                  </div>
+                  <span className="wk-label">{d.isToday ? 'اليوم' : d.label}</span>
                 </div>
               )
             })}

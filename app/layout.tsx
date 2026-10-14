@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from 'next'
-import { IBM_Plex_Sans_Arabic } from 'next/font/google'
+import { Tajawal } from 'next/font/google'
 import { MATERIAL_ICONS_HREF } from '@/lib/icon-names'
 import { Toaster } from '@/components/ui/Toaster'
 import { ConfirmHost } from '@/components/ui/ConfirmDialog'
@@ -10,9 +10,10 @@ import { QueryProvider } from '@/components/providers/QueryProvider'
 import '@/styles/globals.css'
 
 // IBM Plex Sans Arabic: أوضح للأرقام والنص العربي في الجداول (أوزانه حتى 700؛ الأثقل يُعرض 700)
-const plex = IBM_Plex_Sans_Arabic({
+const plex = Tajawal({
+  // خط الموقع: Tajawal (اختيار المستخدم) — عربي + لاتيني
   subsets: ['arabic', 'latin'],
-  weight: ['400', '500', '600', '700'],
+  weight: ['400', '500', '700', '800'],
   variable: '--font-plex',
   display: 'swap',
 })

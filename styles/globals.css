@@ -81,8 +81,8 @@
     --gold-glow: rgba(212, 175, 55, 0.25);
     --gold-border: rgba(212, 175, 55, 0.35);
 
-    --font-ui: var(--font-plex), 'IBM Plex Sans Arabic', -apple-system, 'Segoe UI', system-ui, sans-serif;
-    --font-display: var(--font-plex), 'IBM Plex Sans Arabic', var(--font-ui);
+    --font-ui: var(--font-plex), 'Tajawal', -apple-system, 'Segoe UI', system-ui, sans-serif;
+    --font-display: var(--font-plex), 'Tajawal', var(--font-ui);
 
     /* ---- Default Tokens (Apple Pure Frosted Slate — Image 5 Spec) ---- */
     --bg-app: #EEF2F6;
@@ -367,7 +367,7 @@
   }
 
   html[data-theme="dark"] {
-    background-color: #0F131A !important;
+    background-color: #1C2128 !important;
   }
 
   body {
@@ -378,7 +378,7 @@
   }
 
   html[data-theme="dark"] body {
-    background-color: #0F131A !important;
+    background-color: #1C2128 !important;
   }
 
   h1,
@@ -4371,3 +4371,145 @@ html[data-theme="dark"] .cr-tz { color: #8FE3CF; }
   .cr-strip, .cr-fill { transition: none; }
   .cr-card.is-ready .cr-digits, .cr-card.is-ready .cr-date { animation: none; }
 }
+
+/* ============================================================
+   الساعة — رجوع للشكل الهادئ (أبيض + لمسة ذهبية)، مع الأرقام المتدحرجة
+   الحاسبة: صف واحد «التاريخ · يوم العمل · الوقت» — الهاتف: الوقت ثم التاريخ ثم الشريط
+   ============================================================ */
+.cr-card {
+  --c1: var(--gold, #B08D57); --c2: var(--gold, #B08D57); --c3: var(--gold, #B08D57);
+  display: grid !important; grid-template-columns: minmax(0, auto) minmax(220px, 1fr) auto;
+  grid-template-areas: "date work time"; align-items: center; gap: 36px !important;
+  padding: 24px 30px !important;
+  background:
+    radial-gradient(440px 230px at 6% 50%, color-mix(in srgb, var(--gold, #B08D57) 13%, transparent), transparent 70%),
+    var(--surface) !important;
+}
+.cr-mesh { display: none !important; }
+.cr-top { display: contents; }
+.cr-work { grid-area: work; min-width: 0; }
+.cr-digits { color: var(--brand); font-size: clamp(60px, 6vw, 88px); }
+html[data-theme="dark"] .cr-digits { color: #EEF2FA; }
+.cr-colon i { background: var(--gold, #B08D57); }
+.cr-period { background: none; -webkit-background-clip: border-box; background-clip: border-box; color: var(--gold, #B08D57); }
+.cr-day { font-size: 26px; }
+.cr-greg { font-size: 15px; }
+.cr-tz { color: var(--accent); background: var(--accent-soft); }
+html[data-theme="dark"] .cr-tz { color: #A9BBE6; }
+.cr-track { height: 10px; background: var(--surface-2); }
+.cr-fill { animation: none; background: linear-gradient(90deg, color-mix(in srgb, var(--gold, #B08D57) 70%, #fff), var(--gold, #B08D57)); }
+[dir="rtl"] .cr-fill { background: linear-gradient(270deg, color-mix(in srgb, var(--gold, #B08D57) 70%, #fff), var(--gold, #B08D57)); }
+.cr-fill::after { background: linear-gradient(100deg, transparent 30%, rgba(255, 255, 255, .45) 50%, transparent 70%); }
+.cr-orb { width: 16px; height: 16px; background: var(--brand); box-shadow: 0 2px 6px rgba(15, 23, 42, .3); border: 3px solid var(--surface); }
+html[data-theme="dark"] .cr-orb { background: #EEF2FA; }
+.cr-orb::before, .cr-orb::after { border-color: color-mix(in srgb, var(--brand) 45%, transparent); inset: -3px; }
+.cr-work-head small { display: none; }
+.cr-work-foot { display: none; }
+@media (max-width: 760px) {
+  .cr-card { grid-template-columns: 1fr; grid-template-areas: "time" "date" "work"; gap: 14px !important; padding: 18px !important;
+    background: radial-gradient(260px 160px at 8% 18%, color-mix(in srgb, var(--gold, #B08D57) 14%, transparent), transparent 70%), var(--surface) !important; }
+  .cr-digits { font-size: clamp(54px, 16vw, 72px); }
+  .cr-day { font-size: 20px; }
+}
+
+/* ============================================================
+   الوضع الليلي «الخافت» (Dimmed) — مستوحى من GitHub Dark Dimmed و Material:
+   رمادي مزرق لا أسود · البطاقات أفتح من الصفحة (الارتفاع = أفتح) · نص أبيض ناعم لا ناصع · ألوان أقل تشبّعاً
+   ============================================================ */
+html:root[data-theme="dark"] {
+  --bg-app: #1C2128 !important;
+  --bg: #1C2128 !important;
+  --surface: #252B33 !important;
+  --surface-glass: rgba(37, 43, 51, .84) !important;
+  --surface-2: #2D333B !important;
+  --surface-3: #363D47 !important;
+  --border: rgba(205, 217, 229, .16) !important;
+  --border-soft: rgba(205, 217, 229, .10) !important;
+  --line: rgba(205, 217, 229, .15) !important;
+  --line-soft: rgba(205, 217, 229, .10) !important;
+  --line-glass: rgba(205, 217, 229, .14) !important;
+  --text: #DDE3EA !important;
+  --text-1: #E6EBF0 !important;
+  --text-2: #ADBAC7 !important;
+  --text-3: #8B96A3 !important;
+  --accent: #6CA0F0 !important;
+  --accent-soft: rgba(108, 160, 240, .15) !important;
+  --brand: #4A69AD !important;
+  --brand-soft: rgba(108, 160, 240, .14) !important;
+  --glass-bg: rgba(37, 43, 51, .84) !important;
+  --glass-border: rgba(205, 217, 229, .12) !important;
+  --glass-shadow: 0 12px 32px rgba(0, 0, 0, .28) !important;
+  --canvas-mesh: #1C2128 !important;
+  --input-bg: #22272E !important;
+}
+html[data-theme="dark"] body { background: var(--bg) !important; color: var(--text); }
+/* ظلال أخف في الليلي (الظل الأسود الثقيل يبدو «ثقوباً») */
+html[data-theme="dark"] :is(.bx-card, .kpi-card, .card, .tk-card, .data-panel) { box-shadow: 0 1px 0 rgba(255, 255, 255, .03) inset, 0 6px 18px -12px rgba(0, 0, 0, .45) !important; }
+/* التوهج الذهبي/الكحلي أعلى الصفحة أخف ليلاً */
+html[data-theme="dark"] #view-root {
+  background-image:
+    radial-gradient(900px 340px at 78% -140px, rgba(108, 160, 240, .09), transparent 70%),
+    radial-gradient(620px 280px at 12% -120px, rgba(201, 166, 110, .07), transparent 70%) !important;
+}
+
+/* ============================================================
+   نشاط الأسبوع — أعمدة أنيقة: الرقم فوق، مسار خفيف يمتلئ، اليوم مميّز، القادمة منقّطة
+   ============================================================ */
+html:root .bx-week { height: 210px !important; display: flex !important; align-items: stretch !important; gap: 10px !important; padding-top: 6px; }
+html:root .bx-day.wk { flex: 1; min-width: 0; display: flex; flex-direction: column; align-items: center; gap: 8px; height: 100%; }
+.wk-val { font-size: 13px; font-weight: 800; color: var(--text-2); min-height: 18px; line-height: 18px; }
+.wk-col { flex: 1; width: min(38px, 72%); position: relative; display: flex; align-items: flex-end; border-radius: 12px; background: var(--surface-2); overflow: hidden; }
+.wk-fill { width: 100%; border-radius: 12px; background: color-mix(in srgb, var(--accent) 38%, var(--surface)); transform-origin: bottom; animation: wk-grow .7s cubic-bezier(.2, .8, .2, 1) both; }
+@keyframes wk-grow { from { transform: scaleY(0); } to { transform: scaleY(1); } }
+.wk-label { font-size: 12px; font-weight: 600; color: var(--text-3); white-space: nowrap; }
+.bx-day.wk.is-today .wk-fill { background: linear-gradient(180deg, color-mix(in srgb, var(--accent) 75%, #fff), var(--accent)); box-shadow: 0 6px 16px -6px color-mix(in srgb, var(--accent) 70%, transparent); }
+.bx-day.wk.is-today .wk-col { box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--accent) 35%, transparent); }
+.bx-day.wk.is-today .wk-val, .bx-day.wk.is-today .wk-label { color: var(--accent); font-weight: 800; }
+.bx-day.wk.is-future .wk-col { background: transparent; box-shadow: inset 0 0 0 1.5px var(--line-soft); background-image: repeating-linear-gradient(-45deg, transparent 0 6px, color-mix(in srgb, var(--line) 60%, transparent) 6px 7px); }
+.bx-day.wk.is-future .wk-label { opacity: .7; }
+html[data-theme="dark"] .bx-day.wk.is-today .wk-fill { background: linear-gradient(180deg, #9DBFF5, #6CA0F0); }
+@media (max-width: 640px) { html:root .bx-week { height: 170px !important; gap: 6px !important; } .wk-label { font-size: 10.5px; } .wk-val { font-size: 12px; } }
+@media (prefers-reduced-motion: reduce) { .wk-fill { animation: none; } }
+
+/* ============================================================
+   المهل القريبة — قائمة هادئة: نقطة حالة + اسم + تفاصيل + شارة الحالة (بدل الكتل الحمراء)
+   ============================================================ */
+.dl-list { display: flex; flex-direction: column; }
+.dl-row { display: flex; align-items: center; gap: 10px; padding: 11px 8px; border-radius: 12px; text-decoration: none; color: inherit; transition: background-color .15s ease; position: relative; }
+.dl-row + .dl-row::before { content: ''; position: absolute; top: 0; inset-inline: 8px; height: 1px; background: var(--line-soft); }
+@media (hover: hover) { .dl-row:hover { background: var(--surface-2); } .dl-row:hover::before, .dl-row:hover + .dl-row::before { opacity: 0; } }
+.dl-dot { flex: none; width: 8px; height: 8px; border-radius: 999px; background: #E0A100; }
+.dl-row.is-late .dl-dot { background: #D64550; box-shadow: 0 0 0 3px rgba(214, 69, 80, .14); }
+.dl-main { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.dl-main b { font-size: 13.5px; font-weight: 700; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.dl-main span { font-size: 12px; color: var(--text-3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.dl-chip { flex: none; font-style: normal; font-size: 11.5px; font-weight: 800; border-radius: 999px; padding: 2px 9px; color: #8A6400; background: rgba(224, 161, 0, .12); white-space: nowrap; }
+.dl-row.is-late .dl-chip { color: #B3303B; background: rgba(214, 69, 80, .1); }
+html[data-theme="dark"] .dl-chip { color: #E8C766; background: rgba(232, 199, 102, .12); }
+html[data-theme="dark"] .dl-row.is-late .dl-chip { color: #F4A3A9; background: rgba(244, 163, 169, .12); }
+
+/* ============================================================
+   الوضع الليلي بلمسة كحلية خفيفة (ليس أسود ولا رمادياً بارداً)
+   ============================================================ */
+html:root[data-theme="dark"] {
+  --bg-app: #182030 !important;
+  --bg: #182030 !important;
+  --canvas-mesh: #182030 !important;
+  --surface: #1F293B !important;
+  --surface-glass: rgba(31, 41, 59, .86) !important;
+  --surface-2: #273246 !important;
+  --surface-3: #303C52 !important;
+  --input-bg: #1C2536 !important;
+  --border: rgba(186, 204, 232, .16) !important;
+  --border-soft: rgba(186, 204, 232, .10) !important;
+  --line: rgba(186, 204, 232, .15) !important;
+  --line-soft: rgba(186, 204, 232, .10) !important;
+  --line-glass: rgba(186, 204, 232, .14) !important;
+  --text: #E1E7F0 !important;
+  --text-1: #E9EEF5 !important;
+  --text-2: #B0BCCD !important;
+  --text-3: #8C99AD !important;
+  --glass-bg: rgba(31, 41, 59, .86) !important;
+  --glass-border: rgba(186, 204, 232, .12) !important;
+}
+html[data-theme="dark"], html[data-theme="dark"] body { background-color: #182030 !important; }
