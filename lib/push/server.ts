@@ -42,7 +42,7 @@ export async function sendPush(userIds: string[] | 'all', payload: PushPayload):
   let sent = 0
   const dead: string[] = []
   const okIds: string[] = []
-  const body = JSON.stringify({ title: payload.title, body: payload.body || '', url: payload.url || '/dashboard', tag: payload.tag })
+  const body = JSON.stringify({ title: payload.title, body: payload.body || '', url: payload.url || '/dashboard', tag: payload.tag, rid: payload.rid })
   await Promise.all(((subs || []) as Sub[]).map(async s => {
     try {
       await webpush.sendNotification({ endpoint: s.endpoint, keys: { p256dh: s.p256dh, auth: s.auth } }, body, { TTL: 60 * 60 * 12, urgency: 'high' })

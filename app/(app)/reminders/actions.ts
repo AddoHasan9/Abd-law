@@ -285,3 +285,13 @@ export async function deleteReminderAction(id: string) {
   }
 }
 
+
+/** زر «إيقاف» على بطاقة التذكير: يوقف التكرار والتنبيهات ويبقي التذكير ظاهراً */
+export async function stopReminderAction(id: string) {
+  const profile = await getCurrentUserProfile()
+  if (!profile) return { success: false, error: 'يجب تسجيل الدخول' }
+  const { applyReminderAct } = await import('@/lib/reminders/act')
+  const res = await applyReminderAct(profile, id, 'stop')
+  if (res.success) revalidatePath('/reminders')
+  return res
+}

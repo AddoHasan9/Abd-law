@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import { repeatShort } from '@/lib/push/time'
+import { repeatShort, baghdadNow } from '@/lib/push/time'
 import { DataPanel } from '@/components/ui/DataPanel'
 import { confirmAction, runAction } from '@/components/ui/ConfirmDialog'
 import Link from 'next/link'
@@ -10,7 +10,8 @@ import {
   getRemindersAction,
   toggleReminderCompleteAction,
   toggleReminderArchiveAction,
-  deleteReminderAction
+  deleteReminderAction,
+  stopReminderAction,
 } from '@/app/(app)/reminders/actions'
 import { createClient } from '@/lib/supabase/client'
 import type { Company, ReminderItem } from '@/types/database'
@@ -85,9 +86,28 @@ export default function RemindersWidget({ companies = [], hideIfEmpty = false }:
     await runAction(deleteReminderAction(id), 'التذكيرات · الحذف')
   }
 
-  // Categorize reminders
-  const now = new Date()
-  const todayStr = now.toISOString().slice(0, 10)
+  // إيقاف تكرار/تنبيهات تذكير (يبقى ظاهراً)
+  const handleStop = async (id: string) => {
+    setReminders(prev => prev.map(r => (r.id === id ? { ...r, repeat: 'none' } : r)))
+    await runAction(stopReminderAction(id), 'التذكيرات · الإيقاف')
+    fetchReminders()
+  }
+
+  // فتح تذكير من إشعار الهاتف (/reminders?r=<id>): نمرّر إليه ونبرزه
+  useEffect(() => {
+    if (typeof window === 'undefined' || !reminders.length) return
+    const rid = new URLSearchParams(window.location.search).get('r')
+    if (!rid) return
+    const el = document.querySelector<HTMLElement>(`[data-rid="${CSS.escape(rid)}"]`)
+    if (!el) return
+    el.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    el.classList.add('is-focus')
+    const t = setTimeout(() => el.classList.remove('is-focus'), 4000)
+    return () => clearTimeout(t)
+  }, [reminders])
+
+  // Categorize reminders — بتوقيت بغداد (كان UTC ⇒ تذكيرات اليوم تظهر «متأخرة» بين 12 و3 فجراً)
+  const todayStr = baghdadNow().date
 
   const overdueList = reminders.filter(r => r.due_date && r.due_date < todayStr && !r.is_completed)
   const todayList = reminders.filter(r => r.due_date === todayStr && !r.is_completed)
@@ -202,6 +222,7 @@ export default function RemindersWidget({ companies = [], hideIfEmpty = false }:
                     setIsModalOpen(true)
                   }}
                   onDelete={() => handleDelete(item.id)}
+                  onStop={() => handleStop(item.id)}
                   onArchive={() => handleToggleArchive(item)}
                 />
               ))}
@@ -227,6 +248,7 @@ export default function RemindersWidget({ companies = [], hideIfEmpty = false }:
                     setIsModalOpen(true)
                   }}
                   onDelete={() => handleDelete(item.id)}
+                  onStop={() => handleStop(item.id)}
                   onArchive={() => handleToggleArchive(item)}
                 />
               ))}
@@ -252,6 +274,7 @@ export default function RemindersWidget({ companies = [], hideIfEmpty = false }:
                     setIsModalOpen(true)
                   }}
                   onDelete={() => handleDelete(item.id)}
+                  onStop={() => handleStop(item.id)}
                   onArchive={() => handleToggleArchive(item)}
                 />
               ))}
@@ -277,6 +300,7 @@ export default function RemindersWidget({ companies = [], hideIfEmpty = false }:
                     setIsModalOpen(true)
                   }}
                   onDelete={() => handleDelete(item.id)}
+                  onStop={() => handleStop(item.id)}
                   onArchive={() => handleToggleArchive(item)}
                 />
               ))}
@@ -322,6 +346,7 @@ export default function RemindersWidget({ companies = [], hideIfEmpty = false }:
                   setIsModalOpen(true)
                 }}
                 onDelete={() => handleDelete(item.id)}
+                  onStop={() => handleStop(item.id)}
                 onArchive={() => handleToggleArchive(item)}
               />
             ))
@@ -351,6 +376,7 @@ export function ReminderItemCard({
   onEdit,
   onDelete,
   onArchive,
+  onStop,
 }: {
   item: ReminderItem
   badgeColor?: string
@@ -359,10 +385,11 @@ export function ReminderItemCard({
   onEdit: () => void
   onDelete: () => void
   onArchive: () => void
+  onStop?: () => void
 }) {
   // تذكير مختصر: سطر للعنوان وسطر للتفاصيل، ولون القسم خط رفيع جانبي بدل خلفية كاملة
   return (
-    <div className={`rem-item${item.is_completed ? ' is-done' : ''}`} style={{ ['--rem-tone' as string]: borderColor }}>
+    <div data-rid={item.id} className={`rem-item${item.is_completed ? ' is-done' : ''}`} style={{ ['--rem-tone' as string]: borderColor }}>
       <input type="checkbox" className="rem-check" checked={item.is_completed} onChange={onToggleComplete} aria-label="تم" />
       <div className="rem-body">
         <div className="rem-title">
@@ -389,6 +416,9 @@ export function ReminderItemCard({
       </div>
       <div className="rem-actions">
         <button type="button" onClick={onEdit} title="تعديل" aria-label="تعديل"><span className="material-symbols-outlined" aria-hidden>edit</span></button>
+        {onStop && item.repeat && item.repeat !== 'none' && !item.is_completed && (
+          <button type="button" className="rem-stop" onClick={onStop} title="إيقاف التكرار والتنبيهات" aria-label="إيقاف التكرار والتنبيهات">⏹ إيقاف</button>
+        )}
         <button type="button" onClick={onArchive} title={item.is_archived ? 'إلغاء الأرشفة' : 'أرشفة'} aria-label={item.is_archived ? 'إلغاء الأرشفة' : 'أرشفة'}><span className="material-symbols-outlined" aria-hidden>{item.is_archived ? 'unarchive' : 'archive'}</span></button>
         <button type="button" onClick={onDelete} title="حذف" aria-label="حذف" className="is-danger"><span className="material-symbols-outlined" aria-hidden>delete</span></button>
       </div>

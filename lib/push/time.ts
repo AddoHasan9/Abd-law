@@ -8,10 +8,11 @@ export function baghdadNow(d = new Date()): { date: string; time: string } {
   return { date: `${g('year')}-${g('month')}-${g('day')}`, time: `${hh}:${g('minute')}` }
 }
 
-export type ReminderRepeat = 'none' | 'daily' | 'weekdays' | 'weekly' | 'monthly' | 'yearly'
+export type ReminderRepeat = 'none' | 'every5' | 'daily' | 'weekdays' | 'weekly' | 'monthly' | 'yearly'
 
 export const REPEAT_OPTIONS: { value: ReminderRepeat; label: string; short: string }[] = [
   { value: 'none', label: 'مرة واحدة', short: '' },
+  { value: 'every5', label: 'كل 5 دقائق حتى أوقفه', short: 'كل 5 دقائق' },
   { value: 'daily', label: 'يومياً', short: 'يومياً' },
   { value: 'weekdays', label: 'أيام الدوام (الأحد–الخميس)', short: 'أيام الدوام' },
   { value: 'weekly', label: 'أسبوعياً (نفس اليوم)', short: 'أسبوعياً' },
@@ -71,11 +72,16 @@ function step(d: string, rule: ReminderRepeat, anchorDay: number): string {
  * الشهري/السنوي: نفس يوم الشهر؛ في شهر أقصر يُستخدم آخر يوم فيه (مثلاً 31 ⇒ 30)، ويستمر من هذا اليوم.
  */
 export function nextOccurrence(dueDate: string, dueTime: string | null, rule: ReminderRepeat, now = baghdadNow()): string | null {
-  if (rule === 'none') return null
+  if (rule === 'none' || rule === 'every5') return null // every5 يُحسب بالدقائق (plusMinutes)
   const anchorDay = parse(dueDate).day
   const t = alertTime(dueTime)
   let d = step(dueDate, rule, anchorDay)
   // نتخطى المواعيد الفائتة (مثلاً إن توقف الخادم أياماً) — حد أمان للحلقة
   for (let i = 0; i < 4000 && (d < now.date || (d === now.date && t <= now.time)); i++) d = step(d, rule, anchorDay)
   return d
+}
+
+/** «كل 5 دقائق»: الموعد التالي = الآن + 5 دقائق (بتوقيت بغداد) */
+export function plusMinutes(minutes: number, d = new Date()): { date: string; time: string } {
+  return baghdadNow(new Date(d.getTime() + minutes * 60_000))
 }
