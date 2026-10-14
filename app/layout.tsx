@@ -20,8 +20,8 @@ const plex = IBM_Plex_Sans_Arabic({
 export const metadata: Metadata = {
   title: 'مكتب المحامي عبدالحسن الخزرجي | Legal ERP',
   description: 'نظام إدارة معاملات ومهام المكتب القانوني والمؤسسات',
-  // الاسم الظاهر تحت الأيقونة عند الإضافة لشاشة آيفون الرئيسية
-  appleWebApp: { capable: true, title: 'مكتب الخزرجي', statusBarStyle: 'default' },
+  // الاسم الظاهر تحت الأيقونة عند الإضافة لشاشة آيفون الرئيسية — ويظهر أيضاً في سطر «from …» بإشعارات الآيفون
+  appleWebApp: { capable: true, title: 'مكتب المحامي عبدالحسن الخزرجي', statusBarStyle: 'default' },
 }
 
 export const viewport: Viewport = {

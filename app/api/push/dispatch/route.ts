@@ -50,7 +50,12 @@ export async function POST(req: Request) {
     const rep = repeatShort(rule)
     const timeTxt = r.due_time ? r.due_time.slice(0, 5) : '09:00'
     const title = r.title
-    const body = [`⏰ ${timeTxt}`, r.notes?.trim(), rep ? `🔁 ${rep}${rule === 'every5' ? ' — اضغط لإيقافه' : ''}` : ''].filter(Boolean).join(' · ')
+    // التفاصيل بأسطر واضحة: الموعد، ثم الملاحظات، ثم التكرار
+    const body = [
+      `⏰ الموعد ${timeTxt}`,
+      r.notes?.trim() ? `📝 ${r.notes.trim()}` : '',
+      rep ? `🔁 ${rep}${rule === 'every5' ? ' — اضغط لإيقافه' : ''}` : '',
+    ].filter(Boolean).join('\n')
     // المستلم: المحامي المسؤول، وإلا صاحب التذكير، وإلا الجميع (تذكيرات قديمة بلا مالك)
     const target: string | null = r.assignee_id || r.owner_id || null
     await admin.from('notifications').insert({
