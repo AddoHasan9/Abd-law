@@ -466,3 +466,32 @@ html[data-theme="dark"] .hz-lf-btn:hover:not(:disabled) { background: #FFFFFF; }
   .hz-top .cr-day { font-size: 24px; }
   .hz-top .cr-greg { font-size: 14.5px; }
 }
+
+/* ---------- 22) طي الشريط الجانبي (الحاسبة) ---------- */
+@media (min-width: 1025px) {
+  /* عرض الطي يتغلّب على العرض الثابت 264 أعلاه (كان يُبقي البطاقة عريضة فارغة) */
+  html:root.side-collapsed { --sidebar-w: 80px !important; }
+  html.side-collapsed #sidebar { padding-inline: 8px !important; align-items: center; }
+  html.side-collapsed #sidebar .side-head { border-bottom: 1px solid var(--line-soft) !important; margin-inline: 4px; padding: 12px 0 14px !important; width: calc(100% - 8px); align-items: center; }
+  html.side-collapsed #sidebar .side-nav { width: 100%; align-items: center; padding-inline: 0 !important; }
+  /* كل أسهم المجموعات تختفي (منها زر «القسم التجاري» المنفصل) */
+  html.side-collapsed #sidebar :is(.nav-toggle, .nav-head-row > .nav-toggle) { display: none !important; }
+  html.side-collapsed #sidebar .nav-head-row { justify-content: center; }
+  /* أيقونات بنفس المقاس في عمود واحد، والفعّال دائرة بيضاء */
+  html.side-collapsed #sidebar .nav-item { width: 48px; min-width: 48px; height: 44px; min-height: 44px; margin-inline: auto; border-radius: 14px !important; position: relative; transform: none !important; }
+  html.side-collapsed #sidebar .nav-item .icon { width: 20px; height: 20px; margin: 0; }
+  html.side-collapsed #sidebar .nav-item-head { margin-top: 10px; color: var(--text-2) !important; }
+  html.side-collapsed #sidebar .nav-item-head + .nav-toggle { display: none !important; }
+  /* القسم الأب يُبرز إذا كانت الصفحة الحالية من أقسامه الفرعية (مثل «تأسيس الشركات» ← القسم التجاري) */
+  html.side-collapsed #sidebar .nav-group:has(.nav-item.sub[aria-current="page"]) .nav-item-head { background: var(--surface) !important; border: 1px solid var(--line-soft) !important; box-shadow: 0 2px 12px rgba(0, 0, 0, .06) !important; }
+  html.side-collapsed #sidebar .nav-group:has(.nav-item.sub[aria-current="page"]) .nav-item-head .icon { color: var(--coral) !important; }
+  html.side-collapsed #sidebar .side-help { width: 48px; min-width: 48px; height: 44px; justify-content: center; padding: 0 !important; margin-inline: auto; }
+  html.side-collapsed #sidebar .side-collapse { width: 34px; height: 34px; }
+  html.side-collapsed #sidebar .side-head .w-\[38px\] { width: 44px !important; height: 44px !important; }
+}
+/* شريط تمرير القائمة: يظهر فقط عند المرور (كان خطاً ثابتاً داخل الشريط) */
+html:root #sidebar .side-nav { scrollbar-width: thin; scrollbar-color: transparent transparent; }
+html:root #sidebar .side-nav:hover { scrollbar-color: color-mix(in srgb, var(--text) 18%, transparent) transparent; }
+html:root #sidebar .side-nav::-webkit-scrollbar { width: 6px; }
+html:root #sidebar .side-nav::-webkit-scrollbar-thumb { background: transparent; border-radius: 6px; }
+html:root #sidebar .side-nav:hover::-webkit-scrollbar-thumb { background: color-mix(in srgb, var(--text) 18%, transparent); }
