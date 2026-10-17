@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from 'next'
-import { Tajawal, Plus_Jakarta_Sans } from 'next/font/google'
+import { Tajawal } from 'next/font/google'
 import { MATERIAL_ICONS_HREF } from '@/lib/icon-names'
 import { Toaster } from '@/components/ui/Toaster'
 import { ConfirmHost } from '@/components/ui/ConfirmDialog'
@@ -20,14 +20,6 @@ const plex = Tajawal({
   display: 'swap',
 })
 
-// Plus Jakarta Sans: للأرقام والحروف اللاتينية (خط نموذج Horizon)؛ العربي يبقى Tajawal
-const jakarta = Plus_Jakarta_Sans({
-  subsets: ['latin'],
-  weight: ['500', '600', '700', '800'],
-  variable: '--font-jakarta',
-  display: 'swap',
-})
-
 export const metadata: Metadata = {
   title: 'مكتب المحامي عبدالحسن الخزرجي | Legal ERP',
   description: 'نظام إدارة معاملات ومهام المكتب القانوني والمؤسسات',
@@ -43,7 +35,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="ar" dir="rtl" data-theme="light" data-scroll-behavior="smooth" className={`${plex.variable} ${jakarta.variable}`} suppressHydrationWarning>
+    <html lang="ar" dir="rtl" data-theme="light" data-scroll-behavior="smooth" className={plex.variable} suppressHydrationWarning>
       <head>
         <meta id="theme-color-meta" name="theme-color" content="#FBF8F3" />
         <meta name="apple-mobile-web-app-capable" content="yes" />

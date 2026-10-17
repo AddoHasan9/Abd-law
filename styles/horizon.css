@@ -27,9 +27,6 @@ html:root, html:root[data-theme="light"] {
   --shadow-3: 0 40px 80px -30px rgba(0, 0, 0, .2) !important;
   --r-xl: 24px;
   --sidebar-w: 264px !important;
-  --font-num: var(--font-jakarta), var(--font-plex), system-ui, sans-serif;
-  --font-ui: var(--font-jakarta), var(--font-plex), 'Tajawal', -apple-system, 'Segoe UI', system-ui, sans-serif !important;
-  --font-display: var(--font-jakarta), var(--font-plex), 'Tajawal', system-ui, sans-serif !important;
 }
 html:root[data-theme="dark"] {
   --bg-app: #14121A !important; --bg: #14121A !important; --canvas-mesh: #14121A !important;
@@ -50,10 +47,6 @@ html:root[data-theme="dark"] {
 }
 html[data-theme="dark"], html[data-theme="dark"] body { background-color: var(--bg) !important; }
 
-/* الأرقام بخط Plus Jakarta Sans (اللاتيني فقط؛ العربي يبقى Tajawal) */
-html:root :is(.num, .kpi-value, .wk-val, .nav-num, .nav-badge, .tb-badge, td.num) { font-family: var(--font-num) !important; }
-/* الساعة المتدحرجة: عرض كل رقم مضبوط على أرقام Tajawal، فتبقى عليه (خط Jakarta أعرض فيقصّ الثواني) */
-html:root :is(.cr-digits, .cr-sec, .cr-digits *, .cr-sec *) { font-family: var(--font-plex), 'Tajawal', system-ui, sans-serif !important; }
 
 /* ---------- 2) الخلفية: سماء خافتة أعلى الصفحة ---------- */
 html:root body { background: var(--bg) !important; }
