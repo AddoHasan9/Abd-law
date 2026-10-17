@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from 'next'
-import { Tajawal } from 'next/font/google'
+import { Tajawal, Plus_Jakarta_Sans } from 'next/font/google'
 import { MATERIAL_ICONS_HREF } from '@/lib/icon-names'
 import { Toaster } from '@/components/ui/Toaster'
 import { ConfirmHost } from '@/components/ui/ConfirmDialog'
@@ -8,6 +8,8 @@ import { TableStacker } from '@/components/ui/TableStacker'
 import { BoosthisScript } from '@/components/BoosthisScript'
 import { QueryProvider } from '@/components/providers/QueryProvider'
 import '@/styles/globals.css'
+// طبقة تصميم Horizon — آخر ملف حتى تكون الكلمة الأخيرة (احذف السطر للعودة للتصميم السابق)
+import '@/styles/horizon.css'
 
 // IBM Plex Sans Arabic: أوضح للأرقام والنص العربي في الجداول (أوزانه حتى 700؛ الأثقل يُعرض 700)
 const plex = Tajawal({
@@ -15,6 +17,14 @@ const plex = Tajawal({
   subsets: ['arabic', 'latin'],
   weight: ['400', '500', '700', '800'],
   variable: '--font-plex',
+  display: 'swap',
+})
+
+// Plus Jakarta Sans: للأرقام والحروف اللاتينية (خط نموذج Horizon)؛ العربي يبقى Tajawal
+const jakarta = Plus_Jakarta_Sans({
+  subsets: ['latin'],
+  weight: ['500', '600', '700', '800'],
+  variable: '--font-jakarta',
   display: 'swap',
 })
 
@@ -33,9 +43,9 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="ar" dir="rtl" data-theme="light" data-scroll-behavior="smooth" className={plex.variable} suppressHydrationWarning>
+    <html lang="ar" dir="rtl" data-theme="light" data-scroll-behavior="smooth" className={`${plex.variable} ${jakarta.variable}`} suppressHydrationWarning>
       <head>
-        <meta id="theme-color-meta" name="theme-color" content="#EEF2F6" />
+        <meta id="theme-color-meta" name="theme-color" content="#FBF8F3" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
 
@@ -59,7 +69,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               } else {
                 document.documentElement.classList.remove('dark');
               }
-              var color = t === 'dark' ? '#0F131A' : '#EEF2F6';
+              var color = t === 'dark' ? '#14121A' : '#FBF8F3';
               document.documentElement.style.colorScheme = t;
               var meta = document.getElementById('theme-color-meta');
               if (meta) { meta.setAttribute('content', color); }

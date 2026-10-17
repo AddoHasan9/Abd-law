@@ -128,7 +128,7 @@ export default function CommandPalette({
             className="flex items-center justify-between cursor-pointer"
           >
             <div className="flex items-center gap-2">
-              <Calculator className="h-4 w-4 text-indigo-500" />
+              <Calculator className="h-4 w-4 text-[var(--accent)]" />
               <span>التحاسب والملفات الضريبية</span>
             </div>
             <span className="text-[11px] text-muted-foreground font-mono">/commercial/tax</span>

@@ -239,7 +239,7 @@ export default function CompaniesRegistryClient({ companies = [] }: Props) {
                       {/* Financial Statements */}
                       <td className="py-2.5 px-2 text-center align-middle whitespace-nowrap">
                         {co.last_completed_fs_year ? (
-                          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10.5px] font-bold bg-[color:color-mix(in_srgb,var(--accent)_10%,transparent)] text-[var(--accent)] dark:text-[#A9BBE6] border border-[color:color-mix(in_srgb,var(--accent)_20%,transparent)]">
+                          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10.5px] font-bold bg-[color:color-mix(in_srgb,var(--accent)_10%,transparent)] text-[var(--accent)] dark:text-[var(--accent)] border border-[color:color-mix(in_srgb,var(--accent)_20%,transparent)]">
                             ميزانية {co.last_completed_fs_year}
                           </span>
                         ) : (

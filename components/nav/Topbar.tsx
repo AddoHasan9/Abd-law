@@ -247,7 +247,7 @@ export default function Topbar({ profile, title, subtitle, notifCount = 0, onMen
                       {userProfile.email}
                     </div>
                   )}
-                  <span className="inline-flex items-center mt-1 px-2 py-0.5 text-[10.5px] font-bold rounded-full bg-[var(--accent-soft)] text-[var(--accent)] dark:bg-[color:color-mix(in_srgb,var(--accent)_60%,transparent)] dark:text-[#A9BBE6] border border-[color:color-mix(in_srgb,var(--accent)_60%,transparent)] dark:border-[color:color-mix(in_srgb,var(--accent)_50%,transparent)]">
+                  <span className="inline-flex items-center mt-1 px-2 py-0.5 text-[10.5px] font-bold rounded-full bg-[var(--accent-soft)] text-[var(--accent)] dark:bg-[color:color-mix(in_srgb,var(--accent)_60%,transparent)] dark:text-[var(--accent)] border border-[color:color-mix(in_srgb,var(--accent)_60%,transparent)] dark:border-[color:color-mix(in_srgb,var(--accent)_50%,transparent)]">
                     {roleLabel}
                   </span>
                 </div>

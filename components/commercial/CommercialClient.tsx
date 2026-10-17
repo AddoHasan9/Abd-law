@@ -549,7 +549,7 @@ export default function CommercialClient({ heading = 'المعاملات الت�
 
                           if (isServiceValid) {
                             return (
-                              <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-[color:color-mix(in_srgb,var(--accent)_10%,transparent)] text-[var(--accent)] dark:text-[#A9BBE6] border border-[color:color-mix(in_srgb,var(--accent)_20%,transparent)]">
+                              <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-[color:color-mix(in_srgb,var(--accent)_10%,transparent)] text-[var(--accent)] dark:text-[var(--accent)] border border-[color:color-mix(in_srgb,var(--accent)_20%,transparent)]">
                                 {serviceLabel}
                               </span>
                             )
@@ -595,7 +595,7 @@ export default function CommercialClient({ heading = 'المعاملات الت�
                             ? 'bg-rose-500/15 text-rose-600 dark:text-rose-400 border border-rose-500/20'
                             : t.priority === 'medium'
                             ? 'bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-500/20'
-                            : 'bg-[color:color-mix(in_srgb,var(--accent)_10%,transparent)] text-[var(--accent)] dark:text-[#A9BBE6] border border-[color:color-mix(in_srgb,var(--accent)_20%,transparent)]'
+                            : 'bg-[color:color-mix(in_srgb,var(--accent)_10%,transparent)] text-[var(--accent)] dark:text-[var(--accent)] border border-[color:color-mix(in_srgb,var(--accent)_20%,transparent)]'
                         }`}>
                           {pr.label}
                         </span>
@@ -649,7 +649,7 @@ export default function CommercialClient({ heading = 'المعاملات الت�
                           }}
                           className={`w-8 h-8 rounded-full border transition inline-flex items-center justify-center text-sm font-bold shadow-xs cursor-pointer ${
                             activeMenuTx?.id === t.id
-                              ? 'bg-[var(--accent-soft)] text-[var(--accent)] dark:text-[#A9BBE6] ring-1 ring-inset ring-[color:color-mix(in_srgb,var(--accent)_22%,transparent)]'
+                              ? 'bg-[var(--accent-soft)] text-[var(--accent)] dark:text-[var(--accent)] ring-1 ring-inset ring-[color:color-mix(in_srgb,var(--accent)_22%,transparent)]'
                               : 'bg-[var(--surface-2)] border-[var(--border)] text-[var(--text-2)] hover:bg-[var(--accent)] hover:text-white hover:border-[var(--accent)]'
                           }`}
                           aria-label="خيارات المعاملة"
@@ -740,7 +740,7 @@ export default function CommercialClient({ heading = 'المعاملات الت�
               }}
               className="flex items-center gap-2.5 w-full px-3 py-2 rounded-xl text-xs font-semibold text-[var(--text)] hover:bg-[var(--surface-2)] transition-colors cursor-pointer text-right"
             >
-              <span className="material-symbols-outlined text-[16px] text-indigo-500">person_add</span>
+              <span className="material-symbols-outlined text-[16px] text-[var(--accent)]">person_add</span>
               <span>تعيين المحامي المسؤول</span>
             </button>
 

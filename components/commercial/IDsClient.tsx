@@ -310,7 +310,7 @@ export default function IDsClient({ companies = [], initialCompanyId }: Props) {
 
                       {/* ID Type */}
                       <td className="py-3.5 px-3 text-center align-middle">
-                        <span className="inline-flex items-center whitespace-nowrap px-3 py-1 rounded-full text-xs font-bold bg-[color:color-mix(in_srgb,var(--accent)_10%,transparent)] text-[var(--accent)] dark:text-[#A9BBE6] border border-[color:color-mix(in_srgb,var(--accent)_20%,transparent)]">
+                        <span className="inline-flex items-center whitespace-nowrap px-3 py-1 rounded-full text-xs font-bold bg-[color:color-mix(in_srgb,var(--accent)_10%,transparent)] text-[var(--accent)] dark:text-[var(--accent)] border border-[color:color-mix(in_srgb,var(--accent)_20%,transparent)]">
                           {typeMeta.label}
                         </span>
                       </td>
@@ -323,7 +323,7 @@ export default function IDsClient({ companies = [], initialCompanyId }: Props) {
                       {/* Chamber Grade */}
                       <td className="py-3.5 px-3 text-center align-middle">
                         {r.id_type === 'chamber_id' && r.grade ? (
-                          <span className="inline-flex items-center whitespace-nowrap px-3 py-1 rounded-full text-xs font-bold bg-[color:color-mix(in_srgb,var(--accent)_10%,transparent)] text-[var(--accent)] dark:text-[#A9BBE6] border border-[color:color-mix(in_srgb,var(--accent)_20%,transparent)]">درجة {r.grade}</span>
+                          <span className="inline-flex items-center whitespace-nowrap px-3 py-1 rounded-full text-xs font-bold bg-[color:color-mix(in_srgb,var(--accent)_10%,transparent)] text-[var(--accent)] dark:text-[var(--accent)] border border-[color:color-mix(in_srgb,var(--accent)_20%,transparent)]">درجة {r.grade}</span>
                         ) : (
                           <span className="text-[var(--text-3)]">—</span>
                         )}

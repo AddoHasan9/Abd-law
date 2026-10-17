@@ -327,7 +327,7 @@ export default function QuickHelpGuide() {
                         <div
                           className={`w-9 h-9 rounded-xl flex items-center justify-center flex-none transition-colors ${
                             isExpanded
-                              ? 'bg-[var(--accent-soft)] text-[var(--accent)] dark:text-[#A9BBE6] ring-1 ring-inset ring-[color:color-mix(in_srgb,var(--accent)_22%,transparent)]'
+                              ? 'bg-[var(--accent-soft)] text-[var(--accent)] dark:text-[var(--accent)] ring-1 ring-inset ring-[color:color-mix(in_srgb,var(--accent)_22%,transparent)]'
                               : 'bg-[var(--surface-3)] text-[var(--accent)]'
                           }`}
                         >

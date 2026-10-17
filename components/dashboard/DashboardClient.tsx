@@ -9,13 +9,14 @@ import { useMemo, useState } from 'react'
 import Link from 'next/link'
 import { KpiCard } from '@/components/ui/KpiCard'
 import { FadeInStagger } from '@/components/ui/FadeInStagger'
-import { formatDate, formatFullDate } from '@/lib/constants'
+import { formatDate } from '@/lib/constants'
 import { getWorkflowStatusConfig } from '@/lib/workflow-status'
 import type { DashboardStats } from '@/lib/data/dashboard'
 import type { ProfileWithStats } from '@/lib/data/profiles'
 import type { Company } from '@/types/database'
 import RemindersWidget from './RemindersWidget'
 import ClockCard from './ClockCard'
+import HorizonHero from './HorizonHero'
 
 interface Props {
   stats: DashboardStats
@@ -51,7 +52,7 @@ export default function DashboardClient({ stats, profiles = [], companies = [] }
 
   // ── المهل القريبة: مصدر واحد (الوديعة + الهويات + الحسابات الختامية)، الأكثر إلحاحاً أولاً ─
   //    (كانت الهويات تُضاف مرتين: مرة ضمن urgentDeadlines ومرة من expiryAlerts)
-  const deadlines = useMemo(() => {
+  const allDeadlines = useMemo(() => {
     const idKeys = new Set((stats.expiryAlerts || []).map(a => `${a.companyId}|${a.title}`))
     return (stats.urgentDeadlines || []).map(d => {
       const late = d.level === 'late'
@@ -66,8 +67,9 @@ export default function DashboardClient({ stats, profiles = [], companies = [] }
     })
       .filter((d, i, all) => all.findIndex(x => x.key === d.key) === i)
       .sort((x, y) => Number(y.late) - Number(x.late) || x.rank - y.rank)
-      .slice(0, 4)
   }, [stats.urgentDeadlines, stats.expiryAlerts])
+  const deadlinesTotal = allDeadlines.length
+  const deadlines = allDeadlines.slice(0, 4)
 
   // ── مسار التأسيس ─────────────────────────────────────────────
   const forming = stats.formingList || []
@@ -105,12 +107,8 @@ export default function DashboardClient({ stats, profiles = [], companies = [] }
 
   return (
     <div className="bx relative z-10">
-      <header className="bx-head">
-        <div>
-          <h1 className="ph-two"><span className="ph-title">لوحة التحكم.</span> <span className="ph-tag">كل يومك بمكان واحد.</span></h1>
-          <p>{formatFullDate()}</p>
-        </div>
-      </header>
+      {/* التحية + الإضافة السريعة (أسلوب Horizon) */}
+      <HorizonHero deadlinesCount={deadlinesTotal} />
 
       {/* الساعة والتاريخ (تفعيل تنبيهات الهاتف صار في الإعدادات) */}
       <div className="ck-wrap"><ClockCard /></div>

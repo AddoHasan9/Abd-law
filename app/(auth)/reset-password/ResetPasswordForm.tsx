@@ -86,13 +86,13 @@ export default function ResetPasswordForm() {
         <div className="w-16 h-16 rounded-2xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-500 flex items-center justify-center shadow-lg shadow-emerald-500/10">
           <span className="material-symbols-outlined text-[32px]">check_circle</span>
         </div>
-        <h1 className="text-2xl font-extrabold text-slate-900 dark:text-white font-display">تم تغيير كلمة المرور بنجاح</h1>
-        <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed max-w-sm font-medium">
+        <h1 className="hz-lf-title">تم تغيير كلمة المرور بنجاح</h1>
+        <p className="hz-lf-sub">
           تم تحديث كلمة المرور لحسابك. يمكنك الآن تسجيل الدخول بكلمة المرور الجديدة.
         </p>
         <Link
           href="/login"
-          className="w-full h-12 mt-4 rounded-2xl bg-[#3B82F6] hover:bg-[#2563EB] text-white font-extrabold text-sm flex items-center justify-center gap-2 shadow-lg shadow-blue-500/20 transition border border-white/15"
+          className="hz-lf-btn"
         >
           <span>الذهاب لتسجيل الدخول</span>
           <span className="material-symbols-outlined text-[18px] rotate-180">arrow_right_alt</span>
@@ -104,14 +104,14 @@ export default function ResetPasswordForm() {
   if (!ready) {
     return (
       <div className="flex flex-col items-center text-center space-y-4 py-4">
-        <div className="w-14 h-14 rounded-2xl bg-blue-500/10 border border-blue-500/20 text-[#3B82F6] flex items-center justify-center">
+        <div className="w-14 h-14 rounded-2xl bg-[var(--accent-soft)] text-[var(--accent)] flex items-center justify-center">
           <span className="material-symbols-outlined text-[28px] animate-pulse">lock_reset</span>
         </div>
-        <h1 className="text-xl font-extrabold text-slate-900 dark:text-white font-display">جارٍ التحقق من الرابط…</h1>
-        <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed max-w-sm font-medium">
+        <h1 className="hz-lf-title">جارٍ التحقق من الرابط…</h1>
+        <p className="hz-lf-sub">
           إذا فتحت هذه الصفحة مباشرة بلا رابط من البريد، يرجى مراجعة بريدك الإلكتروني والضغط على الرابط المرسل.
         </p>
-        <Link href="/login" className="text-xs text-[#3B82F6] hover:underline pt-2 font-bold">
+        <Link href="/login" className="hz-lf-link pt-2">
           العودة لصفحة تسجيل الدخول
         </Link>
       </div>
@@ -121,8 +121,8 @@ export default function ResetPasswordForm() {
   return (
     <div className="space-y-6">
       <div className="text-right">
-        <h1 className="text-2xl font-black text-slate-900 dark:text-white font-display tracking-tight">تعيين كلمة مرور جديدة</h1>
-        <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 mt-1 font-medium">اكتب كلمة مرور جديدة وقوية لحسابك.</p>
+        <h1 className="hz-lf-title">تعيين كلمة مرور جديدة</h1>
+        <p className="hz-lf-sub">اكتب كلمة مرور جديدة وقوية لحسابك.</p>
       </div>
 
       {error && (
@@ -134,7 +134,7 @@ export default function ResetPasswordForm() {
 
       <form onSubmit={handleSubmit} className="space-y-4 text-right">
         <div className="space-y-1.5">
-          <label htmlFor="new-password" className="block text-xs font-bold text-slate-800 dark:text-slate-200">كلمة المرور الجديدة</label>
+          <label htmlFor="new-password" className="hz-lf-label">كلمة المرور الجديدة</label>
           <div className="relative group">
             <input
               type="password"
@@ -144,16 +144,16 @@ export default function ResetPasswordForm() {
               value={password}
               onChange={e => setPassword(e.target.value)}
               style={{ paddingRight: '48px', paddingLeft: '16px' }}
-              className="auth-input w-full h-12 input-icon-right rounded-2xl bg-white dark:bg-[#151A24] border border-slate-300/80 dark:border-white/12 focus:border-[#3B82F6] text-slate-900 dark:text-white placeholder-slate-400 text-base sm:text-sm outline-none transition-all text-left [direction:ltr] font-medium focus:ring-4 focus:ring-blue-500/15"
+              className="auth-input hz-lf-input input-icon-right"
             />
-            <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-[#3B82F6] material-symbols-outlined text-[18px] pointer-events-none transition-colors">
+            <span className="hz-lf-ic material-symbols-outlined text-[18px]">
               lock
             </span>
           </div>
         </div>
 
         <div className="space-y-1.5">
-          <label htmlFor="confirm-password" className="block text-xs font-bold text-slate-800 dark:text-slate-200">تأكيد كلمة المرور</label>
+          <label htmlFor="confirm-password" className="hz-lf-label">تأكيد كلمة المرور</label>
           <div className="relative group">
             <input
               type="password"
@@ -163,9 +163,9 @@ export default function ResetPasswordForm() {
               value={confirm}
               onChange={e => setConfirm(e.target.value)}
               style={{ paddingRight: '48px', paddingLeft: '16px' }}
-              className="auth-input w-full h-12 input-icon-right rounded-2xl bg-white dark:bg-[#151A24] border border-slate-300/80 dark:border-white/12 focus:border-[#3B82F6] text-slate-900 dark:text-white placeholder-slate-400 text-base sm:text-sm outline-none transition-all text-left [direction:ltr] font-medium focus:ring-4 focus:ring-blue-500/15"
+              className="auth-input hz-lf-input input-icon-right"
             />
-            <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-[#3B82F6] material-symbols-outlined text-[18px] pointer-events-none transition-colors">
+            <span className="hz-lf-ic material-symbols-outlined text-[18px]">
               lock_reset
             </span>
           </div>
@@ -174,10 +174,10 @@ export default function ResetPasswordForm() {
         <button
           type="submit"
           disabled={loading}
-          className="w-full h-12 mt-2 rounded-2xl bg-[#3B82F6] hover:bg-[#2563EB] active:bg-[#1D4ED8] text-white font-extrabold text-sm flex items-center justify-center gap-2 shadow-lg shadow-blue-500/20 hover:shadow-blue-500/35 transition cursor-pointer border border-white/15 disabled:opacity-60"
+          className="hz-lf-btn"
         >
           {loading ? (
-            <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+            <span className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
           ) : (
             <span>حفظ وتعيين كلمة المرور</span>
           )}

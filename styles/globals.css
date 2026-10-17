@@ -3351,7 +3351,7 @@ html[data-theme="dark"] .page-head.tone-violet { --tone: #a78bfa; } html[data-th
 .bx-card-head h2 { margin: 0; font-size: 16px; font-weight: 800; color: var(--text); }
 .bx-card-head small { display: block; font-size: 12.5px; color: var(--text-3); font-weight: 500; margin-top: 2px; }
 .bx-link { font-size: 13px; font-weight: 700; color: var(--brand); text-decoration: none; display: inline-flex; align-items: center; gap: 4px; min-height: 32px; }
-:root[data-theme="dark"] .bx-link { color: #A9BBE6; }
+:root[data-theme="dark"] .bx-link { color: var(--accent); }
 .bx-link:hover { color: var(--gold); }
 .bx-chip { font-size: 12px; font-weight: 700; border-radius: 999px; padding: 3px 10px; white-space: nowrap; }
 .bx-empty { border-radius: 14px; background: var(--surface-2); color: var(--text-3); font-size: 13px; text-align: center; padding: 18px; }
@@ -3428,7 +3428,7 @@ html[data-theme="dark"] .page-head.tone-violet { --tone: #a78bfa; } html[data-th
 .bx-action:hover { border-color: var(--brand-mid); background: var(--surface); }
 .bx-action:active { transform: scale(.98); }
 .bx-action .material-symbols-outlined { width: 34px; height: 34px; border-radius: 10px; display: grid; place-items: center; background: var(--brand-soft); color: var(--brand); font-size: 19px; flex: none; }
-:root[data-theme="dark"] .bx-action .material-symbols-outlined { color: #A9BBE6; }
+:root[data-theme="dark"] .bx-action .material-symbols-outlined { color: var(--accent); }
 @media (max-width: 420px) { .bx-actions { grid-template-columns: minmax(0, 1fr); } }
 
 @keyframes bx-rise { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
@@ -3525,7 +3525,7 @@ html:root .co-card-meta { font-size: 12px; }
 .co-chip.is-deposit { background: var(--accent-soft); color: var(--accent); }
 .co-chip.is-ok { background: rgba(16, 185, 129, .12); color: #047857; }
 html[data-theme="dark"] .co-chip.is-forming { color: #E3C48F; }
-html[data-theme="dark"] .co-chip.is-deposit { color: #A9BBE6; }
+html[data-theme="dark"] .co-chip.is-deposit { color: var(--accent); }
 html[data-theme="dark"] .co-chip.is-ok { color: #6EE7B7; }
 
 /* الحقائق الثلاث بفواصل رفيعة بدل الصندوق الرمادي */
@@ -3552,7 +3552,7 @@ html:root .co-card-facts dd { font-size: 14px; margin-top: 4px; }
 .co-more { margin-inline-start: auto; display: inline-flex; align-items: center; gap: 2px; min-height: 36px; padding: 0 12px; border-radius: 10px; border: 1px solid color-mix(in srgb, var(--accent) 35%, var(--line-soft)); color: var(--accent); font-size: 12.5px; font-weight: 800; transition: background-color .18s ease; }
 .co-more .material-symbols-outlined { font-size: 18px; transition: transform .18s ease; }
 @media (hover: hover) { html:root .co-card:hover .co-more { background: var(--accent-soft); } html:root .co-card:hover .co-more .material-symbols-outlined { transform: translateX(-3px); } }
-html[data-theme="dark"] .co-more { color: #A9BBE6; }
+html[data-theme="dark"] .co-more { color: var(--accent); }
 
 /* البطاقة المختارة في المؤشرات: لون الشعار بدل لون كل بطاقة */
 html:root .kpi-card.is-active { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent) inset; background: color-mix(in srgb, var(--accent) 5%, var(--surface)); }
@@ -3584,7 +3584,7 @@ html:root .btn-go:active:not(:disabled) { background: color-mix(in srgb, var(--a
 .id-add:hover { background: var(--accent-soft); border-color: var(--accent); }
 .id-add:active { transform: scale(.97); }
 .id-add svg { width: 16px; height: 16px; }
-html[data-theme="dark"] .id-add { color: #A9BBE6; }
+html[data-theme="dark"] .id-add { color: var(--accent); }
 
 /* شرائح الأسبوع/الشهر/السنة داخل البطاقة الملوّنة: أبيض شفاف حتى تُقرأ على الكحلي */
 html:root .kpi-card.is-featured .kpi-chips > span { background: rgba(255, 255, 255, .14) !important; color: #fff !important; border-color: rgba(255, 255, 255, .22) !important; }
@@ -3672,7 +3672,7 @@ html:root .nav-item[aria-current="page"] {
   border-color: transparent !important;
   box-shadow: none !important;
 }
-html[data-theme="dark"] .nav-item[aria-current="page"] { background: var(--accent-soft) !important; color: #A9BBE6 !important; border-color: transparent !important; box-shadow: none !important; }
+html[data-theme="dark"] .nav-item[aria-current="page"] { background: var(--accent-soft) !important; color: var(--accent) !important; border-color: transparent !important; box-shadow: none !important; }
 
 /* رأس مجموعة بلا صفحة («النظام»): نفس شكل «القسم التجاري» */
 .nav-head-btn { width: 100%; border: 0; background: none; font-family: inherit; text-align: right; }
@@ -3806,7 +3806,7 @@ html:root #sidebar .side-name { font-size: 12.5px !important; }
   }
   .tabbar-item .icon { width: 21px; height: 21px; }
   .tabbar-item.is-on { background: var(--accent-soft); color: var(--accent); font-weight: 800; }
-  html[data-theme="dark"] .tabbar-item.is-on { color: #A9BBE6; }
+  html[data-theme="dark"] .tabbar-item.is-on { color: var(--accent); }
   .tabbar-item:active { transform: scale(.96); }
   /* مساحة أسفل المحتوى حتى لا يغطيه الشريط */
   html:root #view-root { padding-bottom: calc(env(safe-area-inset-bottom) + 86px) !important; }
@@ -3898,7 +3898,7 @@ html[data-theme="dark"] .pc-error { color: #F4A3A9; background: rgba(194, 51, 63
 @media (max-width: 900px) { .push-settings { grid-template-columns: 1fr; } }
 /* شارة تكرار التذكير */
 .rem-repeat { display: inline-flex; align-items: center; gap: 3px; margin-inline-start: 8px; font-size: 11px; font-weight: 700; color: var(--accent); background: var(--accent-soft); border-radius: 999px; padding: 1px 8px; white-space: nowrap; }
-html[data-theme="dark"] .rem-repeat { color: #A9BBE6; }
+html[data-theme="dark"] .rem-repeat { color: var(--accent); }
 
 /* ============================================================
    بطاقة التذكير — نظيفة ومتناسقة مع الموقع (بدل الخط الجانبي الملوّن الشبيه ببطاقة التأسيس)
@@ -3974,7 +3974,7 @@ html:root :is(.tag-ok, .tag-work, .tag-warn, .tag-bad, .badge-completed) > .mate
 html:root .tag-orange { background: color-mix(in srgb, #C77A1F 10%, transparent) !important; color: #9A5B12 !important; border-color: transparent !important; }
 html:root .badge-type { background: var(--accent-soft) !important; color: var(--accent) !important; border-color: transparent !important; font-weight: 600; }
 html[data-theme="dark"] .tag-orange { color: #E7B36A !important; }
-html[data-theme="dark"] .badge-type { color: #A9BBE6 !important; }
+html[data-theme="dark"] .badge-type { color: var(--accent) !important; }
 
 /* 3) محايد: إطار فقط */
 html:root :is(.tag-gray, .tag-mute, .tag-blue) { background: var(--surface) !important; border: 1px solid var(--line-soft) !important; color: var(--text-2) !important; }
@@ -3995,7 +3995,7 @@ html:root .btn-go {
   border: 1px solid color-mix(in srgb, var(--accent) 22%, transparent) !important; box-shadow: none !important;
 }
 html:root .btn-go:hover:not(:disabled) { background: color-mix(in srgb, var(--accent) 16%, var(--surface)) !important; box-shadow: none !important; }
-html[data-theme="dark"] .btn-go { color: #A9BBE6 !important; }
+html[data-theme="dark"] .btn-go { color: var(--accent) !important; }
 /* الثانوي: أبيض بإطار */
 html:root .btn-ghost { background: var(--surface) !important; border: 1px solid var(--line) !important; color: var(--text) !important; box-shadow: none !important; }
 @media (hover: hover) { html:root .btn-ghost:hover:not(:disabled) { background: var(--surface-2) !important; } }
@@ -4011,7 +4011,7 @@ html:root .tag-cat-amber  { background: rgba(224, 161, 0, .12) !important; color
 html:root .tag-cat-violet { background: rgba(124, 92, 214, .10) !important; color: #5B3FB3 !important; }
 html[data-theme="dark"] .tag-cat-orange { color: #E7B36A !important; }
 html[data-theme="dark"] .tag-cat-green  { color: #6FD3A5 !important; }
-html[data-theme="dark"] .tag-cat-blue   { color: #A9BBE6 !important; }
+html[data-theme="dark"] .tag-cat-blue   { color: var(--accent) !important; }
 html[data-theme="dark"] .tag-cat-amber  { color: #E8C766 !important; }
 html[data-theme="dark"] .tag-cat-violet { color: #BCA8F2 !important; }
 
@@ -4078,7 +4078,7 @@ html[data-theme="dark"] .lc-card { --onc: #E8EDF8; --off: rgba(255, 255, 255, .0
 .lc-day { font-size: 17px; font-weight: 800; color: var(--text); }
 .lc-date { font-size: 13px; color: var(--text-3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .lc-chip { flex: none; font-size: 12px; font-weight: 700; color: var(--accent); background: var(--accent-soft); border-radius: 999px; padding: 3px 12px; }
-html[data-theme="dark"] .lc-chip { color: #A9BBE6; }
+html[data-theme="dark"] .lc-chip { color: var(--accent); }
 @media (max-width: 440px) { .lc-card { --d: 6.5px; --g: 3px; padding: 18px !important; } .lc-small { --d: 3.6px; --g: 1.6px; gap: 4px; } }
 @media (max-width: 360px) { .lc-card { --d: 5.6px; --g: 2.6px; } }
 @media (prefers-reduced-motion: reduce) { .lc-colon i { animation: none; } .lc-digit i { transition: none; } }
@@ -4093,7 +4093,7 @@ html:root .kpi-card.is-featured {
 html:root .kpi-card.is-featured .kpi-label { color: var(--text) !important; }
 html:root .kpi-card.is-featured .kpi-hint { color: var(--text-3) !important; opacity: 1 !important; }
 html:root .kpi-card.is-featured .kpi-value { color: var(--accent) !important; }
-html[data-theme="dark"] .kpi-card.is-featured .kpi-value { color: #A9BBE6 !important; }
+html[data-theme="dark"] .kpi-card.is-featured .kpi-value { color: var(--accent) !important; }
 html:root .kpi-card.is-featured .kpi-icon { background: var(--accent-soft) !important; color: var(--accent) !important; }
 html:root .kpi-card.is-featured .kpi-chips > span { background: var(--accent-soft) !important; color: var(--accent) !important; border-color: transparent !important; }
 html:root .kpi-card.is-featured .kpi-chips > span.is-on { background: var(--accent) !important; color: #fff !important; }
@@ -4135,7 +4135,7 @@ html[data-theme="dark"] .hc-digits { color: #EEF2FA; }
 .hc-period { font-size: 13px; font-weight: 800; color: var(--gold, #B08D57); }
 .hc-sec { font-size: 22px; font-weight: 700; color: var(--text-3); line-height: 1; direction: ltr; font-variant-numeric: tabular-nums; }
 .hc-tz { font-size: 11px; font-weight: 700; color: var(--accent); background: var(--accent-soft); border-radius: 999px; padding: 1px 9px; }
-html[data-theme="dark"] .hc-tz { color: #A9BBE6; }
+html[data-theme="dark"] .hc-tz { color: var(--accent); }
 
 /* التاريخ */
 .hc-day { font-size: 26px; font-weight: 800; color: var(--text); line-height: 1.25; }
@@ -4206,7 +4206,7 @@ html[data-theme="dark"] .tk-urgent { color: #F4A3A9; }
 @keyframes tk-pulse { 0% { box-shadow: 0 0 0 0 rgba(214, 69, 80, .55); } 70% { box-shadow: 0 0 0 7px rgba(214, 69, 80, 0); } 100% { box-shadow: 0 0 0 0 rgba(214, 69, 80, 0); } }
 .tk-meta { display: flex; flex-wrap: wrap; gap: 6px; }
 .tk-agency { font-size: 12px; font-weight: 700; color: var(--accent); background: var(--accent-soft); border-radius: 999px; padding: 1px 9px; }
-html[data-theme="dark"] .tk-agency { color: #A9BBE6; }
+html[data-theme="dark"] .tk-agency { color: var(--accent); }
 .tk-when { font-size: 12px; font-weight: 700; color: var(--text-2); background: var(--surface); border: 1px solid var(--line-soft); border-radius: 999px; padding: 0 9px; }
 .tk-when.is-today { color: #8A6400; background: rgba(224, 161, 0, .1); border-color: transparent; }
 .tk-when.is-late { color: #A12B36; background: rgba(214, 69, 80, .1); border-color: transparent; }
@@ -4256,7 +4256,7 @@ html[data-theme="dark"] .tk-result { color: #6FD3A5; }
 .tk-chip:active { transform: scale(.96); }
 .tk-chip:disabled { opacity: .45; cursor: not-allowed; }
 .tk-chip.on { background: var(--accent-soft); color: var(--accent); border-color: color-mix(in srgb, var(--accent) 30%, transparent); }
-html[data-theme="dark"] .tk-chip.on { color: #A9BBE6; }
+html[data-theme="dark"] .tk-chip.on { color: var(--accent); }
 .tk-chip.is-urgent.on { background: rgba(214, 69, 80, .1); color: #B3303B; border-color: rgba(214, 69, 80, .3); }
 .tk-combo { position: relative; margin-top: 8px; }
 .tk-picked { position: absolute; inset-inline-end: 10px; top: 50%; transform: translateY(-50%); font-size: 12px; font-weight: 700; color: #157A51; }
@@ -4395,7 +4395,7 @@ html[data-theme="dark"] .cr-digits { color: #EEF2FA; }
 .cr-day { font-size: 26px; }
 .cr-greg { font-size: 15px; }
 .cr-tz { color: var(--accent); background: var(--accent-soft); }
-html[data-theme="dark"] .cr-tz { color: #A9BBE6; }
+html[data-theme="dark"] .cr-tz { color: var(--accent); }
 .cr-track { height: 10px; background: var(--surface-2); }
 .cr-fill { animation: none; background: linear-gradient(90deg, color-mix(in srgb, var(--gold, #B08D57) 70%, #fff), var(--gold, #B08D57)); }
 [dir="rtl"] .cr-fill { background: linear-gradient(270deg, color-mix(in srgb, var(--gold, #B08D57) 70%, #fff), var(--gold, #B08D57)); }

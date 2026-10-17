@@ -45,7 +45,7 @@ export default function FormationServiceChecklist({ selected, onToggle }: Props)
               <div
                 className={`w-4 h-4 rounded-md flex-none flex items-center justify-center transition ${
                   isChecked
-                    ? 'bg-[var(--accent-soft)] text-[var(--accent)] dark:text-[#A9BBE6] ring-1 ring-inset ring-[color:color-mix(in_srgb,var(--accent)_22%,transparent)]'
+                    ? 'bg-[var(--accent-soft)] text-[var(--accent)] dark:text-[var(--accent)] ring-1 ring-inset ring-[color:color-mix(in_srgb,var(--accent)_22%,transparent)]'
                     : 'border border-[var(--line)] bg-transparent'
                 }`}
               >

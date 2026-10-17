@@ -376,7 +376,7 @@ export default function NewCompanyModal({ isOpen, onClose }: Props) {
                       onClick={() => setHasReservationLetter(true)}
                       className={`px-3 py-1 rounded-lg text-xs font-bold transition ${
                         hasReservationLetter
-                          ? 'bg-[var(--accent-soft)] text-[var(--accent)] dark:text-[#A9BBE6] ring-1 ring-inset ring-[color:color-mix(in_srgb,var(--accent)_22%,transparent)]'
+                          ? 'bg-[var(--accent-soft)] text-[var(--accent)] dark:text-[var(--accent)] ring-1 ring-inset ring-[color:color-mix(in_srgb,var(--accent)_22%,transparent)]'
                           : 'text-[var(--text-3)] hover:text-[var(--text)]'
                       }`}
                     >

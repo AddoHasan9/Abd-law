@@ -37,7 +37,7 @@ const ROLE_BADGES: Record<UserRole, { label: string; badgeClass: string; desc: s
   },
   admin: {
     label: 'مدير النظام',
-    badgeClass: 'bg-indigo-500/15 text-indigo-500 border border-indigo-500/30',
+    badgeClass: 'bg-[var(--accent-soft)] text-[var(--accent)] border border-[color:color-mix(in_srgb,var(--coral)_30%,transparent)]',
     desc: 'إشراف شامل على كافة الأقسام والمستخدمين والعمليات',
   },
   manager: {
