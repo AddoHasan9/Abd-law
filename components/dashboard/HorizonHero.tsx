@@ -39,13 +39,18 @@ export default function HorizonHero({ deadlinesCount }: Props) {
 
   const [kind, setKind] = useState<Kind>('task')
   const [text, setText] = useState('')
-  const [date, setDate] = useState('')
+  const [when, setWhen] = useState<'today' | 'tomorrow' | 'none'>('today')
   const [time, setTime] = useState('')
   const [busy, setBusy] = useState(false)
   const [msg, setMsg] = useState<{ tone: 'ok' | 'err'; text: string; href?: string } | null>(null)
-  const boxRef = useRef<HTMLTextAreaElement>(null)
+  const boxRef = useRef<HTMLInputElement>(null)
 
-  useEffect(() => { if (today && !date) setDate(today) }, [today, date])
+  // تاريخ الغد بتوقيت بغداد (من تاريخ اليوم نفسه، فلا يتأثر بمنطقة الجهاز)
+  const addDays = (d: string, n: number) => {
+    const [y, m, dd] = d.split('-').map(Number)
+    const t = new Date(Date.UTC(y, m - 1, dd + n))
+    return t.toISOString().slice(0, 10)
+  }
 
   async function submit() {
     const title = text.trim()
@@ -53,15 +58,16 @@ export default function HorizonHero({ deadlinesCount }: Props) {
     setBusy(true)
     setMsg(null)
     try {
-      const when = date || today || null
+      const base = today || baghdadNow().date
+      const day = when === 'none' ? null : when === 'tomorrow' ? addDays(base, 1) : base
       const res = kind === 'task'
-        ? await saveTaskAction({ title, task_date: when, task_time: time || null })
-        : await createReminderAction({ title, due_date: when || undefined, due_time: time || undefined })
+        ? await saveTaskAction({ title, task_date: day, task_time: day ? (time || null) : null })
+        : await createReminderAction({ title, due_date: day || undefined, due_time: day ? (time || undefined) : undefined })
       if (res && res.success) {
-        const isToday = !when || when === today
+        const whenTxt = day === null ? '' : when === 'tomorrow' ? ' لباچر' : ' لليوم'
         setMsg({
           tone: 'ok',
-          text: kind === 'task' ? (isToday ? 'انضافت المهمة لليوم' : 'انضافت المهمة') : 'انضاف التذكير',
+          text: kind === 'task' ? `انضافت المهمة${whenTxt}` : `انضاف التذكير${whenTxt}`,
           href: kind === 'task' ? '/tasks' : '/reminders',
         })
         setText('')
@@ -89,48 +95,56 @@ export default function HorizonHero({ deadlinesCount }: Props) {
       </h1>
       <p className="hz-sub">كل يومك بمكان واحد: المهام، والمهل، والتذكيرات، وملفات الشركات.</p>
 
-      <form
-        className="hz-box"
-        onSubmit={e => { e.preventDefault(); submit() }}
-      >
-        <label htmlFor="hz-text" className="sr-only">إضافة سريعة</label>
-        <textarea
-          id="hz-text"
-          ref={boxRef}
-          value={text}
-          maxLength={300}
-          onChange={e => { setText(e.target.value); if (msg) setMsg(null) }}
-          onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); submit() } }}
-          placeholder={kind === 'task'
-            ? 'اكتب شغلة تريد تنجزها… مثلاً: مراجعة وزارة الخارجية لتصديق وكالة'
-            : 'اكتب شي تريد تتذكره… مثلاً: الاتصال بالموكل بخصوص الحسابات الختامية'}
-        />
+      <form className="hz-box" onSubmit={e => { e.preventDefault(); submit() }}>
+        <div className="hz-row">
+          <label htmlFor="hz-text" className="sr-only">إضافة سريعة</label>
+          <input
+            id="hz-text"
+            ref={boxRef}
+            type="text"
+            className="hz-input"
+            value={text}
+            maxLength={300}
+            enterKeyHint="send"
+            autoComplete="off"
+            onChange={e => { setText(e.target.value); if (msg) setMsg(null) }}
+            placeholder={kind === 'task' ? 'أضف مهمة… مثلاً: تصديق وكالة بالخارجية' : 'أضف تذكير… مثلاً: الاتصال بالموكل'}
+          />
+          <button type="submit" className="hz-send" disabled={!text.trim() || busy} aria-label={kind === 'task' ? 'إضافة المهمة' : 'إضافة التذكير'}>
+            <span className="material-symbols-outlined" aria-hidden>{busy ? 'progress_activity' : 'arrow_upward'}</span>
+          </button>
+        </div>
         <div className="hz-bar">
           <div className="hz-seg" role="radiogroup" aria-label="نوع الإضافة">
             <button type="button" role="radio" aria-checked={kind === 'task'} onClick={() => setKind('task')}>مهمة</button>
             <button type="button" role="radio" aria-checked={kind === 'reminder'} onClick={() => setKind('reminder')}>تذكير</button>
           </div>
-          <span className="hz-when">
-            <label htmlFor="hz-date" className="sr-only">التاريخ</label>
-            <input id="hz-date" type="date" value={date} onChange={e => setDate(e.target.value)} />
-            <label htmlFor="hz-time" className="sr-only">الوقت (اختياري)</label>
-            <input id="hz-time" type="time" value={time} onChange={e => setTime(e.target.value)} aria-describedby="hz-time-note" />
-            <span id="hz-time-note" className="sr-only">الوقت اختياري</span>
-          </span>
-          <button type="submit" className="hz-send" disabled={!text.trim() || busy} aria-label={kind === 'task' ? 'إضافة المهمة' : 'إضافة التذكير'}>
-            <span className="material-symbols-outlined" aria-hidden>{busy ? 'progress_activity' : 'arrow_upward'}</span>
-          </button>
+          <label className="hz-chip">
+            <span className="material-symbols-outlined" aria-hidden>event</span>
+            <span className="sr-only">الموعد</span>
+            <select value={when} onChange={e => setWhen(e.target.value as typeof when)}>
+              <option value="today">اليوم</option>
+              <option value="tomorrow">باچر</option>
+              <option value="none">بدون تاريخ</option>
+            </select>
+          </label>
+          {when !== 'none' && (
+            <label className={`hz-chip${time ? ' has-val' : ''}`}>
+              <span className="material-symbols-outlined" aria-hidden>schedule</span>
+              {!time && <span className="hz-chip-ph" aria-hidden>الوقت</span>}
+              <span className="sr-only">الوقت (اختياري)</span>
+              <input type="time" value={time} onChange={e => setTime(e.target.value)} />
+            </label>
+          )}
         </div>
       </form>
 
-      <div className="hz-hint" role="status" aria-live="polite">
-        {msg ? (
-          <span className={msg.tone === 'ok' ? 'is-ok' : 'is-err'}>
-            {msg.tone === 'ok' ? '✓ ' : ''}{msg.text}
-            {msg.href ? <> — <Link href={msg.href} className="link">فتح</Link></> : null}
-          </span>
-        ) : null}
-      </div>
+      <div className="hz-hint" role="status" aria-live="polite">{msg ? (
+        <span className={msg.tone === 'ok' ? 'is-ok' : 'is-err'}>
+          {msg.tone === 'ok' ? '✓ ' : ''}{msg.text}
+          {msg.href ? <> — <Link href={msg.href} className="link">فتح</Link></> : null}
+        </span>
+      ) : null}</div>
 
       <div className="hz-chips" aria-label="اقتراحات سريعة">
         {CHIPS.map(c => (
