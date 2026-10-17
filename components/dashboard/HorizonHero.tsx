@@ -47,6 +47,14 @@ export default function HorizonHero({ deadlinesCount }: Props) {
 
   useEffect(() => { if (today && !date) setDate(today) }, [today, date])
 
+  // Keep the composer compact until the text needs more space.
+  useEffect(() => {
+    const box = boxRef.current
+    if (!box) return
+    box.style.height = 'auto'
+    box.style.height = `${Math.min(box.scrollHeight, 160)}px`
+  }, [text])
+
   async function submit() {
     const title = text.trim()
     if (!title || busy) return
@@ -99,31 +107,35 @@ export default function HorizonHero({ deadlinesCount }: Props) {
           ref={boxRef}
           value={text}
           maxLength={300}
+          rows={2}
           onChange={e => { setText(e.target.value); if (msg) setMsg(null) }}
           onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); submit() } }}
           placeholder={kind === 'task'
-            ? 'اكتب شغلة تريد تنجزها… مثلاً: مراجعة وزارة الخارجية لتصديق وكالة'
-            : 'اكتب شي تريد تتذكره… مثلاً: الاتصال بالموكل بخصوص الحسابات الختامية'}
+            ? 'اكتب مهمة… مثل مراجعة وزارة الخارجية'
+            : 'اكتب تذكيراً… مثل الاتصال بالموكل'}
         />
         <div className="hz-bar">
           <div className="hz-seg" role="radiogroup" aria-label="نوع الإضافة">
             <button type="button" role="radio" aria-checked={kind === 'task'} onClick={() => setKind('task')}>مهمة</button>
             <button type="button" role="radio" aria-checked={kind === 'reminder'} onClick={() => setKind('reminder')}>تذكير</button>
           </div>
-          <span className="hz-when">
-            <label htmlFor="hz-date" className="sr-only">التاريخ</label>
-            <input id="hz-date" type="date" value={date} onChange={e => setDate(e.target.value)} />
-            <label htmlFor="hz-time" className="sr-only">الوقت (اختياري)</label>
-            <input id="hz-time" type="time" value={time} onChange={e => setTime(e.target.value)} aria-describedby="hz-time-note" />
-            <span id="hz-time-note" className="sr-only">الوقت اختياري</span>
-          </span>
           <button type="submit" className="hz-send" disabled={!text.trim() || busy} aria-label={kind === 'task' ? 'إضافة المهمة' : 'إضافة التذكير'}>
             <span className="material-symbols-outlined" aria-hidden>{busy ? 'progress_activity' : 'arrow_upward'}</span>
           </button>
         </div>
+        <div className="hz-when">
+          <label className="hz-field" htmlFor="hz-date">
+            <span>التاريخ</span>
+            <input id="hz-date" type="date" value={date} onChange={e => setDate(e.target.value)} />
+          </label>
+          <label className="hz-field" htmlFor="hz-time">
+            <span>الوقت <small>اختياري</small></span>
+            <input id="hz-time" type="time" value={time} onChange={e => setTime(e.target.value)} />
+          </label>
+        </div>
       </form>
 
-      <div className="hz-hint" role="status" aria-live="polite">
+      <div className={`hz-hint${msg ? ' has-message' : ''}`} role="status" aria-live="polite">
         {msg ? (
           <span className={msg.tone === 'ok' ? 'is-ok' : 'is-err'}>
             {msg.tone === 'ok' ? '✓ ' : ''}{msg.text}
