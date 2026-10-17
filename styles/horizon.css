@@ -50,18 +50,23 @@ html[data-theme="dark"], html[data-theme="dark"] body { background-color: var(--
 
 /* ---------- 2) الخلفية: سماء خافتة أعلى الصفحة ---------- */
 html:root body { background: var(--bg) !important; }
+/* أعلى الصفحة = لون الخلفية الأساسي بالضبط (نفس لون شريط حالة الهاتف theme-color) حتى يلتحمان بلا خط فاصل؛
+   التدرّج يبدأ تدريجياً تحت الشريط العلوي */
+html:root, html[data-theme="dark"] { background-color: var(--bg) !important; }
 html:root body::before {
   content: ''; position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  -webkit-mask-image: linear-gradient(180deg, transparent 0, transparent calc(env(safe-area-inset-top, 0px) + 16px), #000 calc(env(safe-area-inset-top, 0px) + 170px));
+  mask-image: linear-gradient(180deg, transparent 0, transparent calc(env(safe-area-inset-top, 0px) + 16px), #000 calc(env(safe-area-inset-top, 0px) + 170px));
   background:
-    radial-gradient(620px 520px at 8% 6%, rgba(224, 133, 102, .07), transparent 70%),
-    radial-gradient(560px 480px at 96% 4%, rgba(185, 163, 230, .10), transparent 70%),
-    linear-gradient(180deg, rgba(124, 196, 228, .13), rgba(185, 163, 230, .06) 32%, transparent 60%);
+    radial-gradient(620px 520px at 8% calc(env(safe-area-inset-top, 0px) + 240px), rgba(224, 133, 102, .07), transparent 70%),
+    radial-gradient(560px 480px at 96% calc(env(safe-area-inset-top, 0px) + 220px), rgba(185, 163, 230, .10), transparent 70%),
+    linear-gradient(180deg, transparent 0, transparent calc(env(safe-area-inset-top, 0px) + 24px), rgba(124, 196, 228, .12) calc(env(safe-area-inset-top, 0px) + 150px), rgba(185, 163, 230, .05) 36%, transparent 62%);
 }
 html[data-theme="dark"] body::before {
   background:
-    radial-gradient(620px 520px at 8% 6%, rgba(232, 152, 124, .06), transparent 70%),
-    radial-gradient(560px 480px at 96% 4%, rgba(185, 163, 230, .08), transparent 70%),
-    linear-gradient(180deg, rgba(124, 196, 228, .07), rgba(185, 163, 230, .04) 32%, transparent 60%);
+    radial-gradient(620px 520px at 8% calc(env(safe-area-inset-top, 0px) + 240px), rgba(232, 152, 124, .05), transparent 70%),
+    radial-gradient(560px 480px at 96% calc(env(safe-area-inset-top, 0px) + 220px), rgba(185, 163, 230, .06), transparent 70%),
+    linear-gradient(180deg, transparent 0, transparent calc(env(safe-area-inset-top, 0px) + 24px), rgba(124, 196, 228, .05) calc(env(safe-area-inset-top, 0px) + 150px), rgba(185, 163, 230, .03) 36%, transparent 62%);
 }
 html:root #view-root, html[data-theme="dark"] #view-root { background: transparent !important; background-image: none !important; }
 
