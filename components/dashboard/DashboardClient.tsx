@@ -108,10 +108,12 @@ export default function DashboardClient({ stats, profiles = [], companies = [] }
   return (
     <div className="bx relative z-10">
       {/* التحية + الإضافة السريعة (أسلوب Horizon) */}
-      <HorizonHero deadlinesCount={deadlinesTotal} />
+      {/* الحاسبة: التحية والإضافة يميناً والساعة يساراً بصف واحد؛ الهاتف: تحت بعض */}
+      <div className="hz-top">
+        <HorizonHero deadlinesCount={deadlinesTotal} />
+        <div className="ck-wrap"><ClockCard /></div>
+      </div>
 
-      {/* الساعة والتاريخ (تفعيل تنبيهات الهاتف صار في الإعدادات) */}
-      <div className="ck-wrap"><ClockCard /></div>
 
       {/* 1. المؤشرات — الأولى ملوّنة بلون الشعار */}
       <FadeInStagger className="kpi-grid">

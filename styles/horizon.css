@@ -450,3 +450,26 @@ html[data-theme="dark"] .hz-lf-btn:hover:not(:disabled) { background: #FFFFFF; }
 @media (max-width: 768px) {
   .hz-login-shell { background: color-mix(in srgb, var(--surface) 88%, transparent); -webkit-backdrop-filter: none; backdrop-filter: none; }
 }
+
+/* ---------- 21) الحاسبة: رأس لوحة التحكم بصف واحد (تحية + إضافة | الساعة) ---------- */
+@media (min-width: 1100px) {
+  .hz-top { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); gap: 20px; align-items: stretch; margin: 6px 0 18px; }
+  .hz-top .hz-hero {
+    margin: 0; max-width: none; text-align: start; display: flex; flex-direction: column; justify-content: center;
+    padding: 24px 26px; border-radius: 26px; background: var(--surface-glass); border: 1px solid var(--glass-line); box-shadow: var(--glass-shadow);
+    -webkit-backdrop-filter: blur(22px) saturate(1.2); backdrop-filter: blur(22px) saturate(1.2);
+  }
+  .hz-top .hz-pill { align-self: flex-start; }
+  .hz-top .hz-greet { font-size: clamp(30px, 2.5vw, 42px); margin-top: 12px; }
+  .hz-top .hz-sub { margin: 6px 0 16px; max-width: none; font-size: 15px; }
+  /* المربع داخل بطاقة: سطح أفتح بدل زجاج فوق زجاج */
+  .hz-top .hz-box { max-width: none; margin: 0; background: color-mix(in srgb, var(--surface) 78%, transparent); box-shadow: none; -webkit-backdrop-filter: none; backdrop-filter: none; }
+  .hz-top .hz-chips { justify-content: flex-start; margin-top: 10px; }
+  .hz-top .ck-wrap { min-width: 0; }
+  .hz-top .ck-wrap > .cr-card { height: 100%; justify-content: center; }
+  /* الساعة بعمود أضيق: صف أول «التاريخ | الوقت»، وشريط يوم العمل بعرض البطاقة تحتهما */
+  html:root .hz-top .cr-card { grid-template-columns: minmax(0, 1fr) auto !important; grid-template-areas: "date time" "work work" !important; gap: 18px 20px !important; padding: 24px 26px !important; align-content: center; }
+  .hz-top .cr-digits { font-size: clamp(56px, 5vw, 84px); }
+  .hz-top .cr-day { font-size: 24px; }
+  .hz-top .cr-greg { font-size: 14.5px; }
+}
