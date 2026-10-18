@@ -45,7 +45,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="ar" dir="rtl" data-theme="light" data-scroll-behavior="smooth" className={`${plex.variable} ${jakarta.variable}`} suppressHydrationWarning>
       <head>
-        <meta id="theme-color-meta" name="theme-color" content="#FBF8F3" />
+        <meta id="theme-color-meta" name="theme-color" content="#dfe7f2" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
 
@@ -69,7 +69,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               } else {
                 document.documentElement.classList.remove('dark');
               }
-              var color = t === 'dark' ? '#14121A' : '#FBF8F3';
+              var color = t === 'dark' ? '#111827' : '#dfe7f2';
               document.documentElement.style.colorScheme = t;
               var meta = document.getElementById('theme-color-meta');
               if (meta) { meta.setAttribute('content', color); }
