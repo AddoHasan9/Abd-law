@@ -301,26 +301,37 @@ html[data-theme="dark"] .bx-action .material-symbols-outlined { color: var(--acc
 .hz-box:focus-within { border-color: color-mix(in srgb, var(--coral) 40%, var(--glass-line)); box-shadow: 0 0 0 4px color-mix(in srgb, var(--coral) 14%, transparent), var(--glass-shadow); }
 /* Compact composer, including Safari's native date/time controls. */
 html:root .hz-box textarea {
-  display: block; width: 100%; min-height: 52px; max-height: 160px;
-  padding: 0; border: 0; outline: 0; resize: none; overflow-y: auto;
+  display: block; width: 100%; height: var(--hz-text-height, 48px) !important; min-height: 48px !important; max-height: 120px !important;
+  padding: 0 !important; border: 0 !important; outline: 0; resize: none; overflow-y: auto;
   background: transparent; box-shadow: none; color: var(--text);
-  font: inherit; font-size: 16px; line-height: 1.6; border-radius: 0;
+  font: inherit; font-size: 16px !important; line-height: 1.5 !important; border-radius: 0 !important;
 }
 .hz-box textarea::placeholder { color: var(--text-3); }
-.hz-bar { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: 10px; }
+.hz-bar { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: 6px; }
 .hz-seg { display: flex; padding: 3px; border-radius: 14px; background: var(--surface-2); }
 .hz-seg button { font: inherit; font-size: 13px; font-weight: 700; border: 0; background: transparent; color: var(--text-2); padding: 6px 16px; min-height: 38px; border-radius: 11px; cursor: pointer; }
 .hz-seg button[aria-checked="true"] { background: var(--surface); color: var(--text); box-shadow: 0 2px 8px rgba(0,0,0,.06); }
-.hz-when { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); gap: 10px; margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--line-soft); }
-.hz-field { display: flex; flex-direction: column; gap: 3px; min-width: 0; font-size: 12px; font-weight: 600; color: var(--text-2); }
+.hz-when { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); gap: 8px; margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--line-soft); }
+.hz-field { display: flex; flex-direction: column; gap: 3px; min-width: 0; max-width: 100%; overflow: hidden; font-size: 12px; font-weight: 600; color: var(--text-2); }
 .hz-field small { font-size: 11px; color: var(--text-3); font-weight: 400; }
 html:root .hz-field input {
-  box-sizing: border-box; display: block; width: 100%; min-width: 0; max-width: 100%;
-  height: 44px; min-height: 44px; padding: 6px 10px; border-radius: 12px;
+  -webkit-appearance: none; appearance: none;
+  box-sizing: border-box !important; display: block;
+  width: 100% !important; min-width: 0 !important; max-width: 100% !important;
+  min-inline-size: 0 !important; inline-size: 100% !important; max-inline-size: 100% !important;
+  height: 40px !important; min-height: 40px !important; max-height: 40px !important;
+  margin: 0 !important; padding: 6px 8px !important; border-radius: 10px !important;
   border: 1px solid var(--input-border); background: var(--input-bg);
-  font: inherit; font-size: 16px; color: var(--text); direction: rtl; text-align: start;
+  font: inherit; font-size: 16px !important; line-height: 26px !important;
+  color: var(--text); direction: ltr; text-align: center;
+  overflow: hidden;
 }
-.hz-field input::-webkit-date-and-time-value { text-align: start; min-height: 1.5em; }
+html:root .hz-field input::-webkit-date-and-time-value {
+  display: block !important; width: 100%; min-width: 0;
+  min-height: 26px !important; height: 26px !important; line-height: 26px !important;
+  margin: 0 !important; padding: 0 !important; text-align: center !important;
+}
+html:root .hz-field input::-webkit-datetime-edit { min-width: 0; padding: 0; }
 .hz-send { flex: none; width: 44px; height: 44px; border-radius: 12px; border: 1px solid rgba(255,255,255,.2); background: var(--ink); color: var(--on-ink); display: grid; place-items: center; cursor: pointer; transition: transform .2s ease, opacity .2s ease; }
 .hz-send:hover:not(:disabled) { transform: translateY(-2px); }
 .hz-send:disabled { opacity: .45; cursor: default; }
@@ -334,10 +345,10 @@ html:root .hz-field input {
 .hz-hint .is-ok { color: #22A06B; font-weight: 700; }
 .hz-hint .is-err { color: #B5484A; font-weight: 700; }
 @media (max-width: 640px) {
-  .hz-hero { margin: 4px auto 16px; }
+  .hz-hero { width: 100%; min-width: 0; margin: 4px 0 12px; }
   .hz-greet { margin-top: 12px; font-size: clamp(26px, 7vw, 34px); line-height: 1.25; }
-  .hz-sub { margin: 6px auto 14px; font-size: 13px; line-height: 1.6; }
-  .hz-box { padding: 12px; border-radius: 20px; }
+  .hz-sub { margin: 6px 0 10px; font-size: 13px; line-height: 1.6; }
+  .hz-box { width: 100%; padding: 10px; border-radius: 18px; }
   .hz-chips { flex-wrap: nowrap; justify-content: flex-start; overflow-x: auto; max-width: 100%; padding: 2px 1px 4px; gap: 6px; }
   .hz-chips button { font-size: 12px; padding-inline: 12px; }
   html:root .cr-card { padding: 14px !important; gap: 10px !important; }
