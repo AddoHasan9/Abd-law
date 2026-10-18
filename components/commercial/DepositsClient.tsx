@@ -9,9 +9,9 @@ import { Mi } from '@/components/ui/Mi'
 import { useRouter } from 'next/navigation'
 import { Icon } from '@/components/ui/Icon'
 import { Empty } from '@/components/ui/Empty'
-import { formatDate, formatMoney, penaltyState } from '@/lib/constants'
+import { penaltyState } from '@/lib/constants'
 import { updateDepositStageStateAction, uploadCompanyBarcodeAction } from '@/app/(app)/commercial/deposits/actions'
-import BarcodeUploader from './BarcodeUploader'
+import DepositCard from './DepositCard'
 import { usePermissions } from '@/lib/context/UserRoleContext'
 import type { Deposit, DepositStage, Company } from '@/types/database'
 
@@ -33,6 +33,20 @@ export default function DepositsClient({ deposits = [], companyId }: Props) {
   const [editingStageId, setEditingStageId] = useState<string | null>(null)
   const [editDate, setEditDate] = useState<string>('')
   const [loading, setLoading] = useState(false)
+  /** المحطة التي تُحفظ الآن، وآخر محطة اكتملت (لحركة الإكمال)، والوديعة التي أُطلقت للتو (للاحتفال) */
+  const [savingId, setSavingId] = useState<string | null>(null)
+  const [justDoneId, setJustDoneId] = useState<string | null>(null)
+  const [celebrateId, setCelebrateId] = useState<string | null>(null)
+  useEffect(() => {
+    if (!justDoneId) return
+    const t = setTimeout(() => setJustDoneId(null), 1600)
+    return () => clearTimeout(t)
+  }, [justDoneId])
+  useEffect(() => {
+    if (!celebrateId) return
+    const t = setTimeout(() => setCelebrateId(null), 1600)
+    return () => clearTimeout(t)
+  }, [celebrateId])
 
   useEffect(() => {
     setDepositsList(deposits)
@@ -52,7 +66,10 @@ export default function DepositsClient({ deposits = [], companyId }: Props) {
     )
 
     setLoading(true)
+    setSavingId(stage.id)
+    if (newState === 'done' && stage.state !== 'done') setJustDoneId(stage.id)
     await runAction(updateDepositStageStateAction(stage.id, newState, atDate), 'إطلاق الوديعة · الحفظ')
+    setSavingId(null)
     setLoading(false)
     setEditingStageId(null)
     router.refresh()
@@ -112,6 +129,9 @@ export default function DepositsClient({ deposits = [], companyId }: Props) {
           ),
         }))
       )
+      setJustDoneId(stageId)
+      const released = depositsList.find(d => d.deposit_stages.some(s => s.id === stageId))
+      if (released) setCelebrateId(released.id)
       setNotification('تم إطلاق الوديعة بنجاح!')
       setTimeout(() => setNotification(null), 8000)
     } catch {
@@ -268,343 +288,34 @@ export default function DepositsClient({ deposits = [], companyId }: Props) {
           />
         </div>
       ) : (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(310px, 1fr))', gap: '12px', alignItems: 'start' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(330px, 1fr))', gap: '16px', alignItems: 'start' }}>
           {visible.map(dep => {
             const company = dep.companies
-            const statusInfo = getDepositStatusInfo(dep)
-            const isDepositFullyCompleted = statusInfo.isFullyCompleted
-            
-            // Ensure 4 stages exist
             const stages = [...(dep.deposit_stages || [])].sort((a, b) => a.stage_order - b.stage_order)
-            const submitStage = stages.find(s => s.stage_key === 'submit')
-            const advisorStage = stages.find(s => s.stage_key === 'advisor' || s.stage_key === 'consultant')
-            const accountantStage = stages.find(s => s.stage_key === 'accountant')
-
-            const isSubmitted = submitStage?.state === 'done'
-            const isAdvisorDone = advisorStage?.state === 'done'
-            const isAccountantDone = accountantStage?.state === 'done'
-            const arePriorStagesDone = Boolean(isSubmitted && isAdvisorDone && isAccountantDone)
-
-            const doneCount = stages.filter(s => s.state === 'done').length
-            const pen = company ? penaltyState(company, isSubmitted) : null
-            const isFocused = selectedCompanyFocus === dep.company_id
-
+            const isSubmitted = stages.find(s => s.stage_key === 'submit')?.state === 'done'
             return (
-              <div
+              <DepositCard
                 key={dep.id}
-                className={`card transition-all duration-200 ${isFocused ? 'ring-2 ring-[var(--accent)]' : ''}`}
-                style={{
-                  padding: '12px 14px',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: '8px',
-                  background: 'var(--surface)',
-                  border: isFocused
-                    ? '2px solid var(--accent)'
-                    : isDepositFullyCompleted
-                    ? '1px solid rgba(16, 185, 129, 0.25)'
-                    : '1px solid var(--line-soft)',
-                  borderRadius: '12px',
-                  boxShadow: '0 2px 8px rgba(0, 0, 0, 0.03)',
-                  position: 'relative',
+                dep={dep}
+                stages={stages}
+                pen={company ? penaltyState(company, isSubmitted) : null}
+                isFocused={selectedCompanyFocus === dep.company_id}
+                isCompleted={getDepositStatusInfo(dep).isFullyCompleted}
+                canRelease={canRelease}
+                loading={loading}
+                savingId={savingId}
+                justDoneId={justDoneId}
+                celebrate={celebrateId === dep.id}
+                editingStageId={editingStageId}
+                editDate={editDate}
+                setEditDate={setEditDate}
+                onEdit={stage => {
+                  setEditingStageId(stage ? stage.id : null)
+                  if (stage) setEditDate(stage.at_date || new Date().toISOString().slice(0, 10))
                 }}
-              >
-                {/* Deposit Card Header */}
-                <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '8px' }}>
-                  <div style={{ display: 'flex', alignItems: 'flex-start', gap: '8px', minWidth: 0, flex: 1 }}>
-                    <div
-                      style={{
-                        width: '32px',
-                        height: '32px',
-                        borderRadius: '8px',
-                        background: isDepositFullyCompleted ? 'rgba(16, 185, 129, 0.1)' : 'var(--accent-soft)',
-                        color: isDepositFullyCompleted ? 'var(--ok)' : 'var(--accent)',
-                        display: 'grid',
-                        placeItems: 'center',
-                        flexShrink: 0,
-                        fontSize: '14px',
-                        marginTop: '2px',
-                      }}
-                    >
-                      <Icon name={isDepositFullyCompleted ? 'check' : 'vault'} />
-                    </div>
-                    <div style={{ minWidth: 0, flex: 1 }}>
-                      <div
-                        style={{
-                          fontWeight: 800,
-                          fontSize: '13.5px',
-                          color: 'var(--text)',
-                          lineHeight: '1.4',
-                          wordBreak: 'break-word',
-                          whiteSpace: 'normal',
-                        }}
-                        title={company?.name ?? '—'}
-                      >
-                        {company?.name ?? '—'}
-                      </div>
-                      <div style={{ fontSize: '11px', color: 'var(--text-3)', marginTop: '3px' }}>
-                        بدأت المتابعة <span className="num">{formatDate(dep.started_at)}</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  <span
-                    style={{
-                      fontSize: '10.5px',
-                      padding: '2px 7px',
-                      fontWeight: 700,
-                      borderRadius: '6px',
-                      background: isDepositFullyCompleted
-                        ? 'rgba(16, 185, 129, 0.1)'
-                        : doneCount
-                        ? 'var(--accent-soft)'
-                        : 'rgba(245, 158, 11, 0.1)',
-                      color: isDepositFullyCompleted
-                        ? 'var(--ok)'
-                        : doneCount
-                        ? 'var(--accent)'
-                        : '#d97706',
-                      border: isDepositFullyCompleted
-                        ? '1px solid rgba(16, 185, 129, 0.2)'
-                        : '1px solid var(--line-soft)',
-                      whiteSpace: 'nowrap',
-                    }}
-                  >
-                    {isDepositFullyCompleted ? 'أُطلقت الوديعة ✓' : `${doneCount}/4 محطات`}
-                  </span>
-                </div>
-
-                {/* 4 Mandatory Stages */}
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                  {stages.map((stage: DepositStage) => {
-                    const isDone = stage.state === 'done'
-                    const isEditing = editingStageId === stage.id
-                    const isSubmitStage = stage.stage_key === 'submit'
-                    const isBarcodeStage = stage.stage_key === 'barcode'
-                    const isLockedByShareholderRule = isSubmitStage && pen?.canSubmitYet === false
-                    const isBarcodeLocked = isBarcodeStage && !arePriorStagesDone && !isDone
-
-                    return (
-                      <div
-                        key={stage.id}
-                        style={{
-                          background: 'var(--surface-2)',
-                          border: isDone ? '1px solid rgba(16, 185, 129, 0.18)' : '1px solid var(--line-soft)',
-                          borderRadius: '6px',
-                          padding: '6px 8px',
-                          display: 'flex',
-                          flexDirection: 'column',
-                          gap: '4px',
-                        }}
-                      >
-                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '6px' }}>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', minWidth: 0 }}>
-                            <span
-                              style={{
-                                width: '16px',
-                                height: '16px',
-                                borderRadius: '50%',
-                                background: isDone ? 'var(--ok)' : 'var(--surface-3)',
-                                color: isDone ? '#fff' : 'var(--text-3)',
-                                fontSize: '9px',
-                                display: 'grid',
-                                placeItems: 'center',
-                                fontWeight: 800,
-                                flexShrink: 0,
-                              }}
-                            >
-                              {isDone ? '✓' : stage.stage_order}
-                            </span>
-                            <span style={{ fontWeight: 700, fontSize: '11.5px', color: 'var(--text)' }}>
-                              {stage.label}
-                            </span>
-                          </div>
-
-                          <span
-                            style={{
-                              fontSize: '9.5px',
-                              padding: '1px 5px',
-                              borderRadius: '4px',
-                              fontWeight: 700,
-                              background: isDone ? 'rgba(16, 185, 129, 0.1)' : 'var(--surface-3)',
-                              color: isDone ? 'var(--ok)' : 'var(--text-3)',
-                            }}
-                          >
-                            {isDone ? 'مكتملة ✓' : 'انتظار'}
-                          </span>
-                        </div>
-
-                        {/* Date info if done */}
-                        {isDone && stage.at_date && (
-                          <div style={{ fontSize: '10px', color: 'var(--text-3)' }}>
-                            تاريخ الإكمال: <span className="num">{formatDate(stage.at_date)}</span>
-                          </div>
-                        )}
-
-                        {/* Barcode/PDF Upload Controls for Stage 4 */}
-                        {isBarcodeStage && company && (
-                          <div style={{ marginTop: '2px', display: 'flex', flexDirection: 'column', gap: '3px' }}>
-                            {isBarcodeLocked && (
-                              <div style={{ fontSize: '10.5px', color: 'var(--warn)', background: 'rgba(245, 158, 11, 0.1)', padding: '4px 6px', borderRadius: '4px' }}>
-                                <Mi n="lock" />يلزم إكمال المحطات الثلاث الأولى (الإرسال، المشاور، المحاسب) لرفع الباركود.
-                              </div>
-                            )}
-
-                            <BarcodeUploader
-                              stageId={stage.id}
-                              companyId={company.id}
-                              initialBarcodeUrl={stage.notes || company.barcode_url || null}
-                              disabled={!canRelease || loading || isBarcodeLocked}
-                              onUpload={async (stId, compId, file) => {
-                                await handleBarcodeUpload(stId, compId, file)
-                              }}
-                            />
-                          </div>
-                        )}
-
-                        {/* Lock Warning for 15-day shareholder rule */}
-                        {isLockedByShareholderRule && !isDone && (
-                          <div style={{ fontSize: '10.5px', color: 'var(--bad)', background: 'var(--bad-soft)', padding: '3px 6px', borderRadius: '4px' }}>
-                            <Mi n="warning" />شركة شركاء: يلزم انتظار {pen?.daysUntilSubmitAllowed} يوماً للإرسال.
-                          </div>
-                        )}
-
-                        {/* Stage Controls: Complete / Undo / Edit */}
-                        {!isBarcodeStage && (
-                          <div style={{ display: 'flex', gap: '4px', marginTop: '1px', flexWrap: 'wrap' }}>
-                            {canRelease ? (
-                              !isDone ? (
-                                <button
-                                  type="button"
-                                  disabled={loading || isLockedByShareholderRule}
-                                  onClick={() => handleToggleStage(stage, 'done')}
-                                  className="btn btn-go"
-                                  style={{ fontSize: '10.5px', padding: '1px 6px', height: '22px' }}
-                                >
-                                  ✓ إكمال المحطة
-                                </button>
-                              ) : (
-                                <>
-                                  <button
-                                    type="button"
-                                    disabled={loading}
-                                    onClick={() => handleToggleStage(stage, 'idle')}
-                                    className="btn btn-ghost"
-                                    style={{ fontSize: '10px', padding: '1px 5px', height: '22px', color: 'var(--bad)' }}
-                                  >
-                                    ↺ تراجع
-                                  </button>
-
-                                  {!isEditing ? (
-                                    <button
-                                      type="button"
-                                      disabled={loading}
-                                      onClick={() => {
-                                        setEditingStageId(stage.id)
-                                        setEditDate(stage.at_date || new Date().toISOString().slice(0, 10))
-                                      }}
-                                      className="btn btn-ghost"
-                                      style={{ fontSize: '10px', padding: '1px 5px', height: '22px' }}
-                                    >
-                                      تعديل التاريخ
-                                    </button>
-                                  ) : (
-                                    <div style={{ display: 'flex', gap: '3px', alignItems: 'center' }}>
-                                      <input
-                                        type="date"
-                                        className="input"
-                                        value={editDate}
-                                        onChange={e => setEditDate(e.target.value)}
-                                        style={{ padding: '1px 4px', fontSize: '10.5px', height: '22px' }}
-                                      />
-                                      <button
-                                        type="button"
-                                        disabled={loading}
-                                        onClick={() => handleToggleStage(stage, 'done', editDate)}
-                                        className="btn btn-primary"
-                                        style={{ fontSize: '9.5px', padding: '1px 5px', height: '22px' }}
-                                      >
-                                        حفظ
-                                      </button>
-                                      <button
-                                        type="button"
-                                        onClick={() => setEditingStageId(null)}
-                                        className="btn btn-ghost"
-                                        style={{ fontSize: '9.5px', padding: '1px 4px', height: '22px' }}
-                                      >
-                                        ✕
-                                      </button>
-                                    </div>
-                                  )}
-                                </>
-                              )
-                            ) : (
-                              <span style={{ fontSize: '10px', color: 'var(--text-3)', padding: '2px 4px' }}>
-                                {isDone ? 'تم اعتمادها رسمياً' : 'قيد المتابعة الإدارية'}
-                              </span>
-                            )}
-                          </div>
-                        )}
-                      </div>
-                    )
-                  })}
-                </div>
-
-                {/* Footer Micro-Bar */}
-                {isDepositFullyCompleted ? (
-                  <div
-                    style={{
-                      background: 'var(--surface-2)',
-                      border: '1px solid rgba(16, 185, 129, 0.2)',
-                      borderRadius: '6px',
-                      padding: '5px 8px',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'space-between',
-                      gap: '4px',
-                    }}
-                  >
-                    <span style={{ fontSize: '10.5px', fontWeight: 700, color: 'var(--ok)' }}>
-                      ✓ تم إطلاق الوديعة بنجاح
-                    </span>
-
-                    <a
-                      href={`/commercial/companies-registry`}
-                      className="text-[10.5px] font-bold text-[var(--accent)] hover:underline"
-                    >
-                      فتح بسجل الشركات ←
-                    </a>
-                  </div>
-                ) : isSubmitted ? (
-                  <div
-                    style={{
-                      background: 'rgba(56, 189, 248, 0.06)',
-                      border: '1px solid rgba(56, 189, 248, 0.2)',
-                      borderRadius: '6px',
-                      padding: '5px 8px',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '6px',
-                      fontSize: '10.5px',
-                      color: 'var(--text-2)',
-                    }}
-                  >
-                    <span className="material-symbols-outlined text-[var(--accent)] text-[14px]">info</span>
-                    <span>أُرسلت على النظام · بانتظار رفع الباركود لإكمال الإطلاق.</span>
-                  </div>
-                ) : pen ? (
-                  <div className={`pen${pen.level === 'late' ? ' late' : pen.level === 'soon' ? ' warn' : ''}`} style={{ padding: '6px 8px' }}>
-                    <Icon name={pen.level === 'late' ? 'alert' : 'clock'} />
-                    <div>
-                      <div className="pen-main" style={{ fontSize: '11px' }}>{pen.label}</div>
-                      <div className="pen-sub" style={{ fontSize: '10px' }}>
-                        تنتهي المهلة بتاريخ {formatDate(pen.due)}
-                        {pen.amount > 0 ? ` · متراكم ${formatMoney(pen.amount)}` : ''}
-                      </div>
-                    </div>
-                  </div>
-                ) : null}
-              </div>
+                onToggle={handleToggleStage}
+                onUpload={handleBarcodeUpload}
+              />
             )
           })}
         </div>
