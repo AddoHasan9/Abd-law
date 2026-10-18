@@ -8,7 +8,7 @@
 export type Theme = 'light' | 'dark'
 
 /** لون شريط الحالة = لون خلفية الصفحة في كل وضع */
-export const THEME_BAR_COLOR: Record<Theme, string> = { light: '#FBF8F3', dark: '#14121A' }
+export const THEME_BAR_COLOR: Record<Theme, string> = { light: '#FBF8F3', dark: '#131620' }
 
 export function currentTheme(): Theme {
   if (typeof document === 'undefined') return 'light'

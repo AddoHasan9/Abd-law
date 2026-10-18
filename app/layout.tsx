@@ -61,7 +61,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               } else {
                 document.documentElement.classList.remove('dark');
               }
-              var color = t === 'dark' ? '#14121A' : '#FBF8F3';
+              var color = t === 'dark' ? '#131620' : '#FBF8F3';
               document.documentElement.style.colorScheme = t;
               var meta = document.getElementById('theme-color-meta');
               if (meta) { meta.setAttribute('content', color); }

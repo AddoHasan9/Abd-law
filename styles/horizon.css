@@ -29,19 +29,19 @@ html:root, html:root[data-theme="light"] {
   --sidebar-w: 264px !important;
 }
 html:root[data-theme="dark"] {
-  --bg-app: #14121A !important; --bg: #14121A !important; --canvas-mesh: #14121A !important;
-  --surface: #1E1B26 !important; --surface-glass: rgba(34, 30, 43, .62) !important;
-  --surface-2: #262230 !important; --surface-3: #302B3B !important;
+  --bg-app: #131620 !important; --bg: #131620 !important; --canvas-mesh: #131620 !important;
+  --surface: #1C2030 !important; --surface-glass: rgba(30, 35, 52, .62) !important;
+  --surface-2: #232839 !important; --surface-3: #2C3245 !important;
   --input-bg: rgba(255, 255, 255, .05) !important; --input-border: rgba(255, 255, 255, .12) !important;
   --border: rgba(255, 255, 255, .10) !important; --border-soft: rgba(255, 255, 255, .07) !important;
   --line: rgba(255, 255, 255, .11) !important; --line-soft: rgba(255, 255, 255, .07) !important; --line-glass: rgba(255, 255, 255, .09) !important;
-  --side-bg: rgba(34, 30, 43, .55) !important; --side-border: rgba(255, 255, 255, .08) !important;
-  --text: #F1EEF5 !important; --text-1: #F5F2F8 !important; --text-2: #C3BECD !important; --text-3: #8E889A !important;
+  --side-bg: rgba(30, 35, 52, .55) !important; --side-border: rgba(255, 255, 255, .08) !important;
+  --text: #F1EEF5 !important; --text-1: #F5F2F8 !important; --text-2: #C2C3D2 !important; --text-3: #8B8EA2 !important;
   --coral: #E8987C; --coral-2: #F0B49D; --coral-3: #5A3A33;
   --accent: #EBA488 !important; --accent-soft: rgba(235, 164, 136, .15) !important;
   --brand: #F1EEF5 !important; --brand-soft: rgba(255, 255, 255, .06) !important;
-  --ink: #F1EEF5; --on-ink: #17151C;
-  --glass-bg: rgba(34, 30, 43, .62) !important; --glass-border: rgba(255, 255, 255, .09) !important;
+  --ink: #F1EEF5; --on-ink: #151827;
+  --glass-bg: rgba(30, 35, 52, .62) !important; --glass-border: rgba(255, 255, 255, .09) !important;
   --glass-line: rgba(255, 255, 255, .09);
   --glass-shadow: 0 10px 34px rgba(0, 0, 0, .32) !important;
 }
@@ -66,7 +66,7 @@ html[data-theme="dark"] body::before {
   background:
     radial-gradient(620px 520px at 8% calc(env(safe-area-inset-top, 0px) + 240px), rgba(232, 152, 124, .05), transparent 70%),
     radial-gradient(560px 480px at 96% calc(env(safe-area-inset-top, 0px) + 220px), rgba(185, 163, 230, .06), transparent 70%),
-    linear-gradient(180deg, transparent 0, transparent calc(env(safe-area-inset-top, 0px) + 24px), rgba(124, 196, 228, .05) calc(env(safe-area-inset-top, 0px) + 150px), rgba(185, 163, 230, .03) 36%, transparent 62%);
+    linear-gradient(180deg, transparent 0, transparent calc(env(safe-area-inset-top, 0px) + 24px), rgba(86, 170, 230, .10) calc(env(safe-area-inset-top, 0px) + 150px), rgba(170, 140, 230, .05) 38%, transparent 64%);
 }
 html:root #view-root, html[data-theme="dark"] #view-root { background: transparent !important; background-image: none !important; }
 
@@ -76,7 +76,7 @@ html:root :is(.card, .glass-card, .bx-card, .kpi-card, .data-panel, .tk-card, .t
 }
 @media (max-width: 768px) {
   html:root { --surface-glass: rgba(255, 255, 255, .84) !important; --glass-bg: rgba(255, 255, 255, .84) !important; }
-  html:root[data-theme="dark"] { --surface-glass: rgba(34, 30, 43, .9) !important; --glass-bg: rgba(34, 30, 43, .9) !important; }
+  html:root[data-theme="dark"] { --surface-glass: rgba(30, 35, 52, .9) !important; --glass-bg: rgba(30, 35, 52, .9) !important; }
   html:root :is(.card, .glass-card, .bx-card, .kpi-card, .data-panel, .tk-card, .tool-panel, .cr-card, .page-head, .animated-tabs-track) { -webkit-backdrop-filter: none !important; backdrop-filter: none !important; }
 }
 
@@ -304,7 +304,8 @@ html:root .hz-box input.hz-input { flex: 1; min-width: 0; height: 44px; border: 
 .hz-input::placeholder { color: var(--text-3); }
 .hz-send { flex: none; width: 40px; height: 40px; border-radius: 999px; border: 0; background: var(--coral); color: #fff; display: grid; place-items: center; cursor: pointer; box-shadow: 0 8px 18px -10px color-mix(in srgb, var(--coral) 75%, transparent); transition: transform .2s ease, opacity .2s ease, background-color .2s ease; }
 .hz-send:hover:not(:disabled) { transform: translateY(-1px); }
-.hz-send:disabled { background: color-mix(in srgb, var(--coral) 35%, var(--surface-2)); box-shadow: none; cursor: default; }
+.hz-send:disabled { opacity: .5; box-shadow: none; cursor: default; }
+html[data-theme="dark"] .hz-send:disabled { opacity: .62; }
 .hz-send .material-symbols-outlined { font-size: 20px; }
 /* السطر 2: النوع + الموعد + الوقت — كلها بنفس الارتفاع */
 .hz-bar { display: flex; align-items: center; gap: 6px; padding: 6px 4px 2px; border-top: 1px solid var(--line-soft); margin-top: 4px; }
@@ -500,3 +501,23 @@ html:root #sidebar .side-nav:hover { scrollbar-color: color-mix(in srgb, var(--t
 html:root #sidebar .side-nav::-webkit-scrollbar { width: 6px; }
 html:root #sidebar .side-nav::-webkit-scrollbar-thumb { background: transparent; border-radius: 6px; }
 html:root #sidebar .side-nav:hover::-webkit-scrollbar-thumb { background: color-mix(in srgb, var(--text) 18%, transparent); }
+
+
+/* ---------- 23) الشريط السفلي زجاجي حقيقي (مثل النموذج) ---------- */
+/* :not(#_) يرفع الأولوية فوق قاعدة الزجاج العامة (التي تحوي #topbar) */
+/* شفافية أعلى مع تمويه حقيقي حتى على الهاتف؛ عنصر واحد ثابت فلا يثقل الجهاز */
+html:root body .tabbar:not(#_) {
+  background: rgba(255, 255, 255, .5) !important;
+  border: 1px solid rgba(255, 255, 255, .75) !important;
+  -webkit-backdrop-filter: blur(22px) saturate(1.5) !important; backdrop-filter: blur(22px) saturate(1.5) !important;
+  box-shadow: 0 14px 34px -14px rgba(0, 0, 0, .22), inset 0 1px 0 rgba(255, 255, 255, .6) !important;
+}
+html:root[data-theme="dark"] body .tabbar:not(#_) {
+  background: rgba(30, 35, 52, .52) !important;
+  border-color: rgba(255, 255, 255, .1) !important;
+  box-shadow: 0 14px 34px -14px rgba(0, 0, 0, .55), inset 0 1px 0 rgba(255, 255, 255, .06) !important;
+}
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  html:root body .tabbar:not(#_) { background: rgba(255, 255, 255, .92) !important; }
+  html:root[data-theme="dark"] body .tabbar:not(#_) { background: rgba(30, 35, 52, .94) !important; }
+}
