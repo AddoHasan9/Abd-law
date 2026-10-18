@@ -1,5 +1,7 @@
 'use client'
 
+import { dataUrlToBlob } from '@/components/ui/AttachmentField'
+
 import { useState, useEffect } from 'react'
 import { PageHeader } from '@/components/ui/PageHeader'
 import { runAction } from '@/components/ui/ConfirmDialog'
@@ -99,7 +101,7 @@ export default function DepositsClient({ deposits = [], companyId }: Props) {
     setLoading(true)
     try {
       const dataUrl = await compressImageFile(file)
-      await runAction(uploadCompanyBarcodeAction(stageId, targetCompanyId, dataUrl), 'إطلاق الوديعة · رفع الملف')
+      await runAction(uploadCompanyBarcodeAction(stageId, targetCompanyId, dataUrlToBlob(dataUrl)), 'إطلاق الوديعة · رفع الملف')
       
       // Update local optimistic state
       setDepositsList(prev =>

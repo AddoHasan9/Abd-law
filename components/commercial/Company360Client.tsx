@@ -1,5 +1,7 @@
 'use client'
 
+import { dataUrlToBlob } from '@/components/ui/AttachmentField'
+
 import { useState, useMemo, useEffect } from 'react'
 import dynamic from 'next/dynamic'
 import { toast } from 'sonner'
@@ -319,7 +321,7 @@ export default function Company360Client({
       }
 
       const dataUrl = await compressImage(file)
-      await runAction(uploadCompanyBarcodeAction(stageId, company.id, dataUrl), 'الملف الشامل للشركة · رفع الملف')
+      await runAction(uploadCompanyBarcodeAction(stageId, company.id, dataUrlToBlob(dataUrl)), 'الملف الشامل للشركة · رفع الملف')
       setMsg({ type: 'ok', text: 'تم إطلاق الوديعة بنجاح' })
     } catch {
       setMsg({ type: 'err', text: 'حدث خطأ أثناء رفع الباركود' })

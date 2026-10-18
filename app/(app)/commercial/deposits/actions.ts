@@ -146,7 +146,7 @@ export async function updateDepositStageStateAction(
   }
 }
 
-export async function uploadCompanyBarcodeAction(stageId: string, companyId: string, barcodeDataUrl: string) {
+export async function uploadCompanyBarcodeAction(stageId: string, companyId: string, barcodeFile: Blob | string) {
   if (stageId) {
     const access = await requireRecordAccess('deposit_stages', stageId)
     if (access) return access
@@ -158,6 +158,13 @@ export async function uploadCompanyBarcodeAction(stageId: string, companyId: str
   const denied = await requirePermission('deposits', 'release')
   if (denied) return denied
 
+  // الملف يصل كـ Blob: حماية React الجديدة ترفض النصوص الأطول من مليون حرف (ملف PDF بحجم 1 م.ب)
+  if (barcodeFile instanceof Blob && barcodeFile.size > 4 * 1024 * 1024) {
+    return { success: false as const, error: 'حجم الملف كبير جداً (الحد الأقصى 4 ميغابايت)' }
+  }
+  const barcodeDataUrl = barcodeFile instanceof Blob
+    ? `data:${barcodeFile.type || 'application/octet-stream'};base64,${Buffer.from(await barcodeFile.arrayBuffer()).toString('base64')}`
+    : barcodeFile
   // التحقق من الملف على الخادم: صورة أو PDF فقط، وحد أقصى للحجم (لا نثق بفحص المتصفح وحده)
   if (!/^data:(image\/(png|jpeg|webp|gif)|application\/pdf);base64,[A-Za-z0-9+/=]+$/.test(barcodeDataUrl || '')) {
     return { success: false as const, error: 'الملف غير صالح: يُقبل PNG أو JPG أو WebP أو PDF فقط' }
