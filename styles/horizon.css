@@ -503,20 +503,21 @@ html:root #sidebar .side-nav::-webkit-scrollbar-thumb { background: transparent;
 html:root #sidebar .side-nav:hover::-webkit-scrollbar-thumb { background: color-mix(in srgb, var(--text) 18%, transparent); }
 
 
-/* ---------- 23) الشريط السفلي زجاجي حقيقي (مثل النموذج) ---------- */
-/* :not(#_) يرفع الأولوية فوق قاعدة الزجاج العامة (التي تحوي #topbar) */
-/* شفافية أعلى مع تمويه حقيقي حتى على الهاتف؛ عنصر واحد ثابت فلا يثقل الجهاز */
+/* ---------- 23) الشريط السفلي زجاجي حقيقي (نفس قيم ملف التصميم: bg-white/40 + border-white/60 + backdrop-blur-xl) ---------- */
+/* :not(#_) يرفع الأولوية فوق قاعدة الزجاج العامة (التي تحوي #topbar)؛ التمويه يعمل على الهاتف أيضاً (عنصر واحد ثابت) */
 html:root body .tabbar:not(#_) {
-  background: rgba(255, 255, 255, .5) !important;
-  border: 1px solid rgba(255, 255, 255, .75) !important;
-  -webkit-backdrop-filter: blur(22px) saturate(1.5) !important; backdrop-filter: blur(22px) saturate(1.5) !important;
-  box-shadow: 0 14px 34px -14px rgba(0, 0, 0, .22), inset 0 1px 0 rgba(255, 255, 255, .6) !important;
+  background: rgba(255, 255, 255, .40) !important;
+  border: 1px solid rgba(255, 255, 255, .60) !important;
+  -webkit-backdrop-filter: blur(24px) saturate(1.8) !important; backdrop-filter: blur(24px) saturate(1.8) !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, .06), inset 0 1px 0 rgba(255, 255, 255, .55) !important;
 }
+/* الليلي مثل النموذج: زجاج شبه شفاف (5-6% أبيض) والتمويه هو اللي يعطي الإحساس */
 html:root[data-theme="dark"] body .tabbar:not(#_) {
-  background: rgba(30, 35, 52, .52) !important;
-  border-color: rgba(255, 255, 255, .1) !important;
-  box-shadow: 0 14px 34px -14px rgba(0, 0, 0, .55), inset 0 1px 0 rgba(255, 255, 255, .06) !important;
+  background: rgba(255, 255, 255, .06) !important;
+  border-color: rgba(255, 255, 255, .12) !important;
+  box-shadow: 0 10px 34px rgba(0, 0, 0, .35), inset 0 1px 0 rgba(255, 255, 255, .08) !important;
 }
+html:root[data-theme="dark"] body .tabbar:not(#_) .tabbar-item:not(.is-on) { color: #A9ACBE !important; }
 @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
   html:root body .tabbar:not(#_) { background: rgba(255, 255, 255, .92) !important; }
   html:root[data-theme="dark"] body .tabbar:not(#_) { background: rgba(30, 35, 52, .94) !important; }
