@@ -51,8 +51,8 @@ export default function HorizonHero({ deadlinesCount }: Props) {
   useEffect(() => {
     const box = boxRef.current
     if (!box) return
-    box.style.height = 'auto'
-    box.style.height = `${Math.min(box.scrollHeight, 160)}px`
+    box.style.setProperty('--hz-text-height', '0px')
+    box.style.setProperty('--hz-text-height', `${Math.min(box.scrollHeight, 120)}px`)
   }, [text])
 
   async function submit() {
