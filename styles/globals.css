@@ -3322,6 +3322,26 @@ html[data-theme="dark"] .page-head.tone-violet { --tone: #a78bfa; } html[data-th
 .att-chip .material-symbols-outlined { font-size: 15px; }
 .att-chip:disabled { opacity: .5; cursor: wait; }
 @media (pointer: coarse) { .att-chip { width: 34px; height: 34px; } }
+/* رفع المرفق: شريط متحرك أثناء الرفع، ثم ومضة نجاح قصيرة */
+.att-uploading { display: flex; align-items: center; gap: 12px; padding: 10px; border-radius: 14px; border: 1px dashed color-mix(in srgb, var(--accent) 45%, var(--line-soft)); background: color-mix(in srgb, var(--accent) 5%, var(--surface)); }
+.att-up-icon { width: 56px; height: 56px; flex: none; border-radius: 10px; display: grid; place-items: center; font-size: 26px; color: var(--accent); background: color-mix(in srgb, var(--accent) 12%, var(--surface)); animation: att-rise 1.1s ease-in-out infinite; }
+.att-bar { position: relative; height: 6px; margin: 7px 0 5px; border-radius: 99px; overflow: hidden; background: color-mix(in srgb, var(--accent) 14%, var(--surface-2)); }
+.att-bar > span { position: absolute; inset-block: 0; inset-inline-start: 0; width: 40%; border-radius: inherit; background: var(--accent); animation: att-slide 1.15s cubic-bezier(.45, 0, .55, 1) infinite; }
+.att-file { position: relative; }
+.att-file--done { animation: att-pop .45s cubic-bezier(.2, .9, .3, 1.25); border-color: color-mix(in srgb, #16a34a 55%, var(--line-soft)); box-shadow: 0 0 0 4px color-mix(in srgb, #16a34a 14%, transparent); transition: border-color .6s, box-shadow .6s; }
+.att-done-badge { position: absolute; top: -10px; inset-inline-end: 12px; display: inline-flex; align-items: center; gap: 3px; padding: 2px 9px 2px 7px; border-radius: 99px; font-size: 11px; font-weight: 800; color: #fff; background: #16a34a; box-shadow: 0 4px 12px -4px rgba(22, 163, 74, .6); animation: att-badge 1.8s ease forwards; }
+.att-done-badge .material-symbols-outlined { font-size: 14px; animation: att-check .4s .1s cubic-bezier(.2, .9, .3, 1.4) both; }
+@keyframes att-slide { 0% { transform: translateX(-110%); } 100% { transform: translateX(260%); } }
+[dir="rtl"] .att-bar > span { animation-name: att-slide-rtl; }
+@keyframes att-slide-rtl { 0% { transform: translateX(110%); } 100% { transform: translateX(-260%); } }
+@keyframes att-rise { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-3px); } }
+@keyframes att-pop { 0% { transform: scale(.96); opacity: .4; } 100% { transform: scale(1); opacity: 1; } }
+@keyframes att-check { 0% { transform: scale(0) rotate(-30deg); } 100% { transform: scale(1) rotate(0); } }
+@keyframes att-badge { 0% { opacity: 0; transform: translateY(4px) scale(.85); } 12%, 80% { opacity: 1; transform: none; } 100% { opacity: 0; transform: translateY(-3px); } }
+@media (prefers-reduced-motion: reduce) {
+  .att-up-icon, .att-file--done, .att-done-badge, .att-done-badge .material-symbols-outlined { animation: none; }
+  .att-bar > span { animation: none; width: 100%; opacity: .55; }
+}
 
 /* ============================================================
    لوحة التحكم — أسلوب Bento (ألوان الشعار: كحلي + ذهبي)

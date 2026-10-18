@@ -9,11 +9,11 @@ import {
 } from '@/app/(app)/commercial/attachments/actions'
 import { confirmAction, runAction, showError } from '@/components/ui/ConfirmDialog'
 
-const MAX_PDF = 5 * 1024 * 1024
+const MAX_FILE = 4 * 1024 * 1024
 const ACCEPT = 'image/jpeg,image/png,image/webp,application/pdf'
 
 /** تصغير الصورة قبل الرفع (أطول ضلع 1800px، JPEG) — صورة الهاتف تصبح بضع مئات من الكيلوبايت */
-async function imageToDataUrl(file: File): Promise<string> {
+async function imageToBlob(file: File): Promise<Blob> {
   const url = URL.createObjectURL(file)
   try {
     const img = await new Promise<HTMLImageElement>((res, rej) => {
@@ -30,19 +30,29 @@ async function imageToDataUrl(file: File): Promise<string> {
     ctx.fillStyle = '#fff'
     ctx.fillRect(0, 0, c.width, c.height)
     ctx.drawImage(img, 0, 0, c.width, c.height)
-    return c.toDataURL('image/jpeg', 0.82)
+    return await new Promise<Blob>((res, rej) =>
+      c.toBlob(b => (b ? res(b) : rej(new Error('تعذّر تجهيز الصورة'))), 'image/jpeg', 0.82),
+    )
   } finally {
     URL.revokeObjectURL(url)
   }
 }
 
-function fileToDataUrl(file: File): Promise<string> {
+function blobToDataUrl(blob: Blob): Promise<string> {
   return new Promise((res, rej) => {
     const r = new FileReader()
     r.onload = () => res(String(r.result))
     r.onerror = () => rej(new Error('تعذّر قراءة الملف'))
-    r.readAsDataURL(file)
+    r.readAsDataURL(blob)
   })
+}
+
+/** يحوّل data: إلى Blob حتى يُرسل للخادم كملف لا كنص طويل */
+export function dataUrlToBlob(dataUrl: string): Blob {
+  const [head, b64] = dataUrl.split(',')
+  const mime = /data:([^;]+)/.exec(head)?.[1] || 'application/octet-stream'
+  const bytes = Uint8Array.from(atob(b64), ch => ch.charCodeAt(0))
+  return new Blob([bytes], { type: mime })
 }
 
 /** يفتح المرفق في تبويب جديد (رابط blob مؤقت) */
@@ -72,7 +82,16 @@ export function AttachmentField({
   const [file, setFile] = useState<Loaded>(null)
   const [loading, setLoading] = useState(false)
   const [busy, setBusy] = useState(false)
+  /** اسم الملف أثناء الرفع، وومضة النجاح بعد اكتماله */
+  const [uploading, setUploading] = useState<string | null>(null)
+  const [justDone, setJustDone] = useState(false)
   const input = useRef<HTMLInputElement>(null)
+
+  useEffect(() => {
+    if (!justDone) return
+    const t = setTimeout(() => setJustDone(false), 1800)
+    return () => clearTimeout(t)
+  }, [justDone])
 
   useEffect(() => {
     if (!entityId) return
@@ -90,23 +109,31 @@ export function AttachmentField({
       showError('نوع الملف غير مدعوم: يُقبل JPG أو PNG أو WebP أو PDF', 'المرفقات')
       return
     }
-    if (f.type === 'application/pdf' && f.size > MAX_PDF) {
-      showError('حجم ملف PDF كبير (الحد الأقصى 5 ميغابايت)', 'المرفقات')
+    const isPdf = f.type === 'application/pdf'
+    if (isPdf && f.size > MAX_FILE) {
+      showError('حجم ملف PDF كبير (الحد الأقصى 4 ميغابايت)', 'المرفقات')
       return
     }
+    const name = isPdf ? f.name : f.name.replace(/\.[^.]+$/, '') + '.jpg'
     setBusy(true)
+    setUploading(name)
     try {
-      const dataUrl = f.type === 'application/pdf' ? await fileToDataUrl(f) : await imageToDataUrl(f)
-      const name = f.type === 'application/pdf' ? f.name : f.name.replace(/\.[^.]+$/, '') + '.jpg'
-      const res = await runAction(uploadAttachmentAction(entity, entityId, name, dataUrl), 'المرفقات · الرفع')
+      const blob = isPdf ? f : await imageToBlob(f)
+      if (blob.size > MAX_FILE) {
+        showError('حجم الملف كبير (الحد الأقصى 4 ميغابايت)', 'المرفقات')
+        return
+      }
+      const res = await runAction(uploadAttachmentAction(entity, entityId, name, blob), 'المرفقات · الرفع')
       if (res?.success) {
-        const mime = /data:([^;]+)/.exec(dataUrl)?.[1] || 'image/jpeg'
-        setFile({ file_name: name, mime_type: mime, size_bytes: Math.floor((dataUrl.length * 3) / 4), data_url: dataUrl })
+        const dataUrl = await blobToDataUrl(blob)
+        setFile({ file_name: name, mime_type: blob.type || 'image/jpeg', size_bytes: blob.size, data_url: dataUrl })
+        setJustDone(true)
       }
     } catch (e) {
       showError(e instanceof Error ? e.message : 'تعذّر تجهيز الملف', 'المرفقات')
     } finally {
       setBusy(false)
+      setUploading(null)
       if (input.current) input.current.value = ''
     }
   }
@@ -132,8 +159,23 @@ export function AttachmentField({
         <div className="att-note">احفظ السجل أولاً، ثم افتحه لإرفاق الملف.</div>
       ) : loading ? (
         <div className="att-note">جارٍ التحميل…</div>
+      ) : uploading ? (
+        <div className="att-uploading" role="status" aria-live="polite">
+          <span className="att-up-icon material-symbols-outlined" aria-hidden>upload</span>
+          <div className="att-meta">
+            <div className="att-name" title={uploading}>{uploading}</div>
+            <div className="att-bar"><span /></div>
+            <div className="att-size">جارٍ الرفع…</div>
+          </div>
+        </div>
       ) : file ? (
-        <div className="att-file">
+        <div className={`att-file${justDone ? ' att-file--done' : ''}`}>
+          {justDone && (
+            <span className="att-done-badge" role="status" aria-live="polite">
+              <span className="material-symbols-outlined" aria-hidden>check</span>
+              تم الرفع
+            </span>
+          )}
           <button type="button" className="att-thumb" onClick={() => openDataUrl(file.data_url)} title="فتح">
             {isImage ? (
               // eslint-disable-next-line @next/next/no-img-element
@@ -155,7 +197,7 @@ export function AttachmentField({
       ) : (
         <button type="button" className="att-drop" onClick={() => input.current?.click()} disabled={busy}>
           <span className="material-symbols-outlined" aria-hidden>attach_file</span>
-          <span>{busy ? 'جارٍ الرفع…' : 'إرفاق صورة أو PDF'}</span>
+          <span>إرفاق صورة أو PDF</span>
           {hint && <small>{hint}</small>}
         </button>
       )}
