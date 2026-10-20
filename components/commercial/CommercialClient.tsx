@@ -12,6 +12,7 @@ import { WorkflowStatus } from '@/components/ui/WorkflowStatus'
 import { WORKFLOW_STATUS_LIST } from '@/lib/workflow-status'
 import { Icon } from '@/components/ui/Icon'
 import { Empty } from '@/components/ui/Empty'
+import { Portal } from '@/components/ui/Portal'
 import { useModalBodyLock } from '@/lib/hooks/useModalBodyLock'
 import dynamic from 'next/dynamic'
 import TxBoard from './TxBoard'
@@ -176,6 +177,56 @@ export default function CommercialClient({ heading = 'المعاملات الت�
     try { localStorage.setItem('commercial-view', v) } catch { /* وضع خاص */ }
   }
 
+  /** فتح قائمة الإجراءات (⋮) قرب الزر، داخل حدود الشاشة */
+  const openTxMenu = (el: HTMLElement, t: TransactionFull) => {
+    if (activeMenuTx?.id === t.id) {
+      setActiveMenuTx(null)
+      setMenuCoords(null)
+      return
+    }
+    const rect = el.getBoundingClientRect()
+    const menuHeight = 240
+    const menuWidth = 210
+    let top = rect.bottom + 6
+    if (top + menuHeight > window.innerHeight - 12) top = Math.max(12, rect.top - menuHeight - 6)
+    let left = rect.left
+    if (left + menuWidth > window.innerWidth - 12) left = window.innerWidth - menuWidth - 12
+    if (left < 12) left = 12
+    setMenuCoords({ top, left })
+    setActiveMenuTx(t)
+  }
+
+  /** شارة نوع الخدمة — التأسيس يعرض مرحلة الوديعة كسطر صغير أنيق تحت الشارة بدل شارة طويلة */
+  const renderService = (t: TransactionFull, companyObj?: CompanyWithWorkflow | Company | null) => {
+    const serviceLabel = t.type ? txType(t.type).label : null
+    const isServiceValid = serviceLabel && serviceLabel !== '—'
+    const stStyle = SERVICE_TYPE_STYLES[t.type]
+    const isFormation = t.type === 'formation' || t.type === 'tasis'
+    const isDepositReleased = companyObj?.deposit_released || Boolean(companyObj?.deposit_released_at)
+    const isInDepositPhase = isFormation && !isDepositReleased && Boolean(companyObj?.cert_date || companyObj?.status === 'established')
+
+    if (isFormation && (isDepositReleased || isInDepositPhase)) {
+      const base = stStyle ?? { label: 'تأسيس شركة', bg: 'var(--surface-2)', color: 'var(--text)', border: '1px solid var(--line)' }
+      return (
+        <span className="svc-stack">
+          <span className="svc-pill" style={{ background: base.bg, border: base.border, color: base.color }}>{base.label}</span>
+          {isDepositReleased ? (
+            <span className="svc-phase is-done"><span className="material-symbols-outlined" aria-hidden>check_circle</span>أُطلقت الوديعة</span>
+          ) : (
+            <a href={`/commercial/deposits?company=${t.company_id ?? ''}`} className="svc-phase is-wait" onClick={e => e.stopPropagation()}>
+              <i aria-hidden />الوديعة قيد الإطلاق
+            </a>
+          )}
+        </span>
+      )
+    }
+    if (stStyle) {
+      return <span className="svc-pill" style={{ background: stStyle.bg, border: stStyle.border, color: stStyle.color }}>{stStyle.label}</span>
+    }
+    if (isServiceValid) return <span className="svc-pill svc-pill--accent">{serviceLabel}</span>
+    return <span className="svc-pill svc-pill--bad">سجل غير مكتمل</span>
+  }
+
   const filteredRows = useMemo(() => {
     return localRows.filter(t => {
       const companyObj = t.company_id ? companyMap.get(t.company_id) || t.companies : t.companies
@@ -287,6 +338,7 @@ export default function CommercialClient({ heading = 'المعاملات الت�
 
       {/* Toast Notification */}
       {toastMsg && (
+        <Portal>
         <div
           style={{
             position: 'fixed',
@@ -304,6 +356,7 @@ export default function CommercialClient({ heading = 'المعاملات الت�
         >
           {toastMsg}
         </div>
+        </Portal>
       )}
 
       {/* Incomplete Records Warning Banner */}
@@ -454,7 +507,60 @@ export default function CommercialClient({ heading = 'المعاملات الت�
         ) : view === 'board' ? (
           <TxBoard rows={filteredRows} />
         ) : (
-          <div className="overflow-x-auto w-full">
+          <>
+          {/* الموبايل: بطاقات مصمّمة بدل الجدول المكدّس */}
+          <div className="txm-list">
+            {filteredRows.map(t => {
+              const pr = priorityOf(t.priority)
+              const companyObj = t.company_id ? companyMap.get(t.company_id) || t.companies : t.companies
+              const companyName = companyObj?.name || (t.companies as { name?: string })?.name || null
+              const pic = getPersonInCharge(companyObj)
+              const lawyerName = t.profiles?.name || (t as unknown as { assigned_lawyer_name?: string }).assigned_lawyer_name || null
+              const isMenuOpen = activeMenuTx?.id === t.id
+              return (
+                <article key={t.id} className={`txm-card${isMenuOpen ? ' is-open' : ''}${!companyName ? ' is-incomplete' : ''}`}>
+                  <header className="txm-head">
+                    <span className="txm-ico material-symbols-outlined" aria-hidden>domain</span>
+                    <div className="txm-title">
+                      <b>{companyName || 'سجل غير مكتمل'}</b>
+                      {t.description && <small>{t.description}</small>}
+                    </div>
+                    <button type="button" className={`txm-more${isMenuOpen ? ' is-on' : ''}`} aria-label="خيارات المعاملة"
+                      onClick={e => { e.stopPropagation(); openTxMenu(e.currentTarget, t) }}>
+                      <span className="material-symbols-outlined" aria-hidden>more_vert</span>
+                    </button>
+                  </header>
+                  <div className="txm-tags">
+                    {renderService(t, companyObj)}
+                    <span className={`txm-prio is-${t.priority || 'low'}`}><i aria-hidden />{pr.label}</span>
+                  </div>
+                  <dl className="txm-grid">
+                    <div>
+                      <dt>المسؤول</dt>
+                      <dd>{pic.name === 'سجل غير مكتمل' ? <span className="txm-muted">—</span> : pic.name}{pic.roleLabel && <em>{pic.roleLabel}</em>}</dd>
+                    </div>
+                    <div>
+                      <dt>المحامي المكلف</dt>
+                      <dd>{lawyerName ?? (
+                        <button type="button" className="txm-assign" onClick={() => setAssignLawyerTx(t)}>
+                          <span className="material-symbols-outlined" aria-hidden>person_add</span>تعيين
+                        </button>
+                      )}</dd>
+                    </div>
+                    <div>
+                      <dt>الحالة</dt>
+                      <dd><WorkflowStatus status={t.status} entityId={t.id} entityType="transaction" companyId={t.company_id} size="sm" /></dd>
+                    </div>
+                    <div>
+                      <dt>التاريخ</dt>
+                      <dd className="num">{formatDate(t.tx_date)}</dd>
+                    </div>
+                  </dl>
+                </article>
+              )
+            })}
+          </div>
+          <div className="overflow-x-auto w-full txm-table">
             <table className="stackable w-full border-collapse text-right text-xs table-auto">
               <thead>
                 <tr className="border-b border-[var(--border-soft)] bg-[color:color-mix(in_srgb,var(--surface-2)_80%,transparent)] text-xs text-[var(--text-2)] font-bold">
@@ -478,9 +584,6 @@ export default function CommercialClient({ heading = 'المعاملات الت�
                   const isServiceValid = serviceLabel && serviceLabel !== '—'
                   const lawyerName = t.profiles?.name || (t as unknown as { assigned_lawyer_name?: string }).assigned_lawyer_name || null
                   const isIncompleteRecord = !companyName || !isServiceValid
-                  const isMenuOpen = activeMenuTx?.id === t.id
-                  const stStyle = SERVICE_TYPE_STYLES[t.type]
-
                   return (
                     <tr
                       key={t.id}
@@ -509,58 +612,7 @@ export default function CommercialClient({ heading = 'المعاملات الت�
 
                       {/* 2. Service Type */}
                       <td className="py-3.5 px-3 text-center align-middle">
-                        {(() => {
-                          const isFormation = t.type === 'formation' || t.type === 'tasis'
-                          const isDepositReleased = companyObj?.deposit_released || Boolean(companyObj?.deposit_released_at)
-                          const isInDepositPhase = isFormation && !isDepositReleased && Boolean(companyObj?.cert_date || companyObj?.status === 'established')
-
-                          if (isFormation && isDepositReleased) {
-                            return (
-                              <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold text-emerald-700 dark:text-emerald-300 bg-emerald-500/15 border border-emerald-500/20">
-                                <span className="material-symbols-outlined text-[14px]">verified</span>
-                                <span>تأسيس (أُطلقت الوديعة)</span>
-                              </span>
-                            )
-                          }
-
-                          if (isInDepositPhase) {
-                            return (
-                              <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold text-amber-700 dark:text-amber-300 bg-amber-500/15 border border-amber-500/20">
-                                <span className="material-symbols-outlined text-[14px]">hourglass_top</span>
-                                <span>تأسيس · قيد إطلاق الوديعة</span>
-                              </span>
-                            )
-                          }
-
-                          if (stStyle) {
-                            return (
-                              <span
-                                style={{
-                                  background: stStyle.bg,
-                                  border: stStyle.border,
-                                  color: stStyle.color,
-                                }}
-                                className="inline-flex items-center justify-center px-3 py-1 rounded-full text-xs font-bold whitespace-nowrap shadow-xs"
-                              >
-                                {stStyle.label}
-                              </span>
-                            )
-                          }
-
-                          if (isServiceValid) {
-                            return (
-                              <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-[color:color-mix(in_srgb,var(--accent)_10%,transparent)] text-[var(--accent)] dark:text-[var(--accent)] border border-[color:color-mix(in_srgb,var(--accent)_20%,transparent)]">
-                                {serviceLabel}
-                              </span>
-                            )
-                          }
-
-                          return (
-                            <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-rose-500/10 text-rose-600 border border-rose-500/20">
-                              سجل غير مكتمل
-                            </span>
-                          )
-                        })()}
+                        {renderService(t, companyObj)}
                       </td>
 
                       {/* 3. Assigned Lawyer */}
@@ -623,30 +675,7 @@ export default function CommercialClient({ heading = 'المعاملات الت�
                       <td className="py-3.5 px-4 text-center align-middle">
                         <button
                           type="button"
-                          onClick={e => {
-                            e.stopPropagation()
-                            if (activeMenuTx?.id === t.id) {
-                              setActiveMenuTx(null)
-                              setMenuCoords(null)
-                              return
-                            }
-                            const rect = e.currentTarget.getBoundingClientRect()
-                            const menuHeight = 240
-                            const menuWidth = 210
-                            let top = rect.bottom + 6
-                            if (top + menuHeight > window.innerHeight - 12) {
-                              top = Math.max(12, rect.top - menuHeight - 6)
-                            }
-                            let left = rect.left
-                            if (left + menuWidth > window.innerWidth - 12) {
-                              left = window.innerWidth - menuWidth - 12
-                            }
-                            if (left < 12) {
-                              left = 12
-                            }
-                            setMenuCoords({ top, left })
-                            setActiveMenuTx(t)
-                          }}
+                          onClick={e => { e.stopPropagation(); openTxMenu(e.currentTarget, t) }}
                           className={`w-8 h-8 rounded-full border transition inline-flex items-center justify-center text-sm font-bold shadow-xs cursor-pointer ${
                             activeMenuTx?.id === t.id
                               ? 'bg-[var(--accent-soft)] text-[var(--accent)] dark:text-[var(--accent)] ring-1 ring-inset ring-[color:color-mix(in_srgb,var(--accent)_22%,transparent)]'
@@ -663,6 +692,7 @@ export default function CommercialClient({ heading = 'المعاملات الت�
               </tbody>
             </table>
           </div>
+          </>
         )}
       </DataPanel>
 
@@ -790,6 +820,7 @@ export default function CommercialClient({ heading = 'المعاملات الت�
 
       {/* Assign Lawyer Modal */}
       {assignLawyerTx && (
+        <Portal>
         <div
           style={{
             position: 'fixed',
@@ -874,10 +905,12 @@ export default function CommercialClient({ heading = 'المعاملات الت�
             </div>
           </div>
         </div>
+        </Portal>
       )}
 
       {/* نافذة تعديل وتصحيح المعاملة — التصميم الموحّد الحديث */}
       {editTx && (
+        <Portal>
         <div id="modal-root" className="on">
           <div className="modal-veil" onClick={() => setEditTx(null)} role="presentation" aria-hidden="true" />
           <div className="modal" style={{ '--modal-max-w': 'var(--modal-md, 640px)' } as React.CSSProperties}>
@@ -1168,6 +1201,7 @@ export default function CommercialClient({ heading = 'المعاملات الت�
             </form>
           </div>
         </div>
+        </Portal>
       )}
     </div>
   )

@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
+import { Portal } from '@/components/ui/Portal'
 import { useOpenOnNewParam } from '@/lib/hooks/useOpenOnNewParam'
 import Link from 'next/link'
 import dynamic from 'next/dynamic'
@@ -682,6 +683,7 @@ export default function FinancialStatementsClient({ companies = [] }: Props) {
 
       {/* Toast Notification */}
       {toastMsg && (
+        <Portal>
         <div
           role="status"
           style={{
@@ -700,6 +702,7 @@ export default function FinancialStatementsClient({ companies = [] }: Props) {
         >
           {toastMsg}
         </div>
+        </Portal>
       )}
     </div>
   )

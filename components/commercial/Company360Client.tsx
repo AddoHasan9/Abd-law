@@ -1,6 +1,7 @@
 'use client'
 
 import { dataUrlToBlob } from '@/components/ui/AttachmentField'
+import { Portal } from '@/components/ui/Portal'
 
 import { useState, useMemo, useEffect } from 'react'
 import dynamic from 'next/dynamic'
@@ -1237,6 +1238,7 @@ export default function Company360Client({
 
       {/* Document Upload Modal */}
       {isUploadModalOpen && (
+        <Portal>
         <div id="modal-root" className="on">
           <div className="modal-veil" onClick={() => setIsUploadModalOpen(false)} role="presentation" aria-hidden="true" />
           <div className="modal" style={{ '--modal-max-w': 'var(--modal-sm, 480px)' } as React.CSSProperties}>
@@ -1270,6 +1272,7 @@ export default function Company360Client({
             </form>
           </div>
         </div>
+        </Portal>
       )}
     </div>
   )

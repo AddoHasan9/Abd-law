@@ -154,7 +154,47 @@ export default function CompaniesRegistryClient({ companies = [] }: Props) {
             />
           </div>
         ) : (
-          <div className="w-full overflow-x-auto">
+          <>
+          {/* الموبايل: بطاقات مصمّمة بدل الجدول المكدّس */}
+          <div className="com-list">
+            {filteredCompanies.map(co => {
+              const activeManager = co.managers?.find(m => m.active)?.name || co.managers?.[0]?.name || null
+              return (
+                <article
+                  key={co.id}
+                  className="com-card"
+                  onClick={e => { if (!(e.target as HTMLElement).closest('a,button')) openDetails(co) }}
+                >
+                  <header className="com-head">
+                    <span className="com-ico material-symbols-outlined" aria-hidden>domain</span>
+                    <div className="com-title">
+                      <Link href={`/commercial/companies/${co.id}`} title="فتح الملف الشامل للشركة">{co.name}</Link>
+                      <div className="com-sub">
+                        <span className="com-kind">{co.kind ?? 'محدودة'}</span>
+                        {activeManager && <span className="com-mgr"><span className="material-symbols-outlined" aria-hidden>person</span>{activeManager}</span>}
+                      </div>
+                    </div>
+                    <button type="button" className="com-edit" onClick={() => openDetails(co)} aria-label="تعديل بيانات الشركة" title="تعديل بيانات الشركة">
+                      <span className="material-symbols-outlined" aria-hidden>edit</span>
+                    </button>
+                  </header>
+                  <div className="com-capital">
+                    <span>رأس المال</span>
+                    <b className="num">{co.capital ? formatMoney(co.capital) : '—'}</b>
+                  </div>
+                  <dl className="com-grid">
+                    <div><dt>الشهادة</dt><dd className="num">{co.cert_no ? <>{co.cert_no}{co.cert_date && <small>{formatDate(co.cert_date)}</small>}</> : <span className="com-muted">—</span>}</dd></div>
+                    <div><dt>رقم الضرائب</dt><dd className="num">{co.tax_no || <span className="com-muted">—</span>}</dd></div>
+                    <div><dt>مسجل الشركات</dt><dd className="num">{co.registrar_no || <span className="com-muted">—</span>}</dd></div>
+                    <div><dt>الميزانيات</dt><dd>{co.last_completed_fs_year
+                      ? <span className="com-fs num">ميزانية {co.last_completed_fs_year}</span>
+                      : <span className="com-muted">غير مدرجة</span>}</dd></div>
+                  </dl>
+                </article>
+              )
+            })}
+          </div>
+          <div className="w-full overflow-x-auto com-table">
             <table className="stackable w-full border-collapse text-right text-xs table-auto">
               <thead>
                 <tr className="border-b border-[var(--border-soft)] bg-[color:color-mix(in_srgb,var(--surface-2)_90%,transparent)] text-xs text-[var(--text-2)] font-bold">
@@ -261,6 +301,7 @@ export default function CompaniesRegistryClient({ companies = [] }: Props) {
               </tbody>
             </table>
           </div>
+          </>
         )}
       </DataPanel>
 
