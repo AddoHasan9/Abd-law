@@ -760,3 +760,61 @@ html:root body .nf-item.is-unread:not(#_) { box-shadow: var(--edge); }
     background: var(--surface) !important; -webkit-backdrop-filter: none !important; backdrop-filter: none !important;
   }
 }
+
+
+/* =====================================================================
+   26) ضبط أدق ليطابق النموذج: توهّج أوضح، الشريط العلوي يطفو فوق المحتوى، لمعة وعمق للكروت
+   ===================================================================== */
+/* التوهّج بنفس قوة النموذج؛ على الحاسبة بدون قناع (القناع للهاتف فقط حتى يلتحم شريط الحالة) */
+html:root body::before {
+  background:
+    radial-gradient(48% 42% at 86% 4%, rgba(249, 115, 22, .26), transparent 70%),
+    radial-gradient(44% 40% at 6% 26%, rgba(14, 165, 233, .20), transparent 72%),
+    radial-gradient(50% 44% at 46% 96%, rgba(139, 92, 246, .16), transparent 70%),
+    radial-gradient(34% 32% at 26% 70%, rgba(16, 185, 129, .12), transparent 70%) !important;
+}
+html[data-theme="dark"] body::before {
+  background:
+    radial-gradient(48% 42% at 86% 4%, rgba(249, 115, 22, .22), transparent 70%),
+    radial-gradient(44% 40% at 6% 26%, rgba(14, 165, 233, .16), transparent 72%),
+    radial-gradient(50% 44% at 46% 96%, rgba(139, 92, 246, .18), transparent 70%),
+    radial-gradient(34% 32% at 26% 70%, rgba(16, 185, 129, .08), transparent 70%) !important;
+}
+@media (min-width: 1025px) { html:root body::before { -webkit-mask-image: none !important; mask-image: none !important; } }
+
+/* الكروت: لمعة ضوء من الأعلى + ظل أوضح (مثل النموذج) */
+html:root body :is(.card, .glass-card, .bx-card, .kpi-card, .data-panel, .tk-card, .tool-panel, .cr-card, .dpc, .txm-card, .com-card):not(#_) {
+  background-image: linear-gradient(180deg, rgba(255, 255, 255, .42), rgba(255, 255, 255, 0) 42%) !important;
+  background-color: var(--m-card) !important;
+  box-shadow: var(--edge), 0 1px 2px rgba(15, 23, 42, .05), 0 8px 22px -10px rgba(15, 23, 42, .16) !important;
+}
+html[data-theme="dark"] body :is(.card, .glass-card, .bx-card, .kpi-card, .data-panel, .tk-card, .tool-panel, .cr-card, .dpc, .txm-card, .com-card):not(#_) {
+  background-image: linear-gradient(180deg, rgba(255, 255, 255, .07), rgba(255, 255, 255, 0) 42%) !important;
+  box-shadow: var(--edge), 0 1px 2px rgba(0, 0, 0, .35), 0 12px 28px -12px rgba(0, 0, 0, .6) !important;
+}
+@media (hover: hover) { html:root body :is(.kpi-card, .bx-card):not(#_):hover { box-shadow: var(--edge), var(--sh-2) !important; transform: translateY(-3px); } }
+html:root body .kpi-card.is-alert:not(#_) { background-color: color-mix(in srgb, var(--rose) 6%, var(--m-card)) !important; box-shadow: var(--edge), 0 8px 22px -10px rgba(225, 29, 72, .22), 0 0 0 1px color-mix(in srgb, var(--rose) 38%, transparent) !important; }
+/* الأرقام والعناوين أثقل مثل النموذج */
+html:root .kpi-card .kpi-value { font-size: 34px !important; font-weight: 900 !important; letter-spacing: -.02em; }
+html:root .kpi-card .kpi-label { font-weight: 800 !important; color: var(--text) !important; }
+html:root :is(.bx-card-head h2, .data-panel-head h2) { font-weight: 900 !important; }
+html:root .hz-greet { letter-spacing: -.02em; }
+@media (max-width: 640px) { html:root .kpi-card .kpi-value { font-size: 28px !important; } }
+
+/* الشريط العلوي يطفو فوق منطقة التمرير، فيمر المحتوى تحته ويبين الزجاج (الحاسبة) */
+@media (min-width: 1025px) {
+  html:root #main { position: relative !important; }
+  html:root body #topbar:not(#_) { position: absolute !important; top: 0; inset-inline: 0; z-index: 30; }
+  html:root #view-root { padding-top: 92px !important; scroll-padding-top: 92px; }
+}
+/* الشريط الجانبي أوضح كسطح سميك */
+@media (min-width: 1025px) {
+  html:root body #sidebar:not(#_) {
+    background-image: linear-gradient(180deg, rgba(255, 255, 255, .5), rgba(255, 255, 255, 0) 30%) !important;
+    background-color: var(--m-thick) !important;
+  }
+  html[data-theme="dark"] body #sidebar:not(#_) { background-image: linear-gradient(180deg, rgba(255, 255, 255, .06), rgba(255, 255, 255, 0) 30%) !important; }
+}
+/* النوافذ والقوائم: نفس اللمعة */
+html:root body :is(.modal, .flyout-panel):not(#_) { background-image: linear-gradient(180deg, rgba(255, 255, 255, .5), rgba(255, 255, 255, 0) 36%) !important; }
+html[data-theme="dark"] body :is(.modal, .flyout-panel):not(#_) { background-image: linear-gradient(180deg, rgba(255, 255, 255, .07), rgba(255, 255, 255, 0) 36%) !important; }
