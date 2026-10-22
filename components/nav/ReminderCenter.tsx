@@ -5,6 +5,7 @@ import { repeatShort } from '@/lib/push/time'
 import { Mi } from '@/components/ui/Mi'
 import { confirmAction, runAction } from '@/components/ui/ConfirmDialog'
 import { Icon } from '@/components/ui/Icon'
+import { Portal } from '@/components/ui/Portal'
 import {
   getRemindersAction,
   toggleReminderCompleteAction,
@@ -22,6 +23,17 @@ export default function ReminderCenter() {
   const [editingReminder, setEditingReminder] = useState<ReminderItem | null>(null)
 
   const dropdownRef = useRef<HTMLDivElement>(null)
+  const panelRef = useRef<HTMLDivElement>(null)
+  /** موضع النافذة يُحسب من الزر نفسه، لأنها تُرسم داخل <body> (الشريط العلوي زجاجي ويحبس position: fixed) */
+  const [pos, setPos] = useState<{ top: number; left: number } | null>(null)
+  const togglePanel = (btn: HTMLElement) => {
+    if (isOpen) { setIsOpen(false); return }
+    const r = btn.getBoundingClientRect()
+    const w = Math.min(380, window.innerWidth - 16)
+    const left = Math.max(8, Math.min(r.left + r.width / 2 - w / 2, window.innerWidth - w - 8))
+    setPos({ top: Math.round(r.bottom + 10), left: Math.round(left) })
+    setIsOpen(true)
+  }
 
   const fetchReminders = useCallback(async () => {
     setLoading(true)
@@ -40,7 +52,8 @@ export default function ReminderCenter() {
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+      const t = e.target as Node
+      if (dropdownRef.current && !dropdownRef.current.contains(t) && !panelRef.current?.contains(t)) {
         setIsOpen(false)
       }
     }
@@ -70,7 +83,7 @@ export default function ReminderCenter() {
       <button
         type="button"
         className="icon-btn"
-        onClick={() => setIsOpen(!isOpen)}
+        onClick={e => togglePanel(e.currentTarget)}
         aria-label="التذكيرات الشخصية"
         style={{ position: 'relative' }}
         title="التذكيرات والملاحظات"
@@ -100,30 +113,25 @@ export default function ReminderCenter() {
         )}
       </button>
 
+      {isOpen && pos && (
+        <Portal>
       {/* Click Outside Veil */}
-      {isOpen && (
         <div
           onClick={() => setIsOpen(false)}
-          style={{
-            position: 'fixed',
-            inset: 0,
-            zIndex: 99998,
-            background: 'rgba(0, 0, 0, 0.25)',
-            backdropFilter: 'blur(2px)',
-            WebkitBackdropFilter: 'blur(2px)',
-          }}
+          className="flyout-veil"
+          aria-hidden
         />
-      )}
 
       {/* Flyout Panel */}
-      {isOpen && (
         <div
+          ref={panelRef}
+          className="flyout-panel"
           style={{
             position: 'fixed',
-            top: 'calc(var(--topbar-h, 56px) + 8px)',
-            insetInlineEnd: '8px',
+            top: `${pos.top}px`,
+            left: `${pos.left}px`,
             width: 'min(380px, calc(100vw - 16px))',
-            maxHeight: 'calc(100dvh - var(--topbar-h, 56px) - 24px)',
+            maxHeight: `min(560px, calc(100dvh - ${pos.top}px - 16px))`,
             background: 'var(--surface)',
             color: 'var(--text)',
             border: '1px solid var(--border)',
@@ -245,17 +253,8 @@ export default function ReminderCenter() {
             )}
           </div>
         </div>
+        </Portal>
       )}
-
-      {/* Reminder Add/Edit Modal */}
-      <ReminderModal
-        isOpen={isModalOpen}
-        onClose={() => {
-          setIsModalOpen(false)
-          fetchReminders()
-        }}
-        editingReminder={editingReminder}
-      />
     </div>
   )
 }
