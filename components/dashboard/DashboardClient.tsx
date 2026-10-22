@@ -124,7 +124,7 @@ export default function DashboardClient({ stats, profiles = [], companies = [] }
 
       <div className="bx-grid">
         {/* 2. أحدث المعاملات */}
-        <section className="bx-card bx-s6" style={{ animationDelay: '.08s' }} aria-labelledby="bx-tx-h">
+        <section className="bx-card bx-s6 hz-col-tx" style={{ animationDelay: '.08s' }} aria-labelledby="bx-tx-h">
           <div className="bx-card-head">
             <h2 id="bx-tx-h">أحدث المعاملات</h2>
             <div className="bx-pills" role="group" aria-label="تصفية المعاملات">
@@ -161,9 +161,10 @@ export default function DashboardClient({ stats, profiles = [], companies = [] }
         </section>
 
         {/* 3. المهل القريبة */}
-        <section className="bx-card bx-s3" style={{ animationDelay: '.14s' }} aria-labelledby="bx-dl-h">
+        <section className="bx-card bx-s3 hz-col-dl" style={{ animationDelay: '.14s' }} aria-labelledby="bx-dl-h">
           <div className="bx-card-head">
-            <h2 id="bx-dl-h">المهل القريبة</h2>
+            <h2 id="bx-dl-h">المهل القريبة والحرجة</h2>
+            {deadlinesTotal > 0 && <span className="dl-urgent num">{deadlinesTotal} عاجل ومستحق</span>}
           </div>
           {deadlines.length ? (
             <div className="dl-list">
@@ -184,7 +185,7 @@ export default function DashboardClient({ stats, profiles = [], companies = [] }
         </section>
 
         {/* 4. مسار التأسيس */}
-        <section className="bx-card bx-s3" style={{ animationDelay: '.2s' }} aria-labelledby="bx-form-h">
+        <section className="bx-card bx-s3 hz-col-form" style={{ animationDelay: '.2s' }} aria-labelledby="bx-form-h">
           <div className="bx-card-head">
             <h2 id="bx-form-h">مسار التأسيس</h2>
             <Link href="/commercial/companies" className="bx-link">فتح ←</Link>

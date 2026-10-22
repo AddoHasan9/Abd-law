@@ -525,3 +525,114 @@ html:root[data-theme="dark"] body .tabbar:not(#_) .tabbar-item:not(.is-on) { col
   html:root body .tabbar:not(#_) { background: rgba(255, 255, 255, .92) !important; }
   html:root[data-theme="dark"] body .tabbar:not(#_) { background: rgba(30, 35, 52, .94) !important; }
 }
+
+
+/* =====================================================================
+   24) لوحة «الغروب» (من ملف التصميم الجديد): رمادي بارد نظيف + برتقالي واضح
+   تأتي آخراً فتتغلّب على ألوان Horizon السابقة؛ لإرجاع القديم احذف هذا القسم.
+   ===================================================================== */
+html:root, html:root[data-theme="light"] {
+  --bg-app: #F8FAFC !important; --bg: #F8FAFC !important; --canvas-mesh: #F8FAFC !important;
+  --surface: #FFFFFF !important; --surface-glass: rgba(255, 255, 255, .86) !important;
+  --surface-2: #F1F5F9 !important; --surface-3: #E2E8F0 !important;
+  --input-bg: #FFFFFF !important; --input-border: rgba(15, 23, 42, .12) !important;
+  --border: rgba(15, 23, 42, .09) !important; --border-soft: rgba(15, 23, 42, .06) !important;
+  --line: rgba(15, 23, 42, .09) !important; --line-soft: rgba(15, 23, 42, .06) !important; --line-glass: rgba(226, 232, 240, .9) !important;
+  --side-bg: #FFFFFF !important; --side-border: rgba(226, 232, 240, .9) !important;
+  --text: #0F172A !important; --text-1: #0F172A !important; --text-2: #475569 !important; --text-3: #64748B !important;
+  --coral: #F97316; --coral-2: #FB923C; --coral-3: #FFEDD5;
+  --accent: #C2410C !important; --accent-soft: rgba(249, 115, 22, .11) !important;
+  --brand: #0F172A !important; --brand-soft: rgba(15, 23, 42, .05) !important; --brand-mid: rgba(15, 23, 42, .4) !important;
+  --sky: #0EA5E9; --lav: #8B5CF6; --lime: #10B981; --peach: #F97316; --rose: #F43F5E; --blue: #3B82F6;
+  --ok: #059669; --warn: #D97706; --bad: #E11D48;
+  --ink: #0F172A; --on-ink: #FFFFFF;
+  --glass-bg: rgba(255, 255, 255, .86) !important; --glass-border: rgba(226, 232, 240, .9) !important;
+  --glass-line: rgba(226, 232, 240, .95);
+  --glass-shadow: 0 4px 20px -2px rgba(15, 23, 42, .05) !important;
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, .04) !important; --shadow-md: 0 10px 30px -12px rgba(15, 23, 42, .12) !important;
+}
+html:root[data-theme="dark"] {
+  --bg-app: #0B0F17 !important; --bg: #0B0F17 !important; --canvas-mesh: #0B0F17 !important;
+  --surface: #131B28 !important; --surface-glass: rgba(19, 27, 40, .82) !important;
+  --surface-2: #1A2333 !important; --surface-3: #243045 !important;
+  --input-bg: rgba(255, 255, 255, .04) !important; --input-border: rgba(148, 163, 184, .18) !important;
+  --border: rgba(148, 163, 184, .14) !important; --border-soft: rgba(148, 163, 184, .09) !important;
+  --line: rgba(148, 163, 184, .14) !important; --line-soft: rgba(148, 163, 184, .09) !important; --line-glass: rgba(148, 163, 184, .13) !important;
+  --side-bg: #0F1520 !important; --side-border: rgba(148, 163, 184, .12) !important;
+  --text: #F1F5F9 !important; --text-1: #F8FAFC !important; --text-2: #CBD5E1 !important; --text-3: #94A3B8 !important;
+  --coral: #FB923C; --coral-2: #FDBA74; --coral-3: rgba(249, 115, 22, .16);
+  --accent: #FB923C !important; --accent-soft: rgba(251, 146, 60, .14) !important;
+  --brand: #F1F5F9 !important; --brand-soft: rgba(255, 255, 255, .05) !important;
+  --sky: #38BDF8; --lav: #A78BFA; --lime: #34D399; --peach: #FB923C; --rose: #FB7185; --blue: #60A5FA;
+  --ok: #34D399; --warn: #FBBF24; --bad: #FB7185;
+  --ink: #F1F5F9; --on-ink: #0B0F17;
+  --glass-bg: rgba(19, 27, 40, .82) !important; --glass-border: rgba(148, 163, 184, .13) !important;
+  --glass-line: rgba(148, 163, 184, .13);
+  --glass-shadow: 0 10px 30px -12px rgba(0, 0, 0, .55) !important;
+}
+/* خلفية نظيفة: توهّج برتقالي خفيف جداً بدل سماء المرجاني والبنفسجي */
+html:root body::before {
+  background: radial-gradient(700px 420px at 30% calc(env(safe-area-inset-top, 0px) + 160px), rgba(249, 115, 22, .05), transparent 70%) !important;
+}
+html[data-theme="dark"] body::before {
+  background: radial-gradient(700px 420px at 30% calc(env(safe-area-inset-top, 0px) + 160px), rgba(249, 115, 22, .05), transparent 70%) !important;
+}
+.hz-login-sky, html[data-theme="dark"] .hz-login-sky { background: radial-gradient(640px 520px at 10% 8%, rgba(249, 115, 22, .09), transparent 70%) !important; }
+
+/* البطاقات: بيضاء صافية بحدود رمادية رفيعة وزوايا 28px */
+html:root :is(.card, .glass-card, .bx-card, .data-panel, .tk-card, .tool-panel) { border-radius: 26px !important; }
+html:root .hz-greet span { background: none !important; color: var(--coral) !important; -webkit-text-fill-color: currentColor; }
+html:root #topbar .tb-user .bg-\[var\(--brand\)\], html:root .bx-avatar { background: linear-gradient(135deg, #FB923C, #F97316) !important; }
+
+/* المؤشرات: بطاقة بيضاء، وأيقونة بلون القسم (أخضر، برتقالي، أزرق بحري، بنفسجي، أزرق، وردي) */
+html:root .kpi-card { background: var(--surface) !important; border-color: var(--glass-line) !important; }
+html:root .kpi-card::before { display: none !important; }
+html:root .kpi-card.tone-emerald, html:root .kpi-card.tone-ok { --tint: var(--lime); }
+html:root .kpi-card.tone-amber, html:root .kpi-card.tone-warn { --tint: var(--peach); }
+html:root .kpi-card.tone-blue, html:root .kpi-card.tone-work { --tint: var(--sky); }
+html:root .kpi-card.tone-indigo { --tint: var(--lav); }
+html:root .kpi-card.tone-violet { --tint: var(--blue); }
+html:root .kpi-card.tone-rose, html:root .kpi-card.tone-bad { --tint: var(--rose); }
+html:root .kpi-card .kpi-icon, html:root .kpi-card.is-featured .kpi-icon {
+  background: color-mix(in srgb, var(--tint) 12%, var(--surface)) !important; border: 0 !important; color: var(--tint) !important; border-radius: 12px !important; }
+html:root .kpi-card.is-alert { background: color-mix(in srgb, var(--rose) 5%, var(--surface)) !important; border-color: color-mix(in srgb, var(--rose) 35%, transparent) !important; }
+html:root .kpi-card.is-alert :is(.kpi-value, .kpi-hint) { color: var(--bad) !important; }
+@media (hover: hover) { html:root .kpi-card:hover { border-color: color-mix(in srgb, var(--tint) 40%, var(--glass-line)) !important; transform: translateY(-2px); } }
+
+/* الوسوم بألوان التصميم */
+html:root .tag-cat-orange, html:root .tag-orange { background: rgba(249, 115, 22, .1) !important; color: #C2410C !important; }
+html:root .tag-cat-green  { background: rgba(16, 185, 129, .1) !important; color: #047857 !important; }
+html:root .tag-cat-blue   { background: rgba(14, 165, 233, .1) !important; color: #0369A1 !important; }
+html:root .tag-cat-amber  { background: rgba(245, 158, 11, .12) !important; color: #B45309 !important; }
+html:root .tag-cat-violet { background: rgba(139, 92, 246, .1) !important; color: #6D28D9 !important; }
+html[data-theme="dark"] .tag-cat-orange, html[data-theme="dark"] .tag-orange { color: #FDBA74 !important; }
+html[data-theme="dark"] .tag-cat-green  { color: #6EE7B7 !important; }
+html[data-theme="dark"] .tag-cat-blue   { color: #7DD3FC !important; }
+html[data-theme="dark"] .tag-cat-amber  { color: #FCD34D !important; }
+html[data-theme="dark"] .tag-cat-violet { color: #C4B5FD !important; }
+
+/* المهل القريبة: كل مهلة بطاقة صغيرة محدّدة، والمتأخرة بإطار وردي */
+html:root .dl-list { display: flex; flex-direction: column; gap: 10px; }
+html:root .dl-row { padding: 12px 14px !important; border: 1px solid var(--glass-line); background: var(--surface); }
+html:root .dl-row + .dl-row::before { display: none; }
+html:root .dl-row.is-late { border-color: color-mix(in srgb, var(--rose) 30%, transparent); }
+html:root .dl-row.is-soon { border-color: color-mix(in srgb, var(--warn) 30%, transparent); }
+html:root .dl-row.is-late .dl-dot { background: var(--rose) !important; box-shadow: 0 0 0 4px color-mix(in srgb, var(--rose) 15%, transparent) !important; }
+html:root .dl-dot { background: var(--warn) !important; box-shadow: 0 0 0 4px color-mix(in srgb, var(--warn) 15%, transparent) !important; }
+html:root .dl-row.is-late .dl-chip { color: var(--bad) !important; background: color-mix(in srgb, var(--rose) 10%, transparent) !important; border: 1px solid color-mix(in srgb, var(--rose) 25%, transparent); }
+html:root .dl-row.is-soon .dl-chip { color: var(--warn) !important; background: color-mix(in srgb, var(--warn) 10%, transparent) !important; border: 1px solid color-mix(in srgb, var(--warn) 25%, transparent); }
+.dl-urgent { display: inline-flex; align-items: center; height: 26px; padding: 0 10px; border-radius: 99px; font-size: 11.5px; font-weight: 800; color: var(--bad); background: color-mix(in srgb, var(--rose) 10%, transparent); border: 1px solid color-mix(in srgb, var(--rose) 22%, transparent); }
+.bx-card-head h2 .hz-hdot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-inline-start: 7px; vertical-align: middle; background: var(--coral); }
+
+/* ترتيب الصف السفلي مثل التصميم: مسار التأسيس (يمين) · المهل (وسط) · المعاملات (يسار) */
+@media (min-width: 1181px) {
+  .bx-grid > .hz-col-form { grid-column: span 3; order: 1; }
+  .bx-grid > .hz-col-dl { grid-column: span 4; order: 2; }
+  .bx-grid > .hz-col-tx { grid-column: span 5; order: 3; }
+  .bx-grid > :not(.hz-col-form):not(.hz-col-dl):not(.hz-col-tx) { order: 4; }
+}
+/* المؤشرات الست بصف واحد من 1100px */
+@media (min-width: 1100px) { .kpi-grid:not(.cols-3):not(.cols-4) { grid-template-columns: repeat(6, minmax(0, 1fr)) !important; } }
+/* الساعة وشريط الدوام بالبرتقالي */
+html:root .bx-ring-fg { stroke: var(--coral) !important; }
+html:root .bx-fill { background: var(--coral) !important; }
