@@ -217,6 +217,9 @@ html:root #topbar .tb-badge { background: var(--coral) !important; color: #fff !
 html:root #topbar .search-trigger { border-radius: 999px !important; background: color-mix(in srgb, var(--surface) 62%, transparent) !important; border: 1px solid var(--glass-line) !important; min-height: 44px; }
 html:root #topbar .tb-user { border-radius: 999px !important; background: color-mix(in srgb, var(--surface) 62%, transparent) !important; border: 1px solid var(--glass-line) !important; }
 html:root #topbar .tb-user .bg-\[var\(--brand\)\] { background: linear-gradient(135deg, var(--coral-2), var(--lav)) !important; }
+/* النهاري: حدود الزجاج بيضاء فتختفي فوق الخلفية الفاتحة؛ حلقة رمادية خفيفة تجعل الدوائر واضحة مثل الليلي */
+html:root:not([data-theme="dark"]) #topbar :is(.icon-btn, .search-trigger, .tb-user) { border-color: rgba(23, 21, 28, .13) !important; background: rgba(255, 255, 255, .72) !important; box-shadow: 0 1px 2px rgba(23, 21, 28, .04); }
+@media (hover: hover) { html:root:not([data-theme="dark"]) #topbar :is(.icon-btn, .search-trigger, .tb-user):hover { border-color: rgba(23, 21, 28, .22) !important; background: #fff !important; } }
 html:root #topbar #page-title { font-weight: 800 !important; letter-spacing: -.01em; }
 @media (max-width: 768px) {
   html:root #topbar { margin: calc(env(safe-area-inset-top) + 8px) 10px 2px !important; width: calc(100% - 20px) !important; height: 58px !important; min-height: 58px !important; padding: 0 8px !important; border-radius: 22px !important; }
