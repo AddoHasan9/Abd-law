@@ -636,3 +636,127 @@ html:root .dl-row.is-soon .dl-chip { color: var(--warn) !important; background: 
 /* الساعة وشريط الدوام بالبرتقالي */
 html:root .bx-ring-fg { stroke: var(--coral) !important; }
 html:root .bx-fill { background: var(--coral) !important; }
+
+
+/* =====================================================================
+   25) زجاج أبل (Materials): سماكات مختلفة، حافة تلتقط الضوء، ظلال طبقية
+   - رقيق: الشريط العلوي والسفلي (المحتوى يمر تحتهما)
+   - متوسط: القوائم المنبثقة (بدون تعتيم)
+   - سميك: النوافذ والشريط الجانبي
+   - الكروت أسمك من الأشرطة حتى لا يصير زجاج خفيف فوق زجاج خفيف
+   :not(#_) لأن قاعدة الزجاج العامة تحوي #topbar فأولويتها عالية. لإرجاع الشكل السابق احذف هذا القسم.
+   ===================================================================== */
+html:root, html:root[data-theme="light"] {
+  --m-thin: rgba(255, 255, 255, .54); --m-reg: rgba(255, 255, 255, .70); --m-thick: rgba(255, 255, 255, .82); --m-card: rgba(255, 255, 255, .74);
+  --blur-m: blur(28px) saturate(1.8); --blur-l: blur(44px) saturate(2);
+  --edge: inset 0 1px 0 rgba(255, 255, 255, .9), inset 0 0 0 1px rgba(255, 255, 255, .5);
+  --rim: rgba(15, 23, 42, .07);
+  --sh-1: 0 1px 1px rgba(15, 23, 42, .04), 0 4px 14px -6px rgba(15, 23, 42, .10);
+  --sh-2: 0 1px 2px rgba(15, 23, 42, .05), 0 10px 28px -10px rgba(15, 23, 42, .16), 0 22px 44px -26px rgba(15, 23, 42, .18);
+  --sh-3: 0 2px 4px rgba(15, 23, 42, .06), 0 24px 60px -18px rgba(15, 23, 42, .30), 0 60px 120px -40px rgba(15, 23, 42, .35);
+  --scrim: rgba(15, 23, 42, .22);
+}
+html:root[data-theme="dark"] {
+  --m-thin: rgba(34, 40, 52, .50); --m-reg: rgba(30, 36, 48, .66); --m-thick: rgba(24, 30, 42, .80); --m-card: rgba(22, 28, 40, .66);
+  --edge: inset 0 1px 0 rgba(255, 255, 255, .11), inset 0 0 0 1px rgba(255, 255, 255, .05);
+  --rim: rgba(0, 0, 0, .45);
+  --sh-1: 0 1px 1px rgba(0, 0, 0, .3), 0 6px 18px -8px rgba(0, 0, 0, .55);
+  --sh-2: 0 1px 2px rgba(0, 0, 0, .35), 0 14px 34px -12px rgba(0, 0, 0, .65), 0 30px 60px -30px rgba(0, 0, 0, .7);
+  --sh-3: 0 2px 6px rgba(0, 0, 0, .4), 0 30px 70px -20px rgba(0, 0, 0, .75), 0 70px 140px -40px rgba(0, 0, 0, .8);
+  --scrim: rgba(0, 0, 0, .45);
+}
+
+/* الخلفية: توهّجات ألوان ناعمة ثابتة، حتى يبين الزجاج فعلاً (على خلفية سادة يبين مثل الأبيض) */
+html:root body::before {
+  background:
+    radial-gradient(42% 36% at 82% 8%, rgba(249, 115, 22, .16), transparent 70%),
+    radial-gradient(40% 34% at 8% 24%, rgba(14, 165, 233, .13), transparent 72%),
+    radial-gradient(46% 40% at 50% 92%, rgba(139, 92, 246, .10), transparent 70%),
+    radial-gradient(30% 30% at 24% 72%, rgba(16, 185, 129, .08), transparent 70%) !important;
+}
+html[data-theme="dark"] body::before {
+  background:
+    radial-gradient(42% 36% at 82% 8%, rgba(249, 115, 22, .14), transparent 70%),
+    radial-gradient(40% 34% at 8% 24%, rgba(14, 165, 233, .11), transparent 72%),
+    radial-gradient(46% 40% at 50% 92%, rgba(139, 92, 246, .13), transparent 70%),
+    radial-gradient(30% 30% at 24% 72%, rgba(16, 185, 129, .05), transparent 70%) !important;
+}
+
+/* الكروت */
+html:root body :is(.card, .glass-card, .bx-card, .kpi-card, .data-panel, .tk-card, .tool-panel, .cr-card, .dpc, .txm-card, .com-card):not(#_) {
+  background: var(--m-card) !important; border: 1px solid var(--rim) !important;
+  -webkit-backdrop-filter: var(--blur-m) !important; backdrop-filter: var(--blur-m) !important;
+  box-shadow: var(--edge), var(--sh-1) !important;
+}
+@media (hover: hover) { html:root body :is(.kpi-card, .bx-card):not(#_):hover { box-shadow: var(--edge), var(--sh-2) !important; } }
+html:root body .kpi-card.is-alert:not(#_) { background: color-mix(in srgb, var(--rose) 6%, var(--m-card)) !important; box-shadow: var(--edge), var(--sh-1), 0 0 0 1px color-mix(in srgb, var(--rose) 35%, transparent) !important; }
+/* العناصر داخل الكروت: شبه صلبة بحافة ضوئية (لا زجاج فوق زجاج) */
+html:root body :is(.dl-row, .bx-prog, .dpc-tile, .dpc-prog, .dpc-hero, .txm-grid, .com-grid, .hz-box):not(#_) { box-shadow: var(--edge) !important; }
+html:root body .dl-row:not(#_) { background: color-mix(in srgb, var(--surface) 55%, transparent) !important; }
+
+/* الشريط العلوي: رقيق، والمحتوى يمر تحته */
+html:root body #topbar:not(#_) {
+  background: var(--m-thin) !important; border: 1px solid var(--rim) !important;
+  -webkit-backdrop-filter: var(--blur-m) !important; backdrop-filter: var(--blur-m) !important;
+  box-shadow: var(--edge), var(--sh-2) !important;
+}
+html:root body #topbar :is(.icon-btn, .search-trigger, .tb-user):not(#_) {
+  background: color-mix(in srgb, var(--surface) 42%, transparent) !important; border: 1px solid var(--rim) !important; box-shadow: var(--edge) !important;
+}
+
+/* الشريط الجانبي: سميك */
+@media (min-width: 1025px) {
+  html:root body #sidebar:not(#_) {
+    background: var(--m-thick) !important; border: 1px solid var(--rim) !important;
+    -webkit-backdrop-filter: var(--blur-l) !important; backdrop-filter: var(--blur-l) !important;
+    box-shadow: var(--edge), var(--sh-2) !important;
+  }
+  html:root body #sidebar .nav-link.active:not(#_), html:root body #sidebar [aria-current="page"]:not(#_) { box-shadow: var(--edge), 0 1px 3px rgba(0, 0, 0, .08) !important; }
+}
+
+/* الشريط السفلي: رقيق */
+html:root body .tabbar:not(#_) {
+  background: var(--m-thin) !important; border: 1px solid var(--rim) !important;
+  -webkit-backdrop-filter: var(--blur-m) !important; backdrop-filter: var(--blur-m) !important;
+  box-shadow: var(--edge), var(--sh-2) !important;
+}
+
+/* النوافذ: سميكة + تعتيم بدون تضبيب (أسلوب أبل)، وتظهر كمادة تتشكّل */
+html:root body .modal-veil:not(#_) { background: var(--scrim) !important; -webkit-backdrop-filter: none !important; backdrop-filter: none !important; }
+html:root body .modal:not(#_) {
+  background: var(--m-thick) !important; border: 1px solid var(--rim) !important;
+  -webkit-backdrop-filter: var(--blur-l) !important; backdrop-filter: var(--blur-l) !important;
+  box-shadow: var(--edge), var(--sh-3) !important; border-radius: 30px !important;
+  animation: hzMaterialize .42s cubic-bezier(.2, .9, .25, 1.06) backwards !important;
+}
+html:root body .modal .modal-foot:not(#_) { background: transparent !important; }
+html:root body .modal :is(.input, input, select, textarea):not(#_) { background: color-mix(in srgb, var(--surface) 64%, transparent) !important; }
+@keyframes hzMaterialize { from { opacity: 0; transform: translateY(10px) scale(.95); filter: blur(10px); } to { opacity: 1; transform: none; filter: none; } }
+
+/* القوائم المنبثقة (الإشعارات والتذكيرات): متوسطة، بدون تعتيم، تطلع من مكان الزر */
+html:root body .flyout-veil:not(#_) { background: transparent !important; }
+html:root body .flyout-panel:not(#_) {
+  background: var(--m-reg) !important; border: 1px solid var(--rim) !important;
+  -webkit-backdrop-filter: var(--blur-l) !important; backdrop-filter: var(--blur-l) !important;
+  box-shadow: var(--edge), var(--sh-3) !important; border-radius: 24px !important;
+  transform-origin: 30% 0; animation: hzPop .34s cubic-bezier(.2, .9, .25, 1.1) backwards !important;
+}
+html:root body .flyout-panel :is(header, [class*="head"]):not(#_) { background: transparent !important; }
+html:root body .nf-item.is-unread:not(#_) { box-shadow: var(--edge); }
+@keyframes hzPop { from { opacity: 0; transform: scale(.92) translateY(-6px); filter: blur(8px); } to { opacity: 1; transform: none; filter: none; } }
+
+/* الهاتف: الأشرطة والنوافذ بتمويه كامل؛ الكروت الكثيرة شبه صلبة بدون تمويه حتى لا يثقل الجهاز */
+@media (max-width: 768px) {
+  html:root body :is(.card, .glass-card, .bx-card, .kpi-card, .data-panel, .tk-card, .tool-panel, .cr-card, .dpc, .txm-card, .com-card):not(#_) {
+    background: color-mix(in srgb, var(--surface) 88%, transparent) !important;
+    -webkit-backdrop-filter: none !important; backdrop-filter: none !important;
+  }
+  /* النافذة تصعد من الأسفل كورقة */
+  @keyframes hzMaterialize { from { opacity: .4; transform: translateY(40px); } to { opacity: 1; transform: none; } }
+}
+@media (prefers-reduced-motion: reduce) { html:root body :is(.modal, .flyout-panel):not(#_) { animation: none !important; } }
+@media (prefers-reduced-transparency: reduce) {
+  html:root body :is(.card, .bx-card, .kpi-card, .data-panel, .modal, .flyout-panel, #topbar, #sidebar, .tabbar):not(#_) {
+    background: var(--surface) !important; -webkit-backdrop-filter: none !important; backdrop-filter: none !important;
+  }
+}
