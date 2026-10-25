@@ -152,8 +152,8 @@ export default function DepositsClient({ deposits = [], companyId }: Props) {
     const isSubmitted = submitStage?.state === 'done'
     const isBarcodeDone = barcodeStage?.state === 'done' || Boolean(dep.companies?.barcode_url) || Boolean(barcodeStage?.notes)
     const doneCount = stages.filter(s => s.state === 'done').length
-    const companyStatus = dep.companies?.status
-    const isReleased = Boolean(dep.companies?.deposit_released) || (dep as { status?: string }).status === 'released' || companyStatus === 'established'
+    // الإطلاق يُحسب من الإطلاق الفعلي فقط؛ حالة الشركة «مؤسسة» قد تأتي من إكمال معاملة التأسيس قبل إطلاق الوديعة
+    const isReleased = Boolean(dep.companies?.deposit_released) || (dep as { status?: string }).status === 'released'
 
     const isFullyCompleted = (isSubmitted && isBarcodeDone && doneCount >= 4) || isReleased
 

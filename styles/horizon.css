@@ -818,3 +818,43 @@ html:root .hz-greet { letter-spacing: -.02em; }
 /* النوافذ والقوائم: نفس اللمعة */
 html:root body :is(.modal, .flyout-panel):not(#_) { background-image: linear-gradient(180deg, rgba(255, 255, 255, .5), rgba(255, 255, 255, 0) 36%) !important; }
 html[data-theme="dark"] body :is(.modal, .flyout-panel):not(#_) { background-image: linear-gradient(180deg, rgba(255, 255, 255, .07), rgba(255, 255, 255, 0) 36%) !important; }
+
+
+/* =====================================================================
+   27) بطاقتا الترحيب والساعة: نفس مادة الكروت بالضبط (مثل النموذج)
+   ===================================================================== */
+@media (min-width: 1100px) {
+  html:root body .hz-top .hz-hero:not(#_) {
+    background-color: var(--m-card) !important;
+    background-image: linear-gradient(180deg, rgba(255, 255, 255, .42), rgba(255, 255, 255, 0) 42%) !important;
+    border: 1px solid var(--rim) !important;
+    -webkit-backdrop-filter: var(--blur-m) !important; backdrop-filter: var(--blur-m) !important;
+    box-shadow: var(--edge), 0 1px 2px rgba(15, 23, 42, .05), 0 8px 22px -10px rgba(15, 23, 42, .16) !important;
+  }
+  html[data-theme="dark"] body .hz-top .hz-hero:not(#_) {
+    background-image: linear-gradient(180deg, rgba(255, 255, 255, .07), rgba(255, 255, 255, 0) 42%) !important;
+    box-shadow: var(--edge), 0 1px 2px rgba(0, 0, 0, .35), 0 12px 28px -12px rgba(0, 0, 0, .6) !important;
+  }
+}
+/* صندوق الإضافة: محفور داخل البطاقة (ظل داخلي) بدل حد بارز، مثل النموذج */
+html:root body .hz-box:not(#_) {
+  background: color-mix(in srgb, var(--surface) 55%, transparent) !important;
+  border: 1px solid var(--rim) !important;
+  box-shadow: inset 0 1px 2px rgba(15, 23, 42, .06) !important;
+  -webkit-backdrop-filter: none !important; backdrop-filter: none !important;
+}
+html:root body .hz-box:not(#_):focus-within { border-color: color-mix(in srgb, var(--coral) 45%, transparent) !important; box-shadow: inset 0 1px 2px rgba(15, 23, 42, .06), 0 0 0 4px color-mix(in srgb, var(--coral) 12%, transparent) !important; }
+html:root body .hz-seg:not(#_) { background: color-mix(in srgb, var(--text) 6%, transparent) !important; border: 0 !important; }
+html:root body .hz-seg [aria-checked="true"]:not(#_), html:root body .hz-seg .is-on:not(#_) { background: var(--surface) !important; box-shadow: 0 1px 3px rgba(0, 0, 0, .12), 0 0 0 .5px rgba(0, 0, 0, .04) !important; }
+/* الاقتراحات والشارة: زجاج رقيق جداً بحافة ضوئية */
+html:root body :is(.hz-chips button, .hz-chips a, .hz-chip, .hz-pill):not(#_) {
+  background: color-mix(in srgb, var(--surface) 38%, transparent) !important; border: 1px solid var(--rim) !important; box-shadow: var(--edge) !important;
+}
+/* زر الإرسال وزر الإضافة: برتقالي بعمق ولمعة مثل النموذج */
+html:root body .hz-send:not(#_):not(:disabled) { background: linear-gradient(180deg, #FB923C, #F97316) !important; box-shadow: 0 6px 14px -6px rgba(249, 115, 22, .7), inset 0 1px 0 rgba(255, 255, 255, .45) !important; }
+/* الساعة: بدون توهّج الذهبي القديم داخل البطاقة */
+html:root body .cr-card:not(#_) { background-image: linear-gradient(180deg, rgba(255, 255, 255, .42), rgba(255, 255, 255, 0) 42%) !important; }
+html[data-theme="dark"] body .cr-card:not(#_) { background-image: linear-gradient(180deg, rgba(255, 255, 255, .07), rgba(255, 255, 255, 0) 42%) !important; }
+html:root body .cr-colon i:not(#_) { background: var(--coral) !important; }
+html:root body .cr-period:not(#_) { color: #C2410C !important; }
+html[data-theme="dark"] body .cr-period:not(#_) { color: #FDBA74 !important; }
