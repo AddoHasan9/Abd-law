@@ -858,3 +858,27 @@ html[data-theme="dark"] body .cr-card:not(#_) { background-image: linear-gradien
 html:root body .cr-colon i:not(#_) { background: var(--coral) !important; }
 html:root body .cr-period:not(#_) { color: #C2410C !important; }
 html[data-theme="dark"] body .cr-period:not(#_) { color: #FDBA74 !important; }
+
+
+/* =====================================================================
+   28) خلفية رصاصية ضبابية بدل البرتقالي: تدرجات رمادية باردة (أغمق بالزاوية اليسرى)
+   تبقى ناعمة ومضبّبة حتى يبين الزجاج فوقها بدون لون يتعب العين
+   ===================================================================== */
+html:root body::before {
+  background:
+    radial-gradient(55% 50% at 4% 4%, rgba(100, 116, 139, .30), transparent 72%),
+    radial-gradient(40% 38% at 30% 30%, rgba(148, 163, 184, .18), transparent 72%),
+    radial-gradient(50% 46% at 96% 46%, rgba(148, 163, 184, .22), transparent 72%),
+    radial-gradient(60% 40% at 40% 104%, rgba(71, 85, 105, .16), transparent 70%),
+    radial-gradient(30% 28% at 78% 8%, rgba(186, 198, 214, .30), transparent 70%) !important;
+}
+html[data-theme="dark"] body::before {
+  background:
+    radial-gradient(55% 50% at 4% 4%, rgba(148, 163, 184, .16), transparent 72%),
+    radial-gradient(40% 38% at 30% 30%, rgba(100, 116, 139, .10), transparent 72%),
+    radial-gradient(50% 46% at 96% 46%, rgba(148, 163, 184, .10), transparent 72%),
+    radial-gradient(60% 40% at 40% 104%, rgba(100, 116, 139, .12), transparent 70%),
+    radial-gradient(30% 28% at 78% 8%, rgba(203, 213, 225, .07), transparent 70%) !important;
+}
+/* تضبيب إضافي للخلفية نفسها: الحواف بين التدرجات تذوب تماماً (طبقة ثابتة واحدة، خفيفة على الجهاز) */
+@media (min-width: 1025px) { html:root body::before { filter: blur(30px); inset: -60px !important; } }
