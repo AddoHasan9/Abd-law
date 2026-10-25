@@ -882,3 +882,64 @@ html[data-theme="dark"] body::before {
 }
 /* تضبيب إضافي للخلفية نفسها: الحواف بين التدرجات تذوب تماماً (طبقة ثابتة واحدة، خفيفة على الجهاز) */
 @media (min-width: 1025px) { html:root body::before { filter: blur(30px); inset: -60px !important; } }
+
+
+/* =====================================================================
+   29) قيم أبل الرسمية (macOS 27 Liquid Glass من ملف Sketch) — مضبوطة للويب
+   - Sketch يستخدم أنماط دمج غير موجودة بالمتصفح، فالظلال الداخلية الغامقة خُففت حتى لا تصير حافة متسخة
+   - الهندسة نفسها: حواف جانبية رفيعة، خط ضوء علوي، ظلال داخلية فوق وتحت (سماكة الزجاج)، ظل بعيد ناعم
+   - filter: blur في كود Sketch = تضبيب الخلفية (backdrop-filter) وليس تضبيب العنصر
+   ===================================================================== */
+html:root, html:root[data-theme="light"] {
+  --ap-fill: linear-gradient(rgba(255, 255, 255, .72), rgba(255, 255, 255, .40));
+  --ap-rim: -1.25px 0 0 -.75px rgba(219, 219, 219, 1), 1.25px 0 0 -.75px rgba(219, 219, 219, 1), 0 0 .3px .3px rgba(180, 186, 196, .5);
+  --ap-depth: inset 0 2px .25px -1.5px rgba(255, 255, 255, 1), inset 0 1px 1.5px -.5px rgba(39, 39, 39, .10), inset 0 -1px 1.5px -.5px rgba(39, 39, 39, .10), inset 0 4px 8px -4px rgba(39, 39, 39, .10), inset 0 -4px 8px -4px rgba(39, 39, 39, .10);
+  --ap-drop-card: 0 10px 30px -10px rgba(15, 23, 42, .14);
+  --ap-drop-panel: 0 18px 46px 0 rgba(15, 23, 42, .18);
+  --ap-blur: blur(30px) saturate(1.6);
+}
+html:root[data-theme="dark"] {
+  /* الليلي من قيم القائمة الرسمية: رمادي محايد 50% + حلقة خارجية سوداء + حافة داخلية فاتحة + سماكة غامقة */
+  --ap-fill: linear-gradient(rgba(120, 128, 146, .26), rgba(70, 76, 92, .22));
+  --ap-rim: 0 0 0 .5px rgba(0, 0, 0, .8), inset 0 0 0 1px rgba(160, 166, 180, .22);
+  --ap-depth: inset 0 .5px 0 0 rgba(255, 255, 255, .14), inset 0 -.5px 0 0 rgba(0, 0, 0, .5), inset 0 4px 8px -4px rgba(0, 0, 0, .45), inset 0 -4px 8px -4px rgba(0, 0, 0, .45);
+  --ap-drop-card: 0 6px 22px -6px rgba(0, 0, 0, .45);
+  --ap-drop-panel: 0 4px 24px 0 rgba(0, 0, 0, .3), 0 24px 60px -20px rgba(0, 0, 0, .6);
+  --ap-blur: blur(30px) saturate(1.4);
+}
+
+/* الكروت */
+html:root body :is(.card, .glass-card, .bx-card, .kpi-card, .data-panel, .tk-card, .tool-panel, .cr-card, .dpc, .txm-card, .com-card):not(#_),
+html:root body .hz-top .hz-hero:not(#_) {
+  background-image: var(--ap-fill) !important; background-color: transparent !important;
+  border: 0 !important;
+  box-shadow: var(--ap-rim), var(--ap-drop-card), var(--ap-depth) !important;
+  -webkit-backdrop-filter: var(--ap-blur) !important; backdrop-filter: var(--ap-blur) !important;
+}
+@media (hover: hover) {
+  html:root body :is(.kpi-card, .bx-card):not(#_):hover { box-shadow: var(--ap-rim), var(--ap-drop-panel), var(--ap-depth) !important; }
+}
+html:root body .kpi-card.is-alert:not(#_) {
+  background-image: linear-gradient(color-mix(in srgb, var(--rose) 7%, transparent), color-mix(in srgb, var(--rose) 7%, transparent)), var(--ap-fill) !important;
+  box-shadow: var(--ap-rim), 0 0 0 1px color-mix(in srgb, var(--rose) 38%, transparent), var(--ap-drop-card), var(--ap-depth) !important;
+}
+
+/* الأشرطة: نفس المادة، أشف */
+html:root body :is(#topbar, .tabbar):not(#_) { border: 0 !important; box-shadow: var(--ap-rim), var(--ap-drop-card), var(--ap-depth) !important; }
+@media (min-width: 1025px) { html:root body #sidebar:not(#_) { border: 0 !important; box-shadow: var(--ap-rim), var(--ap-drop-card), var(--ap-depth) !important; } }
+
+/* النوافذ والقوائم المنبثقة: أعمق ظل (مثل Alert أبل) */
+html:root body :is(.modal, .flyout-panel):not(#_) {
+  background-image: var(--ap-fill) !important; background-color: var(--m-thick) !important;
+  border: 0 !important; box-shadow: var(--ap-rim), var(--ap-drop-panel), var(--ap-depth) !important;
+}
+html:root body .modal:not(#_) { border-radius: 26px !important; }
+html:root body .flyout-panel:not(#_) { border-radius: 20px !important; }
+
+/* الهاتف: الكروت بدون تمويه (أداء) لكن بنفس الحواف والعمق */
+@media (max-width: 768px) {
+  html:root body :is(.card, .glass-card, .bx-card, .kpi-card, .data-panel, .tk-card, .tool-panel, .cr-card, .dpc, .txm-card, .com-card):not(#_) {
+    background-color: color-mix(in srgb, var(--surface) 82%, transparent) !important;
+    -webkit-backdrop-filter: none !important; backdrop-filter: none !important;
+  }
+}
