@@ -1015,3 +1015,42 @@ html:root body :is(.flyout-panel, [role="menu"]) hr:not(#_) { border: 0 !importa
     padding: 11px 12px !important; font-size: 13.5px !important;
   }
 }
+
+
+/* =====================================================================
+   32) صفحة الدخول: نفس الخلفية الرصاصية وزجاج أبل بالموقع (كانت بعدها على البرتقالي/البنفسجي القديم)
+   ===================================================================== */
+.hz-login-sky {
+  background:
+    radial-gradient(55% 50% at 4% 4%, rgba(100, 116, 139, .30), transparent 72%),
+    radial-gradient(40% 38% at 30% 30%, rgba(148, 163, 184, .18), transparent 72%),
+    radial-gradient(50% 46% at 96% 46%, rgba(148, 163, 184, .22), transparent 72%),
+    radial-gradient(60% 40% at 40% 104%, rgba(71, 85, 105, .16), transparent 70%),
+    radial-gradient(30% 28% at 78% 8%, rgba(186, 198, 214, .30), transparent 70%) !important;
+}
+html[data-theme="dark"] .hz-login-sky {
+  background:
+    radial-gradient(55% 50% at 4% 4%, rgba(148, 163, 184, .16), transparent 72%),
+    radial-gradient(40% 38% at 30% 30%, rgba(100, 116, 139, .10), transparent 72%),
+    radial-gradient(50% 46% at 96% 46%, rgba(148, 163, 184, .10), transparent 72%),
+    radial-gradient(60% 40% at 40% 104%, rgba(100, 116, 139, .12), transparent 70%),
+    radial-gradient(30% 28% at 78% 8%, rgba(203, 213, 225, .07), transparent 70%) !important;
+}
+@media (min-width: 1025px) { .hz-login-sky { filter: blur(30px); inset: -60px !important; } }
+
+html:root body :is(.hz-login-shell, .hz-theme-pill, .hz-login-logo, .hz-login-feat):not(#_) {
+  background-image: var(--ap-fill) !important; background-color: transparent !important;
+  border: 0 !important; box-shadow: var(--ap-rim), var(--ap-drop-panel), var(--ap-depth) !important;
+  -webkit-backdrop-filter: var(--ap-blur) !important; backdrop-filter: var(--ap-blur) !important;
+}
+html:root body .hz-login-shell:not(#_) { border-radius: 34px !important; }
+html:root body input.auth-input.hz-lf-input:not(#_) {
+  background: color-mix(in srgb, var(--surface) 55%, transparent) !important;
+  box-shadow: inset 0 1px 2px rgba(15, 23, 42, .06) !important; border: 1px solid var(--rim) !important;
+}
+html:root body input.auth-input.hz-lf-input:not(#_):focus {
+  box-shadow: inset 0 1px 2px rgba(15, 23, 42, .06), 0 0 0 4px color-mix(in srgb, var(--coral) 18%, transparent) !important;
+}
+html:root body .hz-lf-btn:not(#_) { background: linear-gradient(180deg, #FB923C, #F97316) !important; color: #fff !important; box-shadow: 0 10px 22px -10px rgba(249, 115, 22, .6), inset 0 1px 0 rgba(255, 255, 255, .4) !important; }
+html:root body .hz-lf-btn:not(#_):hover:not(:disabled) { background: linear-gradient(180deg, #F97316, #EA580C) !important; }
+@media (max-width: 768px) { html:root body :is(.hz-login-shell, .hz-login-feat):not(#_) { -webkit-backdrop-filter: none !important; backdrop-filter: none !important; background-color: color-mix(in srgb, var(--surface) 88%, transparent) !important; } }
