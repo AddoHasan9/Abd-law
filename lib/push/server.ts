@@ -5,17 +5,29 @@ import { VAPID_PUBLIC_KEY, type PushPayload } from './config'
 let configured = false
 let cronSecret: string | null = null
 
-/** يقرأ المفتاح الخاص وسر الجدولة من app_secrets (لا يقرؤه إلا مفتاح الخادم) */
+/**
+ * يجهّز مفاتيح الإشعارات.
+ * الأولوية لمتغيرات البيئة (لا تستهلك أي طلب من Supabase)، وقراءة app_secrets احتياط فقط.
+ * السبب: هذه الدالة تُستدعى في كل تشغيل للجدولة، وقراءتها من القاعدة كانت تستهلك حصة النقل الشهرية.
+ */
 async function ensureConfigured() {
   if (configured) return
+  const envPriv = process.env.VAPID_PRIVATE_KEY
+  const envCron = process.env.PUSH_CRON_SECRET
+  if (envPriv && envCron) {
+    webpush.setVapidDetails(process.env.VAPID_SUBJECT || 'mailto:admin@lawyer-office-lexl.vercel.app', VAPID_PUBLIC_KEY, envPriv)
+    cronSecret = envCron
+    configured = true
+    return
+  }
   const admin = createAdminClient()
   const { data, error } = await admin.from('app_secrets').select('key, value').in('key', ['vapid_private_key', 'push_cron_secret'])
   if (error) throw new Error('push secrets unavailable')
   const map = new Map((data || []).map(r => [r.key as string, r.value as string]))
-  const priv = process.env.VAPID_PRIVATE_KEY || map.get('vapid_private_key')
+  const priv = envPriv || map.get('vapid_private_key')
   if (!priv) throw new Error('VAPID private key missing')
   webpush.setVapidDetails(process.env.VAPID_SUBJECT || 'mailto:admin@lawyer-office-lexl.vercel.app', VAPID_PUBLIC_KEY, priv)
-  cronSecret = process.env.PUSH_CRON_SECRET || map.get('push_cron_secret') || null
+  cronSecret = envCron || map.get('push_cron_secret') || null
   configured = true
 }
 
