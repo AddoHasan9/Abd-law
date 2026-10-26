@@ -943,3 +943,45 @@ html:root body .flyout-panel:not(#_) { border-radius: 20px !important; }
     -webkit-backdrop-filter: none !important; backdrop-filter: none !important;
   }
 }
+
+
+/* =====================================================================
+   30) قوائم أبل الرسمية (Menu — Light/Dark) للقوائم المنبثقة والمنسدلة
+   نفس هندسة Sketch (حلقة خارجية، حافة داخلية، خطوط وظلال داخلية فوق/تحت) مع تخفيف الغامق للويب
+   ===================================================================== */
+html:root, html:root[data-theme="light"] {
+  --apm-bg: rgba(236, 238, 242, .62);
+  --apm-sh: 0 0 0 .5px rgba(0, 0, 0, .14), 0 4px 24px 0 rgba(15, 23, 42, .18), inset 0 0 0 1px rgba(255, 255, 255, .55),
+            inset 0 .5px 0 0 rgba(255, 255, 255, .9), inset 0 -.5px 0 0 rgba(38, 38, 38, .10),
+            inset 0 4px 8px -4px rgba(13, 13, 13, .10), inset 0 -4px 8px -4px rgba(13, 13, 13, .10);
+}
+html:root[data-theme="dark"] {
+  --apm-bg: rgba(90, 90, 90, .5);
+  --apm-sh: 0 0 0 .5px rgba(0, 0, 0, .8), 0 4px 24px 0 rgba(0, 0, 0, .3), inset 0 0 0 1px rgba(102, 102, 102, .4),
+            inset 0 .5px 0 0 rgba(255, 255, 255, .14), inset 0 -.5px 0 0 rgba(38, 38, 38, 1),
+            inset 0 4px 8px -4px rgba(13, 13, 13, .85), inset 0 -4px 8px -4px rgba(13, 13, 13, .85);
+}
+/* القوائم العائمة: الإشعارات والتذكيرات وقائمة إجراءات المعاملة وقوائم الحساب */
+html:root body :is(.flyout-panel, .tx-menu, .menu-pop, [role="menu"], .dropdown-panel):not(#_) {
+  background-image: none !important; background-color: var(--apm-bg) !important;
+  border: 0 !important; border-radius: 12px !important;
+  box-shadow: var(--apm-sh) !important;
+  -webkit-backdrop-filter: blur(20px) saturate(1.6) !important; backdrop-filter: blur(20px) saturate(1.6) !important;
+  padding: 6px !important;
+}
+/* عناصر القائمة: زوايا 7، والمختار/المؤشَّر عليه مستطيل برتقالي ممتلئ مثل أبل */
+html:root body :is(.flyout-panel, [role="menu"]) :is([role="menuitem"], .menu-item, button.menu-row):not(#_) {
+  border-radius: 7px !important; padding: 7px 10px !important;
+}
+@media (hover: hover) {
+  html:root body :is(.flyout-panel, [role="menu"]) :is([role="menuitem"], .menu-item, button.menu-row):not(#_):hover {
+    background: var(--coral) !important; color: #fff !important;
+  }
+  html:root body :is(.flyout-panel, [role="menu"]) :is([role="menuitem"], .menu-item, button.menu-row):not(#_):hover :is(span, b, small, svg, .material-symbols-outlined) { color: #fff !important; }
+}
+/* عنصر الحذف يبقى أحمر */
+@media (hover: hover) {
+  html:root body :is(.flyout-panel, [role="menu"]) .menu-item:not(#_):hover:has(.text-rose-500, .text-red-500, [class*="rose"], [class*="red"]) { background: var(--bad) !important; }
+}
+/* فواصل القائمة رفيعة مثل أبل */
+html:root body :is(.flyout-panel, [role="menu"]) hr:not(#_) { border: 0 !important; height: 1px !important; margin: 5px 8px !important; background: color-mix(in srgb, var(--text) 12%, transparent) !important; }

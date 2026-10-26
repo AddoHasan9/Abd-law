@@ -711,7 +711,8 @@ export default function CommercialClient({ heading = 'المعاملات الت�
           {/* Floating Dropdown Card */}
           <div
             ref={menuRef}
-            className="fixed z-[999999] min-w-[200px] max-w-[90vw] bg-[var(--surface)] border border-[var(--glass-border)] rounded-2xl shadow-2xl p-1.5 text-right flex flex-col gap-1 backdrop-blur-2xl animate-scale-in"
+            className="menu-pop fixed z-[999999] min-w-[200px] max-w-[90vw] bg-[var(--surface)] border border-[var(--glass-border)] rounded-2xl shadow-2xl p-1.5 text-right flex flex-col gap-1 backdrop-blur-2xl animate-scale-in"
+            role="menu"
             style={{
               top: `${menuCoords.top}px`,
               left: `${menuCoords.left}px`,
@@ -738,7 +739,8 @@ export default function CommercialClient({ heading = 'المعاملات الت�
                   setEditTx(cur)
                 }
               }}
-              className="flex items-center gap-2.5 w-full px-3 py-2 rounded-xl text-xs font-semibold text-[var(--text)] hover:bg-[var(--surface-2)] transition-colors cursor-pointer text-right"
+              role="menuitem"
+              className="menu-item flex items-center gap-2.5 w-full px-3 py-2 rounded-xl text-xs font-semibold text-[var(--text)] hover:bg-[var(--surface-2)] transition-colors cursor-pointer text-right"
             >
               <span className="material-symbols-outlined text-[16px] text-[var(--accent)]">visibility</span>
               <span>{activeMenuTx.type === 'formation' || activeMenuTx.type === 'tasis' ? 'فتح تفاصيل وسير عمل التأسيس' : 'فتح تفاصيل الشركة'}</span>
@@ -753,7 +755,8 @@ export default function CommercialClient({ heading = 'المعاملات الت�
                 setMenuCoords(null)
                 setEditTx(cur)
               }}
-              className="flex items-center gap-2.5 w-full px-3 py-2 rounded-xl text-xs font-semibold hover:bg-[var(--surface-2)] transition-colors cursor-pointer text-right"
+              role="menuitem"
+              className="menu-item flex items-center gap-2.5 w-full px-3 py-2 rounded-xl text-xs font-semibold hover:bg-[var(--surface-2)] transition-colors cursor-pointer text-right"
             >
               <span className="material-symbols-outlined text-[16px] text-amber-500">edit_note</span>
               <span>{(!activeMenuTx.company_id || !activeMenuTx.type) ? 'تصحيح وإكمال السجل' : 'تعديل المعاملة'}</span>
@@ -768,7 +771,8 @@ export default function CommercialClient({ heading = 'المعاملات الت�
                 setMenuCoords(null)
                 setAssignLawyerTx(cur)
               }}
-              className="flex items-center gap-2.5 w-full px-3 py-2 rounded-xl text-xs font-semibold text-[var(--text)] hover:bg-[var(--surface-2)] transition-colors cursor-pointer text-right"
+              role="menuitem"
+              className="menu-item flex items-center gap-2.5 w-full px-3 py-2 rounded-xl text-xs font-semibold text-[var(--text)] hover:bg-[var(--surface-2)] transition-colors cursor-pointer text-right"
             >
               <span className="material-symbols-outlined text-[16px] text-[var(--accent)]">person_add</span>
               <span>تعيين المحامي المسؤول</span>
@@ -783,7 +787,8 @@ export default function CommercialClient({ heading = 'المعاملات الت�
                 setMenuCoords(null)
                 handleArchive(id)
               }}
-              className="flex items-center gap-2.5 w-full px-3 py-2 rounded-xl text-xs font-semibold text-[var(--text-2)] hover:bg-[var(--surface-2)] transition-colors cursor-pointer text-right"
+              role="menuitem"
+              className="menu-item flex items-center gap-2.5 w-full px-3 py-2 rounded-xl text-xs font-semibold text-[var(--text-2)] hover:bg-[var(--surface-2)] transition-colors cursor-pointer text-right"
             >
               <span className="material-symbols-outlined text-[16px] text-slate-400">archive</span>
               <span>أرشفة المعاملة</span>
@@ -800,7 +805,8 @@ export default function CommercialClient({ heading = 'المعاملات الت�
                 setMenuCoords(null)
                 handleDelete(id)
               }}
-              className="flex items-center gap-2.5 w-full px-3 py-2 rounded-xl text-xs font-semibold text-rose-500 hover:bg-rose-500/10 transition-colors cursor-pointer text-right"
+              role="menuitem"
+              className="menu-item flex items-center gap-2.5 w-full px-3 py-2 rounded-xl text-xs font-semibold text-rose-500 hover:bg-rose-500/10 transition-colors cursor-pointer text-right"
             >
               <span className="material-symbols-outlined text-[16px] text-rose-500">delete</span>
               <span>حذف المعاملة</span>
