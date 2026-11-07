@@ -37,10 +37,15 @@ export default function ReminderCenter() {
 
   const fetchReminders = useCallback(async () => {
     setLoading(true)
-    const res = await getRemindersAction('pending')
-    setLoading(false)
-    if (res.success) {
-      setReminders(res.data)
+    try {
+      const res = await getRemindersAction('pending')
+      if (res.success) {
+        setReminders(res.data)
+      }
+    } catch {
+      // قراءة خلفية دورية: نتجاهل الفشل العابر ونعيد المحاولة في الدورة التالية
+    } finally {
+      setLoading(false)
     }
   }, [])
 
