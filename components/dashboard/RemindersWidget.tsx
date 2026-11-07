@@ -53,13 +53,18 @@ export default function RemindersWidget({ companies = [], hideIfEmpty = false }:
 
   const fetchReminders = useCallback(async () => {
     setLoading(true)
-    const res = await getRemindersAction(activeTab)
-    setLoading(false)
-    if (res.success) {
-      setReminders(res.data)
-      if (activeTab === 'pending') {
-        setPendingCount(res.data.filter(r => !r.is_completed).length)
+    try {
+      const res = await getRemindersAction(activeTab)
+      if (res.success) {
+        setReminders(res.data)
+        if (activeTab === 'pending') {
+          setPendingCount(res.data.filter(r => !r.is_completed).length)
+        }
       }
+    } catch {
+      // فشل قراءة عابر (انقطاع اتصال): تبقى البيانات السابقة ظاهرة بدون نافذة خطأ
+    } finally {
+      setLoading(false)
     }
   }, [activeTab])
 

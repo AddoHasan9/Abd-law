@@ -43,11 +43,16 @@ export default function NotificationCenter({ initialCount = 0 }: Props) {
 
   const fetchNotifications = async () => {
     setLoading(true)
-    const res = await getNotificationsAction()
-    setLoading(false)
-    if (res.success) {
-      setNotifications(res.data)
-      setUnreadCount(res.unreadCount)
+    try {
+      const res = await getNotificationsAction()
+      if (res.success) {
+        setNotifications(res.data)
+        setUnreadCount(res.unreadCount)
+      }
+    } catch {
+      // قراءة خلفية دورية: انقطاع الاتصال اللحظي لا يستحق نافذة خطأ، وتُعاد المحاولة بعد 45 ثانية
+    } finally {
+      setLoading(false)
     }
   }
 
