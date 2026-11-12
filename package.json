@@ -40,7 +40,7 @@
     "jspdf": "^4.2.1",
     "jszip": "^3.10.1",
     "lucide-react": "^1.28.0",
-    "next": "^15.5.26",
+    "next": "^15.5.29",
     "pdf-lib": "^1.17.1",
     "pdfjs-dist": "^4.10.38",
     "react": "^19.0.0",
@@ -51,7 +51,7 @@
     "sonner": "^2.0.8",
     "tailwind-merge": "^3.6.0",
     "web-push": "^3.6.7",
-    "zod": "^3.25.76"
+    "zod": "^4.6.7"
   },
   "devDependencies": {
     "@electric-sql/pglite": "^0.5.8",
@@ -61,17 +61,19 @@
     "@types/web-push": "^3.6.4",
     "autoprefixer": "^10.4.20",
     "eslint": "^9",
-    "eslint-config-next": "^15.5.26",
+    "eslint-config-next": "^15.5.29",
     "postcss": "^8.5.25",
     "tailwindcss": "^3.4.17",
     "tailwindcss-animate": "^1.0.7",
     "typescript": "^5.7.2"
   },
   "overrides": {
-    "sharp": "0.35.4",
+    "sharp": "0.35.5",
     "next": {
       "postcss": "^8.5.25"
-    }
+    },
+    "dompurify": "^3.4.17",
+    "fast-uri": "^3.1.9"
   },
   "allowScripts": {
     "unrs-resolver@1.12.2": true
