@@ -41,29 +41,22 @@ export async function getRemindersAction(filter?: 'active' | 'completed' | 'arch
       query = query.eq('is_completed', false).eq('is_archived', false)
     }
 
-    const [{ data, error }, compRes, profRes] = await Promise.all([
-      query,
-      supabase.from('companies').select('id, name'),
-      supabase.from('profiles').select('id, name'),
-    ])
-    const profMap = new Map<string, string>(((profRes?.data || []) as { id: string; name: string }[]).map(p => [p.id, p.name]))
-
-    const companies = compRes?.data || []
-
-    const compMap = new Map<string, string>()
-    if (companies) {
-      companies.forEach((c: { id: string; name: string }) => {
-        if (c.id && c.name) compMap.set(c.id, c.name)
-      })
-    }
-
-    let items: ReminderItem[] = []
-
+    const { data, error } = await query.limit(300)
     if (error || !data) {
       console.error('getRemindersAction DB error:', error?.message)
       return { success: false, data: [] as ReminderItem[] }
     }
-    items = data as ReminderItem[]
+    let items = data as ReminderItem[]
+
+    // نجلب أسماء الشركات والأشخاص المذكورين فقط، لا الجداول كاملة (هذه الدالة تُستدعى دورياً)
+    const companyIds = [...new Set(items.map(i => i.company_id).filter((v): v is string => !!v))]
+    const personIds = [...new Set(items.map(i => i.assignee_id || i.owner_id).filter((v): v is string => !!v))]
+    const [compRes, profRes] = await Promise.all([
+      companyIds.length ? supabase.from('companies').select('id, name').in('id', companyIds) : Promise.resolve({ data: [] as { id: string; name: string }[] }),
+      personIds.length ? supabase.from('profiles').select('id, name').in('id', personIds) : Promise.resolve({ data: [] as { id: string; name: string }[] }),
+    ])
+    const compMap = new Map<string, string>(((compRes?.data || []) as { id: string; name: string }[]).filter(c => c.id && c.name).map(c => [c.id, c.name]))
+    const profMap = new Map<string, string>(((profRes?.data || []) as { id: string; name: string }[]).map(p => [p.id, p.name]))
 
     // Populate company_name for each item from compMap
     items = items.map(item => ({

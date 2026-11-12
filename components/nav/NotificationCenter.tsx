@@ -1,5 +1,6 @@
 'use client'
 
+import { useVisiblePoll } from '@/lib/hooks/useVisiblePoll'
 import { useState, useEffect, useRef } from 'react'
 import { runAction } from '@/components/ui/ConfirmDialog'
 import { Mi } from '@/components/ui/Mi'
@@ -56,12 +57,8 @@ export default function NotificationCenter({ initialCount = 0 }: Props) {
     }
   }
 
-  useEffect(() => {
-    fetchNotifications()
-    // Periodic poll check every 45s for fresh notifications
-    const timer = setInterval(fetchNotifications, 45000)
-    return () => clearInterval(timer)
-  }, [])
+  // تحديث كل 90 ثانية والتبويب ظاهر فقط (التنبيهات العاجلة تصل بإشعارات الدفع أصلاً)
+  useVisiblePoll(fetchNotifications, 90_000)
 
   // Close dropdown on click outside
   useEffect(() => {

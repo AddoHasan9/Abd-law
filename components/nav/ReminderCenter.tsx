@@ -1,5 +1,6 @@
 'use client'
 
+import { useVisiblePoll } from '@/lib/hooks/useVisiblePoll'
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { repeatShort } from '@/lib/push/time'
 import { Mi } from '@/components/ui/Mi'
@@ -49,11 +50,7 @@ export default function ReminderCenter() {
     }
   }, [])
 
-  useEffect(() => {
-    fetchReminders()
-    const timer = setInterval(fetchReminders, 45000)
-    return () => clearInterval(timer)
-  }, [fetchReminders])
+  useVisiblePoll(fetchReminders, 90_000)
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
