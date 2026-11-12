@@ -6,44 +6,10 @@
 
 /* ---------- 1) الألوان ---------- */
 html:root, html:root[data-theme="light"] {
-  --bg-app: #FBF8F3 !important; --bg: #FBF8F3 !important; --canvas-mesh: #FBF8F3 !important;
-  --surface: #FFFFFF !important; --surface-glass: rgba(255, 255, 255, .64) !important;
-  --surface-2: #F6F2EC !important; --surface-3: #EDE7DE !important;
-  --input-bg: rgba(255, 255, 255, .78) !important; --input-border: rgba(28, 25, 23, .12) !important;
-  --border: rgba(28, 25, 23, .10) !important; --border-soft: rgba(28, 25, 23, .07) !important;
-  --line: rgba(28, 25, 23, .11) !important; --line-soft: rgba(28, 25, 23, .07) !important; --line-glass: rgba(255, 255, 255, .7) !important;
-  --side-bg: rgba(255, 255, 255, .55) !important; --side-border: rgba(255, 255, 255, .7) !important;
-  --text: #17151C !important; --text-1: #17151C !important; --text-2: #4A4652 !important; --text-3: #8A8592 !important;
   /* المرجاني: --coral للتعبئة والزينة، --accent أغمق قليلاً لأنه يُستخدم للنص والروابط (تباين كافٍ) */
-  --coral: #E08566; --coral-2: #EBA488; --coral-3: #F5D6C9;
-  --accent: #B9614A !important; --accent-soft: rgba(224, 133, 102, .13) !important;
-  --brand: #17151C !important; --brand-soft: rgba(23, 21, 28, .06) !important; --brand-mid: rgba(23, 21, 28, .4) !important;
-  --sky: #7CC4E4; --lav: #B9A3E6; --lime: #B9C97A; --peach: #F2C6B4;
-  --ink: #17151C; --on-ink: #FFFFFF;
-  --glass-bg: rgba(255, 255, 255, .64) !important; --glass-border: rgba(255, 255, 255, .72) !important;
-  --glass-line: rgba(255, 255, 255, .72);
-  --glass-shadow: 0 8px 32px rgba(0, 0, 0, .05) !important;
-  --shadow-sm: 0 2px 10px rgba(0, 0, 0, .04) !important; --shadow-md: 0 14px 34px -14px rgba(0, 0, 0, .12) !important;
   --shadow-3: 0 40px 80px -30px rgba(0, 0, 0, .2) !important;
   --r-xl: 24px;
   --sidebar-w: 264px !important;
-}
-html:root[data-theme="dark"] {
-  --bg-app: #131620 !important; --bg: #131620 !important; --canvas-mesh: #131620 !important;
-  --surface: #1C2030 !important; --surface-glass: rgba(30, 35, 52, .62) !important;
-  --surface-2: #232839 !important; --surface-3: #2C3245 !important;
-  --input-bg: rgba(255, 255, 255, .05) !important; --input-border: rgba(255, 255, 255, .12) !important;
-  --border: rgba(255, 255, 255, .10) !important; --border-soft: rgba(255, 255, 255, .07) !important;
-  --line: rgba(255, 255, 255, .11) !important; --line-soft: rgba(255, 255, 255, .07) !important; --line-glass: rgba(255, 255, 255, .09) !important;
-  --side-bg: rgba(30, 35, 52, .55) !important; --side-border: rgba(255, 255, 255, .08) !important;
-  --text: #F1EEF5 !important; --text-1: #F5F2F8 !important; --text-2: #C2C3D2 !important; --text-3: #8B8EA2 !important;
-  --coral: #E8987C; --coral-2: #F0B49D; --coral-3: #5A3A33;
-  --accent: #EBA488 !important; --accent-soft: rgba(235, 164, 136, .15) !important;
-  --brand: #F1EEF5 !important; --brand-soft: rgba(255, 255, 255, .06) !important;
-  --ink: #F1EEF5; --on-ink: #151827;
-  --glass-bg: rgba(30, 35, 52, .62) !important; --glass-border: rgba(255, 255, 255, .09) !important;
-  --glass-line: rgba(255, 255, 255, .09);
-  --glass-shadow: 0 10px 34px rgba(0, 0, 0, .32) !important;
 }
 html[data-theme="dark"], html[data-theme="dark"] body { background-color: var(--bg) !important; }
 
@@ -57,16 +23,6 @@ html:root body::before {
   content: ''; position: fixed; inset: 0; z-index: 0; pointer-events: none;
   -webkit-mask-image: linear-gradient(180deg, transparent 0, transparent calc(env(safe-area-inset-top, 0px) + 16px), #000 calc(env(safe-area-inset-top, 0px) + 170px));
   mask-image: linear-gradient(180deg, transparent 0, transparent calc(env(safe-area-inset-top, 0px) + 16px), #000 calc(env(safe-area-inset-top, 0px) + 170px));
-  background:
-    radial-gradient(620px 520px at 8% calc(env(safe-area-inset-top, 0px) + 240px), rgba(224, 133, 102, .07), transparent 70%),
-    radial-gradient(560px 480px at 96% calc(env(safe-area-inset-top, 0px) + 220px), rgba(185, 163, 230, .10), transparent 70%),
-    linear-gradient(180deg, transparent 0, transparent calc(env(safe-area-inset-top, 0px) + 24px), rgba(124, 196, 228, .12) calc(env(safe-area-inset-top, 0px) + 150px), rgba(185, 163, 230, .05) 36%, transparent 62%);
-}
-html[data-theme="dark"] body::before {
-  background:
-    radial-gradient(620px 520px at 8% calc(env(safe-area-inset-top, 0px) + 240px), rgba(232, 152, 124, .05), transparent 70%),
-    radial-gradient(560px 480px at 96% calc(env(safe-area-inset-top, 0px) + 220px), rgba(185, 163, 230, .06), transparent 70%),
-    linear-gradient(180deg, transparent 0, transparent calc(env(safe-area-inset-top, 0px) + 24px), rgba(86, 170, 230, .10) calc(env(safe-area-inset-top, 0px) + 150px), rgba(170, 140, 230, .05) 38%, transparent 64%);
 }
 html:root #view-root, html[data-theme="dark"] #view-root { background: transparent !important; background-image: none !important; }
 
@@ -82,8 +38,7 @@ html:root :is(.card, .glass-card, .bx-card, .kpi-card, .data-panel, .tk-card, .t
 
 /* ---------- 3) البطاقات ---------- */
 html:root :is(.card, .glass-card, .bx-card, .data-panel, .tk-card, .tool-panel) {
-  background: var(--surface-glass) !important; border: 1px solid var(--glass-line) !important;
-  border-radius: 24px !important; box-shadow: var(--glass-shadow) !important;
+  background: var(--surface-glass) !important; border: 1px solid var(--glass-line) !important; box-shadow: var(--glass-shadow) !important;
 }
 html[data-theme="dark"] :is(.bx-card, .kpi-card, .card, .tk-card, .data-panel) { box-shadow: var(--glass-shadow) !important; }
 html:root .data-panel-head { background: transparent !important; border-bottom: 1px solid var(--line-soft) !important; }
@@ -95,29 +50,22 @@ html:root .bx-head { display: none; }
 
 /* ---------- 4) المؤشرات: بطاقات زجاجية بلمسة لون باستيل ---------- */
 html:root .kpi-card {
-  position: relative; overflow: hidden; isolation: isolate;
-  background: var(--surface-glass) !important; border: 1px solid var(--glass-line) !important; border-radius: 22px !important;
+  position: relative; overflow: hidden; isolation: isolate; border: 1px solid var(--glass-line) !important; border-radius: 22px !important;
   box-shadow: var(--glass-shadow) !important; padding: 16px 18px !important; --tint: var(--coral);
 }
 html:root .kpi-card::before { content: ''; position: absolute; inset: 0; z-index: -1; background: linear-gradient(160deg, color-mix(in srgb, var(--tint) 16%, transparent), transparent 70%); pointer-events: none; }
-html:root .kpi-card.tone-emerald, html:root .kpi-card.tone-ok { --tint: var(--lime); }
-html:root .kpi-card.tone-amber, html:root .kpi-card.tone-warn { --tint: var(--peach); }
-html:root .kpi-card.tone-blue, html:root .kpi-card.tone-work { --tint: var(--sky); }
 html:root .kpi-card.tone-indigo, html:root .kpi-card.tone-violet { --tint: var(--lav); }
-html:root .kpi-card.tone-rose, html:root .kpi-card.tone-bad { --tint: var(--coral); }
 html:root .kpi-card.is-featured { background: var(--surface-glass) !important; border-color: var(--glass-line) !important; color: var(--text) !important; }
 html:root .kpi-card.is-featured :is(.kpi-label, .kpi-value, .kpi-hint) { color: inherit !important; }
 html:root .kpi-card.is-featured .kpi-label { color: var(--text-2) !important; }
-html:root .kpi-card.is-featured .kpi-hint { color: var(--text-3) !important; opacity: 1; }
+html:root .kpi-card.is-featured .kpi-hint { color: var(--text-3) !important; }
 html:root .kpi-card .kpi-icon, html:root .kpi-card.is-featured .kpi-icon {
-  width: 38px; height: 38px; border-radius: 13px !important;
-  background: color-mix(in srgb, var(--surface) 70%, transparent) !important; border: 1px solid var(--glass-line);
-  color: color-mix(in srgb, var(--tint) 75%, var(--text)) !important;
+  width: 38px; height: 38px;
 }
 html:root .kpi-value { font-size: 32px !important; font-weight: 800 !important; letter-spacing: -.04em; }
-html:root .kpi-card.is-alert { --tint: var(--coral); border-color: color-mix(in srgb, var(--coral) 35%, var(--glass-line)) !important; }
+html:root .kpi-card.is-alert { --tint: var(--coral); }
 @media (hover: hover) {
-  html:root .kpi-card:hover { transform: translateY(-3px); border-color: var(--glass-line) !important; box-shadow: 0 18px 36px -20px rgba(0, 0, 0, .22) !important; }
+  html:root .kpi-card:hover { box-shadow: 0 18px 36px -20px rgba(0, 0, 0, .22) !important; }
   html:root .kpi-card:hover .kpi-icon { color: var(--accent) !important; }
   html:root .kpi-card:hover .kpi-hint { color: var(--accent) !important; }
 }
@@ -176,15 +124,7 @@ html:root .tag { border-radius: 999px; font-weight: 700; }
 html:root .tag-work { --dot: var(--coral); }
 html:root .badge-type { background: var(--accent-soft) !important; color: var(--accent) !important; }
 html:root .tag-cat-orange { background: rgba(224, 133, 102, .13) !important; color: #A95A43 !important; }
-html:root .tag-cat-green  { background: rgba(185, 201, 122, .2) !important;  color: #5F7128 !important; }
-html:root .tag-cat-blue   { background: rgba(124, 196, 228, .18) !important; color: #3A7F9E !important; }
-html:root .tag-cat-amber  { background: rgba(217, 162, 74, .15) !important;  color: #8A6420 !important; }
-html:root .tag-cat-violet { background: rgba(185, 163, 230, .2) !important;  color: #6E55AE !important; }
 html[data-theme="dark"] .tag-cat-orange { color: #F0B49D !important; }
-html[data-theme="dark"] .tag-cat-green  { color: #CFDC9A !important; }
-html[data-theme="dark"] .tag-cat-blue   { color: #A6D8EE !important; }
-html[data-theme="dark"] .tag-cat-amber  { color: #E8C98C !important; }
-html[data-theme="dark"] .tag-cat-violet { color: #CDBDF0 !important; }
 html:root .tag-orange { background: rgba(224, 133, 102, .13) !important; color: #A95A43 !important; }
 html[data-theme="dark"] .tag-orange { color: #F0B49D !important; }
 
@@ -283,11 +223,7 @@ html:root .wk-fill { background: linear-gradient(180deg, var(--coral-3), var(--p
 html:root .bx-day.wk.is-today .wk-fill, html[data-theme="dark"] .bx-day.wk.is-today .wk-fill { background: linear-gradient(180deg, var(--coral-2), var(--coral)) !important; box-shadow: 0 10px 20px -12px color-mix(in srgb, var(--coral) 70%, transparent) !important; }
 html:root .bx-day.wk.is-today .wk-col { box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--coral) 35%, transparent) !important; }
 html[data-theme="dark"] .wk-fill { background: linear-gradient(180deg, #6B4A40, #8A5A4C) !important; }
-html:root .bx-ring-fg { stroke: var(--coral) !important; }
-html:root .bx-fill { background: linear-gradient(270deg, var(--coral), var(--coral-2)) !important; }
 html:root .bx-avatar { background: linear-gradient(135deg, var(--coral-2), var(--lav)) !important; color: #fff !important; }
-html:root .dl-row.is-late .dl-dot { background: #D46A6A !important; box-shadow: 0 0 0 4px rgba(212, 106, 106, .15) !important; }
-html:root .dl-dot { background: #D9A24A !important; box-shadow: 0 0 0 4px rgba(217, 162, 74, .15); }
 html:root .bx-row, html:root .dl-row { border-radius: 16px !important; }
 html:root .bx-action { border-radius: 18px !important; background: color-mix(in srgb, var(--surface) 62%, transparent) !important; border: 1px solid var(--glass-line) !important; }
 html[data-theme="dark"] .bx-action .material-symbols-outlined { color: var(--accent) !important; }
@@ -376,17 +312,8 @@ html[data-theme="dark"] .kpi-card.is-alert .kpi-value { color: #F2A3A3 !importan
 html:root .tb-badge { border-radius: 999px !important; display: inline-grid !important; place-items: center; padding: 0 5px; font-weight: 800; line-height: 1; }
 
 /* ---------- 20) صفحات الدخول واسترجاع كلمة المرور ---------- */
-.hz-login { position: relative; min-height: 100vh; min-height: 100dvh; width: 100%; display: grid; place-items: center; padding: calc(env(safe-area-inset-top, 0px) + 64px) 16px calc(env(safe-area-inset-bottom, 0px) + 32px); background: var(--bg); color: var(--text); overflow: hidden; }
-.hz-login-sky { position: absolute; inset: 0; pointer-events: none; z-index: 0;
-  background:
-    radial-gradient(600px 520px at 6% 10%, rgba(224, 133, 102, .10), transparent 70%),
-    radial-gradient(600px 520px at 96% 6%, rgba(185, 163, 230, .14), transparent 70%),
-    linear-gradient(180deg, rgba(124, 196, 228, .16), rgba(185, 163, 230, .07) 36%, transparent 64%); }
-html[data-theme="dark"] .hz-login-sky {
-  background:
-    radial-gradient(600px 520px at 6% 10%, rgba(232, 152, 124, .07), transparent 70%),
-    radial-gradient(600px 520px at 96% 6%, rgba(185, 163, 230, .09), transparent 70%),
-    linear-gradient(180deg, rgba(124, 196, 228, .08), transparent 60%); }
+.hz-login { position: relative; min-height: 100dvh; width: 100%; display: grid; place-items: center; padding: calc(env(safe-area-inset-top, 0px) + 64px) 16px calc(env(safe-area-inset-bottom, 0px) + 32px); background: var(--bg); color: var(--text); overflow: hidden; }
+.hz-login-sky { position: absolute; inset: 0; pointer-events: none; z-index: 0; }
 .hz-login-theme { position: absolute; z-index: 5; top: calc(env(safe-area-inset-top, 0px) + 16px); left: 16px; }
 .hz-theme-pill { display: inline-flex; align-items: center; gap: 8px; height: 40px; padding: 0 14px; border-radius: 999px; font: inherit; font-size: 13px; font-weight: 700; cursor: pointer;
   color: var(--text-2); background: var(--surface-glass); border: 1px solid var(--glass-line); box-shadow: var(--glass-shadow); -webkit-backdrop-filter: blur(16px); backdrop-filter: blur(16px); transition: background-color .2s ease; }
@@ -508,12 +435,6 @@ html:root #sidebar .side-nav:hover::-webkit-scrollbar-thumb { background: color-
 
 /* ---------- 23) الشريط السفلي زجاجي حقيقي (نفس قيم ملف التصميم: bg-white/40 + border-white/60 + backdrop-blur-xl) ---------- */
 /* :not(#_) يرفع الأولوية فوق قاعدة الزجاج العامة (التي تحوي #topbar)؛ التمويه يعمل على الهاتف أيضاً (عنصر واحد ثابت) */
-html:root body .tabbar:not(#_) {
-  background: rgba(255, 255, 255, .40) !important;
-  border: 1px solid rgba(255, 255, 255, .60) !important;
-  -webkit-backdrop-filter: blur(24px) saturate(1.8) !important; backdrop-filter: blur(24px) saturate(1.8) !important;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, .06), inset 0 1px 0 rgba(255, 255, 255, .55) !important;
-}
 /* الليلي مثل النموذج: زجاج شبه شفاف (5-6% أبيض) والتمويه هو اللي يعطي الإحساس */
 html:root[data-theme="dark"] body .tabbar:not(#_) {
   background: rgba(255, 255, 255, .06) !important;
@@ -571,12 +492,6 @@ html:root[data-theme="dark"] {
   --glass-shadow: 0 10px 30px -12px rgba(0, 0, 0, .55) !important;
 }
 /* خلفية نظيفة: توهّج برتقالي خفيف جداً بدل سماء المرجاني والبنفسجي */
-html:root body::before {
-  background: radial-gradient(700px 420px at 30% calc(env(safe-area-inset-top, 0px) + 160px), rgba(249, 115, 22, .05), transparent 70%) !important;
-}
-html[data-theme="dark"] body::before {
-  background: radial-gradient(700px 420px at 30% calc(env(safe-area-inset-top, 0px) + 160px), rgba(249, 115, 22, .05), transparent 70%) !important;
-}
 .hz-login-sky, html[data-theme="dark"] .hz-login-sky { background: radial-gradient(640px 520px at 10% 8%, rgba(249, 115, 22, .09), transparent 70%) !important; }
 
 /* البطاقات: بيضاء صافية بحدود رمادية رفيعة وزوايا 28px */
@@ -667,29 +582,13 @@ html:root[data-theme="dark"] {
 }
 
 /* الخلفية: توهّجات ألوان ناعمة ثابتة، حتى يبين الزجاج فعلاً (على خلفية سادة يبين مثل الأبيض) */
-html:root body::before {
-  background:
-    radial-gradient(42% 36% at 82% 8%, rgba(249, 115, 22, .16), transparent 70%),
-    radial-gradient(40% 34% at 8% 24%, rgba(14, 165, 233, .13), transparent 72%),
-    radial-gradient(46% 40% at 50% 92%, rgba(139, 92, 246, .10), transparent 70%),
-    radial-gradient(30% 30% at 24% 72%, rgba(16, 185, 129, .08), transparent 70%) !important;
-}
-html[data-theme="dark"] body::before {
-  background:
-    radial-gradient(42% 36% at 82% 8%, rgba(249, 115, 22, .14), transparent 70%),
-    radial-gradient(40% 34% at 8% 24%, rgba(14, 165, 233, .11), transparent 72%),
-    radial-gradient(46% 40% at 50% 92%, rgba(139, 92, 246, .13), transparent 70%),
-    radial-gradient(30% 30% at 24% 72%, rgba(16, 185, 129, .05), transparent 70%) !important;
-}
 
 /* الكروت */
 html:root body :is(.card, .glass-card, .bx-card, .kpi-card, .data-panel, .tk-card, .tool-panel, .cr-card, .dpc, .txm-card, .com-card):not(#_) {
   background: var(--m-card) !important; border: 1px solid var(--rim) !important;
   -webkit-backdrop-filter: var(--blur-m) !important; backdrop-filter: var(--blur-m) !important;
-  box-shadow: var(--edge), var(--sh-1) !important;
 }
-@media (hover: hover) { html:root body :is(.kpi-card, .bx-card):not(#_):hover { box-shadow: var(--edge), var(--sh-2) !important; } }
-html:root body .kpi-card.is-alert:not(#_) { background: color-mix(in srgb, var(--rose) 6%, var(--m-card)) !important; box-shadow: var(--edge), var(--sh-1), 0 0 0 1px color-mix(in srgb, var(--rose) 35%, transparent) !important; }
+html:root body .kpi-card.is-alert:not(#_) { background: color-mix(in srgb, var(--rose) 6%, var(--m-card)) !important; }
 /* العناصر داخل الكروت: شبه صلبة بحافة ضوئية (لا زجاج فوق زجاج) */
 html:root body :is(.dl-row, .bx-prog, .dpc-tile, .dpc-prog, .dpc-hero, .txm-grid, .com-grid, .hz-box):not(#_) { box-shadow: var(--edge) !important; }
 html:root body .dl-row:not(#_) { background: color-mix(in srgb, var(--surface) 55%, transparent) !important; }
@@ -707,9 +606,8 @@ html:root body #topbar :is(.icon-btn, .search-trigger, .tb-user):not(#_) {
 /* الشريط الجانبي: سميك */
 @media (min-width: 1025px) {
   html:root body #sidebar:not(#_) {
-    background: var(--m-thick) !important; border: 1px solid var(--rim) !important;
+    background: var(--m-thick) !important;
     -webkit-backdrop-filter: var(--blur-l) !important; backdrop-filter: var(--blur-l) !important;
-    box-shadow: var(--edge), var(--sh-2) !important;
   }
   html:root body #sidebar .nav-link.active:not(#_), html:root body #sidebar [aria-current="page"]:not(#_) { box-shadow: var(--edge), 0 1px 3px rgba(0, 0, 0, .08) !important; }
 }
@@ -726,7 +624,7 @@ html:root body .modal-veil:not(#_) { background: var(--scrim) !important; -webki
 html:root body .modal:not(#_) {
   background: var(--m-thick) !important; border: 1px solid var(--rim) !important;
   -webkit-backdrop-filter: var(--blur-l) !important; backdrop-filter: var(--blur-l) !important;
-  box-shadow: var(--edge), var(--sh-3) !important; border-radius: 30px !important;
+  box-shadow: var(--edge), var(--sh-3) !important;
   animation: hzMaterialize .42s cubic-bezier(.2, .9, .25, 1.06) backwards !important;
 }
 html:root body .modal .modal-foot:not(#_) { background: transparent !important; }
@@ -738,7 +636,7 @@ html:root body .flyout-veil:not(#_) { background: transparent !important; }
 html:root body .flyout-panel:not(#_) {
   background: var(--m-reg) !important; border: 1px solid var(--rim) !important;
   -webkit-backdrop-filter: var(--blur-l) !important; backdrop-filter: var(--blur-l) !important;
-  box-shadow: var(--edge), var(--sh-3) !important; border-radius: 24px !important;
+  box-shadow: var(--edge), var(--sh-3) !important;
   transform-origin: 30% 0; animation: hzPop .34s cubic-bezier(.2, .9, .25, 1.1) backwards !important;
 }
 html:root body .flyout-panel :is(header, [class*="head"]):not(#_) { background: transparent !important; }
@@ -749,7 +647,6 @@ html:root body .nf-item.is-unread:not(#_) { box-shadow: var(--edge); }
 @media (max-width: 768px) {
   html:root body :is(.card, .glass-card, .bx-card, .kpi-card, .data-panel, .tk-card, .tool-panel, .cr-card, .dpc, .txm-card, .com-card):not(#_) {
     background: color-mix(in srgb, var(--surface) 88%, transparent) !important;
-    -webkit-backdrop-filter: none !important; backdrop-filter: none !important;
   }
   /* النافذة تصعد من الأسفل كورقة */
   @keyframes hzMaterialize { from { opacity: .4; transform: translateY(40px); } to { opacity: 1; transform: none; } }
@@ -766,20 +663,6 @@ html:root body .nf-item.is-unread:not(#_) { box-shadow: var(--edge); }
    26) ضبط أدق ليطابق النموذج: توهّج أوضح، الشريط العلوي يطفو فوق المحتوى، لمعة وعمق للكروت
    ===================================================================== */
 /* التوهّج بنفس قوة النموذج؛ على الحاسبة بدون قناع (القناع للهاتف فقط حتى يلتحم شريط الحالة) */
-html:root body::before {
-  background:
-    radial-gradient(48% 42% at 86% 4%, rgba(249, 115, 22, .26), transparent 70%),
-    radial-gradient(44% 40% at 6% 26%, rgba(14, 165, 233, .20), transparent 72%),
-    radial-gradient(50% 44% at 46% 96%, rgba(139, 92, 246, .16), transparent 70%),
-    radial-gradient(34% 32% at 26% 70%, rgba(16, 185, 129, .12), transparent 70%) !important;
-}
-html[data-theme="dark"] body::before {
-  background:
-    radial-gradient(48% 42% at 86% 4%, rgba(249, 115, 22, .22), transparent 70%),
-    radial-gradient(44% 40% at 6% 26%, rgba(14, 165, 233, .16), transparent 72%),
-    radial-gradient(50% 44% at 46% 96%, rgba(139, 92, 246, .18), transparent 70%),
-    radial-gradient(34% 32% at 26% 70%, rgba(16, 185, 129, .08), transparent 70%) !important;
-}
 @media (min-width: 1025px) { html:root body::before { -webkit-mask-image: none !important; mask-image: none !important; } }
 
 /* الكروت: لمعة ضوء من الأعلى + ظل أوضح (مثل النموذج) */
@@ -792,8 +675,8 @@ html[data-theme="dark"] body :is(.card, .glass-card, .bx-card, .kpi-card, .data-
   background-image: linear-gradient(180deg, rgba(255, 255, 255, .07), rgba(255, 255, 255, 0) 42%) !important;
   box-shadow: var(--edge), 0 1px 2px rgba(0, 0, 0, .35), 0 12px 28px -12px rgba(0, 0, 0, .6) !important;
 }
-@media (hover: hover) { html:root body :is(.kpi-card, .bx-card):not(#_):hover { box-shadow: var(--edge), var(--sh-2) !important; transform: translateY(-3px); } }
-html:root body .kpi-card.is-alert:not(#_) { background-color: color-mix(in srgb, var(--rose) 6%, var(--m-card)) !important; box-shadow: var(--edge), 0 8px 22px -10px rgba(225, 29, 72, .22), 0 0 0 1px color-mix(in srgb, var(--rose) 38%, transparent) !important; }
+@media (hover: hover) { html:root body :is(.kpi-card, .bx-card):not(#_):hover { transform: translateY(-3px); } }
+html:root body .kpi-card.is-alert:not(#_) { background-color: color-mix(in srgb, var(--rose) 6%, var(--m-card)) !important; }
 /* الأرقام والعناوين أثقل مثل النموذج */
 html:root .kpi-card .kpi-value { font-size: 34px !important; font-weight: 900 !important; letter-spacing: -.02em; }
 html:root .kpi-card .kpi-label { font-weight: 800 !important; color: var(--text) !important; }
@@ -816,7 +699,6 @@ html:root .hz-greet { letter-spacing: -.02em; }
   html[data-theme="dark"] body #sidebar:not(#_) { background-image: linear-gradient(180deg, rgba(255, 255, 255, .06), rgba(255, 255, 255, 0) 30%) !important; }
 }
 /* النوافذ والقوائم: نفس اللمعة */
-html:root body :is(.modal, .flyout-panel):not(#_) { background-image: linear-gradient(180deg, rgba(255, 255, 255, .5), rgba(255, 255, 255, 0) 36%) !important; }
 html[data-theme="dark"] body :is(.modal, .flyout-panel):not(#_) { background-image: linear-gradient(180deg, rgba(255, 255, 255, .07), rgba(255, 255, 255, 0) 36%) !important; }
 
 
